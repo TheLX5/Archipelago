@@ -461,6 +461,13 @@ def patch_rom(world: World, rom, player, active_level_dict):
     if world.options.level_palette_shuffle == "on_curated":
         generate_curated_level_palette_data(rom, world)
 
+        # Fix bush filler tiles
+        BUSH_FILLER_ADDR = 0x68248
+        rom.write_byte(BUSH_FILLER_ADDR + 0x01, 0x04)
+        rom.write_byte(BUSH_FILLER_ADDR + 0x03, 0x04)
+        rom.write_byte(BUSH_FILLER_ADDR + 0x05, 0x04)
+        rom.write_byte(BUSH_FILLER_ADDR + 0x07, 0x04)
+
     if world.options.overworld_palette_shuffle == "on_curated":
         generate_curated_map_palette_data(rom, world)
     
