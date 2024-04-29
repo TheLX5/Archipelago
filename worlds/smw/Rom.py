@@ -499,6 +499,7 @@ def patch_rom(world: World, rom, player, active_level_dict):
     rom.write_byte(0x01BFAC, world.options.level_palette_shuffle.value)
     rom.write_byte(0x01BFAD, world.options.overworld_palette_shuffle.value)
     rom.write_byte(0x01BFB0, world.options.level_shuffle.value)
+    rom.write_byte(0x01BFB1, world.options.block_collect_behavior.value)
 
     from Utils import __version__
     rom.name = bytearray(f'SMW{__version__.replace(".", "")[0:3]}_{player}_{world.multiworld.seed:11}\0', 'utf8')[:21]

@@ -88,6 +88,20 @@ class Blocksanity(Toggle):
     display_name = "Blocksanity"
 
 
+class BlockCollectBehavior(Choice):
+    """
+    How blocks react when they are collected.
+    vanilla: Blocks retain their original behavior (always have their original items inside)
+    exclude_powerups: Blocks with a single coin and 1-Ups inside will remain collected
+    everything: Blocks with a single coin, 1-Ups, powerups and Yoshis will remain collected
+    """
+    display_name = "Block Collect Behavior"
+    option_vanilla = 0
+    option_exclude_powerups = 1
+    option_everything = 3
+    default = 1
+
+
 class BowserCastleDoors(Choice):
     """
     How the doors of Bowser's Castle behave
@@ -371,6 +385,7 @@ class SMWOptions(PerGameCommonOptions):
     hidden_1up_checks: Hidden1UpChecks
     bonus_block_checks: BonusBlockChecks
     blocksanity: Blocksanity
+    block_collect_behavior: BlockCollectBehavior
     bowser_castle_doors: BowserCastleDoors
     bowser_castle_rooms: BowserCastleRooms
     level_shuffle: LevelShuffle
