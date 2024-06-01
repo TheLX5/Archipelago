@@ -265,6 +265,42 @@ def copy_gfx_tiles(original, order, size):
     return result
 
 
+def handle_location_item_info(rom, world: World):
+    from .Levels import location_id_to_level_id
+
+    block_info = bytearray([0x00 for _ in range(582)])
+    normal_exit_info = bytearray([0x00 for _ in range(96)])
+    secret_exit_info = bytearray([0x00 for _ in range(96)])
+    bonus_block_info = bytearray([0x00 for _ in range(96)])
+    moon_info = bytearray([0x00 for _ in range(96)])
+    dragon_coin_info = bytearray([0x00 for _ in range(96)])
+    hidden_1up_info = bytearray([0x00 for _ in range(96)])
+    locations = world.multiworld.get_filled_locations(world.player)
+    for location in locations:
+        if "Normal Exit" in location.name:
+            normal_exit_info[location_id_to_level_id[location.name][0]] = (location.item.classification & 0x07) * 2
+        elif "Secret Exit" in location.name:
+            secret_exit_info[location_id_to_level_id[location.name][0]] = (location.item.classification & 0x07) * 2
+        elif "Dragon Coins" in location.name:
+            dragon_coin_info[location_id_to_level_id[location.name][0]] = (location.item.classification & 0x07) * 2
+        elif "3-Up Moon" in location.name:
+            moon_info[location_id_to_level_id[location.name][0]] = (location.item.classification & 0x07) * 2
+        elif "Hidden 1-Up" in location.name:
+            hidden_1up_info[location_id_to_level_id[location.name][0]] = (location.item.classification & 0x07) * 2
+        elif "1-Up from Bonus Block" in location.name:
+            bonus_block_info[location_id_to_level_id[location.name][0]] = (location.item.classification & 0x07) * 2
+        elif location.address > 0xBC0600:
+            block_info[location.address - 0xBC0600] = (location.item.classification & 0x07) * 2
+
+    rom.write_bytes(0x8850D, normal_exit_info)
+    rom.write_bytes(0x8856D, secret_exit_info)
+    rom.write_bytes(0x8844D, dragon_coin_info)
+    rom.write_bytes(0x884AD, moon_info)
+    rom.write_bytes(0x8862D, hidden_1up_info)
+    rom.write_bytes(0x885CD, bonus_block_info)
+    rom.write_bytes(0x88207, block_info)
+
+
 def file_to_bytes(filename):  
     return open(os.path.dirname(__file__)+filename, "rb").read()
    
@@ -479,6 +515,8 @@ def patch_rom(world: World, rom, player, active_level_dict):
 
     handle_mario_palette(rom, world)
 
+    handle_location_item_info(rom, world)
+
     # Store all relevant option results in ROM
     rom.write_byte(0x01BFA0, world.options.goal.value)
     if world.options.goal.value == 0:
@@ -500,6 +538,19 @@ def patch_rom(world: World, rom, player, active_level_dict):
     rom.write_byte(0x01BFAD, world.options.overworld_palette_shuffle.value)
     rom.write_byte(0x01BFB0, world.options.level_shuffle.value)
     rom.write_byte(0x01BFB1, world.options.block_collect_behavior.value)
+    setting_value = 0
+    location_visual_indicator = world.options.location_visual_indicator.value
+    if "Exits" in location_visual_indicator:
+        setting_value |= 0x01
+    if "Dragon Coins" in location_visual_indicator:
+        setting_value |= 0x02
+    if "Moons" in location_visual_indicator:
+        setting_value |= 0x04
+    if "Bonus Blocks" in location_visual_indicator:
+        setting_value |= 0x08
+    if "Blocksanity" in location_visual_indicator:
+        setting_value |= 0x10
+    rom.write_byte(0x01BFB2, setting_value)
 
     from Utils import __version__
     rom.name = bytearray(f'SMW{__version__.replace(".", "")[0:3]}_{player}_{world.multiworld.seed:11}\0', 'utf8')[:21]

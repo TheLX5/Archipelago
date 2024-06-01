@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from Options import Choice, Range, Toggle, DeathLink, DefaultOnToggle, OptionGroup, PerGameCommonOptions
+from Options import Choice, Range, Toggle, DeathLink, DefaultOnToggle, OptionSet, OptionGroup, PerGameCommonOptions
 
 
 class Goal(Choice):
@@ -99,8 +99,11 @@ class Blocksanity(Toggle):
 class BlockCollectBehavior(Choice):
     """
     How blocks react when they are collected.
+    
     vanilla: Blocks retain their original behavior (always have their original items inside)
+    
     exclude_powerups: Blocks with a single coin and 1-Ups inside will remain collected
+    
     everything: Blocks with a single coin, 1-Ups, powerups and Yoshis will remain collected
     """
     display_name = "Block Collect Behavior"
@@ -108,6 +111,31 @@ class BlockCollectBehavior(Choice):
     option_exclude_powerups = 1
     option_everything = 3
     default = 1
+
+
+class LocationVisualIndicator(OptionSet):
+    """
+    Locations will have a visual indicator whether the item they have inside is important or not.
+    
+    Exits: Goal posts, keys and orbs will have a visual indicator
+    
+    Dragon Coins: Dragon Coins will have an AP icon inside
+    
+    Moons: 3-Up Moons will be swapped for an AP icon
+   
+    Bonus Blocks: Bonus Blocks will have an AP icon inside
+    
+    Blocksanity: All Blocksanity blocks will have a visual indicator
+    """
+    display_name = "Location Visual Indicator"
+    default = {}
+    valid_keys = {
+        "Exits",
+        "Dragon Coins",
+        "Moons",
+        "Bonus Blocks",
+        "Blocksanity",
+    }
 
 
 class BowserCastleDoors(Choice):
@@ -446,6 +474,7 @@ smw_option_groups = [
     ]),
     OptionGroup("Aesthetics", [
         DisplayReceivedItemPopups,
+        LocationVisualIndicator,
         Autosave,
         OverworldSpeed,
         MusicShuffle,
@@ -477,6 +506,7 @@ class SMWOptions(PerGameCommonOptions):
     exclude_special_zone: ExcludeSpecialZone
     boss_shuffle: BossShuffle
     swap_donut_gh_exits: SwapDonutGhostHouseExits
+    location_visual_indicator: LocationVisualIndicator
     display_received_item_popups: DisplayReceivedItemPopups
     junk_fill_percentage: JunkFillPercentage
     trap_fill_percentage: TrapFillPercentage
