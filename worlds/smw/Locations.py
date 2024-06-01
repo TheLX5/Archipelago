@@ -976,6 +976,17 @@ special_zone_blocksanity_names = [
 
 location_table = {}
 
+location_groups = {
+    "Normal Exits": {location for location in level_location_table.keys() if "- Normal Exit" in location},
+    "Secret Exits": {location for location in level_location_table.keys() if "- Secret Exit" in location},
+    "Castles": {location for location in level_location_table.keys() if "Castle - Normal Exit" in location or "Fortress - Normal Exit" in location},
+    "Ghost Houses": {location for location in level_location_table.keys() if "House" in location},
+    "Switch Palaces": {location for location in level_location_table.keys() if "Switch Palace" in location},
+    "Dragon Coins": {location for location in dragon_coin_location_table.keys()},
+    "3-Up Moons": {location for location in moon_location_table.keys()},
+    "Hidden 1-Ups": {location for location in hidden_1ups_location_table.keys()},
+    "Bonus Blocks": {location for location in bonus_block_location_table.keys()},
+}
 
 def setup_locations(world: World):
     location_table = {**level_location_table}
