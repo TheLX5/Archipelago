@@ -16,18 +16,24 @@ SRAM_START = 0xE00000
 SMW_ROMHASH_START = 0x7FC0
 ROMHASH_SIZE = 0x15
 
-SMW_PROGRESS_DATA       = WRAM_START + 0x1F02
-SMW_DRAGON_COINS_DATA   = WRAM_START + 0x1F2F
-SMW_PATH_DATA           = WRAM_START + 0x1EA2
-SMW_EVENT_ROM_DATA      = ROM_START + 0x2D608
-SMW_ACTIVE_LEVEL_DATA   = ROM_START + 0x37F70
-SMW_MOON_DATA           = WRAM_START + 0x1FEE
-SMW_HIDDEN_1UP_DATA     = WRAM_START + 0x1F3C
-SMW_BONUS_BLOCK_DATA    = WRAM_START + 0x1A000
-SMW_BLOCKSANITY_DATA    = WRAM_START + 0x1A400
-SMW_BLOCKSANITY_FLAGS   = WRAM_START + 0x1A010
-SMW_LEVEL_CLEAR_FLAGS   = WRAM_START + 0x1A200
-SMW_SPECIAL_WORLD_CLEAR = WRAM_START + 0x1F1E
+SMW_PROGRESS_DATA           = WRAM_START + 0x1F02
+SMW_DRAGON_COINS_DATA       = WRAM_START + 0x1F2F
+SMW_PATH_DATA               = WRAM_START + 0x1EA2
+SMW_EVENT_ROM_DATA          = ROM_START + 0x2D608
+SMW_ACTIVE_LEVEL_DATA       = ROM_START + 0x37F70
+SMW_MOON_DATA               = WRAM_START + 0x1FEE
+SMW_HIDDEN_1UP_DATA         = WRAM_START + 0x1F3C
+SMW_BONUS_BLOCK_DATA        = WRAM_START + 0x1A000
+SMW_BLOCKSANITY_DATA        = WRAM_START + 0x1A400
+SMW_BLOCKSANITY_FLAGS       = WRAM_START + 0x1A010
+SMW_LEVEL_CLEAR_FLAGS       = WRAM_START + 0x1A200
+SMW_SPECIAL_WORLD_CLEAR     = WRAM_START + 0x1F1E
+SMW_ENERGY_LINK_TRANSFER    = WRAM_START + 0x1BC06
+SMW_ENERGY_LINK_PURCHASE    = WRAM_START + 0x1BC08
+SMW_ENERGY_LINK_ITEM        = WRAM_START + 0x1BC0A
+SMW_ENERGY_LINK_REPLY       = WRAM_START + 0x1BC0B
+SMW_ENERGY_LINK_COUNT       = WRAM_START + 0x1BC0C
+SMW_ENERGY_LINK_ENABLED     = ROM_START + 0x1BFB4
 
 
 SMW_GOAL_DATA                = ROM_START + 0x01BFA0
@@ -65,6 +71,8 @@ SMW_RECV_PROGRESS_ADDR = WRAM_START + 0x01F2B
 
 SMW_BLOCKSANITY_BLOCK_COUNT = 582
 
+SMW_EXCHANGE_RATE = 125000000
+
 SMW_GOAL_LEVELS                = [0x28, 0x31, 0x32]
 SMW_INVALID_MARIO_STATES       = [0x05, 0x06, 0x0A, 0x0C, 0x0D]
 SMW_BAD_TEXT_BOX_LEVELS        = [0x00, 0x26, 0x02, 0x4B]
@@ -76,6 +84,10 @@ SMW_UNCOLLECTABLE_DRAGON_COINS = [0x24]
 class SMWSNIClient(SNIClient):
     game = "Super Mario World"
     patch_suffix = ".apsmw"
+
+    def __init__(self):
+        super().__init__()
+        self.using_newer_client = False
 
     async def deathlink_kill_player(self, ctx):
         from SNIClient import DeathState, snes_buffered_write, snes_flush_writes, snes_read
@@ -334,6 +346,21 @@ class SMWSNIClient(SNIClient):
         await self.handle_message_queue(ctx)
         await self.handle_trap_queue(ctx)
 
+        # This is going to be rewritten whenever SNIClient supports on_package
+        energy_link = await snes_read(ctx, SMW_ENERGY_LINK_ENABLED, 0x1)
+        if self.using_newer_client:
+            if energy_link[0] != 0:
+                await self.handle_energy_link(ctx)
+        else:
+            if energy_link[0] != 0:
+                if self.energy_link_enabled and f'EnergyLink{ctx.team}' in ctx.stored_data:
+                    await self.handle_energy_link(ctx)
+
+                if ctx.server and ctx.server.socket.open and not self.energy_link_enabled and ctx.team is not None:
+                    self.energy_link_enabled = True
+                    ctx.set_notify(f"EnergyLink{ctx.team}")
+                    snes_logger.info(f"Initialized EnergyLink{ctx.team}")
+
         new_checks = []
         event_data = await snes_read(ctx, SMW_EVENT_ROM_DATA, 0x60)
         progress_data = bytearray(await snes_read(ctx, SMW_PROGRESS_DATA, 0x0F))
@@ -480,7 +507,7 @@ class SMWSNIClient(SNIClient):
                     }
                 ]
             )
-
+        
         if game_state[0] != 0x14:
             # Don't receive items or collect locations outside of in-level mode
             ctx.current_sublevel_value = 0
@@ -508,7 +535,7 @@ class SMWSNIClient(SNIClient):
             if self.should_show_message(ctx, item):
                 if item.item != 0xBC0012 and item.item not in trap_rom_data:
                     # Don't send messages for Boss Tokens
-                    item_name = ctx.item_names.lookup_in_game(item.item)
+                    item_name =ctx.item_names.lookup_in_game(item.item)
                     player_name = ctx.player_names[item.player]
 
                     receive_message = generate_received_text(item_name, player_name)
@@ -733,3 +760,76 @@ class SMWSNIClient(SNIClient):
             snes_buffered_write(ctx, SMW_NUM_EVENTS_ADDR, bytes([old_events[0] + new_events]))
 
         await snes_flush_writes(ctx)
+        
+    async def handle_energy_link(self, ctx):
+        from SNIClient import snes_buffered_write, snes_flush_writes, snes_read
+
+        # Expose EnergyLink to the ROM
+        pool = ctx.stored_data[f'EnergyLink{ctx.team}'] or 0
+        total_energy = int(pool / SMW_EXCHANGE_RATE)
+        if total_energy < 9999:
+            snes_buffered_write(ctx, SMW_ENERGY_LINK_COUNT, bytearray([total_energy & 0xFF, (total_energy >> 8) & 0xFF]))
+        else:
+            snes_buffered_write(ctx, SMW_ENERGY_LINK_COUNT, bytearray([0x0F, 0x27]))
+
+        # Purchase from EnergyLink
+        energy_busy = await snes_read(ctx, SMW_ENERGY_LINK_REPLY, 0x1)
+        if energy_busy[0] == 0x00:
+            energy_purchase = await snes_read(ctx, SMW_ENERGY_LINK_PURCHASE, 0x2)
+            if energy_purchase is not None:
+                energy_purchase = energy_purchase[0] | (energy_purchase[1] << 8)
+                energy_purchase = energy_purchase * SMW_EXCHANGE_RATE
+                if energy_purchase != 0:
+                    snes_buffered_write(ctx, SMW_ENERGY_LINK_PURCHASE, bytearray([0x00, 0x00]))
+                    if pool < energy_purchase:
+                        snes_buffered_write(ctx, SMW_ENERGY_LINK_REPLY, bytearray([0xFF]))
+                        print ("Reply: Nope")
+                        print (f"Pool: {pool} | Request: {energy_purchase}")
+                    else:
+                        await ctx.send_msgs([{
+                            "cmd": "Set", "key": f"EnergyLink{ctx.team}", "operations":
+                                [{"operation": "add", "value": -energy_purchase},
+                                {"operation": "max", "value": 0}],
+                        }])
+                        purchased_item = await snes_read(ctx, SMW_ENERGY_LINK_ITEM, 0x1)
+                        snes_buffered_write(ctx, SMW_ENERGY_LINK_REPLY, bytearray([purchased_item[0]]))
+                        print (f"Reply: {purchased_item[0]}")
+                        print (f"Pool: {pool} | Request: {energy_purchase}")
+                
+        # Deposits EnergyLink into pool
+        energy_packet = await snes_read(ctx, SMW_ENERGY_LINK_TRANSFER, 0x2)
+        if energy_packet is not None:
+            energy_packet = energy_packet[0] | (energy_packet[1] << 8)
+            energy_packet = int((energy_packet * SMW_EXCHANGE_RATE) / 10)
+            if energy_packet != 0:
+                await ctx.send_msgs([{
+                    "cmd": "Set", "key": f"EnergyLink{ctx.team}", "operations":
+                        [{"operation": "add", "value": energy_packet},
+                        {"operation": "max", "value": 0}],
+                }])
+                snes_buffered_write(ctx, SMW_ENERGY_LINK_TRANSFER, bytearray([0x00, 0x00]))
+
+        await snes_flush_writes(ctx)
+
+    def on_package(self, ctx, cmd: str, args: dict):
+        super().on_package(ctx, cmd, args)
+
+        if cmd == "Connected":
+            slot_data = args.get("slot_data", None)
+            self.using_newer_client = True
+            if slot_data["energy_link"]:
+                ctx.set_notify(f"EnergyLink{ctx.team}")
+                if ctx.ui:
+                    ctx.ui.enable_energy_link()
+                    ctx.ui.energy_link_label.text = "Coins: Standby"
+                    snes_logger.info(f"Initialized EnergyLink{ctx.team}")
+
+        elif cmd == "SetReply" and args["key"].startswith("EnergyLink"):
+            if ctx.ui:
+                pool = (args["value"] or 0) / SMW_EXCHANGE_RATE
+                ctx.ui.energy_link_label.text = f"Coins: {int(pool)}"
+
+        elif cmd == "Retrieved":
+            if f"EnergyLink{ctx.team}" in args["keys"] and args["keys"][f"EnergyLink{ctx.team}"] and ctx.ui:
+                pool = (args["keys"][f"EnergyLink{ctx.team}"] or 0) / SMW_EXCHANGE_RATE
+                ctx.ui.energy_link_label.text = f"Coins: {int(pool)}"

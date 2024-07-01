@@ -32,7 +32,7 @@ class NumberOfYoshiEggs(Range):
     Maximum possible number of Yoshi Eggs that will be in the item pool
 
     If fewer available locations exist in the pool than this number, the number of available locations will be used instead.
-
+    
     Required Percentage of Yoshi Eggs will be calculated based off of that number.
     """
     display_name = "Max Number of Yoshi Eggs"
@@ -70,7 +70,7 @@ class Hidden1UpChecks(Toggle):
     Whether collecting a hidden 1-Up mushroom in a level will grant a check
 
     These checks are considered cryptic as there's no actual indicator that they're in their respective places
-
+    
     Enable this option at your own risk
     """
     display_name = "Hidden 1-Up Checks"
@@ -86,9 +86,9 @@ class BonusBlockChecks(Toggle):
 class Blocksanity(Toggle):
     """
     Whether hitting a block with an item or coin inside will grant a check
-
+    
     Note that some blocks are excluded due to how the option and the game works!
-
+    
     Exclusion list:
       * Blocks in Top Secret Area & Front Door/Bowser Castle
       * Blocks that are unreachable unless you glitch your way in
@@ -98,31 +98,31 @@ class Blocksanity(Toggle):
 
 class BlockCollectBehavior(Choice):
     """
-    How blocks react when they are collected.
-    
+    How blocks react when they are collected and blocksanity is enabled
+
     vanilla: Blocks retain their original behavior (always have their original items inside)
-    
+
     exclude_powerups: Blocks with a single coin and 1-Ups inside will remain collected
-    
+
     everything: Blocks with a single coin, 1-Ups, powerups and Yoshis will remain collected
     """
     display_name = "Block Collect Behavior"
     option_vanilla = 0
     option_exclude_powerups = 1
     option_everything = 3
-    default = 1
+    default = 0
 
 
 class LocationVisualIndicator(OptionSet):
     """
     Locations will have a visual indicator whether the item they have inside is important or not.
-    
+
     Exits: Goal posts, keys and orbs will have a visual indicator
-    
+
     Dragon Coins: Dragon Coins will have an AP icon inside
-    
+
     Moons: 3-Up Moons will be swapped for an AP icon
-   
+
     Bonus Blocks: Bonus Blocks will have an AP icon inside
     
     Blocksanity: All Blocksanity blocks will have a visual indicator
@@ -259,6 +259,18 @@ class TrapFillPercentage(Range):
     range_start = 0
     range_end = 100
     default = 0
+
+
+class InventoryFillPercentage(Range):
+    """
+    Replace a percentage of junk items in the item pool with random inventory items
+
+    Percentage is calculated after traps
+    """
+    display_name = "Inventory Fill Percentage"
+    range_start = 0
+    range_end = 100
+    default = 60
 
 
 class BaseTrapWeight(Choice):
@@ -440,6 +452,15 @@ class StartingLifeCount(Range):
     default = 5
 
 
+class EnergyLink(DefaultOnToggle):
+    """
+    Allows players to contribute to the EnergyLink pool by collecting coins
+
+    Players can exchange EnergyLink coins for consumable items
+    """
+    display_name = "Energy Link"
+
+
 smw_option_groups = [
     OptionGroup("Goal Options", [
         Goal,
@@ -474,6 +495,7 @@ smw_option_groups = [
     ]),
     OptionGroup("Aesthetics", [
         DisplayReceivedItemPopups,
+        BlockCollectBehavior,
         LocationVisualIndicator,
         Autosave,
         OverworldSpeed,
@@ -499,17 +521,18 @@ class SMWOptions(PerGameCommonOptions):
     hidden_1up_checks: Hidden1UpChecks
     bonus_block_checks: BonusBlockChecks
     blocksanity: Blocksanity
-    block_collect_behavior: BlockCollectBehavior
     bowser_castle_doors: BowserCastleDoors
     bowser_castle_rooms: BowserCastleRooms
     level_shuffle: LevelShuffle
     exclude_special_zone: ExcludeSpecialZone
     boss_shuffle: BossShuffle
     swap_donut_gh_exits: SwapDonutGhostHouseExits
-    location_visual_indicator: LocationVisualIndicator
     display_received_item_popups: DisplayReceivedItemPopups
+    block_collect_behavior: BlockCollectBehavior
+    location_visual_indicator: LocationVisualIndicator
     junk_fill_percentage: JunkFillPercentage
     trap_fill_percentage: TrapFillPercentage
+    inventory_fill_percentage: InventoryFillPercentage
     ice_trap_weight: IceTrapWeight
     stun_trap_weight: StunTrapWeight
     literature_trap_weight: LiteratureTrapWeight
@@ -525,3 +548,4 @@ class SMWOptions(PerGameCommonOptions):
     level_palette_shuffle: LevelPaletteShuffle
     overworld_palette_shuffle: OverworldPaletteShuffle
     starting_life_count: StartingLifeCount
+    energy_link: EnergyLink

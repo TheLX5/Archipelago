@@ -42,9 +42,9 @@ class SMWWeb(WebWorld):
         "setup/en",
         ["PoryGone"]
     )
-
+    
     tutorials = [setup_en]
-
+    
     option_groups = smw_option_groups
     options_presets = smw_options_presets
 
@@ -67,6 +67,7 @@ class SMWWorld(World):
 
     item_name_to_id = {name: data.code for name, data in item_table.items()}
     location_name_to_id = all_locations
+    #item_name_groups = item_groups
     location_name_groups = location_groups
 
     active_level_dict: typing.Dict[int,int]
@@ -89,6 +90,7 @@ class SMWWorld(World):
             "hidden_1up_checks",
             "bonus_block_checks",
             "blocksanity",
+            "energy_link",
         )
         slot_data["active_levels"] = self.active_level_dict
 
@@ -191,6 +193,22 @@ class SMWWorld(World):
             trap_pool.append(self.create_item(trap_item))
 
         itempool += trap_pool
+
+        inventory_weights = []
+        inventory_weights += ([ItemName.mushroom_inventory] * 15)
+        inventory_weights += ([ItemName.fire_flower_inventory] * 10)
+        inventory_weights += ([ItemName.feather_inventory] * 12)
+        inventory_weights += ([ItemName.star_inventory] * 5)
+        inventory_weights += ([ItemName.green_yoshi_inventory] * 8)
+        inventory_weights += ([ItemName.red_yoshi_inventory] * 8)
+        inventory_weights += ([ItemName.blue_yoshi_inventory] * 12)
+        inventory_weights += ([ItemName.yellow_yoshi_inventory] * 8)
+        inventory_count = 0 if (len(trap_weights) == 0) else math.ceil(junk_count * (self.options.inventory_fill_percentage.value / 100.0))
+        junk_count -= inventory_count
+
+        inventory_pool = [self.create_item(self.random.choice(inventory_weights)) for _ in range(inventory_count)]
+
+        itempool += inventory_pool
 
         junk_weights = []
         junk_weights += ([ItemName.one_coin] * 15)
@@ -311,6 +329,8 @@ class SMWWorld(World):
             classification = ItemClassification.progression
         elif data.trap:
             classification = ItemClassification.trap
+        elif data.useful:
+            classification = ItemClassification.useful
         else:
             classification = ItemClassification.filler
 

@@ -301,7 +301,7 @@ valid_sfxs = [
 
 game_sfx_calls = [
     0x0565E,       # Jump
-    0x1BABD,       # Spin jump
+    0x05649,       # Spin jump
     0x06D41,       # Hit head on ceiling
     0x0B4F2,       # Hit head on sprite
     0x07EB5,       # Shooting a fireball

@@ -36,7 +36,16 @@ icon_rom_data = {
     0xBC0019: [0x1B008], # 10 coins
     0xBC001A: [0x1B00A], # 50 coins
 
-    0xBC0001: [0x1B010]  # 1-Up Mushroom
+    0xBC0001: [0x1B010], # 1-Up Mushroom
+
+    0xBC0020: [0x1B012], # Mushroom
+    0xBC0021: [0x1B014], # Fire Flower
+    0xBC0022: [0x1B016], # Feather
+    0xBC0023: [0x1B018], # Star
+    0xBC0024: [0x1B01A], # Green Yoshi
+    0xBC0025: [0x1B01C], # Red Yoshi
+    0xBC0026: [0x1B01E], # Blue Yoshi
+    0xBC0027: [0x1B020], # Yellow Yoshi
 }
     
 item_rom_data = {
@@ -551,6 +560,7 @@ def patch_rom(world: World, rom, player, active_level_dict):
     if "Blocksanity" in location_visual_indicator:
         setting_value |= 0x10
     rom.write_byte(0x01BFB2, setting_value)
+    rom.write_byte(0x01BFB4, world.options.energy_link.value)
 
     from Utils import __version__
     rom.name = bytearray(f'SMW{__version__.replace(".", "")[0:3]}_{player}_{world.multiworld.seed:11}\0', 'utf8')[:21]

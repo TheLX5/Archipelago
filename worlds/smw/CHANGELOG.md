@@ -1,6 +1,27 @@
 # Super Mario World - Changelog
 
 
+## v3.0
+
+### Features:
+
+- New inventory system that allows you to bring a powerup to a level
+- New Items
+	- Mushroom
+	- Fire Flower
+	- Feather
+	- Super Star
+	- Green Yoshi
+	- Red Yoshi
+	- Yellow Yoshi
+	- Blue Yoshi
+
+### Quality of Life
+
+- Optional visuals for uncollected locations are now included and color coded if applicable
+
+
+
 ## v2.0
 
 ### Features:

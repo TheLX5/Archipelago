@@ -5,6 +5,16 @@ five_coins = "5 coins"
 ten_coins = "10 coins"
 fifty_coins = "50 coins"
 
+# Inventory Definitions
+mushroom_inventory = "Mushroom"
+fire_flower_inventory = "Fire Flower"
+feather_inventory = "Feather"
+star_inventory = "Star"
+green_yoshi_inventory = "Green Yoshi"
+red_yoshi_inventory = "Red Yoshi"
+blue_yoshi_inventory = "Blue Yoshi"
+yellow_yoshi_inventory = "Yellow Yoshi"
+
 # Collectable Definitions
 yoshi_egg = "Yoshi Egg"
 

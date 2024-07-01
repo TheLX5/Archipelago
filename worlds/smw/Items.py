@@ -8,6 +8,7 @@ class ItemData(typing.NamedTuple):
     code: typing.Optional[int]
     progression: bool
     trap: bool = False
+    useful: bool = False
     quantity: int = 1
     event: bool = False
 
@@ -23,6 +24,17 @@ junk_table = {
     ItemName.ten_coins:       ItemData(0xBC0019, False),
     ItemName.fifty_coins:     ItemData(0xBC001A, False),
     ItemName.one_up_mushroom: ItemData(0xBC0001, False),
+}
+
+inventory_table = {
+    ItemName.mushroom_inventory:        ItemData(0xBC0020, False, False, True),
+    ItemName.fire_flower_inventory:     ItemData(0xBC0021, False, False, True),
+    ItemName.feather_inventory:         ItemData(0xBC0022, False, False, True),
+    ItemName.star_inventory:            ItemData(0xBC0023, False, False, True),
+    ItemName.green_yoshi_inventory:     ItemData(0xBC0024, False, False, True),
+    ItemName.red_yoshi_inventory:       ItemData(0xBC0025, False, False, True),
+    ItemName.blue_yoshi_inventory:      ItemData(0xBC0026, False, False, True),
+    ItemName.yellow_yoshi_inventory:    ItemData(0xBC0027, False, False, True),
 }
 
 collectable_table = {
@@ -67,6 +79,7 @@ event_table = {
 # Complete item table.
 item_table = {
     **junk_table,
+    **inventory_table,
     **collectable_table,
     **upgrade_table,
     **switch_palace_table,
