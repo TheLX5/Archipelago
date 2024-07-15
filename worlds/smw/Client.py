@@ -71,7 +71,7 @@ SMW_RECV_PROGRESS_ADDR = WRAM_START + 0x01F2B
 
 SMW_BLOCKSANITY_BLOCK_COUNT = 582
 
-SMW_EXCHANGE_RATE = 125000000
+SMW_EXCHANGE_RATE = 300000000
 
 SMW_GOAL_LEVELS                = [0x28, 0x31, 0x32]
 SMW_INVALID_MARIO_STATES       = [0x05, 0x06, 0x0A, 0x0C, 0x0D]
@@ -88,6 +88,7 @@ class SMWSNIClient(SNIClient):
     def __init__(self):
         super().__init__()
         self.using_newer_client = False
+        self.energy_link_enabled = False
 
     async def deathlink_kill_player(self, ctx):
         from SNIClient import DeathState, snes_buffered_write, snes_flush_writes, snes_read
@@ -783,8 +784,6 @@ class SMWSNIClient(SNIClient):
                     snes_buffered_write(ctx, SMW_ENERGY_LINK_PURCHASE, bytearray([0x00, 0x00]))
                     if pool < energy_purchase:
                         snes_buffered_write(ctx, SMW_ENERGY_LINK_REPLY, bytearray([0xFF]))
-                        print ("Reply: Nope")
-                        print (f"Pool: {pool} | Request: {energy_purchase}")
                     else:
                         await ctx.send_msgs([{
                             "cmd": "Set", "key": f"EnergyLink{ctx.team}", "operations":
@@ -793,14 +792,12 @@ class SMWSNIClient(SNIClient):
                         }])
                         purchased_item = await snes_read(ctx, SMW_ENERGY_LINK_ITEM, 0x1)
                         snes_buffered_write(ctx, SMW_ENERGY_LINK_REPLY, bytearray([purchased_item[0]]))
-                        print (f"Reply: {purchased_item[0]}")
-                        print (f"Pool: {pool} | Request: {energy_purchase}")
                 
         # Deposits EnergyLink into pool
         energy_packet = await snes_read(ctx, SMW_ENERGY_LINK_TRANSFER, 0x2)
         if energy_packet is not None:
             energy_packet = energy_packet[0] | (energy_packet[1] << 8)
-            energy_packet = int((energy_packet * SMW_EXCHANGE_RATE) / 10)
+            energy_packet = int((energy_packet * SMW_EXCHANGE_RATE) / 5)
             if energy_packet != 0:
                 await ctx.send_msgs([{
                     "cmd": "Set", "key": f"EnergyLink{ctx.team}", "operations":
