@@ -1,11 +1,11 @@
 # Super Mario World - Changelog
 
 
-## v3.0
+## v2.1
 
 ### Features:
 
-- New inventory system that allows you to bring a powerup to a level
+- New inventory system that allows you to get a powerup before entering a level
 - New Items
 	- Mushroom
 	- Fire Flower
@@ -15,10 +15,19 @@
 	- Red Yoshi
 	- Yellow Yoshi
 	- Blue Yoshi
+- EnergyLink support
+	- Deposit energy by collecting coins in levels
+	- Use energy to purchase inventory items
+- Blocks with coins and powerups can be kept collected after hitting them once
+	- Makes the game harder on subsequent visits to any level
+
 
 ### Quality of Life
 
-- Optional visuals for uncollected locations are now included and color coded if applicable
+- New appareances for blocks, 3-Up Moons and Dragon Coins when they're enabled as valid locations
+- Current item box contents are displayed during the map gameplay
+- Added location groups
+
 
 
 
