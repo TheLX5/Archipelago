@@ -20,15 +20,15 @@
 	- Use energy to purchase inventory items
 - Blocks with coins and powerups can be kept collected after hitting them once
 	- Makes the game harder on subsequent visits to any level
-
+- New options: `energy_link`, `location_visual_indicator`, `block_collect_behavior`, `inventory_fill_percentage`
 
 ### Quality of Life
 
+- APPP Support (no longer requires a ROM for generation)
 - New appareances for blocks, 3-Up Moons and Dragon Coins when they're enabled as valid locations
 - Current item box contents are displayed during the map gameplay
 - Added location groups
-
-
+- Autopatching for player sprite replacement
 
 
 ## v2.0
