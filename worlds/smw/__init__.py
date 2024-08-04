@@ -4,6 +4,7 @@ import typing
 import math
 import settings
 import threading
+import pkgutil
 
 from BaseClasses import Item, MultiWorld, Tutorial, ItemClassification
 from worlds.AutoWorld import WebWorld, World
@@ -17,7 +18,7 @@ from .Names import ItemName, LocationName
 from .Options import SMWOptions, smw_option_groups
 from .Presets import smw_options_presets
 from .Regions import create_regions, connect_regions
-from .Rom import LocalRom, patch_rom, get_base_rom_path, SMWDeltaPatch
+from .Rom import patch_rom, SMWProcedurePatch, USHASH
 from .Rules import set_rules
 
 
@@ -26,7 +27,7 @@ class SMWSettings(settings.Group):
         """File name of the SMW US rom"""
         description = "Super Mario World (USA) ROM File"
         copy_to = "Super Mario World (USA).sfc"
-        md5s = [SMWDeltaPatch.hash]
+        md5s = [USHASH]
 
     rom_file: RomFile = RomFile(RomFile.copy_to)
 
@@ -67,7 +68,6 @@ class SMWWorld(World):
 
     item_name_to_id = {name: data.code for name, data in item_table.items()}
     location_name_to_id = all_locations
-    #item_name_groups = item_groups
     location_name_groups = location_groups
 
     active_level_dict: typing.Dict[int,int]
@@ -76,12 +76,6 @@ class SMWWorld(World):
     def __init__(self, multiworld: MultiWorld, player: int):
         self.rom_name_available_event = threading.Event()
         super().__init__(multiworld, player)
-
-    @classmethod
-    def stage_assert_generate(cls, multiworld: MultiWorld):
-        rom_file = get_base_rom_path()
-        if not os.path.exists(rom_file):
-            raise FileNotFoundError(rom_file)
 
     def fill_slot_data(self) -> dict:
         slot_data = self.options.as_dict(
@@ -232,27 +226,21 @@ class SMWWorld(World):
 
 
     def generate_output(self, output_directory: str):
-        rompath = ""  # if variable is not declared finally clause may fail
         try:
-            multiworld = self.multiworld
-            player = self.player
+            patch = SMWProcedurePatch(player=self.player, player_name=self.multiworld.player_name[self.player])
+            patch.write_file("smw_basepatch.bsdiff4", pkgutil.get_data(__name__, "data/smw_basepatch.bsdiff4"))
+            patch_rom(self, patch, self.player, self.active_level_dict)
 
-            rom = LocalRom(get_base_rom_path())
-            patch_rom(self, rom, self.player, self.active_level_dict)
+            self.rom_name = patch.name
 
-            rompath = os.path.join(output_directory, f"{self.multiworld.get_out_file_name_base(self.player)}.sfc")
-            rom.write_to_file(rompath)
-            self.rom_name = rom.name
-
-            patch = SMWDeltaPatch(os.path.splitext(rompath)[0]+SMWDeltaPatch.patch_file_ending, player=player,
-                                  player_name=multiworld.player_name[player], patched_path=rompath)
+            patch.write(os.path.join(output_directory,
+                                     f"{self.multiworld.get_out_file_name_base(self.player)}{patch.patch_file_ending}"))
             patch.write()
         except:
             raise
         finally:
             self.rom_name_available_event.set()  # make sure threading continues and errors are collected
-            if os.path.exists(rompath):
-                os.unlink(rompath)
+            
 
     def modify_multidata(self, multidata: dict):
         import base64

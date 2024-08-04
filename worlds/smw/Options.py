@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from Options import Choice, Range, Toggle, DeathLink, DefaultOnToggle, OptionSet, OptionGroup, PerGameCommonOptions
+from Options import Choice, Range, Toggle, DeathLink, DefaultOnToggle, OptionSet, FreeText, OptionGroup, PerGameCommonOptions
 
 
 class Goal(Choice):
@@ -461,6 +461,14 @@ class EnergyLink(DefaultOnToggle):
     display_name = "Energy Link"
 
 
+class Sprite(FreeText):
+    """
+    player sprite name
+    """
+    display_name = "Player Sprite"
+    default = ""
+
+
 smw_option_groups = [
     OptionGroup("Goal Options", [
         Goal,
@@ -549,3 +557,4 @@ class SMWOptions(PerGameCommonOptions):
     overworld_palette_shuffle: OverworldPaletteShuffle
     starting_life_count: StartingLifeCount
     energy_link: EnergyLink
+    sprite: Sprite

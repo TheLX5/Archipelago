@@ -629,49 +629,6 @@ def generate_shuffled_ow_palettes(rom, world: World):
         chosen_palette = world.random.choice(valid_palettes)
         rom.write_byte(address, chosen_palette)
 
-def generate_shuffled_header_data(rom, world: World):
-    if world.options.music_shuffle != "full" and world.options.level_palette_shuffle != "on_legacy":
-        return
-
-    for level_id in range(0, 0x200):
-        layer1_ptr_list = list(rom.read_bytes(0x2E000 + level_id * 3, 3))
-        layer1_ptr = (layer1_ptr_list[2] << 16 | layer1_ptr_list[1] << 8 | layer1_ptr_list[0])
-
-        if layer1_ptr == 0x68000:
-            # Unused Levels
-            continue
-
-        if layer1_ptr >= 0x70000:
-            layer1_ptr -= 0x8000
-
-        layer1_ptr -= 0x38000
-
-        level_header = list(rom.read_bytes(layer1_ptr, 5))
-
-        tileset = level_header[4] & 0x0F
-
-        if world.options.music_shuffle == "full":
-            level_header[2] &= 0x8F
-            level_header[2] |= (world.random.randint(0, 7) << 5)
-
-        if world.options.level_palette_shuffle == "on_legacy":
-            if tileset in valid_foreground_palettes:
-                level_header[3] &= 0xF8
-                level_header[3] |= world.random.choice(valid_foreground_palettes[tileset])
-
-            layer2_ptr_list = list(rom.read_bytes(0x2E600 + level_id * 3, 3))
-            layer2_ptr = (layer2_ptr_list[2] << 16 | layer2_ptr_list[1] << 8 | layer2_ptr_list[0])
-
-            if layer2_ptr in valid_background_palettes:
-                level_header[0] &= 0x1F
-                level_header[0] |= (world.random.choice(valid_background_palettes[layer2_ptr]) << 5)
-
-            if layer2_ptr in valid_background_colors:
-                level_header[1] &= 0x1F
-                level_header[1] |= (world.random.choice(valid_background_colors[layer2_ptr]) << 5)
-
-        rom.write_bytes(layer1_ptr, bytes(level_header))
-
 def generate_curated_level_palette_data(rom, world: World):
     PALETTE_INDEX_ADDR = 0x88000
 
