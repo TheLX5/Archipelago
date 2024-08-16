@@ -15,7 +15,7 @@ import typing
 from json import loads, dumps
 
 # CommonClient import first to trigger ModuleUpdater
-from CommonClient import CommonContext, server_loop, ClientCommandProcessor, gui_enabled, get_base_parser
+from CommonClient import CommonContext, server_loop, ClientCommandProcessor, gui_enabled, get_base_parser, logger
 
 import Utils
 from Utils import async_start
@@ -29,6 +29,13 @@ if __name__ == "__main__":
 import colorama
 from websockets.client import connect as websockets_connect, WebSocketClientProtocol
 from websockets.exceptions import WebSocketException, ConnectionClosed
+
+tracker_loaded = False
+try:
+    from worlds.tracker.TrackerClient import TrackerGameContext as SuperContext
+    tracker_loaded = True
+except ModuleNotFoundError:
+    from CommonClient import CommonContext as SuperContext
 
 snes_logger = logging.getLogger("SNES")
 
@@ -113,7 +120,7 @@ class SNIClientCommandProcessor(ClientCommandProcessor):
     #     return True
 
 
-class SNIContext(CommonContext):
+class SNIContext(SuperContext):
     command_processor: typing.Type[SNIClientCommandProcessor] = SNIClientCommandProcessor
     game: typing.Optional[str] = None  # set in validate_rom
     items_handling: typing.Optional[int] = None  # set in game_watcher
@@ -244,6 +251,7 @@ class SNIContext(CommonContext):
                 # this will no longer be needed.
                 async_start(self.send_msgs([{"cmd": "LocationScouts", "locations": list(new_locations)}]))
 
+
     def run_gui(self) -> None:
         from kvui import GameManager
 
@@ -254,7 +262,18 @@ class SNIContext(CommonContext):
             ]
             base_title = "Archipelago SNI Client"
 
+            def build(self):
+                container = super().build()
+                if tracker_loaded:
+                    self.ctx.build_gui(self)
+                else:
+                    logger.info("to enable a tracker, install Universal Tracker")
+
+                return container
+
         self.ui = SNIManager(self)
+        if tracker_loaded:
+            self.load_kv()
         self.ui_task = asyncio.create_task(self.ui.async_run(), name="UI")  # type: ignore
 
 
@@ -702,6 +721,8 @@ async def main() -> None:
     if ctx.server_task is None:
         ctx.server_task = asyncio.create_task(server_loop(ctx), name="ServerLoop")
 
+    if tracker_loaded:
+        ctx.run_generator()
     if gui_enabled:
         ctx.run_gui()
     ctx.run_cli()
