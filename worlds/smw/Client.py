@@ -13,27 +13,28 @@ WRAM_START = 0xF50000
 WRAM_SIZE = 0x20000
 SRAM_START = 0xE00000
 
+SMW_BWRAM = SRAM_START + 0x4000
+
 SMW_ROMHASH_START = 0x7FC0
 ROMHASH_SIZE = 0x15
 
-SMW_PROGRESS_DATA           = WRAM_START + 0x1F02
-SMW_DRAGON_COINS_DATA       = WRAM_START + 0x1F2F
-SMW_PATH_DATA               = WRAM_START + 0x1EA2
+SMW_PROGRESS_DATA           = SRAM_START + 0x1F02
+SMW_DRAGON_COINS_DATA       = SRAM_START + 0x1F2F
+SMW_PATH_DATA               = SRAM_START + 0x1EA2
 SMW_EVENT_ROM_DATA          = ROM_START + 0x2D608
 SMW_ACTIVE_LEVEL_DATA       = ROM_START + 0x37F70
-SMW_MOON_DATA               = WRAM_START + 0x1FEE
-SMW_HIDDEN_1UP_DATA         = WRAM_START + 0x1F3C
-SMW_BONUS_BLOCK_DATA        = WRAM_START + 0x1A000
-SMW_BLOCKSANITY_DATA        = WRAM_START + 0x1A400
-SMW_BLOCKSANITY_FLAGS       = WRAM_START + 0x1A010
-SMW_LEVEL_CLEAR_FLAGS       = WRAM_START + 0x1A200
-SMW_SPECIAL_WORLD_CLEAR     = WRAM_START + 0x1F1E
-SMW_ENERGY_LINK_TRANSFER    = WRAM_START + 0x1BC06
-SMW_ENERGY_LINK_PURCHASE    = WRAM_START + 0x1BC08
-SMW_ENERGY_LINK_ITEM        = WRAM_START + 0x1BC0A
-SMW_ENERGY_LINK_REPLY       = WRAM_START + 0x1BC0B
-SMW_ENERGY_LINK_COUNT       = WRAM_START + 0x1BC0C
-SMW_ENERGY_LINK_ENABLED     = ROM_START + 0x1BFB4
+SMW_MOON_DATA               = SRAM_START + 0x1FEE
+SMW_HIDDEN_1UP_DATA         = SRAM_START + 0x1F3C
+SMW_BONUS_BLOCK_DATA        = SMW_BWRAM + 0x0000
+SMW_BLOCKSANITY_DATA        = SMW_BWRAM + 0x0400
+SMW_BLOCKSANITY_FLAGS       = SMW_BWRAM + 0x0010
+SMW_LEVEL_CLEAR_FLAGS       = SMW_BWRAM + 0x0200
+SMW_SPECIAL_WORLD_CLEAR     = SRAM_START + 0x1F1E
+SMW_ENERGY_LINK_TRANSFER    = SMW_BWRAM + 0x0C06
+SMW_ENERGY_LINK_PURCHASE    = SMW_BWRAM + 0x0C08
+SMW_ENERGY_LINK_ITEM        = SMW_BWRAM + 0x0C0A
+SMW_ENERGY_LINK_REPLY       = SMW_BWRAM + 0x0C0B
+SMW_ENERGY_LINK_COUNT       = SMW_BWRAM + 0x0C0C
 
 
 SMW_GOAL_DATA                = ROM_START + 0x01BFA0
@@ -48,26 +49,30 @@ SMW_MOON_ACTIVE_ADDR         = ROM_START + 0x01BFA8
 SMW_HIDDEN_1UP_ACTIVE_ADDR   = ROM_START + 0x01BFA9
 SMW_BONUS_BLOCK_ACTIVE_ADDR  = ROM_START + 0x01BFAA
 SMW_BLOCKSANITY_ACTIVE_ADDR  = ROM_START + 0x01BFAB
+SMW_ENERGY_LINK_ENABLED      = ROM_START + 0x01BFB4
 
 
-SMW_GAME_STATE_ADDR       = WRAM_START + 0x100
-SMW_MARIO_STATE_ADDR      = WRAM_START + 0x71
-SMW_BOSS_STATE_ADDR       = WRAM_START + 0xD9B
-SMW_ACTIVE_BOSS_ADDR      = WRAM_START + 0x13FC
-SMW_CURRENT_LEVEL_ADDR    = WRAM_START + 0x13BF
-SMW_CURRENT_SUBLEVEL_ADDR = WRAM_START + 0x10B
-SMW_MESSAGE_BOX_ADDR      = WRAM_START + 0x1426
-SMW_BONUS_STAR_ADDR       = WRAM_START + 0xF48
-SMW_EGG_COUNT_ADDR        = WRAM_START + 0x1F24
-SMW_BOSS_COUNT_ADDR       = WRAM_START + 0x1F26
-SMW_NUM_EVENTS_ADDR       = WRAM_START + 0x1F2E
-SMW_SFX_ADDR              = WRAM_START + 0x1DFC
-SMW_PAUSE_ADDR            = WRAM_START + 0x13D4
-SMW_MESSAGE_QUEUE_ADDR    = WRAM_START + 0xC391
-SMW_ACTIVE_THWIMP_ADDR    = WRAM_START + 0x0F3C
-SMW_GOAL_ITEM_COUNT       = WRAM_START + 0x1A01E
+SMW_GAME_STATE_ADDR       = SRAM_START + 0x0100
+SMW_MARIO_STATE_ADDR      = SRAM_START + 0x71
+SMW_BOSS_STATE_ADDR       = SRAM_START + 0x0D9B
+SMW_ACTIVE_BOSS_ADDR      = SRAM_START + 0x13FC
+SMW_CURRENT_LEVEL_ADDR    = SRAM_START + 0x13BF
+SMW_CURRENT_SUBLEVEL_ADDR = SRAM_START + 0x010B
+SMW_MESSAGE_BOX_ADDR      = SRAM_START + 0x1426
+SMW_BONUS_STAR_ADDR       = SRAM_START + 0x0F48
+SMW_EGG_COUNT_ADDR        = SRAM_START + 0x1F24
+SMW_BOSS_COUNT_ADDR       = SRAM_START + 0x1F26
+SMW_NUM_EVENTS_ADDR       = SRAM_START + 0x1F2E
+SMW_SFX_ADDR              = SRAM_START + 0x1DFC
+SMW_PAUSE_ADDR            = SRAM_START + 0x13D4
+SMW_MESSAGE_QUEUE_ADDR    = SMW_BWRAM + 0x1000 + 0x0191
+SMW_ACTIVE_THWIMP_ADDR    = SMW_BWRAM + 0x0303
+SMW_GOAL_ITEM_COUNT       = SMW_BWRAM + 0x01E
 
-SMW_RECV_PROGRESS_ADDR = WRAM_START + 0x01F2B
+SMW_RAM_MIRROR = SRAM_START + 0x18000
+SMW_BWRAM_PROGRESS = SRAM_START + 0x1F00
+
+SMW_RECV_PROGRESS_ADDR = SRAM_START + 0x01F2B
 
 SMW_BLOCKSANITY_BLOCK_COUNT = 582
 
@@ -168,32 +173,38 @@ class SMWSNIClient(SNIClient):
         if not hasattr(self, "message_queue") or len(self.message_queue) == 0:
             return
 
-        game_state = await snes_read(ctx, SMW_GAME_STATE_ADDR, 0x1)
-        if game_state[0] != 0x14:
+        ram_mirror = await snes_read(ctx, SMW_RAM_MIRROR, 0x0A)
+
+        if ram_mirror is None:
             return
 
-        mario_state = await snes_read(ctx, SMW_MARIO_STATE_ADDR, 0x1)
-        if mario_state[0] != 0x00:
+        game_state = ram_mirror[0x00]
+        mario_state = ram_mirror[0x01]
+        pause_state = ram_mirror[0x09]
+        current_level = ram_mirror[0x04]
+        boss_state = ram_mirror[0x02]
+        active_boss = ram_mirror[0x03]
+        message_box = ram_mirror[0x07]
+
+        if game_state != 0x14:
             return
 
-        message_box = await snes_read(ctx, SMW_MESSAGE_BOX_ADDR, 0x1)
-        if message_box[0] != 0x00:
+        if mario_state != 0x00:
+            return
+        
+        if message_box != 0x00:
+            return
+        
+        if pause_state != 0x00:
+            return
+        
+        if current_level in SMW_BAD_TEXT_BOX_LEVELS:
             return
 
-        pause_state = await snes_read(ctx, SMW_PAUSE_ADDR, 0x1)
-        if pause_state[0] != 0x00:
+        if boss_state in SMW_BOSS_STATES:
             return
 
-        current_level = await snes_read(ctx, SMW_CURRENT_LEVEL_ADDR, 0x1)
-        if current_level[0] in SMW_BAD_TEXT_BOX_LEVELS:
-            return
-
-        boss_state = await snes_read(ctx, SMW_BOSS_STATE_ADDR, 0x1)
-        if boss_state[0] in SMW_BOSS_STATES:
-            return
-
-        active_boss = await snes_read(ctx, SMW_ACTIVE_BOSS_ADDR, 0x1)
-        if active_boss[0] != 0x00:
+        if active_boss != 0x00:
             return
 
         next_message = self.message_queue.pop(0)
@@ -222,23 +233,23 @@ class SMWSNIClient(SNIClient):
         if not hasattr(self, "trap_queue") or len(self.trap_queue) == 0:
             return
 
-        game_state = await snes_read(ctx, SMW_GAME_STATE_ADDR, 0x1)
-        if game_state[0] != 0x14:
+        ram_mirror = await snes_read(ctx, SMW_RAM_MIRROR, 0x0A)
+
+        if ram_mirror is None:
             return
 
-        mario_state = await snes_read(ctx, SMW_MARIO_STATE_ADDR, 0x1)
-        if mario_state[0] != 0x00:
-            return
+        game_state = ram_mirror[0x00]
+        mario_state = ram_mirror[0x01]
+        pause_state = ram_mirror[0x09]
 
-        pause_state = await snes_read(ctx, SMW_PAUSE_ADDR, 0x1)
-        if pause_state[0] != 0x00:
+        if game_state != 0x14 or mario_state != 0x00 or pause_state != 0x00:
             return
 
         next_trap, message = self.trap_queue.pop(0)
 
         from .Rom import trap_rom_data
         if next_trap.item in trap_rom_data:
-            trap_active = await snes_read(ctx, WRAM_START + trap_rom_data[next_trap.item][0], 0x3)
+            trap_active = await snes_read(ctx, SRAM_START + trap_rom_data[next_trap.item][0], 0x3)
 
             if next_trap.item == 0xBC0016:
                 # Timer Trap
@@ -247,9 +258,9 @@ class SMWSNIClient(SNIClient):
                     self.add_trap_to_queue(next_trap, message)
                     return
                 else:
-                    snes_buffered_write(ctx, WRAM_START + trap_rom_data[next_trap.item][0], bytes([0x01]))
-                    snes_buffered_write(ctx, WRAM_START + trap_rom_data[next_trap.item][0] + 1, bytes([0x00]))
-                    snes_buffered_write(ctx, WRAM_START + trap_rom_data[next_trap.item][0] + 2, bytes([0x00]))
+                    snes_buffered_write(ctx, SRAM_START + trap_rom_data[next_trap.item][0], bytes([0x01]))
+                    snes_buffered_write(ctx, SRAM_START + trap_rom_data[next_trap.item][0] + 1, bytes([0x00]))
+                    snes_buffered_write(ctx, SRAM_START + trap_rom_data[next_trap.item][0] + 2, bytes([0x00]))
             else:
                 if trap_active[0] > 0:
                     # Trap already active
@@ -263,23 +274,22 @@ class SMWSNIClient(SNIClient):
                         if active_thwimp[0] != 0xFF:
                             self.add_trap_to_queue(next_trap, message)
                             return
-                    verify_game_state = await snes_read(ctx, SMW_GAME_STATE_ADDR, 0x1)
-                    if verify_game_state[0] == 0x14 and len(trap_rom_data[next_trap.item]) > 2:
+                    if game_state == 0x14 and len(trap_rom_data[next_trap.item]) > 2:
                         snes_buffered_write(ctx, SMW_SFX_ADDR, bytes([trap_rom_data[next_trap.item][2]]))
 
                     new_item_count = trap_rom_data[next_trap.item][1]
-                    snes_buffered_write(ctx, WRAM_START + trap_rom_data[next_trap.item][0], bytes([new_item_count]))
+                    snes_buffered_write(ctx, SRAM_START + trap_rom_data[next_trap.item][0], bytes([new_item_count]))
 
-            current_level = await snes_read(ctx, SMW_CURRENT_LEVEL_ADDR, 0x1)
-            if current_level[0] in SMW_BAD_TEXT_BOX_LEVELS:
+            current_level = ram_mirror[0x04]
+            if current_level in SMW_BAD_TEXT_BOX_LEVELS:
                 return
 
-            boss_state = await snes_read(ctx, SMW_BOSS_STATE_ADDR, 0x1)
-            if boss_state[0] in SMW_BOSS_STATES:
+            boss_state = ram_mirror[0x02]
+            if boss_state in SMW_BOSS_STATES:
                 return
 
-            active_boss = await snes_read(ctx, SMW_ACTIVE_BOSS_ADDR, 0x1)
-            if active_boss[0] != 0x00:
+            active_boss = ram_mirror[0x03]
+            if active_boss != 0x00:
                 return
 
             if self.should_show_message(ctx, next_trap):
@@ -289,42 +299,46 @@ class SMWSNIClient(SNIClient):
     async def game_watcher(self, ctx):
         from SNIClient import snes_buffered_write, snes_flush_writes, snes_read
         
-        boss_state = await snes_read(ctx, SMW_BOSS_STATE_ADDR, 0x1)
-        game_state = await snes_read(ctx, SMW_GAME_STATE_ADDR, 0x1)
-        mario_state = await snes_read(ctx, SMW_MARIO_STATE_ADDR, 0x1)
-        if game_state is None:
+        rom_settings_data = await snes_read(ctx, SMW_GOAL_DATA, 0x20)
+        ram_mirror = await snes_read(ctx, SMW_RAM_MIRROR, 0x0A)
+        game_progress = await snes_read(ctx, SMW_BWRAM_PROGRESS, 0x0100)
+        if ram_mirror is None or rom_settings_data is None or game_progress is None:
             # We're not properly connected
             return
-        elif game_state[0] >= 0x18:
-            if not ctx.finished_game:
-                current_level = await snes_read(ctx, SMW_CURRENT_LEVEL_ADDR, 0x1)
+        
+        game_state = ram_mirror[0x00]
+        mario_state = ram_mirror[0x01]
 
-                if current_level[0] in SMW_GOAL_LEVELS:
+        if game_state >= 0x18:
+            if not ctx.finished_game:
+                current_level = ram_mirror[0x04]
+
+                if current_level in SMW_GOAL_LEVELS:
                     await ctx.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}])
                     ctx.finished_game = True
             return
-        elif game_state[0] < 0x0B:
+        elif game_state < 0x0B:
             # We haven't loaded a save file
             ctx.message_queue = []
             ctx.current_sublevel_value = 0
             return
-        elif mario_state[0] in SMW_INVALID_MARIO_STATES:
+        elif mario_state in SMW_INVALID_MARIO_STATES:
             # Mario can't come to the phone right now
             return
 
-        if "DeathLink" in ctx.tags and game_state[0] == 0x14 and ctx.last_death_link + 1 < time.time():
-            currently_dead = mario_state[0] == 0x09
+        if "DeathLink" in ctx.tags and game_state == 0x14 and ctx.last_death_link + 1 < time.time():
+            currently_dead = mario_state == 0x09
             await ctx.handle_deathlink_state(currently_dead)
 
         # Check for Egg Hunt ending
-        goal = await snes_read(ctx, SMW_GOAL_DATA, 0x1)
-        if game_state[0] == 0x14 and goal[0] == 1:
-            current_level = await snes_read(ctx, SMW_CURRENT_LEVEL_ADDR, 0x1)
-            message_box = await snes_read(ctx, SMW_MESSAGE_BOX_ADDR, 0x1)
-            egg_count = await snes_read(ctx, SMW_EGG_COUNT_ADDR, 0x1)
-            required_egg_count = await snes_read(ctx, SMW_REQUIRED_EGGS_DATA, 0x1)
+        goal = rom_settings_data[0x00]
+        if game_state == 0x14 and goal == 1:
+            current_level = ram_mirror[0x04]
+            message_box = ram_mirror[0x07]
+            egg_count = ram_mirror[0x07]
+            required_egg_count = rom_settings_data[0x02]
 
-            if current_level[0] == 0x28 and message_box[0] == 0x01 and egg_count[0] >= required_egg_count[0]:
+            if current_level == 0x28 and message_box == 0x01 and egg_count >= required_egg_count:
                 snes_buffered_write(ctx, WRAM_START + 0x13C6, bytes([0x08]))
                 snes_buffered_write(ctx, WRAM_START + 0x13CE, bytes([0x01]))
                 snes_buffered_write(ctx, WRAM_START + 0x1DE9, bytes([0x01]))
@@ -333,27 +347,27 @@ class SMWSNIClient(SNIClient):
                 await snes_flush_writes(ctx)
                 return
 
-        egg_count     = await snes_read(ctx, SMW_EGG_COUNT_ADDR, 0x1)
-        boss_count    = await snes_read(ctx, SMW_BOSS_COUNT_ADDR, 0x1)
-        display_count = await snes_read(ctx, SMW_BONUS_STAR_ADDR, 0x1)
+        egg_count     = game_progress[0x24]
+        boss_count    = game_progress[0x26]
+        display_count = ram_mirror[0x08]
 
-        if goal[0] == 0 and boss_count[0] > display_count[0]:
-            snes_buffered_write(ctx, SMW_BONUS_STAR_ADDR, bytes([boss_count[0]]))
+        if goal == 0 and boss_count > display_count:
+            snes_buffered_write(ctx, SMW_BONUS_STAR_ADDR, bytes([boss_count]))
             await snes_flush_writes(ctx)
-        elif goal[0] == 1 and egg_count[0] > display_count[0]:
-            snes_buffered_write(ctx, SMW_BONUS_STAR_ADDR, bytes([egg_count[0]]))
+        elif goal == 1 and egg_count > display_count:
+            snes_buffered_write(ctx, SMW_BONUS_STAR_ADDR, bytes([egg_count]))
             await snes_flush_writes(ctx)
 
         await self.handle_message_queue(ctx)
         await self.handle_trap_queue(ctx)
 
         # This is going to be rewritten whenever SNIClient supports on_package
-        energy_link = await snes_read(ctx, SMW_ENERGY_LINK_ENABLED, 0x1)
+        energy_link = rom_settings_data[0x14]
         if self.using_newer_client:
-            if energy_link[0] != 0:
+            if energy_link != 0:
                 await self.handle_energy_link(ctx)
         else:
-            if energy_link[0] != 0:
+            if energy_link != 0:
                 if self.energy_link_enabled and f'EnergyLink{ctx.team}' in ctx.stored_data:
                     await self.handle_energy_link(ctx)
 
@@ -362,21 +376,26 @@ class SMWSNIClient(SNIClient):
                     ctx.set_notify(f"EnergyLink{ctx.team}")
                     snes_logger.info(f"Initialized EnergyLink{ctx.team}")
 
-        new_checks = []
         event_data = await snes_read(ctx, SMW_EVENT_ROM_DATA, 0x60)
-        progress_data = bytearray(await snes_read(ctx, SMW_PROGRESS_DATA, 0x0F))
-        dragon_coins_data = bytearray(await snes_read(ctx, SMW_DRAGON_COINS_DATA, 0x0C))
-        dragon_coins_active = await snes_read(ctx, SMW_DRAGON_COINS_ACTIVE_ADDR, 0x1)
-        moon_data = bytearray(await snes_read(ctx, SMW_MOON_DATA, 0x0C))
-        moon_active = await snes_read(ctx, SMW_MOON_ACTIVE_ADDR, 0x1)
-        hidden_1up_data = bytearray(await snes_read(ctx, SMW_HIDDEN_1UP_DATA, 0x0C))
-        hidden_1up_active = await snes_read(ctx, SMW_HIDDEN_1UP_ACTIVE_ADDR, 0x1)
-        bonus_block_data = bytearray(await snes_read(ctx, SMW_BONUS_BLOCK_DATA, 0x0C))
-        bonus_block_active = await snes_read(ctx, SMW_BONUS_BLOCK_ACTIVE_ADDR, 0x1)
-        blocksanity_data = bytearray(await snes_read(ctx, SMW_BLOCKSANITY_DATA, SMW_BLOCKSANITY_BLOCK_COUNT))
-        blocksanity_flags = bytearray(await snes_read(ctx, SMW_BLOCKSANITY_FLAGS, 0xC))
-        blocksanity_active = await snes_read(ctx, SMW_BLOCKSANITY_ACTIVE_ADDR, 0x1)
-        level_clear_flags = bytearray(await snes_read(ctx, SMW_LEVEL_CLEAR_FLAGS, 0x60))
+        flags_data = await snes_read(ctx, SMW_BWRAM, 0x0800)
+
+        if event_data is None or flags_data is None:
+            # Somehow we got disconnected
+            return
+        
+        new_checks = []
+        progress_data = game_progress[0x02:0x02+0x0F]
+        dragon_coins_data = game_progress[0x2F:0x2F+0x0C]
+        moon_data = game_progress[0xEE:0xEE+0x0C]
+        hidden_1up_data = game_progress[0x3C:0x3C+0x0C]
+        bonus_block_data = flags_data[0x00:0x00+0x0C]
+        blocksanity_data = flags_data[0x400:0x400+SMW_BLOCKSANITY_BLOCK_COUNT]
+        blocksanity_flags = flags_data[0x10:0x10+0x0C]
+        dragon_coins_active = rom_settings_data[0x06]
+        moon_active = rom_settings_data[0x08]
+        hidden_1up_active = rom_settings_data[0x09]
+        bonus_block_active = rom_settings_data[0x0A]
+        blocksanity_active = rom_settings_data[0x0B]
         from .Rom import item_rom_data, ability_rom_data, trap_rom_data, icon_rom_data
         from .Levels import location_id_to_level_id, level_info_dict, level_blocks_data
         from worlds import AutoWorldRegister
@@ -388,7 +407,7 @@ class SMWSNIClient(SNIClient):
 
                 if level_data[1] == 2:
                     # Dragon Coins Check
-                    if not dragon_coins_active or dragon_coins_active[0] == 0:
+                    if dragon_coins_active == 0:
                         continue
 
                     progress_byte = (level_data[0] // 8)
@@ -402,7 +421,7 @@ class SMWSNIClient(SNIClient):
                         new_checks.append(loc_id)
                 elif level_data[1] == 3:
                     # Moon Check
-                    if not moon_active or moon_active[0] == 0:
+                    if moon_active == 0:
                         continue
 
                     progress_byte = (level_data[0] // 8)
@@ -416,7 +435,7 @@ class SMWSNIClient(SNIClient):
                         new_checks.append(loc_id)
                 elif level_data[1] == 4:
                     # Hidden 1-Up Check
-                    if not hidden_1up_active or hidden_1up_active[0] == 0:
+                    if hidden_1up_active == 0:
                         continue
 
                     progress_byte = (level_data[0] // 8)
@@ -430,7 +449,7 @@ class SMWSNIClient(SNIClient):
                         new_checks.append(loc_id)
                 elif level_data[1] == 5:
                     # Bonus Block Check
-                    if not bonus_block_active or bonus_block_active[0] == 0:
+                    if bonus_block_active == 0:
                         continue
 
                     progress_byte = (level_data[0] // 8)
@@ -443,7 +462,7 @@ class SMWSNIClient(SNIClient):
                     if bit_set:
                         new_checks.append(loc_id)
                 elif level_data[1] >= 100:
-                    if not blocksanity_active or blocksanity_active[0] == 0:
+                    if blocksanity_active == 0:
                         continue
                     block_index = level_data[1] - 100
                     if blocksanity_data[block_index] != 0:
@@ -461,14 +480,16 @@ class SMWSNIClient(SNIClient):
                     if bit_set:
                         new_checks.append(loc_id)
 
-        verify_game_state = await snes_read(ctx, SMW_GAME_STATE_ADDR, 0x1)
-        if verify_game_state is None or verify_game_state[0] < 0x0B or verify_game_state[0] > 0x29:
-            # We have somehow exited the save file (or worse)
-            print("Exit Save File")
-            return
+        #verify_game_state = await snes_read(ctx, SMW_GAME_STATE_ADDR, 0x1)
+        #if verify_game_state is None or verify_game_state[0] < 0x0B or verify_game_state[0] > 0x29:
+        #    # We have somehow exited the save file (or worse)
+        #    print("Exit Save File")
+        #    return
 
         rom = await snes_read(ctx, SMW_ROMHASH_START, ROMHASH_SIZE)
-        if rom != ctx.rom:
+        if rom is None:
+            return
+        elif rom != ctx.rom:
             ctx.rom = None
             print("Exit ROM")
             # We have somehow loaded a different ROM
@@ -482,10 +503,9 @@ class SMWSNIClient(SNIClient):
             await ctx.send_msgs([{"cmd": 'LocationChecks', "locations": [new_check_id]}])
 
         # Send Current Room for Tracker
-        current_sublevel_data = await snes_read(ctx, SMW_CURRENT_SUBLEVEL_ADDR, 2)
-        current_sublevel_value = current_sublevel_data[0] + (current_sublevel_data[1] << 8)
+        current_sublevel_value = int.from_bytes(ram_mirror[0x05:0x07], "little")
 
-        if game_state[0] != 0x14:
+        if game_state != 0x14:
             current_sublevel_value = 0
 
         if ctx.current_sublevel_value != current_sublevel_value:
@@ -509,12 +529,13 @@ class SMWSNIClient(SNIClient):
                 ]
             )
         
-        if game_state[0] != 0x14:
+        if game_state != 0x14:
             # Don't receive items or collect locations outside of in-level mode
             ctx.current_sublevel_value = 0
             return
         
-        if boss_state[0] in SMW_BOSS_STATES:
+        boss_state = ram_mirror[0x02]
+        if boss_state in SMW_BOSS_STATES:
             # Don't receive items or collect locations inside boss battles
             return
 
@@ -527,6 +548,7 @@ class SMWSNIClient(SNIClient):
         if recv_index < len(ctx.items_received):
             item = ctx.items_received[recv_index]
             recv_index += 1
+            print (recv_index)
             sending_game = ctx.slot_info[item.player].game
             logging.info('Received %s from %s (%s) (%d/%d in list)' % (
                 color(ctx.item_names.lookup_in_game(item.item), 'red', 'bold'),
@@ -550,7 +572,7 @@ class SMWSNIClient(SNIClient):
                 receive_message = generate_received_text(item_name, player_name)
                 self.add_trap_to_queue(item, receive_message)
             elif item.item in item_rom_data:
-                item_count = await snes_read(ctx, WRAM_START + item_rom_data[item.item][0], 0x1)
+                item_count = await snes_read(ctx, SRAM_START + item_rom_data[item.item][0], 0x1)
                 increment = item_rom_data[item.item][1]
 
                 new_item_count = item_count[0]
@@ -559,43 +581,43 @@ class SMWSNIClient(SNIClient):
                 else:
                     new_item_count += increment
 
-                if verify_game_state[0] == 0x14 and len(item_rom_data[item.item]) > 2:
+                if game_state == 0x14 and len(item_rom_data[item.item]) > 2:
                     snes_buffered_write(ctx, SMW_SFX_ADDR, bytes([item_rom_data[item.item][2]]))
 
-                snes_buffered_write(ctx, WRAM_START + item_rom_data[item.item][0], bytes([new_item_count]))
+                snes_buffered_write(ctx, SRAM_START + item_rom_data[item.item][0], bytes([new_item_count]))
             elif item.item in icon_rom_data:
-                queue_addr = await snes_read(ctx, WRAM_START + icon_rom_data[item.item][0], 2)
+                queue_addr = await snes_read(ctx, SRAM_START + icon_rom_data[item.item][0], 2)
                 queue_addr = queue_addr[0] + (queue_addr[1] << 8)
                 queue_addr += 1
-                snes_buffered_write(ctx, WRAM_START + icon_rom_data[item.item][0], bytes([queue_addr&0xFF, (queue_addr>>8)&0xFF]))
-                if (goal[0] == 0 and item.item == 0xBC0012) or (goal[0] == 1 and item.item == 0xBC0002):
+                snes_buffered_write(ctx, SRAM_START + icon_rom_data[item.item][0], bytes([queue_addr&0xFF, (queue_addr>>8)&0xFF]))
+                if (goal == 0 and item.item == 0xBC0012) or (goal == 1 and item.item == 0xBC0002):
                     goal_item_count = await snes_read(ctx, SMW_GOAL_ITEM_COUNT, 1)
                     snes_buffered_write(ctx, SMW_GOAL_ITEM_COUNT, bytes([goal_item_count[0] + 1]))
 
             elif item.item in ability_rom_data:
                 # Handle Upgrades
                 for rom_data in ability_rom_data[item.item]:
-                    data = await snes_read(ctx, WRAM_START + rom_data[0], 1)
+                    data = await snes_read(ctx, SRAM_START + rom_data[0], 1)
                     masked_data = data[0] | (1 << rom_data[1])
-                    snes_buffered_write(ctx, WRAM_START + rom_data[0], bytes([masked_data]))
+                    snes_buffered_write(ctx, SRAM_START + rom_data[0], bytes([masked_data]))
                     snes_buffered_write(ctx, SMW_SFX_ADDR, bytes([0x3E])) # SMW_TODO: Custom sounds for each
             elif item.item == 0xBC000A:
                 # Handle Progressive Powerup
-                data = await snes_read(ctx, WRAM_START + 0x1F2D, 1)
+                data = await snes_read(ctx, SRAM_START + 0x1F2D, 1)
                 mushroom_data = data[0] & (1 << 0)
                 fire_flower_data = data[0] & (1 << 1)
                 cape_data = data[0] & (1 << 2)
                 if mushroom_data == 0:
                     masked_data = data[0] | (1 << 0)
-                    snes_buffered_write(ctx, WRAM_START + 0x1F2D, bytes([masked_data]))
+                    snes_buffered_write(ctx, SRAM_START + 0x1F2D, bytes([masked_data]))
                     snes_buffered_write(ctx, SMW_SFX_ADDR, bytes([0x3E]))
                 elif fire_flower_data == 0:
                     masked_data = data[0] | (1 << 1)
-                    snes_buffered_write(ctx, WRAM_START + 0x1F2D, bytes([masked_data]))
+                    snes_buffered_write(ctx, SRAM_START + 0x1F2D, bytes([masked_data]))
                     snes_buffered_write(ctx, SMW_SFX_ADDR, bytes([0x3E]))
                 elif cape_data == 0:
                     masked_data = data[0] | (1 << 2)
-                    snes_buffered_write(ctx, WRAM_START + 0x1F2D, bytes([masked_data]))
+                    snes_buffered_write(ctx, SRAM_START + 0x1F2D, bytes([masked_data]))
                     snes_buffered_write(ctx, SMW_SFX_ADDR, bytes([0x41]))
                 else:
                     # Extra Powerup?
@@ -612,9 +634,25 @@ class SMWSNIClient(SNIClient):
             await snes_flush_writes(ctx)
 
         # Handle Collected Locations
-        new_events = 0
         path_data = bytearray(await snes_read(ctx, SMW_PATH_DATA, 0x60))
-        donut_gh_swapped = await snes_read(ctx, SMW_SWAMP_DONUT_GH_ADDR, 0x1)
+
+        event_data = await snes_read(ctx, SMW_EVENT_ROM_DATA, 0x60)
+        flags_data = await snes_read(ctx, SMW_BWRAM, 0x0800)
+
+        if event_data is None or flags_data is None or path_data is None:
+            # Somehow we got disconnected
+            return
+        
+        new_events = 0
+        donut_gh_swapped = rom_settings_data[0x07]
+        progress_data = bytearray(game_progress[0x02:0x02+0x0F])
+        dragon_coins_data = bytearray(game_progress[0x2F:0x2F+0x0C])
+        moon_data = bytearray(game_progress[0xEE:0xEE+0x0C])
+        hidden_1up_data = bytearray(game_progress[0x3C:0x3C+0x0C])
+        bonus_block_data = bytearray(flags_data[0x00:0x00+0x0C])
+        blocksanity_data = bytearray(flags_data[0x400:0x400+SMW_BLOCKSANITY_BLOCK_COUNT])
+        blocksanity_flags = bytearray(flags_data[0x10:0x10+0x0C])
+        level_clear_flags = bytearray(flags_data[0x200:0x260])
         new_dragon_coin = False
         new_moon = False
         new_hidden_1up = False
@@ -726,7 +764,7 @@ class SMWSNIClient(SNIClient):
 
                     path = level_info.exit1Path if level_data[1] == 0 else level_info.exit2Path
 
-                    if donut_gh_swapped[0] != 0 and tile_id[0] == 0x04:
+                    if donut_gh_swapped != 0 and tile_id[0] == 0x04:
                         # Handle Swapped Donut GH Exits
                         path = level_info.exit2Path if level_data[1] == 0 else level_info.exit1Path
 
@@ -797,7 +835,7 @@ class SMWSNIClient(SNIClient):
         energy_packet = await snes_read(ctx, SMW_ENERGY_LINK_TRANSFER, 0x2)
         if energy_packet is not None:
             energy_packet = energy_packet[0] | (energy_packet[1] << 8)
-            energy_packet = int((energy_packet * SMW_EXCHANGE_RATE) / 5)
+            energy_packet = int((energy_packet * SMW_EXCHANGE_RATE) / 4)
             if energy_packet != 0:
                 await ctx.send_msgs([{
                     "cmd": "Set", "key": f"EnergyLink{ctx.team}", "operations":

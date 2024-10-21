@@ -5,6 +5,7 @@ import math
 import settings
 import threading
 import pkgutil
+import copy
 
 from BaseClasses import Item, MultiWorld, Tutorial, ItemClassification
 from worlds.AutoWorld import WebWorld, World
@@ -29,7 +30,14 @@ class SMWSettings(settings.Group):
         copy_to = "Super Mario World (USA).sfc"
         md5s = [USHASH]
 
+    class GraphicsPath(settings.OptionalUserFilePath):
+        """
+        File name of the graphics pack to be used.
+        Preferably point it to a .zip file in /data/sprites/smw/
+        """
+
     rom_file: RomFile = RomFile(RomFile.copy_to)
+    graphics_file: GraphicsPath = "data/sprites/smw/"
 
 
 class SMWWeb(WebWorld):
@@ -64,7 +72,7 @@ class SMWWorld(World):
     options: SMWOptions
 
     topology_present = False
-    required_client_version = (0, 4, 5)
+    required_client_version = (0, 5, 0)
 
     item_name_to_id = {name: data.code for name, data in item_table.items()}
     location_name_to_id = all_locations
@@ -93,6 +101,23 @@ class SMWWorld(World):
     def generate_early(self):
         if self.options.early_climb:
             self.multiworld.local_early_items[self.player][ItemName.mario_climb] = 1
+        
+        self.active_level_dict = dict(zip(generate_level_list(self), full_level_list))
+
+        if hasattr(self.multiworld, "generation_is_fake"):
+            if hasattr(self.multiworld, "re_gen_passthrough"):
+                if "Super Mario World" in self.multiworld.re_gen_passthrough:
+                    slot_data = self.multiworld.re_gen_passthrough["Super Mario World"]
+                    for x,y in slot_data["active_levels"].items():
+                        self.active_level_dict[int(x)] = y
+
+
+    def interpret_slot_data(self, slot_data):
+        local_active_levels = dict()
+        for x, y in slot_data["active_levels"].items():
+            local_active_levels[x] = y
+        return {"active_levels": local_active_levels}
+    
 
     def create_regions(self):
         location_table = setup_locations(self)
@@ -101,7 +126,6 @@ class SMWWorld(World):
         # Not generate basic
         itempool: typing.List[SMWItem] = []
 
-        self.active_level_dict = dict(zip(generate_level_list(self), full_level_list))
         self.topology_present = self.options.level_shuffle
 
         connect_regions(self, self.active_level_dict)
@@ -178,6 +202,7 @@ class SMWWorld(World):
         trap_weights += ([ItemName.timer_trap] * self.options.timer_trap_weight.value)
         trap_weights += ([ItemName.reverse_controls_trap] * self.options.reverse_trap_weight.value)
         trap_weights += ([ItemName.thwimp_trap] * self.options.thwimp_trap_weight.value)
+        trap_weights += ([ItemName.fishin_trap] * self.options.fishin_trap_weight.value)
         trap_count = 0 if (len(trap_weights) == 0) else math.ceil(junk_count * (self.options.trap_fill_percentage.value / 100.0))
         junk_count -= trap_count
 
@@ -228,7 +253,11 @@ class SMWWorld(World):
     def generate_output(self, output_directory: str):
         try:
             patch = SMWProcedurePatch(player=self.player, player_name=self.multiworld.player_name[self.player])
-            patch.write_file("smw_basepatch.bsdiff4", pkgutil.get_data(__name__, "data/smw_basepatch.bsdiff4"))
+            patch.write_file("smw_sa1_basepatch.bsdiff4", pkgutil.get_data(__name__, "data/smw_sa1_basepatch.bsdiff4"))
+            patch.write_file("sprite_graphics.bsdiff4", pkgutil.get_data(__name__, "data/sprite_graphics.bsdiff4"))
+            patch.write_file("sprite_page_1.bsdiff4", pkgutil.get_data(__name__, "data/sprite_page_1.bsdiff4"))
+            patch.write_file("sprite_page_2.bsdiff4", pkgutil.get_data(__name__, "data/sprite_page_2.bsdiff4"))
+            patch.write_file("map_sprites.bsdiff4", pkgutil.get_data(__name__, "data/map_sprites.bsdiff4"))
             patch_rom(self, patch, self.player, self.active_level_dict)
 
             self.rom_name = patch.name

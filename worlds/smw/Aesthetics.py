@@ -506,79 +506,79 @@ def generate_shuffled_sfx(rom, world: World):
     rom.write_bytes(COMBO_SFX_ADDR + 0x0000, bytearray([0xC0, 0x01]))                         # COMBO_Y:                    CPY #$01
     rom.write_bytes(COMBO_SFX_ADDR + 0x0002, bytearray([0xD0, 0x06]))                         #                             BNE label_0FFE0A
     rom.write_bytes(COMBO_SFX_ADDR + 0x0004, bytearray([0xA9, 0x13]))                         #                             LDA #$13
-    rom.write_bytes(COMBO_SFX_ADDR + 0x0006, bytearray([0x8D, 0xF9, 0x1D]))                   #                             STA $1DF9
+    rom.write_bytes(COMBO_SFX_ADDR + 0x0006, bytearray([0x8D, 0xF9, 0x7D]))                   #                             STA $1DF9
     rom.write_bytes(COMBO_SFX_ADDR + 0x0009, bytearray([0x6B]))                               #                             RTL
     rom.write_bytes(COMBO_SFX_ADDR + 0x000A, bytearray([0xC0, 0x02]))                         # label_0FFE0A:               CPY #$02
     rom.write_bytes(COMBO_SFX_ADDR + 0x000C, bytearray([0xD0, 0x06]))                         #                             BNE label_0FFE14
     rom.write_bytes(COMBO_SFX_ADDR + 0x000E, bytearray([0xA9, 0x14]))                         #                             LDA #$14
-    rom.write_bytes(COMBO_SFX_ADDR + 0x0010, bytearray([0x8D, 0xF9, 0x1D]))                   #                             STA $1DF9
+    rom.write_bytes(COMBO_SFX_ADDR + 0x0010, bytearray([0x8D, 0xF9, 0x7D]))                   #                             STA $1DF9
     rom.write_bytes(COMBO_SFX_ADDR + 0x0013, bytearray([0x6B]))                               #                             RTL
     rom.write_bytes(COMBO_SFX_ADDR + 0x0014, bytearray([0xC0, 0x03]))                         # label_0FFE14:               CPY #$03
     rom.write_bytes(COMBO_SFX_ADDR + 0x0016, bytearray([0xD0, 0x06]))                         #                             BNE label_0FFE1E
     rom.write_bytes(COMBO_SFX_ADDR + 0x0018, bytearray([0xA9, 0x15]))                         #                             LDA #$15
-    rom.write_bytes(COMBO_SFX_ADDR + 0x001A, bytearray([0x8D, 0xF9, 0x1D]))                   #                             STA $1DF9
+    rom.write_bytes(COMBO_SFX_ADDR + 0x001A, bytearray([0x8D, 0xF9, 0x7D]))                   #                             STA $1DF9
     rom.write_bytes(COMBO_SFX_ADDR + 0x001D, bytearray([0x6B]))                               #                             RTL
     rom.write_bytes(COMBO_SFX_ADDR + 0x001E, bytearray([0xC0, 0x04]))                         # label_0FFE1E:               CPY #$04
     rom.write_bytes(COMBO_SFX_ADDR + 0x0020, bytearray([0xD0, 0x06]))                         #                             BNE label_0FFE28
     rom.write_bytes(COMBO_SFX_ADDR + 0x0022, bytearray([0xA9, 0x16]))                         #                             LDA #$16
-    rom.write_bytes(COMBO_SFX_ADDR + 0x0024, bytearray([0x8D, 0xF9, 0x1D]))                   #                             STA $1DF9
+    rom.write_bytes(COMBO_SFX_ADDR + 0x0024, bytearray([0x8D, 0xF9, 0x7D]))                   #                             STA $1DF9
     rom.write_bytes(COMBO_SFX_ADDR + 0x0027, bytearray([0x6B]))                               #                             RTL
     rom.write_bytes(COMBO_SFX_ADDR + 0x0028, bytearray([0xC0, 0x05]))                         # label_0FFE28:               CPY #$05
     rom.write_bytes(COMBO_SFX_ADDR + 0x002A, bytearray([0xD0, 0x06]))                         #                             BNE label_0FFE32
     rom.write_bytes(COMBO_SFX_ADDR + 0x002C, bytearray([0xA9, 0x17]))                         #                             LDA #$17
-    rom.write_bytes(COMBO_SFX_ADDR + 0x002E, bytearray([0x8D, 0xF9, 0x1D]))                   #                             STA $1DF9
+    rom.write_bytes(COMBO_SFX_ADDR + 0x002E, bytearray([0x8D, 0xF9, 0x7D]))                   #                             STA $1DF9
     rom.write_bytes(COMBO_SFX_ADDR + 0x0031, bytearray([0x6B]))                               #                             RTL
     rom.write_bytes(COMBO_SFX_ADDR + 0x0032, bytearray([0xC0, 0x06]))                         # label_0FFE32:               CPY #$06
     rom.write_bytes(COMBO_SFX_ADDR + 0x0034, bytearray([0xD0, 0x06]))                         #                             BNE label_0FFE3C
     rom.write_bytes(COMBO_SFX_ADDR + 0x0036, bytearray([0xA9, 0x18]))                         #                             LDA #$18
-    rom.write_bytes(COMBO_SFX_ADDR + 0x0038, bytearray([0x8D, 0xF9, 0x1D]))                   #                             STA $1DF9
+    rom.write_bytes(COMBO_SFX_ADDR + 0x0038, bytearray([0x8D, 0xF9, 0x7D]))                   #                             STA $1DF9
     rom.write_bytes(COMBO_SFX_ADDR + 0x003B, bytearray([0x6B]))                               #                             RTL
     rom.write_bytes(COMBO_SFX_ADDR + 0x003C, bytearray([0xC0, 0x07]))                         # label_0FFE3C:               CPY #$07
     rom.write_bytes(COMBO_SFX_ADDR + 0x003E, bytearray([0xD0, 0x06]))                         #                             BNE label_0FFE46
     rom.write_bytes(COMBO_SFX_ADDR + 0x0040, bytearray([0xA9, 0x19]))                         #                             LDA #$19
-    rom.write_bytes(COMBO_SFX_ADDR + 0x0042, bytearray([0x8D, 0xF9, 0x1D]))                   #                             STA $1DF9
+    rom.write_bytes(COMBO_SFX_ADDR + 0x0042, bytearray([0x8D, 0xF9, 0x7D]))                   #                             STA $1DF9
     rom.write_bytes(COMBO_SFX_ADDR + 0x0045, bytearray([0x6B]))                               #                             RTL
     rom.write_bytes(COMBO_SFX_ADDR + 0x0046, bytearray([0x6B]))                               # label_0FFE46:               RTL
     rom.write_bytes(COMBO_SFX_ADDR + 0x0047, bytearray([0xE0, 0x01]))                         # COMBO_X:                    CPX #$01
     rom.write_bytes(COMBO_SFX_ADDR + 0x0049, bytearray([0xD0, 0x06]))                         #                             BNE label_0FFE51
     rom.write_bytes(COMBO_SFX_ADDR + 0x004B, bytearray([0xA9, 0x13]))                         #                             LDA #$13
-    rom.write_bytes(COMBO_SFX_ADDR + 0x004D, bytearray([0x8D, 0xF9, 0x1D]))                   #                             STA $1DF9
+    rom.write_bytes(COMBO_SFX_ADDR + 0x004D, bytearray([0x8D, 0xF9, 0x7D]))                   #                             STA $1DF9
     rom.write_bytes(COMBO_SFX_ADDR + 0x0050, bytearray([0x6B]))                               #                             RTL
     rom.write_bytes(COMBO_SFX_ADDR + 0x0051, bytearray([0xE0, 0x02]))                         # label_0FFE51:               CPX #$02
     rom.write_bytes(COMBO_SFX_ADDR + 0x0053, bytearray([0xD0, 0x06]))                         #                             BNE label_0FFE5B
     rom.write_bytes(COMBO_SFX_ADDR + 0x0055, bytearray([0xA9, 0x14]))                         #                             LDA #$14
-    rom.write_bytes(COMBO_SFX_ADDR + 0x0057, bytearray([0x8D, 0xF9, 0x1D]))                   #                             STA $1DF9
+    rom.write_bytes(COMBO_SFX_ADDR + 0x0057, bytearray([0x8D, 0xF9, 0x7D]))                   #                             STA $1DF9
     rom.write_bytes(COMBO_SFX_ADDR + 0x005A, bytearray([0x6B]))                               #                             RTL
     rom.write_bytes(COMBO_SFX_ADDR + 0x005B, bytearray([0xE0, 0x03]))                         # label_0FFE5B:               CPX #$03
     rom.write_bytes(COMBO_SFX_ADDR + 0x005D, bytearray([0xD0, 0x06]))                         #                             BNE label_0FFE65
     rom.write_bytes(COMBO_SFX_ADDR + 0x005F, bytearray([0xA9, 0x15]))                         #                             LDA #$15
-    rom.write_bytes(COMBO_SFX_ADDR + 0x0061, bytearray([0x8D, 0xF9, 0x1D]))                   #                             STA $1DF9
+    rom.write_bytes(COMBO_SFX_ADDR + 0x0061, bytearray([0x8D, 0xF9, 0x7D]))                   #                             STA $1DF9
     rom.write_bytes(COMBO_SFX_ADDR + 0x0064, bytearray([0x6B]))                               #                             RTL
     rom.write_bytes(COMBO_SFX_ADDR + 0x0065, bytearray([0xE0, 0x04]))                         # label_0FFE65:               CPX #$04
     rom.write_bytes(COMBO_SFX_ADDR + 0x0067, bytearray([0xD0, 0x06]))                         #                             BNE label_0FFE6F
     rom.write_bytes(COMBO_SFX_ADDR + 0x0069, bytearray([0xA9, 0x16]))                         #                             LDA #$16
-    rom.write_bytes(COMBO_SFX_ADDR + 0x006B, bytearray([0x8D, 0xF9, 0x1D]))                   #                             STA $1DF9
+    rom.write_bytes(COMBO_SFX_ADDR + 0x006B, bytearray([0x8D, 0xF9, 0x7D]))                   #                             STA $1DF9
     rom.write_bytes(COMBO_SFX_ADDR + 0x006E, bytearray([0x6B]))                               #                             RTL
     rom.write_bytes(COMBO_SFX_ADDR + 0x006F, bytearray([0xE0, 0x05]))                         # label_0FFE6F:               CPX #$05
     rom.write_bytes(COMBO_SFX_ADDR + 0x0071, bytearray([0xD0, 0x06]))                         #                             BNE label_0FFE79
     rom.write_bytes(COMBO_SFX_ADDR + 0x0073, bytearray([0xA9, 0x17]))                         #                             LDA #$17
-    rom.write_bytes(COMBO_SFX_ADDR + 0x0075, bytearray([0x8D, 0xF9, 0x1D]))                   #                             STA $1DF9
+    rom.write_bytes(COMBO_SFX_ADDR + 0x0075, bytearray([0x8D, 0xF9, 0x7D]))                   #                             STA $1DF9
     rom.write_bytes(COMBO_SFX_ADDR + 0x0078, bytearray([0x6B]))                               #                             RTL
     rom.write_bytes(COMBO_SFX_ADDR + 0x0079, bytearray([0xE0, 0x06]))                         # label_0FFE79:               CPX #$06
     rom.write_bytes(COMBO_SFX_ADDR + 0x007B, bytearray([0xD0, 0x06]))                         #                             BNE label_0FFE83
     rom.write_bytes(COMBO_SFX_ADDR + 0x007D, bytearray([0xA9, 0x18]))                         #                             LDA #$18
-    rom.write_bytes(COMBO_SFX_ADDR + 0x007F, bytearray([0x8D, 0xF9, 0x1D]))                   #                             STA $1DF9
+    rom.write_bytes(COMBO_SFX_ADDR + 0x007F, bytearray([0x8D, 0xF9, 0x7D]))                   #                             STA $1DF9
     rom.write_bytes(COMBO_SFX_ADDR + 0x0082, bytearray([0x6B]))                               #                             RTL
     rom.write_bytes(COMBO_SFX_ADDR + 0x0083, bytearray([0xE0, 0x07]))                         # label_0FFE83:               CPX #$07
     rom.write_bytes(COMBO_SFX_ADDR + 0x0085, bytearray([0xD0, 0x06]))                         #                             BNE label_0FFE8D
     rom.write_bytes(COMBO_SFX_ADDR + 0x0087, bytearray([0xA9, 0x19]))                         #                             LDA #$19
-    rom.write_bytes(COMBO_SFX_ADDR + 0x0089, bytearray([0x8D, 0xF9, 0x1D]))                   #                             STA $1DF9
+    rom.write_bytes(COMBO_SFX_ADDR + 0x0089, bytearray([0x8D, 0xF9, 0x7D]))                   #                             STA $1DF9
     rom.write_bytes(COMBO_SFX_ADDR + 0x008C, bytearray([0x6B]))                               #                             RTL
     rom.write_bytes(COMBO_SFX_ADDR + 0x008D, bytearray([0x6B]))                               # label_0FFE8D:               RTL
 
     # Adjust "Hit head on ceiling" code
     rom.write_bytes(0x06D41 + 0x00, bytearray([0xA9, 0x01]))                # lda #$01
-    rom.write_bytes(0x06D41 + 0x02, bytearray([0x8D, 0xF9, 0x1D]))          # sta $1DF9
+    rom.write_bytes(0x06D41 + 0x02, bytearray([0x8D, 0xF9, 0x9D]))          # sta $1DF9
     rom.write_bytes(0x06D41 + 0x05, bytearray([0xEA, 0xEA, 0xEA, 0xEA]))    # nop #4
 
     # Manually add "Map: Stepping onto a level tile" random SFX

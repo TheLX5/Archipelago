@@ -273,6 +273,17 @@ class InventoryFillPercentage(Range):
     default = 60
 
 
+class PersistentTrapBehavior(Choice):
+    """
+    Alters the despawn behavior of Ice, Reverse and Fishing traps.
+    """
+    display_name = "Persistent Trap Behavior"
+    option_gone_after_room_load = 0
+    option_gone_after_map_load = 1
+    option_gone_after_level_clear = 2
+    default = 0
+
+
 class BaseTrapWeight(Choice):
     """
     Base Class for Trap Weights
@@ -325,6 +336,13 @@ class ThwimpTrapWeight(BaseTrapWeight):
     """
     display_name = "Thwimp Trap Weight"
     
+
+class FishinBooTrapWeight(BaseTrapWeight):
+    """
+    Likelihood of a receiving a trap which causes a Fishin' Boo to spawn above the player
+    """
+    display_name = "Fishin' Boo Trap Weight"
+
 
 class Autosave(DefaultOnToggle):
     """
@@ -461,14 +479,6 @@ class EnergyLink(DefaultOnToggle):
     display_name = "Energy Link"
 
 
-class Sprite(FreeText):
-    """
-    player sprite name
-    """
-    display_name = "Player Sprite"
-    default = ""
-
-
 smw_option_groups = [
     OptionGroup("Goal Options", [
         Goal,
@@ -492,6 +502,8 @@ smw_option_groups = [
         SwapDonutGhostHouseExits,
     ]),
     OptionGroup("Junk and Traps", [
+        InventoryFillPercentage,
+        PersistentTrapBehavior,
         JunkFillPercentage,
         TrapFillPercentage,
         IceTrapWeight,
@@ -500,6 +512,7 @@ smw_option_groups = [
         TimerTrapWeight,
         ReverseTrapWeight,
         ThwimpTrapWeight,
+        FishinBooTrapWeight,
     ]),
     OptionGroup("Aesthetics", [
         DisplayReceivedItemPopups,
@@ -541,12 +554,14 @@ class SMWOptions(PerGameCommonOptions):
     junk_fill_percentage: JunkFillPercentage
     trap_fill_percentage: TrapFillPercentage
     inventory_fill_percentage: InventoryFillPercentage
+    persistent_trap_behavior: PersistentTrapBehavior
     ice_trap_weight: IceTrapWeight
     stun_trap_weight: StunTrapWeight
     literature_trap_weight: LiteratureTrapWeight
     timer_trap_weight: TimerTrapWeight
     reverse_trap_weight: ReverseTrapWeight
     thwimp_trap_weight: ThwimpTrapWeight
+    fishin_trap_weight: FishinBooTrapWeight
     autosave: Autosave
     early_climb: EarlyClimb
     overworld_speed: OverworldSpeed
@@ -557,4 +572,3 @@ class SMWOptions(PerGameCommonOptions):
     overworld_palette_shuffle: OverworldPaletteShuffle
     starting_life_count: StartingLifeCount
     energy_link: EnergyLink
-    sprite: Sprite

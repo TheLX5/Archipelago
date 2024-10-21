@@ -1,5 +1,6 @@
 import Utils
-from worlds.AutoWorld import World
+from worlds.AutoWorld import World, AutoWorldRegister
+from settings import get_settings
 from worlds.Files import APProcedurePatch, APTokenMixin, APTokenTypes, APPatchExtension
 from .Aesthetics import generate_shuffled_ow_palettes, generate_curated_level_palette_data, generate_curated_map_palette_data, generate_shuffled_sfx
 from .Levels import level_info_dict, full_bowser_rooms, standard_bowser_rooms, submap_boss_rooms, ow_boss_rooms
@@ -10,10 +11,7 @@ ROM_PLAYER_LIMIT = 65535
 
 import hashlib
 import os
-from pkgutil import get_data
-import bsdiff4
 import typing
-import io
 import json
 import random
 
@@ -32,24 +30,24 @@ ability_rom_data = {
 }
 
 icon_rom_data = {
-    0xBC0002: [0x1B00C], # Yoshi Egg
-    0xBC0012: [0x1B00E], # Boss Token
+    0xBC0002: [0x480C], # Yoshi Egg
+    0xBC0012: [0x480E], # Boss Token
 
-    0xBC0017: [0x1B004], # 1 coin
-    0xBC0018: [0x1B006], # 5 coins
-    0xBC0019: [0x1B008], # 10 coins
-    0xBC001A: [0x1B00A], # 50 coins
+    0xBC0017: [0x4804], # 1 coin
+    0xBC0018: [0x4806], # 5 coins
+    0xBC0019: [0x4808], # 10 coins
+    0xBC001A: [0x480A], # 50 coins
 
-    0xBC0001: [0x1B010], # 1-Up Mushroom
+    0xBC0001: [0x4810], # 1-Up Mushroom
 
-    0xBC0020: [0x1B012], # Mushroom
-    0xBC0021: [0x1B014], # Fire Flower
-    0xBC0022: [0x1B016], # Feather
-    0xBC0023: [0x1B018], # Star
-    0xBC0024: [0x1B01A], # Green Yoshi
-    0xBC0025: [0x1B01C], # Red Yoshi
-    0xBC0026: [0x1B01E], # Blue Yoshi
-    0xBC0027: [0x1B020], # Yellow Yoshi
+    0xBC0020: [0x4812], # Mushroom
+    0xBC0021: [0x4814], # Fire Flower
+    0xBC0022: [0x4816], # Feather
+    0xBC0023: [0x4818], # Star
+    0xBC0024: [0x481A], # Green Yoshi
+    0xBC0025: [0x481C], # Red Yoshi
+    0xBC0026: [0x481E], # Blue Yoshi
+    0xBC0027: [0x4820], # Yellow Yoshi
 }
     
 item_rom_data = {
@@ -61,11 +59,12 @@ item_rom_data = {
 }
 
 trap_rom_data = {
-    0xBC0013: [0x0086, 0x1, 0x0E],  # Ice Trap
+    0xBC0013: [0x4308, 0x1, 0x0E],  # Ice Trap
     0xBC0014: [0x18BD, 0x7F, 0x18], # Stun Trap
     0xBC0016: [0x0F31, 0x1],        # Timer Trap
-    0xBC001C: [0x18B4, 0x1, 0x44],  # Reverse controls trap
-    0xBC001D: [0x18B7, 0x1],        # Thwimp Trap
+    0xBC001C: [0x4300, 0x1, 0x44],  # Reverse controls trap
+    0xBC001D: [0x4302, 0x1],        # Thwimp Trap
+    0xBC001E: [0x4305, 0x1],        # Thwimp Trap
 }
 
 
@@ -73,7 +72,7 @@ class SMWPatchExtension(APPatchExtension):
     game = "Super Mario World"
 
     @staticmethod
-    def handle_uncompressed_graphics(caller: APProcedurePatch, rom: bytes):
+    def handle_uncompressed_graphics(caller: APProcedurePatch, rom: bytes) -> bytes:
         # Decompresses and moves into a expanded region the player, yoshi and animated graphics
         # This should make swapping the graphics a lot easier.
         # Maybe I should look into making a 32x32 version at some point...
@@ -84,24 +83,90 @@ class SMWPatchExtension(APPatchExtension):
         # Player graphics are now located at 0xE0000
         # Player auxiliary tiles are now located at 0xE6000
         # Yoshi graphics are now located at 0xE8800
+        import bsdiff4
+        from .data import sprite_gfx_data
+
         rom = bytearray(rom)
 
-        SMW_COMPRESSED_PLAYER_GFX = 0x40000
-        SMW_COMPRESSED_ANIMATED_GFX = 0x43FC0
+        SMW_COMPRESSED_GFX_32 = 0x40000
+        SMW_COMPRESSED_GFX_33 = 0x43FC0
+
         SMW_COMPRESSED_GFX_00 = 0x459F9
+        SMW_COMPRESSED_GFX_01 = 0x46231
+        SMW_COMPRESSED_GFX_02 = 0x46CBB
+        SMW_COMPRESSED_GFX_03 = 0x47552
+        SMW_COMPRESSED_GFX_04 = 0x47F7D
+        SMW_COMPRESSED_GFX_05 = 0x48963
+        SMW_COMPRESSED_GFX_06 = 0x4936C
+        SMW_COMPRESSED_GFX_09 = 0x4AFA1
+        SMW_COMPRESSED_GFX_0A = 0x4BA15
+        SMW_COMPRESSED_GFX_0B = 0x4C39C
+        SMW_COMPRESSED_GFX_0E = 0x4DDCB
+        SMW_COMPRESSED_GFX_11 = 0x4F7AF
+        SMW_COMPRESSED_GFX_12 = 0x4FFBD
+        SMW_COMPRESSED_GFX_13 = 0x50910
+        SMW_COMPRESSED_GFX_20 = 0x576A1
+        SMW_COMPRESSED_GFX_23 = 0x591CA
+        SMW_COMPRESSED_GFX_24 = 0x59AE5
+        SMW_COMPRESSED_GFX_25 = 0x5A3B5
+
         SMW_COMPRESSED_GFX_10 = 0x4EF1E
         SMW_COMPRESSED_GFX_28 = 0x5C06C
 
-        compressed_player_gfx = rom[SMW_COMPRESSED_PLAYER_GFX:SMW_COMPRESSED_PLAYER_GFX + 0x3FC0]
-        compressed_animated_gfx = rom[SMW_COMPRESSED_ANIMATED_GFX:SMW_COMPRESSED_ANIMATED_GFX + 0x1A39]
-        compressed_gfx_00 = rom[SMW_COMPRESSED_GFX_00:SMW_COMPRESSED_GFX_00 + 0x0838]
-        compressed_gfx_10 = rom[SMW_COMPRESSED_GFX_10:SMW_COMPRESSED_GFX_10 + 0x0891]
-        compressed_gfx_28 = rom[SMW_COMPRESSED_GFX_28:SMW_COMPRESSED_GFX_28 + 0x0637]
-        decompressed_player_gfx = decompress_gfx(compressed_player_gfx)
-        decompressed_animated_gfx = convert_3bpp(decompress_gfx(compressed_animated_gfx))
-        decompressed_gfx_00 = convert_3bpp(decompress_gfx(compressed_gfx_00))
-        decompressed_gfx_10 = convert_3bpp(decompress_gfx(compressed_gfx_10))
-        decompressed_gfx_28 = decompress_gfx(compressed_gfx_28)
+        compressed_graphics = {
+            0x00: [SMW_COMPRESSED_GFX_00, 2104, "3bpp"],
+            0x01: [SMW_COMPRESSED_GFX_01, 2698, "3bpp"],
+            0x02: [SMW_COMPRESSED_GFX_02, 2199, "3bpp"],
+            0x03: [SMW_COMPRESSED_GFX_03, 2603, "3bpp"],
+            0x04: [SMW_COMPRESSED_GFX_04, 2534, "3bpp"],
+            0x05: [SMW_COMPRESSED_GFX_05, 2569, "3bpp"],
+            0x06: [SMW_COMPRESSED_GFX_06, 2468, "3bpp"],
+            0x09: [SMW_COMPRESSED_GFX_09, 2676, "3bpp"],
+            0x0A: [SMW_COMPRESSED_GFX_0A, 2439, "3bpp"],
+            0x0B: [SMW_COMPRESSED_GFX_0B, 2503, "3bpp"],
+            0x0E: [SMW_COMPRESSED_GFX_0E, 2330, "3bpp"],
+            0x11: [SMW_COMPRESSED_GFX_11, 2062, "3bpp"],
+            0x12: [SMW_COMPRESSED_GFX_12, 2387, "3bpp"],
+            0x13: [SMW_COMPRESSED_GFX_13, 2616, "3bpp"],
+            0x20: [SMW_COMPRESSED_GFX_20, 2244, "3bpp"],
+            0x23: [SMW_COMPRESSED_GFX_23, 2331, "3bpp"],
+            0x24: [SMW_COMPRESSED_GFX_24, 2256, "3bpp"],
+            0x25: [SMW_COMPRESSED_GFX_25, 2668, "3bpp"],
+            0x10: [SMW_COMPRESSED_GFX_10, 2193, "3bpp"],
+            0x28: [SMW_COMPRESSED_GFX_28, 1591, "2bpp"],
+            0x32: [SMW_COMPRESSED_GFX_32, 16320, "4bpp"],
+            0x33: [SMW_COMPRESSED_GFX_33, 6713, "3bpp"],
+        }
+
+        raw_sprite_graphics = bytearray()
+
+        for slot, data in compressed_graphics.items():
+            start = data[0]
+            end = start + data[1]
+            compressed_gfx = rom[start:end]
+            if data[2] == "3bpp":
+                raw_sprite_graphics += convert_3bpp(decompress_gfx(compressed_gfx))
+                if slot == 0x33:
+                    decompressed_animated_gfx = convert_3bpp(decompress_gfx(compressed_gfx))
+            elif slot == 0x32:
+                decompressed_player_gfx = decompress_gfx(compressed_gfx)
+            else:
+                raw_sprite_graphics += decompress_gfx(compressed_gfx)
+
+        sprite_graphics = bytearray([0x00 for _ in range(0x23000)])
+
+        offset = 0
+        for _, sprite_data in sprite_gfx_data.sprite_gfx_data.items():
+            if len(sprite_data) == 0:
+                continue
+            sprite_size = sprite_data.pop(0)
+            sprite_graphics[offset:offset+sprite_size*0x400] = copy_sprite_tiles(raw_sprite_graphics, sprite_data, sprite_size)
+            offset += 0x400 * sprite_size
+
+        decompressed_gfx_00 = raw_sprite_graphics[0x0000:0x1000]
+        decompressed_gfx_01 = raw_sprite_graphics[0x1000:0x2000]
+        decompressed_gfx_10 = raw_sprite_graphics[0x12000:0x13000]
+        decompressed_gfx_28 = raw_sprite_graphics[0x13000:0x13800]
 
         # Copy berry tiles
         order = [0x26C, 0x26D, 0x26E, 0x26F,
@@ -116,7 +181,7 @@ class SMWPatchExtension(APPatchExtension):
         order = [0x69, 0x69, 0x0C, 0x69, 0x1A, 0x1B, 0x0D, 0x69, 0x22, 0x23, 0x32, 0x33, 0x0A, 0x0B, 0x20, 0x21,
                 0x30, 0x31, 0x7E, 0x69, 0x80, 0x4A, 0x81, 0x5B, 0x82, 0x4B, 0x83, 0x5A, 0x84, 0x69, 0x85, 0x85]
         player_small_tiles = copy_gfx_tiles(decompressed_gfx_00, order, [5, 32])
-
+        
         # Copy OW mario tiles
         order = [0x06, 0x07, 0x16, 0x17,
                 0x08, 0x09, 0x18, 0x19,
@@ -131,60 +196,76 @@ class SMWPatchExtension(APPatchExtension):
                 0x2E, 0x2F, 0x3E, 0x3F,
                 0x40, 0x41, 0x50, 0x51,
                 0x42, 0x43, 0x52, 0x53]
+        
         player_map_tiles = copy_gfx_tiles(decompressed_gfx_10, order, [5, 32])
 
         # Copy HUD mario tiles
         order = [0x30, 0x31, 0x32, 0x33, 0x34]
         player_name_tiles = copy_gfx_tiles(decompressed_gfx_28, order, [4, 16])
 
+        # Patch GFX 00 with new data
+        patched_gfx_00 = bsdiff4.patch(bytes(decompressed_gfx_00), caller.get_file("sprite_page_1.bsdiff4"))
+        patched_gfx_00 = bytearray(patched_gfx_00)
+        patched_gfx_01 = bsdiff4.patch(bytes(decompressed_gfx_01), caller.get_file("sprite_page_2.bsdiff4"))
+        patched_gfx_01 = bytearray(patched_gfx_01)
+
+        # Create inventory
+        order = [
+            0x0024,0x0024,0x0026,0x0026,0x000E,0x000E,0x0048,0x0048,
+            0x0680,0x0680,0x0680,0x0680,0x0680,0x0680,0x0680,0x0680,
+            0x0066,0x0066,0x0066,0x0066,0x0066,0x0066,0x0066,0x0066,
+            0x0066,0x0066,0x0066,0x0066,0x0066,0x0066,0x0843,0x0066,
+        ]
+        inventory_gfx = copy_sprite_tiles(raw_sprite_graphics, order, 4)
+        inventory_gfx = bsdiff4.patch(bytes(inventory_gfx), caller.get_file("map_sprites.bsdiff4"))
+        inventory_gfx = bytearray(inventory_gfx)
+
         rom[0xE0000:0xE0000 + len(decompressed_player_gfx)] = decompressed_player_gfx
         rom[0xE8000:0xE8000 + len(decompressed_animated_gfx)] = decompressed_animated_gfx
         rom[0xE6000:0xE6000 + len(player_small_tiles)] = player_small_tiles
         rom[0xE6400:0xE6400 + len(player_map_tiles)] = player_map_tiles
         rom[0xE6C00:0xE6C00 + len(player_name_tiles)] = player_name_tiles
+        rom[0xEC000:0xEC000 + len(inventory_gfx)] = inventory_gfx
+        rom[0x100000:0x100000 + len(sprite_graphics)] = sprite_graphics
+        rom[0x178000:0x178000 + len(patched_gfx_00)] = patched_gfx_00
+        rom[0x179000:0x179000 + len(patched_gfx_01)] = patched_gfx_01
 
         return bytes(rom)
 
     @staticmethod
-    def generate_shuffled_header_data(caller: APProcedurePatch, rom: bytes):
+    def generate_shuffled_header_data(caller: APProcedurePatch, rom: bytes) -> bytes:
         options = json.loads(caller.get_file("options.json").decode("UTF-8"))
-        if options["music_shuffle"] != "full" and options["level_palette_shuffle"] != "on_legacy":
+        if options["music_shuffle"] != 2 and options["level_palette_shuffle"] != 1:
             return rom
-        
+
         from .Aesthetics import valid_foreground_palettes, valid_background_palettes, valid_background_colors
 
         rom = bytearray(rom)
 
         for level_id in range(0, 0x200):
-            layer1_ptr_list = list(rom[0x2E000 + level_id * 3:(0x2E000 + level_id * 3) + 3])
-            layer1_ptr = (layer1_ptr_list[2] << 16 | layer1_ptr_list[1] << 8 | layer1_ptr_list[0])
+            layer1_ptr = int.from_bytes(rom[0x2E000 + level_id * 3:(0x2E000 + level_id * 3) + 3], "little")
 
             if layer1_ptr == 0x68000:
                 # Unused Levels
                 continue
 
-            if layer1_ptr >= 0x70000:
-                layer1_ptr -= 0x8000
-
-            layer1_ptr -= 0x38000
-
+            layer1_ptr = snes_to_pc(layer1_ptr)
             level_header = list(rom[layer1_ptr:layer1_ptr + 5])
 
             tileset = level_header[4] & 0x0F
 
-            random.seed(options["seed"] + options["player"])
+            random.seed(options["seed"])
 
-            if options["music_shuffle"] == "full":
+            if options["music_shuffle"] == 2:
                 level_header[2] &= 0x8F
                 level_header[2] |= (random.randint(0, 7) << 5)
 
-            if options["level_palette_shuffle"] == "on_legacy":
+            if options["level_palette_shuffle"] == 1:
                 if tileset in valid_foreground_palettes:
                     level_header[3] &= 0xF8
                     level_header[3] |= random.choice(valid_foreground_palettes[tileset])
 
-                layer2_ptr_list = list(rom[0x2E600 + level_id * 3:(0x2E600 + level_id * 3) + 3])
-                layer2_ptr = (layer2_ptr_list[2] << 16 | layer2_ptr_list[1] << 8 | layer2_ptr_list[0])
+                layer2_ptr = int.from_bytes(rom[0x2E600 + level_id * 3:(0x2E600 + level_id * 3) + 3], "little")
 
                 if layer2_ptr in valid_background_palettes:
                     level_header[0] &= 0x1F
@@ -194,28 +275,31 @@ class SMWPatchExtension(APPatchExtension):
                     level_header[1] &= 0x1F
                     level_header[1] |= (random.choice(valid_background_colors[layer2_ptr]) << 5)
 
-            rom.write_bytes(layer1_ptr, bytes(level_header))
+            rom[layer1_ptr:layer1_ptr+5] = bytearray(level_header)
 
         return bytes(rom)
 
 
     @staticmethod
-    def replace_sprite(caller: APProcedurePatch, rom: bytes):
-        options = json.loads(caller.get_file("options.json").decode("UTF-8"))
-        if options["sprite"] == "":
+    def replace_graphics(caller: APProcedurePatch, rom: bytes) -> bytes:
+        # Get world's settings
+        world_type = AutoWorldRegister.world_types[SMWPatchExtension.game]
+        settings = get_settings()
+        world_settings = getattr(settings, world_type.settings_key, None)
+        if not world_settings:
+            return rom
+
+        # Check if the setting is properly set and exists in data/sprites/smw
+        graphics_setting = world_settings.graphics_file
+        if not os.path.isfile(graphics_setting):
             return rom
         
-        sprite_dir = Utils.local_path(os.path.join('data', 'sprites', 'smw'))
-        sprite_name = f"{options['sprite']}.zip"
-
-        if sprite_name not in os.listdir(sprite_dir):
-            return rom
-
+        # Begin replacing graphics
         import zipfile
 
         rom = bytearray(rom)
 
-        file = zipfile.ZipFile(os.path.join(sprite_dir, sprite_name))
+        file = zipfile.ZipFile(graphics_setting)
         if f"player_big.bin" in file.namelist():
             pass
         if "player.bin" in file.namelist():
@@ -250,11 +334,11 @@ class SMWProcedurePatch(APProcedurePatch, APTokenMixin):
     result_file_ending = ".sfc"
     name: bytearray
     procedure = [
-        ("apply_bsdiff4", ["smw_basepatch.bsdiff4"]),
+        ("apply_bsdiff4", ["smw_sa1_basepatch.bsdiff4"]),
         ("apply_tokens", ["token_patch.bin"]),
         ("generate_shuffled_header_data", []),
         ("handle_uncompressed_graphics", []),
-        ("replace_sprite", []),
+        ("replace_graphics", []),
     ]
 
     @classmethod
@@ -268,7 +352,7 @@ class SMWProcedurePatch(APProcedurePatch, APTokenMixin):
         self.write_token(APTokenTypes.WRITE, offset, bytes(value))
 
 
-def decompress_gfx(compressed_graphics):
+def decompress_gfx(compressed_graphics: bytearray) -> bytearray:
     # This code decompresses graphics in LC_LZ2 format in order to be able to swap player and yoshi's graphics with ease.
     decompressed_gfx = bytearray([])
     i = 0
@@ -315,7 +399,7 @@ def decompress_gfx(compressed_graphics):
     return decompressed_gfx
 
 
-def convert_3bpp(decompressed_gfx):
+def convert_3bpp(decompressed_gfx: bytearray) -> bytearray:
     i = 0
     converted_gfx = bytearray([])
     while i < len(decompressed_gfx):
@@ -333,6 +417,43 @@ def copy_gfx_tiles(original, order, size):
     for x in range(len(order)):
         z = order[x] << size[0]
         result += bytearray([original[z+y] for y in range(size[1])])
+    return result
+
+
+def copy_sprite_tiles(original, order, data_size, px_size = [5, 32]) -> bytearray:
+    result = bytearray([0x00 for _ in range(data_size * 0x400)])
+    offset = 0
+    for x in range(len(order)):
+        if x != 0 and x & 0x7 == 0:
+            offset += 0x0200
+
+        if type(order[x]) is int:
+            z = order[x] << px_size[0]
+            result[offset:offset+0x20] = original[z:z+px_size[1]]
+            offset += 0x20
+            z = order[x]+0x01 << px_size[0]
+            result[offset:offset+0x20] = original[z:z+px_size[1]]
+            offset += 0x1E0
+            z = order[x]+0x10 << px_size[0]
+            result[offset:offset+0x20] = original[z:z+px_size[1]]
+            offset += 0x20
+            z = order[x]+0x11 << px_size[0]
+            result[offset:offset+0x20] = original[z:z+px_size[1]]
+            offset -= 0x1E0
+        else:
+            z = order[x][0] << px_size[0]
+            result[offset:offset+0x20] = original[z:z+px_size[1]]
+            offset += 0x20
+            z = order[x][1] << px_size[0]
+            result[offset:offset+0x20] = original[z:z+px_size[1]]
+            offset += 0x1E0
+            z = order[x][2] << px_size[0]
+            result[offset:offset+0x20] = original[z:z+px_size[1]]
+            offset += 0x20
+            z = order[x][3] << px_size[0]
+            result[offset:offset+0x20] = original[z:z+px_size[1]]
+            offset -= 0x1E0
+
     return result
 
 
@@ -523,13 +644,15 @@ def handle_boss_shuffle(patch, world: World):
                 patch.write_byte(ow_boss_rooms[i].exitAddressAlt, chosen_ow_boss.roomID)
 
 
-def patch_rom(world: World, patch, player, active_level_dict):
+def snes_to_pc(address):
+    return (address & 0x7F0000) >> 1 | (address & 0x7FFF)
+
+
+def patch_rom(world: World, patch, player, active_level_dict: typing.Dict[int,int]) -> None:
     options_dict = {
-        "seed": world.multiworld.seed,
-        "player": world.player,
+        "seed": world.random.getrandbits(64),
         "music_shuffle": world.options.music_shuffle.value,
         "level_palette_shuffle": world.options.level_palette_shuffle.value,
-        "sprite": world.options.sprite.value,
     }
     patch.write_file("options.json", json.dumps(options_dict).encode("UTF-8"))
 
@@ -640,6 +763,7 @@ def patch_rom(world: World, patch, player, active_level_dict):
         setting_value |= 0x10
     patch.write_byte(0x01BFB2, setting_value)
     patch.write_byte(0x01BFB4, world.options.energy_link.value)
+    patch.write_byte(0x01BFB6, world.options.persistent_trap_behavior.value)
 
     from Utils import __version__
     patch.name = bytearray(f'SMW{__version__.replace(".", "")[0:3]}_{player}_{world.multiworld.seed:11}\0', 'utf8')[:21]

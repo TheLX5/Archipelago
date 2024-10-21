@@ -6,14 +6,14 @@ ten_coins = "10 coins"
 fifty_coins = "50 coins"
 
 # Inventory Definitions
-mushroom_inventory = "Mushroom"
-fire_flower_inventory = "Fire Flower"
-feather_inventory = "Feather"
-star_inventory = "Star"
-green_yoshi_inventory = "Green Yoshi"
-red_yoshi_inventory = "Red Yoshi"
-blue_yoshi_inventory = "Blue Yoshi"
-yellow_yoshi_inventory = "Yellow Yoshi"
+mushroom_inventory = "Inventory Mushroom"
+fire_flower_inventory = "Inventory Fire Flower"
+feather_inventory = "Inventory Feather"
+star_inventory = "Inventory Super Star"
+green_yoshi_inventory = "Inventory Green Yoshi"
+red_yoshi_inventory = "Inventory Red Yoshi"
+blue_yoshi_inventory = "Inventory Blue Yoshi"
+yellow_yoshi_inventory = "Inventory Yellow Yoshi"
 
 # Collectable Definitions
 yoshi_egg = "Yoshi Egg"
@@ -46,6 +46,7 @@ literature_trap       = "Literature Trap"
 timer_trap            = "Timer Trap"
 reverse_controls_trap = "Reverse Trap"
 thwimp_trap           = "Thwimp Trap"
+fishin_trap           = "Fishin' Boo Trap"
 
 # Other Definitions
 victory   = "The Princess"
