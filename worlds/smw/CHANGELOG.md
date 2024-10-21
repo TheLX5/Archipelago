@@ -7,28 +7,38 @@
 
 - New inventory system that allows you to get a powerup before entering a level
 - New Items
-	- Mushroom
-	- Fire Flower
-	- Feather
-	- Super Star
-	- Green Yoshi
-	- Red Yoshi
-	- Yellow Yoshi
-	- Blue Yoshi
+	- Inventory Mushroom
+	- Inventory Fire Flower
+	- Inventory Feather
+	- Inventory Super Star
+	- Inventory Green Yoshi
+	- Inventory Red Yoshi
+	- Inventory Yellow Yoshi
+	- Inventory Blue Yoshi
+- New traps
+	- Fishin' Boo Trap
 - EnergyLink support
 	- Deposit energy by collecting coins in levels
 	- Use energy to purchase inventory items
 - Blocks with coins and powerups can be kept collected after hitting them once
 	- Makes the game harder on subsequent visits to any level
-- New options: `energy_link`, `location_visual_indicator`, `block_collect_behavior`, `inventory_fill_percentage`
+- Ice, Reverse and Fishing traps can be altered to despawn on certain events
+	- Gone on room load 
+	- Gone on map load
+	- Gone after beating a level
+- New options: 
+	- `energy_link`
+	- `location_visual_indicator`
+	- `block_collect_behavior`
+	- `inventory_fill_percentage`
 
 ### Quality of Life
 
-- APPP Support (no longer requires a ROM for generation)
 - New appareances for blocks, 3-Up Moons and Dragon Coins when they're enabled as valid locations
 - Current item box contents are displayed during the map gameplay
 - Added location groups
-- Autopatching for player sprite replacement
+
+
 
 
 ## v2.0
