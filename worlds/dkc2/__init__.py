@@ -22,7 +22,7 @@ from .Rom import patch_rom, DKC2ProcedurePatch, HASH_US, HASH_US_REV_1
 
 class DKC2Settings(settings.Group):
     class RomFile(settings.SNESRomPath):
-        """File name of the Mega Man X US ROM"""
+        """File name of the Donkey Kong Country 2 US ROM"""
         description = "Donkey Kong Country 2 (USA) ROM File"
         copy_to = "Donkey Kong Country 2 - Diddy's Kong Quest (USA).sfc"
         md5s = [HASH_US, HASH_US_REV_1]
