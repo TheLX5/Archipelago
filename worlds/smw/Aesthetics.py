@@ -1,7 +1,9 @@
 import json
 import pkgutil
 
-from worlds.AutoWorld import World
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from . import SMWWorld
 
 tileset_names = [
     "grass_hills",
@@ -492,7 +494,7 @@ game_sfx_calls = [
     0x657D8        # Cutscene: Castle being mopped away
 ]
 
-def generate_shuffled_sfx(rom, world: World):
+def generate_shuffled_sfx(rom, world: "SMWWorld"):
     # Adjust "hitting sprites in succession" codes
     rom.write_bytes(0x0A60B, bytearray([0x22, 0x00, 0xFE, 0x0F, 0xEA, 0xEA]))    # jsl $0FFE00 : nop #2     # Thrown sprites combo #1
     rom.write_bytes(0x0A659, bytearray([0x22, 0x47, 0xFE, 0x0F, 0xEA, 0xEA]))    # jsl $0FFE47 : nop #2     # Thrown sprites combo #2
@@ -599,7 +601,7 @@ def generate_shuffled_sfx(rom, world: World):
         # Write randomized SFX port
         rom.write_byte(address + 0x03, selected_sfx[1] + 0xF9)
 
-def generate_shuffled_level_music(world: World):
+def generate_shuffled_level_music(world: "SMWWorld"):
     shuffled_level_music = level_music_value_data.copy()
 
     if world.options.music_shuffle == "consistent":
@@ -610,7 +612,7 @@ def generate_shuffled_level_music(world: World):
 
     return shuffled_level_music
 
-def generate_shuffled_ow_music(world: World):
+def generate_shuffled_ow_music(world: "SMWWorld"):
     shuffled_ow_music = ow_music_value_data.copy()
 
     if world.options.music_shuffle == "consistent" or world.options.music_shuffle == "full":
@@ -621,7 +623,7 @@ def generate_shuffled_ow_music(world: World):
 
     return shuffled_ow_music
 
-def generate_shuffled_ow_palettes(rom, world: World):
+def generate_shuffled_ow_palettes(rom, world: "SMWWorld"):
     if world.options.overworld_palette_shuffle != "on_legacy":
         return
 
@@ -629,11 +631,11 @@ def generate_shuffled_ow_palettes(rom, world: World):
         chosen_palette = world.random.choice(valid_palettes)
         rom.write_byte(address, chosen_palette)
 
-def generate_curated_level_palette_data(rom, world: World):
+def generate_curated_level_palette_data(rom, world: "SMWWorld"):
     PALETTE_INDEX_ADDR = 0x88000
 
     # Load palette paths
-    data = pkgutil.get_data(__name__, f"data/palettes/level/palettes.json").decode("utf-8")
+    data = pkgutil.get_data(__name__, f"data/level_palettes.json").decode("utf-8")
     tilesets = json.loads(data)
 
     # Builds the table in ROM that holds the palette index for each level, including sublevels
@@ -646,11 +648,11 @@ def generate_curated_level_palette_data(rom, world: World):
         palette = world.random.randint(0, len(tilesets[tileset])-1)
         rom.write_bytes(PALETTE_INDEX_ADDR + level_id, bytearray([palette]))
 
-def generate_curated_map_palette_data(rom, world: World):
+def generate_curated_map_palette_data(rom, world: "SMWWorld"):
     PALETTE_MAP_INDEX_ADDR = 0x88200
 
     # Load palette paths
-    data = pkgutil.get_data(__name__, f"data/palettes/map/palettes.json").decode("utf-8")
+    data = pkgutil.get_data(__name__, f"data/map_palettes.json").decode("utf-8")
     maps = json.loads(data)
 
     # Builds the table in ROM that holds the palette index for each map
