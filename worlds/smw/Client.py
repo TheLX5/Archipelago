@@ -335,13 +335,13 @@ class SMWSNIClient(SNIClient):
         if game_state == 0x14 and goal == 1:
             current_level = ram_mirror[0x04]
             message_box = ram_mirror[0x07]
-            egg_count = ram_mirror[0x07]
+            egg_count = game_progress[0x24]
             required_egg_count = rom_settings_data[0x02]
 
             if current_level == 0x28 and message_box == 0x01 and egg_count >= required_egg_count:
-                snes_buffered_write(ctx, WRAM_START + 0x13C6, bytes([0x08]))
-                snes_buffered_write(ctx, WRAM_START + 0x13CE, bytes([0x01]))
-                snes_buffered_write(ctx, WRAM_START + 0x1DE9, bytes([0x01]))
+                snes_buffered_write(ctx, SRAM_START + 0x13C6, bytes([0x08]))
+                snes_buffered_write(ctx, SRAM_START + 0x13CE, bytes([0x01]))
+                snes_buffered_write(ctx, SRAM_START + 0x1DE9, bytes([0x01]))
                 snes_buffered_write(ctx, SMW_GAME_STATE_ADDR, bytes([0x18]))
 
                 await snes_flush_writes(ctx)
@@ -548,7 +548,6 @@ class SMWSNIClient(SNIClient):
         if recv_index < len(ctx.items_received):
             item = ctx.items_received[recv_index]
             recv_index += 1
-            print (recv_index)
             sending_game = ctx.slot_info[item.player].game
             logging.info('Received %s from %s (%s) (%d/%d in list)' % (
                 color(ctx.item_names.lookup_in_game(item.item), 'red', 'bold'),
@@ -771,13 +770,14 @@ class SMWSNIClient(SNIClient):
                     if not path:
                         continue
 
-                    this_end_path = path_data[tile_id[0]]
-                    new_data = this_end_path | path.thisEndDirection
-                    path_data[tile_id[0]] = new_data
-
-                    other_end_path = path_data[path.otherLevelID]
-                    new_data = other_end_path | path.otherEndDirection
-                    path_data[path.otherLevelID] = new_data
+                    if tile_id[0] < 0x60:
+                        this_end_path = path_data[tile_id[0]]
+                        new_data = this_end_path | path.thisEndDirection
+                        path_data[tile_id[0]] = new_data
+                    if path.otherLevelID < 0x60:
+                        other_end_path = path_data[path.otherLevelID]
+                        new_data = other_end_path | path.otherEndDirection
+                        path_data[path.otherLevelID] = new_data
 
         if new_dragon_coin:
             snes_buffered_write(ctx, SMW_DRAGON_COINS_DATA, bytes(dragon_coins_data))
