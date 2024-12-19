@@ -5,7 +5,10 @@
 
 ### Features:
 
-- New inventory system that allows you to get a powerup before entering a level
+- Map teleport and transition shuffle
+	- Shuffle pipe and star destinations
+	- Shuffle map transitions
+- New inventory system that allows you to use a powerup before entering a level
 - New Items
 	- Inventory Mushroom
 	- Inventory Fire Flower
@@ -31,6 +34,10 @@
 	- `location_visual_indicator`
 	- `block_collect_behavior`
 	- `inventory_fill_percentage`
+	- `persistent_trap_behavior`
+	- `map_teleport_shuffle`
+	- `map_transition_shuffle`
+
 
 ### Quality of Life
 
@@ -38,6 +45,10 @@
 - Current item box contents are displayed during the map gameplay
 - Added location groups
 
+### Bug Fixes:
+
+- Several logic tweaks/fixes
+- Some levels received adjustments to their vertical scroll setting
 
 
 

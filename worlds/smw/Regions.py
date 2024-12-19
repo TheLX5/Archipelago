@@ -7,8 +7,11 @@ from .Names import LocationName, ItemName
 from worlds.generic.Rules import add_rule, set_rule
 from worlds.AutoWorld import World
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from . import SMWWorld
 
-def create_regions(world: World, active_locations):
+def create_regions(world: "SMWWorld", active_locations):
     multiworld: MultiWorld = world.multiworld
     player: int = world.player
 
@@ -371,6 +374,18 @@ def create_regions(world: World, active_locations):
         bowser_region_locations += [LocationName.bowser]
     bowser_region = create_region(multiworld, player, active_locations, LocationName.bowser_region, bowser_region_locations)
 
+    donut_plains_entrance_pipe = create_region(multiworld, player, active_locations, LocationName.donut_plains_entrance_pipe, None)
+    donut_plains_exit_pipe = create_region(multiworld, player, active_locations, LocationName.donut_plains_exit_pipe, None)
+    vanilla_dome_bottom_entrance_pipe = create_region(multiworld, player, active_locations, LocationName.vanilla_dome_bottom_entrance_pipe, None)
+    vanilla_dome_top_entrance_pipe = create_region(multiworld, player, active_locations, LocationName.vanilla_dome_top_entrance_pipe, None)
+    vanilla_dome_top_exit_pipe = create_region(multiworld, player, active_locations, LocationName.vanilla_dome_top_exit_pipe, None)
+    twin_bridges_exit_pipe = create_region(multiworld, player, active_locations, LocationName.twin_bridges_exit_pipe, None)
+    chocolate_island_entrance_pipe = create_region(multiworld, player, active_locations, LocationName.chocolate_island_entrance_pipe, None)
+    chocolate_island_exit_pipe = create_region(multiworld, player, active_locations, LocationName.chocolate_island_exit_pipe, None)
+    valley_donut_entrance_pipe = create_region(multiworld, player, active_locations, LocationName.valley_donut_entrance_pipe, None)
+    valley_donut_exit_pipe = create_region(multiworld, player, active_locations, LocationName.valley_donut_exit_pipe, None)
+    valley_chocolate_entrance_pipe = create_region(multiworld, player, active_locations, LocationName.valley_chocolate_entrance_pipe, None)
+    valley_chocolate_exit_pipe = create_region(multiworld, player, active_locations, LocationName.valley_chocolate_exit_pipe, None)
 
     donut_plains_star_road = create_region(multiworld, player, active_locations, LocationName.donut_plains_star_road, None)
     vanilla_dome_star_road = create_region(multiworld, player, active_locations, LocationName.vanilla_dome_star_road, None)
@@ -462,6 +477,20 @@ def create_regions(world: World, active_locations):
                                           [LocationName.special_zone_8_exit_1])
     special_complete = create_region(multiworld, player, active_locations, LocationName.special_complete, None)
 
+    yi_to_ysp = create_region(multiworld, player, active_locations, LocationName.yi_to_ysp, None)
+    ysp_from_yi = create_region(multiworld, player, active_locations, LocationName.ysp_from_yi, None)
+    yi_to_dp = create_region(multiworld, player, active_locations, LocationName.yi_to_dp, None)
+    dp_from_yi = create_region(multiworld, player, active_locations, LocationName.dp_from_yi, None)
+    dp_to_vd = create_region(multiworld, player, active_locations, LocationName.dp_to_vd, None)
+    vd_from_dp = create_region(multiworld, player, active_locations, LocationName.vd_from_dp, None)
+    tw_to_foi = create_region(multiworld, player, active_locations, LocationName.tw_to_foi, None)
+    foi_from_tw = create_region(multiworld, player, active_locations, LocationName.foi_from_tw, None)
+    foi_to_ci = create_region(multiworld, player, active_locations, LocationName.foi_to_ci, None)
+    ci_from_foi = create_region(multiworld, player, active_locations, LocationName.ci_from_foi, None)
+    foi_to_sr = create_region(multiworld, player, active_locations, LocationName.foi_to_sr, None)
+    sr_from_foi = create_region(multiworld, player, active_locations, LocationName.sr_from_foi, None)
+    ci_to_vob = create_region(multiworld, player, active_locations, LocationName.ci_to_vob, None)
+    vob_from_ci = create_region(multiworld, player, active_locations, LocationName.vob_from_ci, None)
 
     # Set up the regions correctly.
     multiworld.regions += [
@@ -668,6 +697,18 @@ def create_regions(world: World, active_locations):
         back_door_tile,
         back_door_region,
         bowser_region,
+        donut_plains_entrance_pipe,
+        donut_plains_exit_pipe,
+        vanilla_dome_bottom_entrance_pipe,
+        vanilla_dome_top_entrance_pipe,
+        vanilla_dome_top_exit_pipe,
+        twin_bridges_exit_pipe,
+        chocolate_island_entrance_pipe,
+        chocolate_island_exit_pipe,
+        valley_donut_entrance_pipe,
+        valley_donut_exit_pipe,
+        valley_chocolate_entrance_pipe,
+        valley_chocolate_exit_pipe,
         donut_plains_star_road,
         vanilla_dome_star_road,
         twin_bridges_star_road,
@@ -725,6 +766,20 @@ def create_regions(world: World, active_locations):
         special_zone_8_region,
         special_zone_8_exit_1,
         special_complete,
+        yi_to_ysp,
+        ysp_from_yi,
+        yi_to_dp,
+        dp_from_yi,
+        dp_to_vd,
+        vd_from_dp,
+        tw_to_foi,
+        foi_from_tw,
+        foi_to_ci,
+        ci_from_foi,
+        foi_to_sr,
+        sr_from_foi,
+        ci_to_vob,
+        vob_from_ci,
     ]
 
 
@@ -1849,7 +1904,7 @@ def create_regions(world: World, active_locations):
         add_location_to_region(multiworld, player, active_locations, LocationName.star_road_5_region, LocationName.star_road_5_green_block_20,
                         lambda state: (state.has(ItemName.green_switch_palace, player) and state.has(ItemName.yoshi_activate, player) and state.has(ItemName.mario_carry, player) and state.has(ItemName.special_world_clear, player)))
 
-def connect_regions(world: World, level_to_tile_dict):
+def connect_regions(world: "SMWWorld", level_to_tile_dict):
     multiworld: MultiWorld = world.multiworld
     player: int = world.player
 
@@ -2084,6 +2139,14 @@ def connect_regions(world: World, level_to_tile_dict):
 
 
     # Connect levels to each other
+    should_cache = [
+        LocationName.star_road_1_tile,
+        LocationName.star_road_2_tile,
+        LocationName.star_road_3_tile,
+        LocationName.star_road_4_tile,
+    ]
+    future_star_cache = dict()
+
     for current_level_id, current_level_data in level_info_dict.items():
         # Connect tile regions to correct level regions
 
@@ -2093,7 +2156,8 @@ def connect_regions(world: World, level_to_tile_dict):
         current_tile_id = level_to_tile_dict[current_level_id]
         current_tile_data = level_info_dict[current_tile_id]
         current_tile_name = current_tile_data.levelName
-        if ("Star Road - " not in current_tile_name) and (" - Star Road" not in current_tile_name):
+
+        if ("Star Road - " not in current_tile_name) and (" - Star Road" not in current_tile_name) and ("Pipe" not in current_tile_name) and ("Transition - " not in current_tile_name):
             current_tile_name += " - Tile"
             connect(world, current_tile_name, current_level_data.levelName)
         # Connect Exit regions to next tile regions
@@ -2102,42 +2166,68 @@ def connect_regions(world: World, level_to_tile_dict):
             if world.options.swap_donut_gh_exits and current_tile_id == 0x04:
                 next_tile_id = current_tile_data.exit2Path.otherLevelID
             next_tile_name = level_info_dict[next_tile_id].levelName
-            if ("Star Road - " not in next_tile_name) and (" - Star Road" not in next_tile_name):
+            if ("Star Road - " not in next_tile_name) and (" - Star Road" not in next_tile_name) and ("Pipe" not in next_tile_name) and ("Transition - " not in next_tile_name):
                 next_tile_name += " - Tile"
+            else:
+                if current_tile_name == LocationName.star_road_5_tile:
+                    future_star_cache[next_tile_name] = current_tile_data.eventIDValue
+                else:
+                    world.cached_connections[next_tile_name] = current_tile_data.eventIDValue
             current_exit_name = (current_level_data.levelName + " - Normal Exit")
             connect(world, current_exit_name, next_tile_name)
+            
         if current_tile_data.exit2Path:
             next_tile_id = current_tile_data.exit2Path.otherLevelID
             if world.options.swap_donut_gh_exits and current_tile_id == 0x04:
                 next_tile_id = current_tile_data.exit1Path.otherLevelID
             next_tile_name = level_info_dict[next_tile_id].levelName
-            if ("Star Road - " not in next_tile_name) and (" - Star Road" not in next_tile_name):
+            if ("Star Road - " not in next_tile_name) and (" - Star Road" not in next_tile_name) and ("Pipe" not in next_tile_name) and ("Transition - " not in next_tile_name):
                 next_tile_name += " - Tile"
+            else:
+                if current_tile_name in should_cache:
+                    future_star_cache[next_tile_name] = current_tile_data.eventIDValue + 1
+                else:
+                    world.cached_connections[next_tile_name] = current_tile_data.eventIDValue + 1
             current_exit_name = (current_level_data.levelName + " - Secret Exit")
             connect(world, current_exit_name, next_tile_name)
 
-    connect(world, LocationName.donut_plains_star_road, LocationName.star_road_donut)
-    connect(world, LocationName.star_road_donut, LocationName.donut_plains_star_road)
+    # Fix cached connections
+    for old_exit, event_id in future_star_cache.items():
+        entrance = world.reverse_teleport_pairs[old_exit]
+        world.cached_connections[entrance] = event_id
+
+    # Connect teleport destination tiles with level tiles
     connect(world, LocationName.star_road_donut, LocationName.star_road_1_tile)
-    connect(world, LocationName.vanilla_dome_star_road, LocationName.star_road_vanilla)
-    connect(world, LocationName.star_road_vanilla, LocationName.vanilla_dome_star_road)
     connect(world, LocationName.star_road_vanilla, LocationName.star_road_2_tile)
-    connect(world, LocationName.twin_bridges_star_road, LocationName.star_road_twin_bridges)
-    connect(world, LocationName.star_road_twin_bridges, LocationName.twin_bridges_star_road)
     connect(world, LocationName.star_road_twin_bridges, LocationName.star_road_3_tile)
-    connect(world, LocationName.forest_star_road, LocationName.star_road_forest)
-    connect(world, LocationName.star_road_forest, LocationName.forest_star_road)
     connect(world, LocationName.star_road_forest, LocationName.star_road_4_tile)
-    connect(world, LocationName.valley_star_road, LocationName.star_road_valley)
-    connect(world, LocationName.star_road_valley, LocationName.valley_star_road)
     connect(world, LocationName.star_road_valley, LocationName.star_road_5_tile)
-    connect(world, LocationName.star_road_special, LocationName.special_star_road)
-    connect(world, LocationName.special_star_road, LocationName.star_road_special)
     connect(world, LocationName.special_star_road, LocationName.special_zone_1_tile)
-    
-    connect(world, LocationName.star_road_valley, LocationName.front_door_tile)
+    connect(world, LocationName.donut_plains_exit_pipe, LocationName.donut_plains_3_tile)
+    connect(world, LocationName.valley_donut_exit_pipe, LocationName.donut_secret_2_tile)
+    connect(world, LocationName.vanilla_dome_top_exit_pipe, LocationName.vanilla_secret_2_tile)
+    connect(world, LocationName.twin_bridges_exit_pipe, LocationName.cheese_bridge_tile)
+    connect(world, LocationName.valley_chocolate_exit_pipe, LocationName.chocolate_secret_tile)
+    connect(world, LocationName.chocolate_island_exit_pipe, LocationName.chocolate_castle_tile)
 
+    # Connect teleports
+    for entrance, exit in world.teleport_pairs.items():
+        connect(world, entrance, exit)
+        if LocationName.yoshis_house_tile in exit:
+            connect(world, exit, entrance)
 
+    # Connect transition destination "tiles" with level tiles
+    connect(world, LocationName.ysp_from_yi, LocationName.yellow_switch_palace_tile)
+    connect(world, LocationName.dp_from_yi, LocationName.donut_plains_1_tile)
+    connect(world, LocationName.vd_from_dp, LocationName.vanilla_dome_1_tile)
+    connect(world, LocationName.foi_from_tw, LocationName.forest_of_illusion_1_tile)
+    connect(world, LocationName.ci_from_foi, LocationName.forest_castle_tile)
+    connect(world, LocationName.sr_from_foi, LocationName.forest_fortress_tile)
+    connect(world, LocationName.vob_from_ci, LocationName.valley_of_bowser_1_tile)
+
+    # Connect transitions
+    for entrance, exit in world.transition_pairs.items():
+        connect(world, entrance, exit)
 
 def create_region(multiworld: MultiWorld, player: int, active_locations, name: str, locations=None):
     ret = Region(name, player, multiworld)
@@ -2161,7 +2251,7 @@ def add_location_to_region(multiworld: MultiWorld, player: int, active_locations
             add_rule(location, rule)
 
 
-def connect(world: World, source: str, target: str,
+def connect(world: "SMWWorld", source: str, target: str,
             rule: typing.Optional[typing.Callable] = None):
     source_region: Region = world.get_region(source)
     target_region: Region = world.get_region(target)

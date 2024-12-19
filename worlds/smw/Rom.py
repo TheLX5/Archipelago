@@ -1,10 +1,11 @@
 import Utils
-from worlds.AutoWorld import World, AutoWorldRegister
+from worlds.AutoWorld import AutoWorldRegister
 from settings import get_settings
 from worlds.Files import APProcedurePatch, APTokenMixin, APTokenTypes, APPatchExtension
 from .Aesthetics import generate_shuffled_ow_palettes, generate_curated_level_palette_data, generate_curated_map_palette_data, generate_shuffled_sfx
 from .Levels import level_info_dict, full_bowser_rooms, standard_bowser_rooms, submap_boss_rooms, ow_boss_rooms
 from .Names.TextBox import generate_goal_text, title_text_mapping, generate_text_box
+from .Teleports import handle_teleport_shuffle, handle_transition_shuffle, handle_silent_events
 
 USHASH = 'cdd3c8c37322978ca8669b34bc89c804'
 ROM_PLAYER_LIMIT = 65535
@@ -15,6 +16,9 @@ import typing
 import json
 import random
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from . import SMWWorld
 
 ability_rom_data = {
     0xBC0003: [[0x1F1C, 0x7]], # Run         0x80
@@ -203,12 +207,6 @@ class SMWPatchExtension(APPatchExtension):
         order = [0x30, 0x31, 0x32, 0x33, 0x34]
         player_name_tiles = copy_gfx_tiles(decompressed_gfx_28, order, [4, 16])
 
-        # Patch GFX 00 with new data
-        patched_gfx_00 = bsdiff4.patch(bytes(decompressed_gfx_00), caller.get_file("sprite_page_1.bsdiff4"))
-        patched_gfx_00 = bytearray(patched_gfx_00)
-        patched_gfx_01 = bsdiff4.patch(bytes(decompressed_gfx_01), caller.get_file("sprite_page_2.bsdiff4"))
-        patched_gfx_01 = bytearray(patched_gfx_01)
-
         # Create inventory
         order = [
             0x0024,0x0024,0x0026,0x0026,0x000E,0x000E,0x0048,0x0048,
@@ -217,18 +215,22 @@ class SMWPatchExtension(APPatchExtension):
             0x0066,0x0066,0x0066,0x0066,0x0066,0x0066,0x0843,0x0066,
         ]
         inventory_gfx = copy_sprite_tiles(raw_sprite_graphics, order, 4)
-        inventory_gfx = bsdiff4.patch(bytes(inventory_gfx), caller.get_file("map_sprites.bsdiff4"))
-        inventory_gfx = bytearray(inventory_gfx)
+
+        # Patch graphics with modified data
+        patched_sprite_graphics = bsdiff4.patch(bytes(sprite_graphics), caller.get_file("sprite_graphics.bsdiff4"))
+        patched_gfx_00 = bsdiff4.patch(bytes(decompressed_gfx_00), caller.get_file("sprite_page_1.bsdiff4"))
+        patched_gfx_01 = bsdiff4.patch(bytes(decompressed_gfx_01), caller.get_file("sprite_page_2.bsdiff4"))
+        patched_inventory_gfx = bsdiff4.patch(bytes(inventory_gfx), caller.get_file("map_sprites.bsdiff4"))
 
         rom[0xE0000:0xE0000 + len(decompressed_player_gfx)] = decompressed_player_gfx
         rom[0xE8000:0xE8000 + len(decompressed_animated_gfx)] = decompressed_animated_gfx
         rom[0xE6000:0xE6000 + len(player_small_tiles)] = player_small_tiles
         rom[0xE6400:0xE6400 + len(player_map_tiles)] = player_map_tiles
         rom[0xE6C00:0xE6C00 + len(player_name_tiles)] = player_name_tiles
-        rom[0xEC000:0xEC000 + len(inventory_gfx)] = inventory_gfx
-        rom[0x100000:0x100000 + len(sprite_graphics)] = sprite_graphics
-        rom[0x178000:0x178000 + len(patched_gfx_00)] = patched_gfx_00
-        rom[0x179000:0x179000 + len(patched_gfx_01)] = patched_gfx_01
+        rom[0xEC000:0xEC000 + len(patched_inventory_gfx)] = bytearray(patched_inventory_gfx)
+        rom[0x100000:0x100000 + len(patched_sprite_graphics)] = bytearray(patched_sprite_graphics)
+        rom[0x178000:0x178000 + len(patched_gfx_00)] = bytearray(patched_gfx_00)
+        rom[0x179000:0x179000 + len(patched_gfx_01)] = bytearray(patched_gfx_01)
 
         return bytes(rom)
 
@@ -241,6 +243,7 @@ class SMWPatchExtension(APPatchExtension):
         from .Aesthetics import valid_foreground_palettes, valid_background_palettes, valid_background_colors
 
         rom = bytearray(rom)
+        random.seed(options["seed"])
 
         for level_id in range(0, 0x200):
             layer1_ptr = int.from_bytes(rom[0x2E000 + level_id * 3:(0x2E000 + level_id * 3) + 3], "little")
@@ -253,8 +256,6 @@ class SMWPatchExtension(APPatchExtension):
             level_header = list(rom[layer1_ptr:layer1_ptr + 5])
 
             tileset = level_header[4] & 0x0F
-
-            random.seed(options["seed"])
 
             if options["music_shuffle"] == 2:
                 level_header[2] &= 0x8F
@@ -324,6 +325,9 @@ class SMWPatchExtension(APPatchExtension):
         if "yoshi+anim.bin" in file.namelist():
             yoshi_anim_file = file.read('yoshi+anim.bin')
             rom[0xE8000:0xE8000 + len(yoshi_anim_file)] = yoshi_anim_file
+        if "sprites.bin" in file.namelist():
+            sprites_file = file.read('sprites.bin')
+            rom[0x100000:0x100000 + len(sprites_file)] = sprites_file
 
         return bytes(rom)
 
@@ -476,7 +480,7 @@ def handle_level_shuffle(rom, active_level_dict):
         rom.write_byte(0x37F00 + tile_id, level_id)
 
 
-def handle_location_item_info(patch, world: World):
+def handle_location_item_info(patch: SMWProcedurePatch, world: "SMWWorld"):
     from .Levels import location_id_to_level_id
 
     block_info = bytearray([0x00 for _ in range(582)])
@@ -512,7 +516,7 @@ def handle_location_item_info(patch, world: World):
     patch.write_bytes(0x88207, block_info)
 
 
-def handle_music_shuffle(patch, world: World):
+def handle_music_shuffle(patch: SMWProcedurePatch, world: "SMWWorld"):
     from .Aesthetics import generate_shuffled_level_music, generate_shuffled_ow_music, level_music_address_data, ow_music_address_data
 
     shuffled_level_music = generate_shuffled_level_music(world)
@@ -525,7 +529,7 @@ def handle_music_shuffle(patch, world: World):
             patch.write_byte(addr, shuffled_ow_music[i])
 
 
-def handle_mario_palette(patch, world: World):
+def handle_mario_palette(patch: SMWProcedurePatch, world: "SMWWorld"):
     from .Aesthetics import mario_palettes, fire_mario_palettes, ow_mario_palettes
 
     chosen_palette = world.options.mario_palette.value
@@ -535,7 +539,7 @@ def handle_mario_palette(patch, world: World):
     patch.write_bytes(0x359C, bytes(ow_mario_palettes[chosen_palette]))
 
 
-def handle_swap_donut_gh_exits(patch):
+def handle_swap_donut_gh_exits(patch: SMWProcedurePatch):
     patch.write_bytes(0x2567C, bytes([0xC0]))
     patch.write_bytes(0x25873, bytes([0xA9]))
     patch.write_bytes(0x25875, bytes([0x85]))
@@ -547,7 +551,7 @@ def handle_swap_donut_gh_exits(patch):
     patch.write_bytes(0x26371, bytes([0x32]))
 
 
-def handle_bowser_rooms(patch, world: World):
+def handle_bowser_rooms(patch: SMWProcedurePatch, world: "SMWWorld"):
     if world.options.bowser_castle_rooms == "random_two_room":
         chosen_rooms = world.random.sample(standard_bowser_rooms, 2)
 
@@ -601,7 +605,7 @@ def handle_bowser_rooms(patch, world: World):
         patch.write_byte(bowser_rooms_copy[len(bowser_rooms_copy)-1].exitAddress, 0xBD)
 
 
-def handle_boss_shuffle(patch, world: World):
+def handle_boss_shuffle(patch: SMWProcedurePatch, world: "SMWWorld"):
     if world.options.boss_shuffle == "simple":
         submap_boss_rooms_copy = submap_boss_rooms.copy()
         ow_boss_rooms_copy = ow_boss_rooms.copy()
@@ -644,11 +648,11 @@ def handle_boss_shuffle(patch, world: World):
                 patch.write_byte(ow_boss_rooms[i].exitAddressAlt, chosen_ow_boss.roomID)
 
 
-def snes_to_pc(address):
+def snes_to_pc(address: int):
     return (address & 0x7F0000) >> 1 | (address & 0x7FFF)
 
 
-def patch_rom(world: World, patch, player, active_level_dict: typing.Dict[int,int]) -> None:
+def patch_rom(world: "SMWWorld", patch: SMWProcedurePatch, player: int, active_level_dict: typing.Dict[int,int]) -> None:
     options_dict = {
         "seed": world.random.getrandbits(64),
         "music_shuffle": world.options.music_shuffle.value,
@@ -698,6 +702,16 @@ def patch_rom(world: World, patch, player, active_level_dict: typing.Dict[int,in
 
     # Handle Level Shuffle
     handle_level_shuffle(patch, active_level_dict)
+
+    if world.options.map_teleport_shuffle != "off":
+        handle_teleport_shuffle(patch, world)
+    
+    #if world.options.map_transition_shuffle:
+    if world.options.map_transition_shuffle:
+        handle_transition_shuffle(patch, world)
+    
+    if world.options.map_teleport_shuffle or world.options.map_transition_shuffle:
+        handle_silent_events(patch, world)
 
     # Handle Music Shuffle
     if world.options.music_shuffle != "none":

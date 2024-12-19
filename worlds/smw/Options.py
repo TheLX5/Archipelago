@@ -209,6 +209,26 @@ class LevelShuffle(Toggle):
     display_name = "Level Shuffle"
 
 
+class MapTeleportShuffle(Choice):
+    """
+    Whether map teleports (stars and pipes) are shuffled
+    """
+    display_name = "Map Teleport Shuffle"
+    option_off = 0
+    option_on_only_stars = 1
+    option_on_only_pipes = 2
+    option_on_both_same_type = 3
+    option_on_both_mix = 4
+    default = 0
+
+
+class MapTransitionShuffle(Toggle):
+    """
+    Wheter map transitions are shuffled
+    """
+    display_name = "Map Transition Shuffle"
+    
+
 class ExcludeSpecialZone(Toggle):
     """
     If active, this option will prevent any progression items from being placed in Special Zone levels.
@@ -281,6 +301,9 @@ class PersistentTrapBehavior(Choice):
     option_gone_after_room_load = 0
     option_gone_after_map_load = 1
     option_gone_after_level_clear = 2
+    option_gone_after_dying_once = 3
+    option_gone_after_dying_twice = 4
+    option_gone_after_dying_thrice = 5
     default = 0
 
 
@@ -495,6 +518,8 @@ smw_option_groups = [
     ]),
     OptionGroup("Level Shuffling", [
         LevelShuffle,
+        MapTeleportShuffle,
+        MapTransitionShuffle,
         ExcludeSpecialZone,
         BowserCastleDoors,
         BowserCastleRooms,
@@ -545,6 +570,8 @@ class SMWOptions(PerGameCommonOptions):
     bowser_castle_doors: BowserCastleDoors
     bowser_castle_rooms: BowserCastleRooms
     level_shuffle: LevelShuffle
+    map_teleport_shuffle: MapTeleportShuffle
+    map_transition_shuffle: MapTransitionShuffle
     exclude_special_zone: ExcludeSpecialZone
     boss_shuffle: BossShuffle
     swap_donut_gh_exits: SwapDonutGhostHouseExits

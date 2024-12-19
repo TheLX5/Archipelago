@@ -21,6 +21,7 @@ from .Presets import smw_options_presets
 from .Regions import create_regions, connect_regions
 from .Rom import patch_rom, SMWProcedurePatch, USHASH
 from .Rules import set_rules
+from .Teleports import generate_entrance_rando
 
 
 class SMWSettings(settings.Group):
@@ -95,6 +96,8 @@ class SMWWorld(World):
             "energy_link",
         )
         slot_data["active_levels"] = self.active_level_dict
+        slot_data["teleport_pairs"] = self.teleport_pairs
+        slot_data["transition_pairs"] = self.transition_pairs
 
         return slot_data
 
@@ -102,6 +105,16 @@ class SMWWorld(World):
         if self.options.early_climb:
             self.multiworld.local_early_items[self.player][ItemName.mario_climb] = 1
         
+        self.teleport_data = dict()
+        self.teleport_pairs = dict()
+        self.reverse_teleport_pairs = dict()
+        self.cached_connections = dict()
+        self.transition_pairs = dict()
+        self.reverse_transition_pairs = dict()
+        self.transition_data = dict()
+        
+        generate_entrance_rando(self)
+
         self.active_level_dict = dict(zip(generate_level_list(self), full_level_list))
 
         if hasattr(self.multiworld, "generation_is_fake"):
@@ -110,13 +123,19 @@ class SMWWorld(World):
                     slot_data = self.multiworld.re_gen_passthrough["Super Mario World"]
                     for x,y in slot_data["active_levels"].items():
                         self.active_level_dict[int(x)] = y
+                    self.teleport_pairs = slot_data["teleport_pairs"]
+                    self.transition_pairs = slot_data["transition_pairs"]
 
 
     def interpret_slot_data(self, slot_data):
         local_active_levels = dict()
         for x, y in slot_data["active_levels"].items():
             local_active_levels[x] = y
-        return {"active_levels": local_active_levels}
+        return {
+            "active_levels": local_active_levels, 
+            "teleport_pairs": slot_data["teleport_pairs"],
+            "transition_pairs": slot_data["transition_pairs"],
+        }
     
 
     def create_regions(self):
@@ -131,11 +150,14 @@ class SMWWorld(World):
         connect_regions(self, self.active_level_dict)
 
         # Add Boss Token amount requirements for Worlds
-        add_rule(self.multiworld.get_region(LocationName.donut_plains_1_tile, self.player).entrances[0], lambda state: state.has(ItemName.koopaling, self.player, 1))
-        add_rule(self.multiworld.get_region(LocationName.vanilla_dome_1_tile, self.player).entrances[0], lambda state: state.has(ItemName.koopaling, self.player, 2))
-        add_rule(self.multiworld.get_region(LocationName.forest_of_illusion_1_tile, self.player).entrances[0], lambda state: state.has(ItemName.koopaling, self.player, 4))
-        add_rule(self.multiworld.get_region(LocationName.chocolate_island_1_tile, self.player).entrances[0], lambda state: state.has(ItemName.koopaling, self.player, 5))
-        add_rule(self.multiworld.get_region(LocationName.valley_of_bowser_1_tile, self.player).entrances[0], lambda state: state.has(ItemName.koopaling, self.player, 6))
+        add_rule(self.multiworld.get_region(LocationName.yi_to_dp, self.player).entrances[0], lambda state: state.has(ItemName.koopaling, self.player, 1))
+        #add_rule(self.multiworld.get_region(LocationName.vanilla_dome_1_tile, self.player).entrances[0], lambda state: state.has(ItemName.koopaling, self.player, 2))
+        #add_rule(self.multiworld.get_region(LocationName.forest_of_illusion_1_tile, self.player).entrances[0], lambda state: state.has(ItemName.koopaling, self.player, 4))
+        #add_rule(self.multiworld.get_region(LocationName.chocolate_island_1_tile, self.player).entrances[0], lambda state: state.has(ItemName.koopaling, self.player, 5))
+        #add_rule(self.multiworld.get_region(LocationName.valley_of_bowser_1_tile, self.player).entrances[0], lambda state: state.has(ItemName.koopaling, self.player, 6))
+
+        #from Utils import visualize_regions
+        #visualize_regions(self.multiworld.get_region("Menu", self.player), f"./plants/world_{self.player}.puml")
 
         exclusion_pool = set()
         if self.options.exclude_special_zone:
@@ -334,6 +356,22 @@ class SMWWorld(World):
                     break
 
             hint_data[self.player] = er_hint_data
+
+
+    def write_spoiler(self, spoiler_handle: typing.TextIO) -> None:
+        print (self.options.map_teleport_shuffle)
+        if self.options.map_teleport_shuffle.value != 0:
+            spoiler_handle.write(f"\nSuper Mario World map teleport shuffle destinations for {self.multiworld.player_name[self.player]}:\n")
+            
+            for entrance, exit in self.teleport_pairs.items():
+                spoiler_handle.write(f"    {entrance} -> {exit}\n")
+
+        if self.options.map_transition_shuffle.value != 0:
+            spoiler_handle.write(f"\nSuper Mario World map transition shuffle destinations for {self.multiworld.player_name[self.player]}:\n")
+        
+            for entrance, exit in self.transition_pairs.items():
+                spoiler_handle.write(f"    {entrance[13:]} -> {exit[13:]}\n")
+
 
     def create_item(self, name: str, force_non_progression=False) -> Item:
         data = item_table[name]
