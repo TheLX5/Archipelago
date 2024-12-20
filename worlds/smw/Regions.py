@@ -782,7 +782,6 @@ def create_regions(world: "SMWWorld", active_locations):
         vob_from_ci,
     ]
 
-
     if world.options.dragon_coin_checks:
         add_location_to_region(multiworld, player, active_locations, LocationName.yoshis_island_1_region, LocationName.yoshis_island_1_dragon,
                                lambda state: (state.has(ItemName.mario_spin_jump, player) and
@@ -2213,7 +2212,7 @@ def connect_regions(world: "SMWWorld", level_to_tile_dict):
     # Connect teleports
     for entrance, exit in world.teleport_pairs.items():
         connect(world, entrance, exit)
-        if LocationName.yoshis_house_tile in exit:
+        if exit != LocationName.yoshis_house_tile:
             connect(world, exit, entrance)
 
     # Connect transition destination "tiles" with level tiles

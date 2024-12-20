@@ -9,7 +9,7 @@ import copy
 
 from BaseClasses import Item, MultiWorld, Tutorial, ItemClassification
 from worlds.AutoWorld import WebWorld, World
-from worlds.generic.Rules import add_rule, exclusion_rules
+from worlds.generic.Rules import set_rule, exclusion_rules
 
 from .Client import SMWSNIClient
 from .Items import SMWItem, ItemData, item_table, junk_table
@@ -112,6 +112,28 @@ class SMWWorld(World):
         self.transition_pairs = dict()
         self.reverse_transition_pairs = dict()
         self.transition_data = dict()
+        self.boss_token_requirements = {
+            LocationName.yi_to_ysp: 0,
+            LocationName.yi_to_dp: 1,
+            LocationName.dp_to_vd: 2,
+            LocationName.tw_to_foi: 4,
+            LocationName.foi_to_ci: 4,
+            LocationName.foi_to_sr: 4,
+            LocationName.ci_to_vob: 6,
+            LocationName.donut_plains_star_road: 1,
+            LocationName.vanilla_dome_star_road: 2,
+            LocationName.twin_bridges_star_road: 3,
+            LocationName.forest_star_road: 5,
+            LocationName.valley_star_road: 6,
+            LocationName.star_road_special: 1,
+            LocationName.special_complete: 1,
+            LocationName.donut_plains_entrance_pipe: 1,
+            LocationName.valley_donut_entrance_pipe: 1,
+            LocationName.vanilla_dome_top_entrance_pipe: 2,
+            LocationName.vanilla_dome_bottom_entrance_pipe: 3,
+            LocationName.chocolate_island_entrance_pipe: 5,
+            LocationName.valley_chocolate_entrance_pipe: 5,
+        }
         
         generate_entrance_rando(self)
 
@@ -150,11 +172,12 @@ class SMWWorld(World):
         connect_regions(self, self.active_level_dict)
 
         # Add Boss Token amount requirements for Worlds
-        add_rule(self.multiworld.get_region(LocationName.yi_to_dp, self.player).entrances[0], lambda state: state.has(ItemName.koopaling, self.player, 1))
-        #add_rule(self.multiworld.get_region(LocationName.vanilla_dome_1_tile, self.player).entrances[0], lambda state: state.has(ItemName.koopaling, self.player, 2))
-        #add_rule(self.multiworld.get_region(LocationName.forest_of_illusion_1_tile, self.player).entrances[0], lambda state: state.has(ItemName.koopaling, self.player, 4))
-        #add_rule(self.multiworld.get_region(LocationName.chocolate_island_1_tile, self.player).entrances[0], lambda state: state.has(ItemName.koopaling, self.player, 5))
-        #add_rule(self.multiworld.get_region(LocationName.valley_of_bowser_1_tile, self.player).entrances[0], lambda state: state.has(ItemName.koopaling, self.player, 6))
+        all_pairs = {**self.teleport_pairs, **self.transition_pairs}
+        for entrance, tokens in self.boss_token_requirements.items():
+            if entrance == LocationName.yi_to_ysp:
+                tokens = 0
+            set_rule(self.multiworld.get_entrance(f"{entrance} -> {all_pairs[entrance]}", self.player), 
+                     lambda state, t=tokens: state.has(ItemName.koopaling, self.player, t))
 
         #from Utils import visualize_regions
         #visualize_regions(self.multiworld.get_region("Menu", self.player), f"./plants/world_{self.player}.puml")
@@ -359,7 +382,6 @@ class SMWWorld(World):
 
 
     def write_spoiler(self, spoiler_handle: typing.TextIO) -> None:
-        print (self.options.map_teleport_shuffle)
         if self.options.map_teleport_shuffle.value != 0:
             spoiler_handle.write(f"\nSuper Mario World map teleport shuffle destinations for {self.multiworld.player_name[self.player]}:\n")
             

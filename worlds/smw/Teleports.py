@@ -1,3 +1,5 @@
+from worlds.generic.Rules import add_rule
+
 from .Names import LocationName
 
 from typing import TYPE_CHECKING, Dict, List
@@ -246,6 +248,29 @@ region_excluded_destinations: Dict[str, List[str]] = {
     ],
 }
 
+region_boss_token_additions = {
+    LocationName.yi_to_ysp: 0,
+    LocationName.yi_to_dp: 1,
+    LocationName.dp_to_vd: 1,
+    LocationName.tw_to_foi: 1,
+    LocationName.foi_to_ci: 0,
+    LocationName.foi_to_sr: 0,
+    LocationName.ci_to_vob: 1,
+    LocationName.donut_plains_star_road: 0,
+    LocationName.vanilla_dome_star_road: 0,
+    LocationName.twin_bridges_star_road: 0,
+    LocationName.forest_star_road: 1,
+    LocationName.valley_star_road: 0,
+    LocationName.star_road_special: 0,
+    LocationName.special_complete: 0,
+    LocationName.donut_plains_entrance_pipe: 0,
+    LocationName.valley_donut_entrance_pipe: 0,
+    LocationName.vanilla_dome_top_entrance_pipe: 0,
+    LocationName.vanilla_dome_bottom_entrance_pipe: 1,
+    LocationName.chocolate_island_entrance_pipe: 1,
+    LocationName.valley_chocolate_entrance_pipe: 0,
+}
+
 
 def generate_entrance_rando(world: "SMWWorld"):
     # This shuffle method walks through every valid exit (starting from YI house) to assign new exits to unconnected entrances
@@ -264,6 +289,28 @@ def generate_entrance_rando(world: "SMWWorld"):
     local_region_mapping = {**region_mapping}
     local_excluded_destinations = {**region_excluded_destinations}
     prefilled_exits: Dict[str, str] = {}
+    boss_token_requirements = {
+        LocationName.yi_to_ysp: 11,
+        LocationName.yi_to_dp: 11,
+        LocationName.dp_to_vd: 11,
+        LocationName.tw_to_foi: 11,
+        LocationName.foi_to_ci: 11,
+        LocationName.foi_to_sr: 11,
+        LocationName.ci_to_vob: 11,
+        LocationName.donut_plains_star_road: 11,
+        LocationName.vanilla_dome_star_road: 11,
+        LocationName.twin_bridges_star_road: 11,
+        LocationName.forest_star_road: 11,
+        LocationName.valley_star_road: 11,
+        LocationName.star_road_special: 11,
+        LocationName.special_complete: 11,
+        LocationName.donut_plains_entrance_pipe: 11,
+        LocationName.valley_donut_entrance_pipe: 11,
+        LocationName.vanilla_dome_top_entrance_pipe: 11,
+        LocationName.vanilla_dome_bottom_entrance_pipe: 11,
+        LocationName.chocolate_island_entrance_pipe: 11,
+        LocationName.valley_chocolate_entrance_pipe: 11,
+    }
 
     if world.options.exclude_special_zone:
         prefilled_exits[LocationName.star_road_special] = LocationName.special_star_road
@@ -323,8 +370,6 @@ def generate_entrance_rando(world: "SMWWorld"):
     for entrance, exit in prefilled_exits.items():
         local_mapping[entrance] = exit
 
-    #print (local_mapping)
-
     used_exits = list(prefilled_exits.values())
 
     swap_count = 0
@@ -332,13 +377,10 @@ def generate_entrance_rando(world: "SMWWorld"):
     while len(processed_exits) != len(local_region_mapping.keys()):
         if len(next_exits) == 0:
             # Swap exits if we haven't met the processed exits goal
-            #print ("-------- SWAP ----------")
             unreached_transitions = [x for x in smw_transition_pairs.values() if x not in local_mapping.values()]
             unreached_teleports = [x for x in teleport_pairs.values() if x not in local_mapping.values()]
             unreached_exits = unreached_transitions + unreached_teleports
-            #print ("UNREACHED: ", unreached_exits)
             if len(unreached_exits) == 0 or swap_count >= 10:
-                #print (" ########################################################## RESTARTING SHUFFLE ##########################################################")
                 local_mapping = {}
                 for entrance, exit in prefilled_exits.items():
                     local_mapping[entrance] = exit
@@ -364,7 +406,6 @@ def generate_entrance_rando(world: "SMWWorld"):
             swap_candidate = world.random.choice(candidates)
             next_exits.append(swap_candidate)
             processed_exits.remove(swap_candidate)
-            #print ("QUEUE: ", next_exits)
             
             if len(processed_exits) >= 18:
                 swap_count += 1
@@ -378,10 +419,9 @@ def generate_entrance_rando(world: "SMWWorld"):
                         processed_exits.remove(value)
                     if value in used_exits:
                         used_exits.remove(value)
-
+        
+        # Processes the current exits
         for exit in next_exits:
-            #print ("------------ EXIT ----------------")
-            #print (f"{exit}")
             next_exits.remove(exit)
             if exit in processed_exits:
                 continue
@@ -389,7 +429,6 @@ def generate_entrance_rando(world: "SMWWorld"):
             for entrance in entrances:
                 if entrance in local_mapping.keys():
                     selected_exit = local_mapping[entrance]
-                    #print (f"ENTRANCE IS FULFILLED: {entrance} -> {local_mapping[entrance]}")
                 else:
                     banned_exits = used_exits.copy()
                     banned_exits.append(exit)
@@ -404,24 +443,22 @@ def generate_entrance_rando(world: "SMWWorld"):
                                 possible_exits = [x for x in smw_star_pairs.values() if x not in banned_exits]
                         else:
                             possible_exits = [x for x in teleport_pairs.values() if x not in banned_exits]
-                    #print (exit, " -> ", entrance, " -> ", possible_exits)
                     if len(possible_exits) == 0:
                         continue
                     selected_exit = world.random.choice(possible_exits)
-                    #print ("SELECTED: ", entrance, " -> ", selected_exit)
                 used_exits.append(selected_exit)
                 local_mapping[entrance] = selected_exit
                 next_exits.append(selected_exit)
 
             processed_exits.append(exit)
-            
-        #print (len(processed_exits), len(local_region_mapping.keys()))
 
         # Reachabilty check
         if len(processed_exits) == len(local_region_mapping.keys()):
-            #print (" ########################################################## REACHABILTY CHECK ##########################################################")
             remaining_exits = list(local_region_mapping.keys())
             check_next_exits = [LocationName.yoshis_house_tile]
+            processed_entrances = []
+            add_tokens = {}
+            boss_tokens = 0
 
             while len(remaining_exits) != 0:
                 cache_exits = remaining_exits.copy()
@@ -434,16 +471,20 @@ def generate_entrance_rando(world: "SMWWorld"):
                         if entrance not in local_mapping.keys():
                             continue
                         check_next_exits.append(local_mapping[entrance])
-                        #print (exit, " -> ", entrance, " -> ", local_mapping[entrance])
-                    #print ("PENDING: ", check_next_exits, "\n")
+                        if entrance not in processed_entrances:
+                            boss_tokens += region_boss_token_additions[entrance]
+                            add_tokens[entrance] = boss_tokens
+                        processed_entrances.append(entrance)
+                    
+                    if len(add_tokens) != 0:
+                        tokens = max(add_tokens.values())
+                        for entrance in add_tokens.keys():
+                            boss_token_requirements[entrance] = min(tokens, boss_token_requirements[entrance])
+                        add_tokens.clear()
 
                 if len(cache_exits) == len(remaining_exits) and len(cache_exits) != 0:
                     # EMERGENCY SWAP
                     # Marks isolated exits as unreachable
-                    #print ("------------ EMERGENCY ----------------")
-                    #print ("PROCESSED_EXITS: ", processed_exits)
-                    #print ("USED_EXITS: ", used_exits)
-                    #print ("REMAINING_EXITS: ", remaining_exits)
                     processed_exits = [x for x in processed_exits if x not in remaining_exits]
                     used_exits = [x for x in used_exits if x not in remaining_exits]
                     emergency_list = [x for x in processed_exits if x not in prefilled_exits.values()]
@@ -454,20 +495,12 @@ def generate_entrance_rando(world: "SMWWorld"):
                         next_exits = [LocationName.yoshis_house_tile]
                         processed_exits = []
                         used_exits = list(prefilled_exits.values())
-                        #print ("PROCESSED_EXITS: ", processed_exits)
-                        #print ("USED_EXITS: ", used_exits)
-                        #print ("LOCAL_MAPPING: ", local_mapping)
-                        #print (" ########################################################## RESTARTING SHUFFLE ##########################################################")
                         break
 
                     emergency_swap = world.random.choice(emergency_list)
-                    #print ("EMERGENCY_SWAP: ", emergency_swap)
                     processed_exits.remove(emergency_swap)
                     if emergency_swap in used_exits:
                         used_exits.remove(emergency_swap)
-                    #print ("PROCESSED_EXITS: ", processed_exits)
-                    #print ("USED_EXITS: ", used_exits)
-                    #print ("LOCAL_MAPPING: ", local_mapping)
                     for exit, entrances in local_region_mapping.items():
                         if exit not in processed_exits:
                             for entrance in entrances:
@@ -475,23 +508,18 @@ def generate_entrance_rando(world: "SMWWorld"):
                                     continue
                                 value = local_mapping.pop(entrance)
                                 next_exits.append(value)
-                    #print ("LOCAL_MAPPING: ", local_mapping)
-                    #print (" ########################################################## RESTART REQUIRED ##########################################################")
-                    break                    
-                
-            #print (" ########################################################## REACHABILTY END ##########################################################")
+                    break
 
     for entrance, exit in local_mapping.items():
-        #print (entrance, " -> " ,exit)
         if "Transition - " in entrance:
             world.transition_pairs[entrance] = exit
         else:
             world.teleport_pairs[entrance] = exit
 
+    world.boss_token_requirements = {**boss_token_requirements}
+
     world.reverse_teleport_pairs = {y: x for x, y in world.teleport_pairs.items()}
     world.reverse_transition_pairs = {y: x for x, y in world.transition_pairs.items()}
-    #print ("TELEPORTS: ", world.teleport_pairs)
-    #print ("TRANSITIONS: ", world.transition_pairs)
 
 
 def handle_silent_events(patch: "SMWProcedurePatch", world: "SMWWorld"):
@@ -500,7 +528,6 @@ def handle_silent_events(patch: "SMWProcedurePatch", world: "SMWWorld"):
             continue
         offset = 0x8888D + smw_offscreen_event_indexes[connection][1]
         size = smw_offscreen_event_indexes[connection][2]
-        #print (f"{offset:06X} ({smw_offscreen_event_indexes[connection][1]:02X}) | {event_id:02X} x {size} | {connection}")
         patch.write_bytes(offset, bytearray([event_id for _ in range(size)]))
 
 
@@ -554,12 +581,10 @@ def handle_transition_shuffle(patch: "SMWProcedurePatch", world: "SMWWorld"):
         patch.write_byte(0x889D1 + offset, smw_transition_data[new_exit][8])
 
         if new_exit in smw_offscreen_event_indexes.keys():
-            #print (new_exit)
             offset = 0x8888D + smw_offscreen_event_indexes[new_exit][1]
             size = smw_offscreen_event_indexes[new_exit][2]
             patch.write_bytes(offset, bytearray([world.cached_connections[new_entrance] for _ in range(size)]))
 
-    #print (world.options.map_transition_shuffle, world.options.map_teleport_shuffle)
     patch.write_bytes(0x219AA, tokens)
     patch.write_bytes(0x219F0, extra_tokens)
     #patch.write_byte(0x2273, 0x00)
