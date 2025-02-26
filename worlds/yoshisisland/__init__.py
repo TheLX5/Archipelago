@@ -88,16 +88,6 @@ class YoshisIslandWorld(World):
         if not os.path.exists(rom_file):
             raise FileNotFoundError(rom_file)
 
-    def fill_slot_data(self) -> Dict[str, List[int]]:
-        return {
-            "world_1": self.world_1_stages,
-            "world_2": self.world_2_stages,
-            "world_3": self.world_3_stages,
-            "world_4": self.world_4_stages,
-            "world_5": self.world_5_stages,
-            "world_6": self.world_6_stages
-        }
-
     def write_spoiler_header(self, spoiler_handle: TextIO) -> None:
         spoiler_handle.write(f"Burt The Bashful's Boss Door:      {self.boss_order[0]}\n")
         spoiler_handle.write(f"Salvo The Slime's Boss Door:       {self.boss_order[1]}\n")
@@ -217,8 +207,77 @@ class YoshisIslandWorld(World):
         self.get_location("Ride Like The Wind: Gather Coins").place_locked_item(self.create_item("Bandit Consumables"))
 
     def generate_early(self) -> None:
+                
         setup_gamevars(self)
 
+        # Handle Universal Tracker support, doesn't do anything during regular generation
+        if hasattr(self.multiworld, "re_gen_passthrough"):
+            if "Yoshi's Island" in self.multiworld.re_gen_passthrough:
+                passthrough = self.multiworld.re_gen_passthrough["Yoshi's Island"]
+                self.world_1_stages = passthrough["world_1"]
+                self.world_2_stages = passthrough["world_2"]
+                self.world_3_stages = passthrough["world_3"]
+                self.world_4_stages = passthrough["world_4"]
+                self.world_5_stages = passthrough["world_5"]
+                self.world_6_stages = passthrough["world_6"]
+                self.castle_door = passthrough["castle_door"]
+                self.boss_order = passthrough["boss_order"]
+                self.options.starting_world.value = passthrough["starting_world"]
+                self.options.luigi_pieces_in_pool.value = passthrough["luigi_pieces_in_pool"]
+                self.options.luigi_pieces_required.value = passthrough["luigi_pieces_required"]
+                self.options.split_extras.value = passthrough["split_extras"]
+                self.options.split_bonus.value = passthrough["split_bonus"]
+                self.options.stage_logic.value = passthrough["stage_logic"]
+                self.options.item_logic.value = passthrough["item_logic"]
+                self.options.bowser_door_mode.value = passthrough["bowser_door_mode"]
+                self.options.extras_enabled.value = passthrough["extras_enabled"]
+                self.options.minigame_checks.value = passthrough["minigame_checks"]
+                self.options.shuffle_midrings.value = passthrough["shuffle_midrings"]
+                self.options.castle_open_condition.value = passthrough["castle_open_condition"]
+                self.options.castle_clear_condition.value = passthrough["castle_clear_condition"]
+                self.global_level_list = passthrough["global_level_list"]
+                self.options.goal.value = passthrough["goal"]
+                self.level_location_list = passthrough["level_location_list"] 
+                self.world_start_lv = passthrough["world_start_lv"]
+
+
+    def fill_slot_data(self) -> Dict[str, List[int]]:
+        slot_data = {
+            "world_1": self.world_1_stages,
+            "world_2": self.world_2_stages,
+            "world_3": self.world_3_stages,
+            "world_4": self.world_4_stages,
+            "world_5": self.world_5_stages,
+            "world_6": self.world_6_stages,
+        }
+
+        slot_data["castle_door"] = self.castle_door
+        slot_data["boss_order"] = self.boss_order
+        slot_data["level_location_list"] = self.level_location_list
+        slot_data["starting_world"] = self.options.starting_world.value
+        slot_data["luigi_pieces_in_pool"] = self.options.luigi_pieces_in_pool.value
+        slot_data["luigi_pieces_required"] = self.options.luigi_pieces_required.value
+        slot_data["split_extras"] = self.options.split_extras.value
+        slot_data["split_bonus"] = self.options.split_bonus.value
+        slot_data["stage_logic"] = self.options.stage_logic.value
+        slot_data["item_logic"] = self.options.item_logic.value
+        slot_data["bowser_door_mode"] = self.options.bowser_door_mode.value
+        slot_data["extras_enabled"] = self.options.extras_enabled.value
+        slot_data["minigame_checks"] = self.options.minigame_checks.value
+        slot_data["shuffle_midrings"] = self.options.shuffle_midrings.value
+        slot_data["castle_open_condition"] = self.options.castle_open_condition.value
+        slot_data["castle_clear_condition"] = self.options.castle_clear_condition.value
+        slot_data["global_level_list"] = self.global_level_list
+        slot_data["goal"] = self.options.goal.value
+        slot_data["world_start_lv"] = self.world_start_lv
+        slot_data["traps_enabled"] = self.options.traps_enabled.value
+        slot_data["trap_link"] = self.options.trap_link.value
+
+        return slot_data
+    
+    def interpret_slot_data(self, slot_data):
+        return slot_data
+    
     def get_excluded_items(self) -> Set[str]:
         excluded_items: Set[str] = set()
 

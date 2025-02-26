@@ -4,8 +4,10 @@ import typing
 import time
 from struct import pack
 
-from NetUtils import ClientStatus, color
+from NetUtils import ClientStatus, NetworkItem, color
 from worlds.AutoSNIClient import SNIClient
+from .Items import trap_value_to_name, trap_name_to_value
+from .Rom import item_values
 
 if typing.TYPE_CHECKING:
     from SNIClient import SNIContext
@@ -34,9 +36,20 @@ GOALFLAG = WRAM_START + 0x14B6
 VALID_GAME_STATES = [0x0F, 0x10, 0x2C]
 
 
+trap_list = [
+    0x302090,
+    0x302091,
+    0x302092,
+    0x302093,
+]
+
 class YoshisIslandSNIClient(SNIClient):
     game = "Yoshi's Island"
     patch_suffix = ".apyi"
+
+    def __init__(self):
+        super().__init__()
+        self.received_trap_link = None
 
     async def deathlink_kill_player(self, ctx: "SNIContext") -> None:
         from SNIClient import DeathState, snes_buffered_write, snes_flush_writes, snes_read
@@ -66,8 +79,14 @@ class YoshisIslandSNIClient(SNIClient):
         ctx.rom = rom_name
 
         death_link = await snes_read(ctx, DEATHLINK_ADDR, 1)
-        if death_link:
+        if death_link[0] & 0x01:
             await ctx.update_death_link(bool(death_link[0] & 0b1))
+
+        if death_link[0] & 0x80:
+            ctx.tags.add("TrapLink")
+
+        await ctx.send_msgs([{"cmd": "ConnectUpdate", "tags": ctx.tags}])
+
         return True
 
     async def game_watcher(self, ctx: "SNIContext") -> None:
@@ -93,7 +112,6 @@ class YoshisIslandSNIClient(SNIClient):
         elif item_received[0] > 0x00:
             return
 
-        from .Rom import item_values
         rom = await snes_read(ctx, YOSHISISLAND_ROMHASH_START, ROMHASH_SIZE)
         if rom != ctx.rom:
             ctx.rom = None
@@ -102,6 +120,9 @@ class YoshisIslandSNIClient(SNIClient):
         if goal_flag[0] != 0x00:
             await ctx.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}])
             ctx.finished_game = True
+
+        if "TrapLink" in ctx.tags:
+            await self.handle_trap_link(ctx)
 
         new_checks = []
         from .Rom import location_table
@@ -144,4 +165,70 @@ class YoshisIslandSNIClient(SNIClient):
                     new_item_count += increment
 
                 snes_buffered_write(ctx, WRAM_START + item_values[item.item][0], bytes([new_item_count]))
+
+                if "TrapLink" in ctx.tags and item.item in trap_value_to_name:
+                        await self.send_trap_link(ctx, trap_value_to_name[item.item])
+
         await snes_flush_writes(ctx)
+
+    async def handle_trap_link(self, ctx):
+        from SNIClient import snes_buffered_write, snes_flush_writes, snes_read
+        
+        if self.received_trap_link:
+            trap = self.received_trap_link
+            print (trap)
+            print ( not self.slot_data["traps_enabled"])
+            print (trap.item in trap_list)
+            if trap.item in trap_list and not self.slot_data["traps_enabled"]:
+                # Exclude processing traps if they're not in the pool
+                self.received_trap_link = None
+                return
+            
+            print (trap)
+            item_count = await snes_read(ctx, WRAM_START + item_values[trap.item][0], 0x1)
+            increment = item_values[trap.item][1]
+            new_item_count = item_count[0]
+            if increment > 1:
+                new_item_count = increment
+            else:
+                new_item_count += increment
+
+            snes_buffered_write(ctx, WRAM_START + item_values[trap.item][0], bytes([new_item_count]))
+            self.received_trap_link = None
+            
+            await snes_flush_writes(ctx)
+            
+    async def send_trap_link(self, ctx: SNIClient, trap_name: str):
+        if "TrapLink" not in ctx.tags or ctx.slot == None:
+            return
+
+        await ctx.send_msgs([{
+            "cmd": "Bounce", "tags": ["TrapLink"],
+            "data": {
+                "time": time.time(),
+                "source": ctx.player_names[ctx.slot],
+                "trap_name": trap_name
+            }
+        }])
+        snes_logger.info(f"Sent linked {trap_name}")
+
+    def on_package(self, ctx, cmd: str, args: dict):
+        super().on_package(ctx, cmd, args)
+
+        if cmd == "Connected":
+            self.slot_data = args.get("slot_data", None)
+
+        elif cmd == "Bounced":
+            if "tags" not in args:
+                return
+            
+            if not hasattr(self, "instance_id"):
+                self.instance_id = time.time()
+
+            source_name = args["data"]["source"]
+            if "TrapLink" in ctx.tags and "TrapLink" in args["tags"] and source_name != ctx.slot_info[ctx.slot].name:
+                trap_name: str = args["data"]["trap_name"]
+                if trap_name not in trap_name_to_value:
+                    return
+                
+                self.received_trap_link = NetworkItem(trap_name_to_value[trap_name], None, None)

@@ -112,6 +112,34 @@ trap_items: Tuple[str, ...] = (
     "Freeze Trap"
 )
 
+trap_value_to_name: Dict[int, str] = {
+    0x302090: "Fuzzy Trap",
+    0x302091: "Reversal Trap",
+    0x302092: "Darkness Trap",
+    0x302093: "Freeze Trap",
+}
+
+trap_name_to_value: Dict[str, int] = {
+    # Our native Traps
+    "Fuzzy Trap":           0x302090,
+    "Reversal Trap":        0x302091,
+    "Darkness Trap":        0x302092,
+    "Freeze Trap":          0x302093,
+
+    # Common other trap names
+    "Confuse Trap":         0x302090, # Fuzzy Trap
+    "Gravity Trap":         0x302090, # Fuzzy Trap
+    "Confound Trap":        0x302090, # Fuzzy Trap
+    "Confusion Trap":       0x302090, # Fuzzy Trap
+    "Chaos Control Trap":   0x302091, # Reversal Trap
+    "Reverse Trap":         0x302091, # Reversal Trap
+    "Stun Trap":            0x302093, # Freeze Trap
+    "Frozen Trap":          0x302093, # Freeze Trap
+    "Honey Trap":           0x302093, # Freeze Trap
+    "Eject Ability":        0x302092, # Darkness Trap
+    "Gooey Bag":            0x302092, # Darkness Trap
+}
+
 def get_item_names_per_category() -> Dict[str, Set[str]]:
     categories: Dict[str, Set[str]] = {}
 
