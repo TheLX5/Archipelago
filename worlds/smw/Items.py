@@ -27,14 +27,14 @@ junk_table = {
 }
 
 inventory_table = {
-    ItemName.mushroom_inventory:        ItemData(0xBC0020, False, False, True),
-    ItemName.fire_flower_inventory:     ItemData(0xBC0021, False, False, True),
-    ItemName.feather_inventory:         ItemData(0xBC0022, False, False, True),
-    ItemName.star_inventory:            ItemData(0xBC0023, False, False, True),
-    ItemName.green_yoshi_inventory:     ItemData(0xBC0024, False, False, True),
-    ItemName.red_yoshi_inventory:       ItemData(0xBC0025, False, False, True),
-    ItemName.blue_yoshi_inventory:      ItemData(0xBC0026, False, False, True),
-    ItemName.yellow_yoshi_inventory:    ItemData(0xBC0027, False, False, True),
+    ItemName.mushroom_inventory:        ItemData(0xBC0040, False, False, True),
+    ItemName.fire_flower_inventory:     ItemData(0xBC0041, False, False, True),
+    ItemName.feather_inventory:         ItemData(0xBC0042, False, False, True),
+    ItemName.star_inventory:            ItemData(0xBC0043, False, False, True),
+    ItemName.green_yoshi_inventory:     ItemData(0xBC0044, False, False, True),
+    ItemName.red_yoshi_inventory:       ItemData(0xBC0045, False, False, True),
+    ItemName.blue_yoshi_inventory:      ItemData(0xBC0046, False, False, True),
+    ItemName.yellow_yoshi_inventory:    ItemData(0xBC0047, False, False, True),
 }
 
 collectable_table = {
@@ -53,6 +53,7 @@ upgrade_table = {
     ItemName.p_balloon:           ItemData(0xBC000B, True),
     ItemName.super_star_active:   ItemData(0xBC000D, True),
     ItemName.special_world_clear: ItemData(0xBC001B, True),
+    ItemName.extra_defense:       ItemData(0xBC0020, False, False, True),
 }
 
 switch_palace_table = {
@@ -63,13 +64,18 @@ switch_palace_table = {
 }
 
 trap_table = {
-    ItemName.ice_trap:              ItemData(0xBC0013, False, True),
-    ItemName.stun_trap:             ItemData(0xBC0014, False, True),
-    ItemName.literature_trap:       ItemData(0xBC0015, False, True),
-    ItemName.timer_trap:            ItemData(0xBC0016, False, True),
-    ItemName.reverse_controls_trap: ItemData(0xBC001C, False, True),
-    ItemName.thwimp_trap:           ItemData(0xBC001D, False, True),
-    ItemName.fishin_trap:           ItemData(0xBC001E, False, True),
+    ItemName.ice_trap:              ItemData(0xBC0080, False, True),
+    ItemName.stun_trap:             ItemData(0xBC0081, False, True),
+    ItemName.literature_trap:       ItemData(0xBC0082, False, True),
+    ItemName.timer_trap:            ItemData(0xBC0083, False, True),
+    ItemName.reverse_controls_trap: ItemData(0xBC0084, False, True),
+    ItemName.thwimp_trap:           ItemData(0xBC0085, False, True),
+    ItemName.fishin_trap:           ItemData(0xBC0086, False, True),
+    ItemName.screen_flip_trap:      ItemData(0xBC0087, False, True),
+    ItemName.sticky_floor_trap:     ItemData(0xBC0088, False, True),
+    ItemName.sticky_hands_trap:     ItemData(0xBC0089, False, True),
+    ItemName.pixelate_trap:         ItemData(0xBC008A, False, True),
+    ItemName.spotlight_trap:        ItemData(0xBC008B, False, True),
 }
 
 event_table = {
@@ -89,3 +95,54 @@ item_table = {
 }
 
 lookup_id_to_name: typing.Dict[int, str] = {data.code: item_name for item_name, data in item_table.items() if data.code}
+
+trap_value_to_name: typing.Dict[int, str] = {
+    0xBC0080: ItemName.ice_trap,
+    0xBC0081: ItemName.stun_trap,
+    0xBC0082: ItemName.literature_trap,
+    0xBC0083: ItemName.timer_trap,
+    0xBC0084: ItemName.reverse_controls_trap,
+    0xBC0085: ItemName.thwimp_trap,
+    0xBC0086: ItemName.fishin_trap,
+    0xBC0087: ItemName.screen_flip_trap,
+    0xBC0088: ItemName.sticky_floor_trap,
+    0xBC0089: ItemName.sticky_hands_trap,
+    0xBC008A: ItemName.pixelate_trap,
+    0xBC008B: ItemName.spotlight_trap,
+}
+
+trap_name_to_value: typing.Dict[str, int] = {
+    # Our native Traps
+    ItemName.ice_trap:              0xBC0080,
+    ItemName.stun_trap:             0xBC0081,
+    ItemName.literature_trap:       0xBC0082,
+    ItemName.timer_trap:            0xBC0083,
+    ItemName.reverse_controls_trap: 0xBC0084,
+    ItemName.thwimp_trap:           0xBC0085,
+    ItemName.fishin_trap:           0xBC0086,
+    ItemName.screen_flip_trap:      0xBC0087,
+    ItemName.sticky_floor_trap:     0xBC0088,
+    ItemName.sticky_hands_trap:     0xBC0089,
+    ItemName.pixelate_trap:         0xBC008A,
+    ItemName.spotlight_trap:        0xBC008B,
+
+    # Common other trap names
+    "Chaos Control Trap": 0xBC0081,  # Stun Trap
+    "Confuse Trap":       0xBC0084,  # Reverse Trap
+    "Exposition Trap":    0xBC0082,  # Literature Trap
+    "Cutscene Trap":      0xBC0082,  # Literature Trap
+    "Freeze Trap":        0xBC0081,  # Stun Trap
+    "Frozen Trap":        0xBC0081,  # Stun Trap
+    "Paralyze Trap":      0xBC0081,  # Stun Trap
+    "Reversal Trap":      0xBC0084,  # Reverse Trap
+    "Fuzzy Trap":         0xBC0084,  # Reverse Trap
+    "Confound Trap":      0xBC0084,  # Reverse Trap
+    "Confusion Trap":     0xBC0084,  # Reverse Trap
+    "Police Trap":        0xBC0085,  # Thwimp Trap
+    "Buyon Trap":         0xBC0085,  # Thwimp Trap
+    "Gooey Bag":          0xBC0085,  # Thwimp Trap
+    "TNT Barrel Trap":    0xBC0085,  # Thwimp Trap
+    "Honey Trap":         0xBC0088,  # Sticky Floor Trap
+    "Slowness Trap":      0xBC0088,  # Sticky Floor Trap
+    "Darkness Trap":      0xBC008B,  # Spotlight Trap
+}

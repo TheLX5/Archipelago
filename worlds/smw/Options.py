@@ -295,16 +295,15 @@ class InventoryFillPercentage(Range):
 
 class PersistentTrapBehavior(Choice):
     """
-    Alters the despawn behavior of Ice, Reverse and Fishing traps.
+    Determines the behavior of Ice, Reverse, Screen Flip, Sticky Hands, Pixelate and Spotlight traps
     """
     display_name = "Persistent Trap Behavior"
-    option_gone_after_room_load = 0
-    option_gone_after_map_load = 1
-    option_gone_after_level_clear = 2
-    option_gone_after_dying_once = 3
-    option_gone_after_dying_twice = 4
-    option_gone_after_dying_thrice = 5
-    default = 0
+    option_gone_after_room_load = 0x01
+    option_gone_after_map_load = 0x02
+    option_gone_after_dying = 0x04
+    option_gone_after_being_hurt = 0x08
+    option_gone_after_level_clear = 0x10
+    default = 1
 
 
 class BaseTrapWeight(Choice):
@@ -363,6 +362,41 @@ class ThwimpTrapWeight(BaseTrapWeight):
 class FishinBooTrapWeight(BaseTrapWeight):
     """
     Likelihood of a receiving a trap which causes a Fishin' Boo to spawn above the player
+    """
+    display_name = "Fishin' Boo Trap Weight"
+
+
+class ScreenFlipTrapWeight(BaseTrapWeight):
+    """
+    Likelihood of a receiving a trap which causes the screen to flip vertically
+    """
+    display_name = "Fishin' Boo Trap Weight"
+
+    
+class StickyFloorTrapWeight(BaseTrapWeight):
+    """
+    Likelihood of a receiving a trap which causes the floor become sticky
+    """
+    display_name = "Fishin' Boo Trap Weight"
+
+    
+class StickyHandsTrapWeight(BaseTrapWeight):
+    """
+    Likelihood of a receiving a trap which causes the player's hands become sticky
+    """
+    display_name = "Fishin' Boo Trap Weight"
+
+    
+class PixelateTrapWeight(BaseTrapWeight):
+    """
+    Likelihood of a receiving a trap which causes a the entire screen become pixelated
+    """
+    display_name = "Fishin' Boo Trap Weight"
+    
+
+class SpotlightTrapWeight(BaseTrapWeight):
+    """
+    Likelihood of a receiving a trap which causes a spotlight to appear on the player's position
     """
     display_name = "Fishin' Boo Trap Weight"
 
@@ -502,6 +536,20 @@ class EnergyLink(DefaultOnToggle):
     display_name = "Energy Link"
 
 
+class RingLink(Toggle):
+    """
+    Whether your in-level coin gain/loss is linked to other players
+    """
+    display_name = "Ring Link"
+
+
+class TrapLink(Toggle):
+    """
+    Whether your received traps are linked to other players
+    """
+    display_name = "Trap Link"
+
+
 smw_option_groups = [
     OptionGroup("Goal Options", [
         Goal,
@@ -538,6 +586,11 @@ smw_option_groups = [
         ReverseTrapWeight,
         ThwimpTrapWeight,
         FishinBooTrapWeight,
+        ScreenFlipTrapWeight,
+        StickyFloorTrapWeight,
+        StickyHandsTrapWeight,
+        PixelateTrapWeight,
+        SpotlightTrapWeight,
     ]),
     OptionGroup("Aesthetics", [
         DisplayReceivedItemPopups,
@@ -558,6 +611,8 @@ smw_option_groups = [
 @dataclass
 class SMWOptions(PerGameCommonOptions):
     death_link: DeathLink
+    ring_link: RingLink
+    trap_link: TrapLink
     goal: Goal
     bosses_required: BossesRequired
     max_yoshi_egg_cap: NumberOfYoshiEggs
@@ -589,6 +644,11 @@ class SMWOptions(PerGameCommonOptions):
     reverse_trap_weight: ReverseTrapWeight
     thwimp_trap_weight: ThwimpTrapWeight
     fishin_trap_weight: FishinBooTrapWeight
+    screen_flip_trap_weight: ScreenFlipTrapWeight
+    sticky_floor_trap_weight: StickyFloorTrapWeight
+    sticky_hands_trap_weight: StickyHandsTrapWeight
+    pixelate_trap_weight: PixelateTrapWeight
+    spotlight_trap_weight: SpotlightTrapWeight
     autosave: Autosave
     early_climb: EarlyClimb
     overworld_speed: OverworldSpeed
@@ -599,3 +659,4 @@ class SMWOptions(PerGameCommonOptions):
     overworld_palette_shuffle: OverworldPaletteShuffle
     starting_life_count: StartingLifeCount
     energy_link: EnergyLink
+

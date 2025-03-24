@@ -1,7 +1,7 @@
 # Super Mario World - Changelog
 
 
-## v2.1
+## v3.0
 
 ### Features:
 
@@ -9,7 +9,11 @@
 	- Shuffle pipe and star destinations
 	- Shuffle map transitions
 - New inventory system that allows you to use a powerup before entering a level
+	- You can gain those items from the multiworld or from the level goals
 - New Items
+	- Progressive Swim
+	- Progressive Super Star
+	- Extra Defense
 	- Inventory Mushroom
 	- Inventory Fire Flower
 	- Inventory Feather
@@ -20,15 +24,21 @@
 	- Inventory Blue Yoshi
 - New traps
 	- Fishin' Boo Trap
+	- Screen Flip Trap
+	- Sticky Hands Trap
+	- Sticky Floor Trap
+	- Pixelate Trap
+	- Spotlight Trap
 - EnergyLink support
 	- Deposit energy by collecting coins in levels
 	- Use energy to purchase inventory items
 - Blocks with coins and powerups can be kept collected after hitting them once
 	- Makes the game harder on subsequent visits to any level
-- Ice, Reverse and Fishing traps can be altered to despawn on certain events
-	- Gone on room load 
+- Persisting traps can be altered to despawn on certain events
+	- Gone on room load
 	- Gone on map load
-	- Gone after beating a level
+	- Gone after dying
+	- Gone after being hurt
 - New options: 
 	- `energy_link`
 	- `location_visual_indicator`
@@ -43,12 +53,14 @@
 
 - New appareances for blocks, 3-Up Moons and Dragon Coins when they're enabled as valid locations
 - Current item box contents are displayed during the map gameplay
+- Made Swim a progressive item; the second upgrade allows for faster horizontal swimming
 - Added location groups
 
 ### Bug Fixes:
 
 - Several logic tweaks/fixes
 - Some levels received adjustments to their vertical scroll setting
+- Ice Trap is now more slippery
 
 
 

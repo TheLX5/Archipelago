@@ -20,7 +20,7 @@ from .Options import SMWOptions, smw_option_groups
 from .Presets import smw_options_presets
 from .Regions import create_regions, connect_regions
 from .Rom import patch_rom, SMWProcedurePatch, USHASH
-from .Rules import set_rules
+from .Rules import SMWOriginalRules
 from .Teleports import generate_entrance_rando
 
 
@@ -98,13 +98,32 @@ class SMWWorld(World):
         slot_data["active_levels"] = self.active_level_dict
         slot_data["teleport_pairs"] = self.teleport_pairs
         slot_data["transition_pairs"] = self.transition_pairs
+        slot_data["trap_weights"] = self.output_trap_weights()
 
         return slot_data
 
+    def output_trap_weights(self) -> typing.Dict[int, int]:
+        trap_data = {}
+
+        trap_data[0xBC0080] = self.options.ice_trap_weight.value
+        trap_data[0xBC0081] = self.options.stun_trap_weight.value
+        trap_data[0xBC0082] = self.options.literature_trap_weight.value
+        trap_data[0xBC0083] = self.options.timer_trap_weight.value
+        trap_data[0xBC0084] = self.options.reverse_trap_weight.value
+        trap_data[0xBC0085] = self.options.thwimp_trap_weight.value
+        trap_data[0xBC0086] = self.options.fishin_trap_weight.value
+        trap_data[0xBC0087] = self.options.screen_flip_trap_weight.value
+        trap_data[0xBC0088] = self.options.sticky_floor_trap_weight.value
+        trap_data[0xBC0089] = self.options.sticky_hands_trap_weight.value
+        trap_data[0xBC008A] = self.options.pixelate_trap_weight.value
+        trap_data[0xBC008B] = self.options.spotlight_trap_weight.value
+
+        return trap_data
+    
     def generate_early(self):
         if self.options.early_climb:
             self.multiworld.local_early_items[self.player][ItemName.mario_climb] = 1
-        
+
         self.teleport_data = dict()
         self.teleport_pairs = dict()
         self.reverse_teleport_pairs = dict()
@@ -112,6 +131,8 @@ class SMWWorld(World):
         self.transition_pairs = dict()
         self.reverse_transition_pairs = dict()
         self.transition_data = dict()
+        self.local_mapping = dict()
+        self.local_region_mapping = dict()
         self.boss_token_requirements = {
             LocationName.yi_to_ysp: 0,
             LocationName.yi_to_dp: 1,
@@ -208,19 +229,20 @@ class SMWWorld(World):
 
         itempool += [self.create_item(ItemName.mario_run)]
         itempool += [self.create_item(ItemName.mario_carry)]
-        itempool += [self.create_item(ItemName.mario_swim)]
+        itempool += [self.create_item(ItemName.mario_swim) for _ in range(2)]
         itempool += [self.create_item(ItemName.mario_spin_jump)]
         itempool += [self.create_item(ItemName.mario_climb)]
         itempool += [self.create_item(ItemName.yoshi_activate)]
         itempool += [self.create_item(ItemName.p_switch)]
         itempool += [self.create_item(ItemName.p_balloon)]
-        itempool += [self.create_item(ItemName.super_star_active)]
+        itempool += [self.create_item(ItemName.super_star_active) for _ in range(5)]
         itempool += [self.create_item(ItemName.progressive_powerup) for _ in range(3)]
         itempool += [self.create_item(ItemName.yellow_switch_palace)]
         itempool += [self.create_item(ItemName.green_switch_palace)]
         itempool += [self.create_item(ItemName.red_switch_palace)]
         itempool += [self.create_item(ItemName.blue_switch_palace)]
         itempool += [self.create_item(ItemName.special_world_clear)]
+        itempool += [self.create_item(ItemName.extra_defense)]
         
         if self.options.goal == "yoshi_egg_hunt":
             raw_egg_count = total_required_locations - len(itempool) - len(exclusion_pool)
@@ -248,6 +270,11 @@ class SMWWorld(World):
         trap_weights += ([ItemName.reverse_controls_trap] * self.options.reverse_trap_weight.value)
         trap_weights += ([ItemName.thwimp_trap] * self.options.thwimp_trap_weight.value)
         trap_weights += ([ItemName.fishin_trap] * self.options.fishin_trap_weight.value)
+        trap_weights += ([ItemName.screen_flip_trap] * self.options.screen_flip_trap_weight.value)
+        trap_weights += ([ItemName.sticky_floor_trap] * self.options.sticky_floor_trap_weight.value)
+        trap_weights += ([ItemName.sticky_hands_trap] * self.options.sticky_hands_trap_weight.value)
+        #trap_weights += ([ItemName.pixelate_trap] * self.options.pixelate_trap_weight.value)
+        trap_weights += ([ItemName.spotlight_trap] * self.options.spotlight_trap_weight.value)
         trap_count = 0 if (len(trap_weights) == 0) else math.ceil(junk_count * (self.options.trap_fill_percentage.value / 100.0))
         junk_count -= trap_count
 
@@ -419,4 +446,4 @@ class SMWWorld(World):
         return self.random.choice(list(junk_table.keys()))
 
     def set_rules(self):
-        set_rules(self)
+        SMWOriginalRules(self).set_smw_rules()

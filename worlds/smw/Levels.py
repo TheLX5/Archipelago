@@ -454,6 +454,10 @@ switch_palace_levels = [
     0x45,
 ]
 
+single_levels = easy_single_levels.copy() + hard_single_levels.copy() + special_zone_levels.copy()
+double_levels = easy_double_levels.copy() + hard_double_levels.copy()
+castle_levels = easy_castle_fortress_levels.copy() + hard_castle_fortress_levels.copy()
+
 location_id_to_level_id = {
     LocationName.yoshis_island_1_exit_1:  [0x29, 0],
     LocationName.yoshis_island_1_dragon:  [0x29, 2],
@@ -1230,6 +1234,69 @@ location_id_to_level_id = {
     LocationName.star_road_5_green_block_20: [0x5A, 681]
 }
 
+reachable_levels_per_path = {
+    LocationName.yoshis_house_tile: [
+        0x29, 0x2A, 0x27, 0x26, 0x25,
+    ],
+    LocationName.ysp_from_yi: [
+    ],
+    LocationName.dp_from_yi: [
+        0x15, 0x09, 0x0A, 0x04, 0x13, 0x05, 0x06, 0x07,
+    ],
+    LocationName.valley_donut_exit_pipe: [
+        0x2F, 
+    ],
+    LocationName.donut_plains_exit_pipe: [
+        0x05, 0x06, 0x07, 
+    ],
+    LocationName.vd_from_dp: [
+        0x3E, 0x3C, 0x2D, 0x2B, 0x2E, 0x3D, 0x40,
+    ],
+    LocationName.twin_bridges_exit_pipe: [
+        0x0F, 0x11, 0x10, 0x0E, 
+    ],
+    LocationName.vanilla_dome_top_exit_pipe: [
+        0x01, 0x02, 0x0B, 0x0C, 0x0D, 0x0E, 
+    ],
+    LocationName.foi_from_tw: [
+        0x42, 0x44, 0x47, 0x43, 0x41, 0x46, 
+    ],
+    LocationName.sr_from_foi: [
+        0x1F, 
+    ],
+    LocationName.ci_from_foi: [
+        0x20, 0x22, 0x24, 0x23, 0x1D, 0x1C, 0x21, 0x1B, 0x1A, 
+    ],
+    LocationName.chocolate_island_exit_pipe: [
+        0x1A, 
+    ],
+    LocationName.valley_chocolate_exit_pipe: [
+        0x3B, 
+    ],
+    LocationName.vob_from_ci: [
+        0x3A, 0x39, 0x37, 0x33, 0x38, 0x35, 0x34, 0x31, 0x32,
+    ],
+    LocationName.star_road_donut: [
+        0x58, 0x54, 0x56, 0x59, 0x5A, 
+    ],
+    LocationName.star_road_vanilla: [
+        0x58, 0x54, 0x56, 0x59, 0x5A, 
+    ],
+    LocationName.star_road_twin_bridges: [
+        0x58, 0x54, 0x56, 0x59, 0x5A, 
+    ],
+    LocationName.star_road_forest: [
+        0x58, 0x54, 0x56, 0x59, 0x5A, 
+    ],
+    LocationName.star_road_valley: [
+        0x58, 0x54, 0x56, 0x59, 0x5A, 
+    ],
+    LocationName.special_star_road: [
+        0x4D, 0x4E, 0x4F, 0x50, 0x51, 0x4C, 0x4B, 0x4A, 0x49, 
+    ],
+}
+
+
 def generate_level_list(world: "SMWWorld"):
 
     if not world.options.level_shuffle:
@@ -1246,7 +1313,6 @@ def generate_level_list(world: "SMWWorld"):
 
         return out_level_list
 
-    shuffled_level_list = []
     easy_castle_fortress_levels_copy = easy_castle_fortress_levels.copy()
     world.random.shuffle(easy_castle_fortress_levels_copy)
     hard_castle_fortress_levels_copy = hard_castle_fortress_levels.copy()
@@ -1263,135 +1329,87 @@ def generate_level_list(world: "SMWWorld"):
     switch_palace_levels_copy = switch_palace_levels.copy()
     world.random.shuffle(switch_palace_levels_copy)
 
-    # Yoshi's Island
-    shuffled_level_list.append(0x03)
-    shuffled_level_list.append(easy_single_levels_copy.pop(0))
-    shuffled_level_list.append(0x14)
-    shuffled_level_list.append(easy_single_levels_copy.pop(0))
-    shuffled_level_list.append(easy_single_levels_copy.pop(0))
-    shuffled_level_list.append(easy_single_levels_copy.pop(0))
-    shuffled_level_list.append(easy_castle_fortress_levels_copy.pop(0))
+    # Ensure the dict has a very specific order
+    shuffled_level_dict = {level_id: 0x00 for level_id in full_level_list}
 
+    # Hardcode some levels/stars
+    shuffled_level_dict[0x28] = 0x03
+    shuffled_level_dict[0x14] = 0x14
+    shuffled_level_dict[0x08] = 0x08
+    shuffled_level_dict[0x03] = 0x28
+    shuffled_level_dict[0x16] = 0x16
+    shuffled_level_dict[0x3F] = 0x3F
+    shuffled_level_dict[0x2C] = 0x2C
+    shuffled_level_dict[0x12] = 0x12
+    shuffled_level_dict[0x45] = 0x45
+    shuffled_level_dict[0x1E] = 0x1E
+    shuffled_level_dict[0x18] = 0x18
+    shuffled_level_dict[0x30] = 0x30
+    shuffled_level_dict[0x5B] = 0x5B
+    shuffled_level_dict[0x53] = 0x53
+    shuffled_level_dict[0x52] = 0x52
+    shuffled_level_dict[0x57] = 0x57
+    shuffled_level_dict[0x5C] = 0x5C
+    shuffled_level_dict[0x55] = 0x55
+    shuffled_level_dict[0x48] = 0x48
+
+    if world.options.bowser_castle_doors == "fast":
+        shuffled_level_dict[0x31] = 0x82
+        shuffled_level_dict[0x32] = 0x32
+    elif world.options.bowser_castle_doors == "slow":
+        shuffled_level_dict[0x31] = 0x31
+        shuffled_level_dict[0x32] = 0x81
+    else:
+        shuffled_level_dict[0x31] = 0x31
+        shuffled_level_dict[0x32] = 0x32
+    
     single_levels_copy = (easy_single_levels_copy.copy() + hard_single_levels_copy.copy())
-    if not world.options.exclude_special_zone:
-        single_levels_copy.extend(special_zone_levels_copy)
-    world.random.shuffle(single_levels_copy)
-
-    castle_fortress_levels_copy = (easy_castle_fortress_levels_copy.copy() + hard_castle_fortress_levels_copy.copy())
-    world.random.shuffle(castle_fortress_levels_copy)
+    if world.options.exclude_special_zone:
+        for level_id in special_zone_levels:
+            shuffled_level_dict[level_id] = level_id
+    else:
+        single_levels_copy.extend(special_zone_levels_copy.copy())
 
     double_levels_copy = (easy_double_levels_copy.copy() + hard_double_levels_copy.copy())
-    world.random.shuffle(double_levels_copy)
+    castle_fortress_levels_copy = (easy_castle_fortress_levels_copy.copy() + hard_castle_fortress_levels_copy.copy())
+        
+    remaining_exits = list(world.local_region_mapping.keys())
+    check_next_exits = [LocationName.yoshis_house_tile]
+    path_count = 0
+    while len(remaining_exits) != 0:
+        cache_exits = check_next_exits.copy()
+        for exit in cache_exits:
+            if exit not in remaining_exits:
+                continue
+            remaining_exits.remove(exit)
+            check_next_exits.remove(exit)
+            for entrance in world.local_region_mapping[exit]:
+                if entrance not in world.local_mapping.keys():
+                    continue
+                check_next_exits.append(world.local_mapping[entrance])
 
-    # Donut Plains
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(0x08)
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(castle_fortress_levels_copy.pop(0))
-    shuffled_level_list.append(0x28)
-    shuffled_level_list.append(0x16)
+            # Shuffle everything once we visit 4 paths
+            path_count += 1
+            if path_count == 4:
+                world.random.shuffle(single_levels_copy)
+                world.random.shuffle(castle_fortress_levels_copy)
+                world.random.shuffle(double_levels_copy)
 
-    # Vanilla Dome
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(0x3F)
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(castle_fortress_levels_copy.pop(0))
-    shuffled_level_list.append(castle_fortress_levels_copy.pop(0))
-    shuffled_level_list.append(0x2C)
+            if len(reachable_levels_per_path[exit]) == 0:
+                continue
 
-    # Twin Bridges
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(castle_fortress_levels_copy.pop(0))
-    shuffled_level_list.append(0x12)
+            for level_id in reachable_levels_per_path[exit]:
+                if shuffled_level_dict[level_id] != 0x00:
+                    continue
+                if level_id in single_levels:
+                    shuffled_level_dict[level_id] = single_levels_copy.pop(0)
+                elif level_id in double_levels:
+                    shuffled_level_dict[level_id] = double_levels_copy.pop(0)
+                elif level_id in castle_levels:
+                    shuffled_level_dict[level_id] = castle_fortress_levels_copy.pop(0)
 
-    # Forest of Illusion
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(0x45)
-    shuffled_level_list.append(castle_fortress_levels_copy.pop(0))
-    shuffled_level_list.append(castle_fortress_levels_copy.pop(0))
-    shuffled_level_list.append(0x1E)
-
-    # Chocolate Island
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(castle_fortress_levels_copy.pop(0))
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(castle_fortress_levels_copy.pop(0))
-
-    # Valley of Bowser
-    shuffled_level_list.append(0x18)
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(single_levels_copy.pop(0))
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(castle_fortress_levels_copy.pop(0))
-    shuffled_level_list.append(castle_fortress_levels_copy.pop(0))
-
-    # Front/Back Door
-    if world.options.bowser_castle_doors == "fast":
-        shuffled_level_list.append(0x82)
-        shuffled_level_list.append(0x32)
-    elif world.options.bowser_castle_doors == "slow":
-        shuffled_level_list.append(0x31)
-        shuffled_level_list.append(0x81)
-    else:
-        shuffled_level_list.append(0x31)
-        shuffled_level_list.append(0x32)
-
-    shuffled_level_list.append(0x30)
-
-    # Star Road
-    shuffled_level_list.append(0x5B)
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(0x53)
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(0x52)
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(0x57)
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(0x5C)
-    shuffled_level_list.append(double_levels_copy.pop(0))
-    shuffled_level_list.append(0x55)
-
-    # Special Zone
-    shuffled_level_list.append(0x4D)
-    if not world.options.exclude_special_zone:
-        shuffled_level_list.append(single_levels_copy.pop(0))
-        shuffled_level_list.append(single_levels_copy.pop(0))
-        shuffled_level_list.append(single_levels_copy.pop(0))
-        shuffled_level_list.append(single_levels_copy.pop(0))
-        shuffled_level_list.append(single_levels_copy.pop(0))
-        shuffled_level_list.append(single_levels_copy.pop(0))
-        shuffled_level_list.append(single_levels_copy.pop(0))
-        shuffled_level_list.append(single_levels_copy.pop(0))
-    else:
-        shuffled_level_list.extend(special_zone_levels_copy)
-    shuffled_level_list.append(0x48)
+    shuffled_level_list = []
+    for level_id in full_level_list:
+        shuffled_level_list.append(shuffled_level_dict[level_id])
 
     return shuffled_level_list

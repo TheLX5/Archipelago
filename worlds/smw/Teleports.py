@@ -315,7 +315,7 @@ def generate_entrance_rando(world: "SMWWorld"):
     if world.options.exclude_special_zone:
         prefilled_exits[LocationName.star_road_special] = LocationName.special_star_road
         prefilled_exits[LocationName.special_complete] = LocationName.yoshis_house_tile
-        local_region_mapping.pop(LocationName.special_star_road)
+        #local_region_mapping.pop(LocationName.special_star_road)
 
     if world.options.map_teleport_shuffle == "off":
         prefilled_exits[LocationName.donut_plains_star_road] = LocationName.star_road_donut
@@ -511,10 +511,14 @@ def generate_entrance_rando(world: "SMWWorld"):
                     break
 
     for entrance, exit in local_mapping.items():
+        world.local_mapping[entrance] = exit
         if "Transition - " in entrance:
             world.transition_pairs[entrance] = exit
         else:
             world.teleport_pairs[entrance] = exit
+
+    for exit, entrance in local_region_mapping.items():
+        world.local_region_mapping[exit] = entrance
 
     world.boss_token_requirements = {**boss_token_requirements}
 
@@ -587,4 +591,4 @@ def handle_transition_shuffle(patch: "SMWProcedurePatch", world: "SMWWorld"):
 
     patch.write_bytes(0x219AA, tokens)
     patch.write_bytes(0x219F0, extra_tokens)
-    #patch.write_byte(0x2273, 0x00)
+    patch.write_byte(0x2273, 0x00)

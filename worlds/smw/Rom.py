@@ -23,14 +23,15 @@ if TYPE_CHECKING:
 ability_rom_data = {
     0xBC0003: [[0x1F1C, 0x7]], # Run         0x80
     0xBC0004: [[0x1F1C, 0x6]], # Carry       0x40
-    0xBC0005: [[0x1F1C, 0x2]], # Swim        0x04
+    #0xBC0005: [[0x1F1C, 0x2]], # Swim        0x04
     0xBC0006: [[0x1F1C, 0x3]], # Spin Jump   0x08
     0xBC0007: [[0x1F1C, 0x5]], # Climb       0x20
     0xBC0008: [[0x1F1C, 0x1]], # Yoshi       0x02
     0xBC0009: [[0x1F1C, 0x4]], # P-Switch    0x10
     #0xBC000A: [[]]
     0xBC000B: [[0x1F2D, 0x3]], # P-Balloon   0x08
-    0xBC000D: [[0x1F2D, 0x4]]  # Super Star  0x10
+    #0xBC000D: [[0x1F2D, 0x4]]  # Super Star  0x10
+    0xBC0020: [[0x43E2, 0x1]], # Extra Defense
 }
 
 icon_rom_data = {
@@ -44,14 +45,14 @@ icon_rom_data = {
 
     0xBC0001: [0x4810], # 1-Up Mushroom
 
-    0xBC0020: [0x4812], # Mushroom
-    0xBC0021: [0x4814], # Fire Flower
-    0xBC0022: [0x4816], # Feather
-    0xBC0023: [0x4818], # Star
-    0xBC0024: [0x481A], # Green Yoshi
-    0xBC0025: [0x481C], # Red Yoshi
-    0xBC0026: [0x481E], # Blue Yoshi
-    0xBC0027: [0x4820], # Yellow Yoshi
+    0xBC0040: [0x4812], # Mushroom
+    0xBC0041: [0x4814], # Fire Flower
+    0xBC0042: [0x4816], # Feather
+    0xBC0043: [0x4818], # Star
+    0xBC0044: [0x481A], # Green Yoshi
+    0xBC0045: [0x481C], # Red Yoshi
+    0xBC0046: [0x481E], # Blue Yoshi
+    0xBC0047: [0x4820], # Yellow Yoshi
 }
     
 item_rom_data = {
@@ -63,12 +64,17 @@ item_rom_data = {
 }
 
 trap_rom_data = {
-    0xBC0013: [0x4308, 0x1, 0x0E],  # Ice Trap
-    0xBC0014: [0x18BD, 0x7F, 0x18], # Stun Trap
-    0xBC0016: [0x0F31, 0x1],        # Timer Trap
-    0xBC001C: [0x4300, 0x1, 0x44],  # Reverse controls trap
-    0xBC001D: [0x4302, 0x1],        # Thwimp Trap
-    0xBC001E: [0x4305, 0x1],        # Thwimp Trap
+    0xBC0080: [0x4308, 0x1, 0x0E],  # Ice Trap
+    0xBC0081: [0x18BD, 0x7F, 0x18], # Stun Trap
+    0xBC0083: [0x0F31, 0x1],        # Timer Trap
+    0xBC0084: [0x4300, 0x1, 0x44],  # Reverse controls trap
+    0xBC0085: [0x4302, 0x1],        # Thwimp Trap
+    0xBC0086: [0x4305, 0x1],        # Fishin' Boo Trap
+    0xBC0087: [0x430A, 0x1],        # Screen Flip Trap
+    0xBC0088: [0x430C, 0x1],        # Sticky Floor Trap
+    0xBC0089: [0x430E, 0x1],        # Sticky Hands Trap
+    0xBC008A: [0x4310, 0x1],        # Pixelate Trap
+    0xBC008B: [0x4312, 0x1],        # Spotlight Trap
 }
 
 
@@ -778,6 +784,8 @@ def patch_rom(world: "SMWWorld", patch: SMWProcedurePatch, player: int, active_l
     patch.write_byte(0x01BFB2, setting_value)
     patch.write_byte(0x01BFB4, world.options.energy_link.value)
     patch.write_byte(0x01BFB6, world.options.persistent_trap_behavior.value)
+    patch.write_byte(0x01BFB7, world.options.trap_link.value)
+    patch.write_byte(0x01BFB8, world.options.ring_link.value)
 
     from Utils import __version__
     patch.name = bytearray(f'SMW{__version__.replace(".", "")[0:3]}_{player}_{world.multiworld.seed:11}\0', 'utf8')[:21]
