@@ -9,6 +9,10 @@ def GetBeemizerItem(world, player: int, item):
 
     if item_name not in trap_replaceable or player in world.groups:
         return item
+    
+    trap_weights = []
+    trap_weights += (["Bee Trap"] * world.bee_trap_weight[player])
+    trap_weights += (["Bomb Trap"] * world.bomb_trap_weight[player])
 
     # first roll - replaceable item should be replaced, within beemizer_total_chance
     if not world.beemizer_total_chance[player] or world.random.random() > (world.beemizer_total_chance[player] / 100):
@@ -18,7 +22,8 @@ def GetBeemizerItem(world, player: int, item):
     if not world.beemizer_trap_chance[player] or world.random.random() > (world.beemizer_trap_chance[player] / 100):
         return "Bee" if isinstance(item, str) else world.create_item("Bee", player)
     else:
-        return "Bee Trap" if isinstance(item, str) else world.create_item("Bee Trap", player)
+        trap = world.random.choice(trap_weights)
+        return trap if isinstance(item, str) else world.create_item(trap, player)
 
 
 def item_factory(items: typing.Union[str, typing.Iterable[str]], world: World):
@@ -223,6 +228,8 @@ item_table = {'Bow': ItemData(IC.progression, None, 0x0B, 'You have\nchosen the\
               'Pick Up Purple Chest': ItemData(IC.progression, 'Event', None, None, None, None, None, None, None, None),
               'Open Floodgate': ItemData(IC.progression, 'Event', None, None, None, None, None, None, None, None),
               'Capacity Upgrade Shop': ItemData(IC.progression, 'Event', None, None, None, None, None, None, None, None),
+              #'Bunny Trap': ItemData(IC.trap, None, 0x100, 'An spell', 'and the spell', 'the caster kid','spell for sale', 'buying an odd potion', 'boy casts spell again', 'an spell'),
+              'Bomb Trap': ItemData(IC.trap, None, 0xB5, 'An explosion!', 'and the explosion', 'the bomb kid','explosion for sale', 'buying an active bomb', 'boy explodes again', 'an explosion'),
               }
 
 item_init_table = {name: data.as_init_dict() for name, data in item_table.items()}
@@ -290,3 +297,23 @@ item_name_groups['Progression Items'] = progression_items
 item_name_groups['Non Progression Items'] = everything - progression_items
 item_name_groups['Upgrades'] = {name for name in everything if 'Upgrade' in name}
 trap_replaceable = item_name_groups['Rupees'] | {'Arrows (10)', 'Single Bomb', 'Bombs (3)', 'Bombs (10)', 'Nothing'}
+
+trap_value_to_name: typing.Dict[int, str] = {
+    0xB0: "Bee Trap",
+}
+
+trap_name_to_value: typing.Dict[str, int] = {
+    # Our native Traps
+    "Bee Trap":             0xB0,
+    "Bomb Trap":            0xB5, 
+
+    # Common other trap names
+    "Honey Trap":           0xB0,  # Bee Trap
+    "Thwimp Trap":          0xB0,  # Bee Trap
+    "TNT Barrel Trap":      0xB0,  # Bee Trap 
+    "Ghost":                0xB0,  # Bee Trap 
+    "Damage Trap":          0xB5,  # Bomb Trap
+    "Poison Trap":          0xB5,  # Bomb Trap
+    "Bomb":                 0xB5,  # Bomb Trap
+    "Fire Trap":            0xB5,  # Bomb Trap
+}

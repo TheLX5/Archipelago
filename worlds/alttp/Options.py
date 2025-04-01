@@ -713,8 +713,8 @@ class BeemizerTotalChance(BeemizerRange):
 
 
 class BeemizerTrapChance(BeemizerRange):
-    """Percentage chance for each replaced junk-fill item to be a bee swarm
-    trap; all other replaced items are single bottle-filling bees."""
+    """Percentage chance for each replaced junk-fill item to be a trap;
+    all other replaced items are single bottle-filling bees."""
     default = 60
     display_name = "Beemizer Trap Chance"
 
@@ -741,6 +741,50 @@ class ALttPPlandoTexts(PlandoTexts):
     Percentage is an integer from 1 to 100, and defaults to 100 when omitted."""
     valid_keys = TextTable.valid_keys
 
+
+class EnergyLink(Toggle):
+    """
+    EnergyLink allows players to transmute rupees into energy that could be transmuted into other items
+
+    You can exchange energy for Rupees, Arrows, Bombs or Health.
+    """
+    display_name = "Energy Link"
+
+
+class TrapLink(Toggle):
+    """
+    Whether your received traps are linked to other players
+    """
+    display_name = "Trap Link"
+
+
+class BaseTrapWeight(Choice):
+    """
+    Base Class for Trap Weights
+    """
+    option_none = 0
+    option_low = 1
+    option_medium = 2
+    option_high = 4
+    default = 2
+
+
+class BeeTrapWeight(BaseTrapWeight):
+    """
+    Likelihood of a receiving a trap which gives Link a bee swarm
+
+    Requires Beemizer to be enabled
+    """
+    display_name = "Bee Trap Weight"
+
+
+class BombTrapWeight(BaseTrapWeight):
+    """
+    Likelihood of a receiving a trap which gives Link an exploding bomb
+
+    Requires Beemizer to be enabled
+    """
+    display_name = "Bomb Trap Weight"
 
 @dataclass
 class ALTTPOptions(PerGameCommonOptions):
@@ -800,6 +844,10 @@ class ALTTPOptions(PerGameCommonOptions):
     glitch_boots: GlitchBoots
     beemizer_total_chance: BeemizerTotalChance
     beemizer_trap_chance: BeemizerTrapChance
+    energy_link: EnergyLink
+    trap_link: TrapLink
+    bee_trap_weight: BeeTrapWeight
+    bomb_trap_weight: BombTrapWeight
     timer: Timer
     countdown_start_time: CountdownStartTime
     red_clock_time: RedClockTime

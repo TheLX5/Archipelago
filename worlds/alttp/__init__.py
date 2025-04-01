@@ -824,7 +824,7 @@ class ALTTPWorld(World):
                             "randomize_shop_inventories", "shuffle_shop_inventories", "shuffle_capacity_upgrades",
                             "entrance_shuffle", "dark_room_logic", "goal", "mode",
                             "triforce_pieces_mode", "triforce_pieces_percentage", "triforce_pieces_required",
-                            "triforce_pieces_available", "triforce_pieces_extra",
+                            "triforce_pieces_available", "triforce_pieces_extra", "trap_link", "energy_link",
             ]
 
             slot_data = {option_name: getattr(self.multiworld, option_name)[self.player].value for option_name in slot_options}
@@ -834,8 +834,18 @@ class ALTTPWorld(World):
                 'tr_medalion': self.required_medallions[1],
                 }
             )
+            slot_data["trap_weights"] = self.output_trap_weights()
+
         return slot_data
 
+    def output_trap_weights(self) -> typing.Dict[int, int]:
+        trap_data = {}
+
+        trap_data[0xB0] = self.options.bee_trap_weight.value
+        trap_data[0xB5] = self.options.bomb_trap_weight.value
+        #trap_data[0x100] = self.options.bunny_trap_weight.value
+
+        return trap_data
 
 def get_same_seed(world, seed_def: tuple) -> str:
     seeds: typing.Dict[tuple, str] = getattr(world, "__named_seeds", {})
