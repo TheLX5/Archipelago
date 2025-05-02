@@ -1,0 +1,131 @@
+import typing
+
+from BaseClasses import Item, ItemClassification
+from .Names import ItemName
+
+class ItemData(typing.NamedTuple):
+    code: typing.Optional[int]
+    classsification: ItemClassification
+    quantity: int = 1
+
+STARTING_ID = 0xBF1000
+
+class DKCItem(Item):
+    game = "Donkey Kong Country"
+
+# Item tables
+worlds_table = {
+    ItemName.kongo_jungle:          ItemData(STARTING_ID + 0x0000, ItemClassification.progression | ItemClassification.useful),
+    ItemName.monkey_mines:          ItemData(STARTING_ID + 0x0001, ItemClassification.progression | ItemClassification.useful),
+    ItemName.vine_valley:           ItemData(STARTING_ID + 0x0002, ItemClassification.progression | ItemClassification.useful),
+    ItemName.gorilla_glacier:       ItemData(STARTING_ID + 0x0003, ItemClassification.progression | ItemClassification.useful),
+    ItemName.kremkroc_industries:   ItemData(STARTING_ID + 0x0004, ItemClassification.progression | ItemClassification.useful),
+    ItemName.chimp_caverns:         ItemData(STARTING_ID + 0x0005, ItemClassification.progression | ItemClassification.useful),
+}
+
+mcguffin_table = {
+    ItemName.boss_token:            ItemData(STARTING_ID + 0x000F, ItemClassification.progression_skip_balancing),
+}
+
+progression_table = {
+    ItemName.donkey:                ItemData(STARTING_ID + 0x0010, ItemClassification.progression | ItemClassification.useful),
+    ItemName.diddy:                 ItemData(STARTING_ID + 0x0011, ItemClassification.progression | ItemClassification.useful),
+    ItemName.carry:                 ItemData(STARTING_ID + 0x0012, ItemClassification.progression),
+    ItemName.swim:                  ItemData(STARTING_ID + 0x0013, ItemClassification.progression),
+    ItemName.roll:                  ItemData(STARTING_ID + 0x0014, ItemClassification.progression),
+    ItemName.climb:                 ItemData(STARTING_ID + 0x0015, ItemClassification.progression),
+    ItemName.slap:                  ItemData(STARTING_ID + 0x0016, ItemClassification.progression),
+    ItemName.kannons:               ItemData(STARTING_ID + 0x0017, ItemClassification.progression),
+    ItemName.switches:              ItemData(STARTING_ID + 0x0018, ItemClassification.progression),
+    ItemName.minecart:              ItemData(STARTING_ID + 0x0019, ItemClassification.progression),
+    ItemName.winky:                 ItemData(STARTING_ID + 0x001A, ItemClassification.progression),
+    ItemName.expresso:              ItemData(STARTING_ID + 0x001B, ItemClassification.progression),
+    ItemName.rambi:                 ItemData(STARTING_ID + 0x001C, ItemClassification.progression),
+    ItemName.enguarde:              ItemData(STARTING_ID + 0x001D, ItemClassification.progression),
+    ItemName.squawks:               ItemData(STARTING_ID + 0x001E, ItemClassification.progression),
+    ItemName.tires:                 ItemData(STARTING_ID + 0x001F, ItemClassification.progression),
+    ItemName.platforms:             ItemData(STARTING_ID + 0x0020, ItemClassification.progression),
+}
+
+misc_table = {
+    ItemName.red_balloon:           ItemData(STARTING_ID + 0x0031, ItemClassification.filler),
+    ItemName.dk_barrel:             ItemData(STARTING_ID + 0x0032, ItemClassification.filler),
+    ItemName.extractinator:         ItemData(STARTING_ID + 0x0033, ItemClassification.useful),
+}
+
+trap_table = {
+    ItemName.nut_trap:              ItemData(STARTING_ID + 0x0080, ItemClassification.trap),
+    ItemName.army_trap:             ItemData(STARTING_ID + 0x0081, ItemClassification.trap),
+    ItemName.jump_trap:             ItemData(STARTING_ID + 0x0082, ItemClassification.trap),
+    ItemName.bonus_trap:            ItemData(STARTING_ID + 0x0083, ItemClassification.trap),
+}
+
+trap_name_to_value: typing.Dict[str, int] = {
+    # Our native Traps
+    ItemName.nut_trap:              STARTING_ID + 0x0080,
+    ItemName.army_trap:             STARTING_ID + 0x0081,
+    ItemName.jump_trap:             STARTING_ID + 0x0082,
+    ItemName.bonus_trap:            STARTING_ID + 0x0083,
+
+    # Common other trap names
+    "Spring Trap":      STARTING_ID + 0x0082,  # Jump Trap
+    "Eject Ability":    STARTING_ID + 0x0082,  # Jump Trap
+    "Hiccup Trap":      STARTING_ID + 0x0082,  # Jump Trap
+    "Ghost":            STARTING_ID + 0x0081,  # Army Trap
+    "Thwimp Trap":      STARTING_ID + 0x0080,  # Nut Trap
+    "TNT Barrel Trap":  STARTING_ID + 0x0080,  # Nut Trap
+    "Bomb Trap":        STARTING_ID + 0x0080,  # Nut Trap
+    "Cutscene Trap":    STARTING_ID + 0x0083,  # Animal Bonus Trap
+    "Pong Trap":        STARTING_ID + 0x0083,  # Animal Bonus Trap
+    "Pinball Trap":     STARTING_ID + 0x0083,  # Animal Bonus Trap
+    "Snake Trap":       STARTING_ID + 0x0083,  # Animal Bonus Trap
+}
+
+trap_value_to_name: typing.Dict[int, str] = {
+    STARTING_ID + 0x0080: ItemName.nut_trap,
+    STARTING_ID + 0x0081: ItemName.army_trap,
+    STARTING_ID + 0x0082: ItemName.jump_trap,
+    STARTING_ID + 0x0083: ItemName.bonus_trap,
+}
+
+item_groups = {
+    "Worlds": {
+        ItemName.kongo_jungle,
+        ItemName.monkey_mines,
+        ItemName.vine_valley,
+        ItemName.gorilla_glacier,
+        ItemName.kremkroc_industries,
+        ItemName.chimp_caverns,
+    },
+    "Abilities": {
+        ItemName.carry,
+        ItemName.climb,
+        ItemName.roll,
+        ItemName.slap,
+        ItemName.swim,
+    },
+    "Animals": {
+        ItemName.rambi,
+        ItemName.expresso,
+        ItemName.enguarde,
+        ItemName.winky,
+        ItemName.squawks,
+    },
+    "Objects": {
+        ItemName.kannons,
+        ItemName.switches,
+        ItemName.minecart,
+        ItemName.tires,
+        ItemName.platforms,
+    }
+}
+
+item_table = {
+    **mcguffin_table,
+    **worlds_table,
+    **progression_table,
+    **misc_table,
+    **trap_table,
+}
+
+lookup_id_to_name: typing.Dict[int, str] = {data.code: item_name for item_name, data in item_table.items() if data.code}
