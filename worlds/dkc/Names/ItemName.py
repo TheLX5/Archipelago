@@ -37,6 +37,9 @@ nut_trap = "Nut Trap"
 army_trap = "Army Trap"
 jump_trap = "Jump Trap"
 bonus_trap = "Animal Bonus Trap"
+sticky_floor_trap = "Sticky Floor Trap"
+ice_trap = "Ice Trap"
+stun_trap = "Stun Trap"
 
 # Energy Link
 extractinator = "Banana Extractinator"

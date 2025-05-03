@@ -80,6 +80,9 @@ trap_data = {
     STARTING_ID + 0x0081: [0x2C, 0x63], # Army Trap
     STARTING_ID + 0x0082: [0x30, 0x63], # Jump Trap
     STARTING_ID + 0x0083: [0x38, 0x63], # Animal Bonus Trap
+    STARTING_ID + 0x0084: [0x40, 0x63], # Sticky Floor Trap
+    STARTING_ID + 0x0085: [0x48, 0x63], # Stun Trap
+    STARTING_ID + 0x0086: [0x44, 0x63], # Ice Trap
     STARTING_ID + 0x0032: [0x24, 0x6C], # Instant DK Barrel (not a trap, but this system works better lol)
     STARTING_ID + 0x0033: [0x22, 0x2F], # Banana Extractinator (not a trap, but this system works better lol)
 }

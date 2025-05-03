@@ -119,7 +119,7 @@ class DKCWorld(World):
             total_required_locations += 29
         if self.options.balloon_checks:
             total_required_locations += 12
-        if self.options.token_checks:
+        if self.options.banana_checks:
             total_required_locations += 183
 
         # Set starting kong
@@ -172,6 +172,9 @@ class DKCWorld(World):
         trap_weights += ([ItemName.nut_trap] * self.options.nut_trap_weight.value)
         trap_weights += ([ItemName.army_trap] * self.options.army_trap_weight.value)
         trap_weights += ([ItemName.bonus_trap] * self.options.animal_bonus_trap_weight.value)
+        trap_weights += ([ItemName.sticky_floor_trap] * self.options.sticky_floor_trap_weight.value)
+        trap_weights += ([ItemName.stun_trap] * self.options.stun_trap_weight.value)
+        trap_weights += ([ItemName.ice_trap] * self.options.ice_trap_weight.value)
         trap_count = 0 if (len(trap_weights) == 0) else math.ceil(junk_count * (self.options.trap_fill_percentage.value / 100.0))
         junk_count -= trap_count
 
@@ -256,6 +259,9 @@ class DKCWorld(World):
         trap_data[STARTING_ID + 0x0081] = self.options.army_trap_weight.value
         trap_data[STARTING_ID + 0x0082] = self.options.jump_trap_weight.value
         trap_data[STARTING_ID + 0x0083] = self.options.animal_bonus_trap_weight.value
+        trap_data[STARTING_ID + 0x0084] = self.options.sticky_floor_trap_weight.value
+        trap_data[STARTING_ID + 0x0085] = self.options.stun_trap_weight.value
+        trap_data[STARTING_ID + 0x0086] = self.options.ice_trap_weight.value
 
         return trap_data
 

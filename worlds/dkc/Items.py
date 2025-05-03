@@ -58,6 +58,9 @@ trap_table = {
     ItemName.army_trap:             ItemData(STARTING_ID + 0x0081, ItemClassification.trap),
     ItemName.jump_trap:             ItemData(STARTING_ID + 0x0082, ItemClassification.trap),
     ItemName.bonus_trap:            ItemData(STARTING_ID + 0x0083, ItemClassification.trap),
+    ItemName.sticky_floor_trap:     ItemData(STARTING_ID + 0x0084, ItemClassification.trap),
+    ItemName.stun_trap:             ItemData(STARTING_ID + 0x0085, ItemClassification.trap),
+    ItemName.ice_trap:              ItemData(STARTING_ID + 0x0086, ItemClassification.trap),
 }
 
 trap_name_to_value: typing.Dict[str, int] = {
@@ -66,19 +69,32 @@ trap_name_to_value: typing.Dict[str, int] = {
     ItemName.army_trap:             STARTING_ID + 0x0081,
     ItemName.jump_trap:             STARTING_ID + 0x0082,
     ItemName.bonus_trap:            STARTING_ID + 0x0083,
+    ItemName.sticky_floor_trap:     STARTING_ID + 0x0084,
+    ItemName.stun_trap:             STARTING_ID + 0x0085,
+    ItemName.ice_trap:              STARTING_ID + 0x0086,
 
     # Common other trap names
-    "Spring Trap":      STARTING_ID + 0x0082,  # Jump Trap
-    "Eject Ability":    STARTING_ID + 0x0082,  # Jump Trap
-    "Hiccup Trap":      STARTING_ID + 0x0082,  # Jump Trap
-    "Ghost":            STARTING_ID + 0x0081,  # Army Trap
-    "Thwimp Trap":      STARTING_ID + 0x0080,  # Nut Trap
-    "TNT Barrel Trap":  STARTING_ID + 0x0080,  # Nut Trap
-    "Bomb Trap":        STARTING_ID + 0x0080,  # Nut Trap
-    "Cutscene Trap":    STARTING_ID + 0x0083,  # Animal Bonus Trap
-    "Pong Trap":        STARTING_ID + 0x0083,  # Animal Bonus Trap
-    "Pinball Trap":     STARTING_ID + 0x0083,  # Animal Bonus Trap
-    "Snake Trap":       STARTING_ID + 0x0083,  # Animal Bonus Trap
+    "Spring Trap":          STARTING_ID + 0x0082,  # Jump Trap
+    "Eject Ability":        STARTING_ID + 0x0082,  # Jump Trap
+    "Hiccup Trap":          STARTING_ID + 0x0082,  # Jump Trap
+    "Ghost":                STARTING_ID + 0x0081,  # Army Trap
+    "Police Trap":          STARTING_ID + 0x0081,  # Army Trap
+    "Gooey Trap":           STARTING_ID + 0x0081,  # Army Trap
+    "Buyon Trap":           STARTING_ID + 0x0080,  # Nut Trap
+    "Thwimp Trap":          STARTING_ID + 0x0080,  # Nut Trap
+    "TNT Barrel Trap":      STARTING_ID + 0x0080,  # Nut Trap
+    "Bomb Trap":            STARTING_ID + 0x0080,  # Nut Trap
+    "Cutscene Trap":        STARTING_ID + 0x0083,  # Animal Bonus Trap
+    "Pong Trap":            STARTING_ID + 0x0083,  # Animal Bonus Trap
+    "Pinball Trap":         STARTING_ID + 0x0083,  # Animal Bonus Trap
+    "Snake Trap":           STARTING_ID + 0x0083,  # Animal Bonus Trap
+    "Honey Trap":           STARTING_ID + 0x0084,  # Sticky Floor Trap
+    "Freeze Trap":          STARTING_ID + 0x0085,  # Stun Trap
+    "Frozen Trap":          STARTING_ID + 0x0085,  # Stun Trap
+    "Paralyze Trap":        STARTING_ID + 0x0085,  # Stun Trap
+    "Chaos Control Trap":   STARTING_ID + 0x0085,  # Stun Trap
+    "Bonk Trap":            STARTING_ID + 0x0085,  # Stun Trap
+    "Banana Trap":          STARTING_ID + 0x0086,  # Ice Trap
 }
 
 trap_value_to_name: typing.Dict[int, str] = {
@@ -86,6 +102,9 @@ trap_value_to_name: typing.Dict[int, str] = {
     STARTING_ID + 0x0081: ItemName.army_trap,
     STARTING_ID + 0x0082: ItemName.jump_trap,
     STARTING_ID + 0x0083: ItemName.bonus_trap,
+    STARTING_ID + 0x0084: ItemName.sticky_floor_trap,
+    STARTING_ID + 0x0085: ItemName.stun_trap,
+    STARTING_ID + 0x0086: ItemName.ice_trap,
 }
 
 item_groups = {

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from .Items import item_groups
 from .Aesthetics import player_palette_set_offsets
 
-from Options import OptionGroup, Choice, Range, Toggle, DefaultOnToggle, OptionSet, OptionList, OptionDict, PerGameCommonOptions, StartInventoryPool, DeathLink, Visibility
+from Options import OptionGroup, Choice, Range, Toggle, DefaultOnToggle, OptionSet, OptionDict, PerGameCommonOptions, StartInventoryPool
 from schema import Schema, Optional
 
 class StartingLifeCount(Range):
@@ -141,13 +141,13 @@ class StartingWorld(Choice):
     option_chimp_caverns = 5
     default = "random"
 
-class KONGChecks(DefaultOnToggle):
+class KONGChecks(Toggle):
     """
     Whether collecting all KONG letters in each level will grant a check
     """
     display_name = "KONG Letters Checks"
 
-class TokenChecks(DefaultOnToggle):
+class TokenChecks(Toggle):
     """
     Whether collecting an animal token in levels will grant a check
 
@@ -155,7 +155,7 @@ class TokenChecks(DefaultOnToggle):
     """
     display_name = "Animal Token Checks"
 
-class BananaChecks(DefaultOnToggle):
+class BananaChecks(Toggle):
     """
     Whether collecting banana bunches in levels will grant a check
 
@@ -163,7 +163,7 @@ class BananaChecks(DefaultOnToggle):
     """
     display_name = "Banana Bunches Checks"
 
-class BalloonChecks(DefaultOnToggle):
+class BalloonChecks(Toggle):
     """
     Whether collecting balloons in levels will grant a check
 
@@ -210,6 +210,24 @@ class JumpTrapWeight(BaseTrapWeight):
     Likelihood of a receiving a trap which makes the player jump uncontrollably
     """
     display_name = "Jump Trap Weight"
+
+class StickyFloorTrapWeight(BaseTrapWeight):
+    """
+    Likelihood of a receiving a trap which makes the player unable to walk or roll in the ground
+    """
+    display_name = "Sticky Floor Trap Weight"
+
+class IceTrapWeight(BaseTrapWeight):
+    """
+    Likelihood of a receiving a trap which makes the floor slippery
+    """
+    display_name = "Stun Trap Weight"
+
+class StunTrapWeight(BaseTrapWeight):
+    """
+    Likelihood of a receiving a trap which freezes the player in place for a few seconds
+    """
+    display_name = "Stun Trap Weight"
 
 class NutTrapWeight(BaseTrapWeight):
     """
@@ -372,9 +390,12 @@ dkc_option_groups = [
     OptionGroup("Traps", [
         TrapFillPercentage,
         JumpTrapWeight,
+        IceTrapWeight,
+        StunTrapWeight,
         NutTrapWeight,
         ArmyTrapWeight,
         BonusTrapWeight,
+        StickyFloorTrapWeight,
     ]),
     OptionGroup("Aesthetics", [
         SetPalettes,
@@ -412,6 +433,9 @@ class DKCOptions(PerGameCommonOptions):
     token_checks: TokenChecks
     trap_fill_percentage: TrapFillPercentage
     jump_trap_weight: JumpTrapWeight
+    sticky_floor_trap_weight: StickyFloorTrapWeight
+    stun_trap_weight: StunTrapWeight
+    ice_trap_weight: IceTrapWeight
     nut_trap_weight: NutTrapWeight
     army_trap_weight: ArmyTrapWeight
     animal_bonus_trap_weight: BonusTrapWeight
