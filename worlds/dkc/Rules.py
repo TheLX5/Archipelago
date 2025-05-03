@@ -387,7 +387,7 @@ class DKCStrictRules(DKCRules):
             LocationName.winky_walkway_bonus_1:
                 self.has_kannons,
             LocationName.winky_walkway_kong:
-                self.has_kannons,
+                lambda state: self.has_kannons(state) and self.has_winky(state),
             LocationName.winky_walkway_bunch_1:
                 self.can_slap,
             LocationName.winky_walkway_bunch_2:
