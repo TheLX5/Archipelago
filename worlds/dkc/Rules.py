@@ -811,7 +811,7 @@ class DKCStrictRules(DKCRules):
             LocationName.oil_drum_alley_bonus_3:
                 lambda state: self.has_tires(state) and self.can_carry(state),
             LocationName.oil_drum_alley_bonus_4:
-                lambda state: self.has_tires(state) and self.can_carry(state),
+                lambda state: self.has_tires(state) and (self.can_carry(state) or self.has_rambi(state)) and self.has_kannons(state),
             LocationName.oil_drum_alley_kong:
                 lambda state: self.has_tires(state) and self.can_roll(state) and self.has_kannons(state) and (self.can_carry(state) and self.has_rambi(state)),
             LocationName.oil_drum_alley_bunch_1:
@@ -1660,7 +1660,13 @@ class DKCLooseRules(DKCRules):
             LocationName.oil_drum_alley_bonus_3:
                 lambda state: self.has_tires(state) and self.can_carry(state) and self.can_carry(state),
             LocationName.oil_drum_alley_bonus_4:
-                lambda state: (self.has_tires(state) or self.can_roll(state)) and self.can_carry(state),
+                lambda state: (
+                              (
+                              (self.has_tires(state) and self.has_rambi(state)) or
+                              (self.has_tires(state) and self.can_carry(state)) or
+                              (self.can_roll(state) and self.can_carry(state))
+                              )
+                              and self.has_kannons(state)),
             LocationName.oil_drum_alley_kong:
                 lambda state: self.has_tires(state) and self.can_roll(state) and self.has_kannons(state) and (self.can_carry(state) or self.has_rambi(state)),
             LocationName.oil_drum_alley_bunch_1:
