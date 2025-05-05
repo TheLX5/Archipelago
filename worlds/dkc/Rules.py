@@ -1328,9 +1328,9 @@ class DKCLooseRules(DKCRules):
                 lambda state: self.has_switches(state) and self.has_tires(state) and self.can_slap(state),
 
             LocationName.millstone_mayhem_clear:
-                lambda state: self.has_tires(state) and (self.can_roll(state) or self.has_winky(state)),
+                self.has_tires,
             EventName.millstone_mayhem_clear:
-                lambda state: self.has_tires(state) and (self.can_roll(state) or self.has_winky(state)),
+                self.has_tires,
             LocationName.millstone_mayhem_bonus_1:
                 lambda state: self.has_tires(state) and self.has_kannons(state),
             LocationName.millstone_mayhem_bonus_2:
@@ -1338,7 +1338,7 @@ class DKCLooseRules(DKCRules):
             LocationName.millstone_mayhem_bonus_3:
                 lambda state: self.has_tires(state) and self.can_carry(state),
             LocationName.millstone_mayhem_kong:
-                lambda state: self.has_tires(state) and self.has_kannons(state) and (self.can_roll(state) or self.has_winky(state)),
+                lambda state: self.has_tires(state) and self.has_kannons(state),
             LocationName.millstone_mayhem_bunch_1:
                 lambda state: self.has_tires(state) and self.can_slap(state),
             LocationName.millstone_mayhem_bunch_2:
@@ -1350,13 +1350,13 @@ class DKCLooseRules(DKCRules):
             LocationName.millstone_mayhem_bunch_5:
                 lambda state: self.has_tires(state) and self.can_slap(state),
             LocationName.millstone_mayhem_bunch_6:
-                lambda state: self.has_tires(state) and self.can_slap(state) and (self.can_roll(state) or self.has_winky(state)),
+                lambda state: self.has_tires(state) and self.can_slap(state),
             LocationName.millstone_mayhem_bunch_7:
-                lambda state: self.has_tires(state) and self.can_slap(state) and (self.can_roll(state) or self.has_winky(state)),
+                lambda state: self.has_tires(state) and (self.can_roll(state) or self.has_winky(state)),
             LocationName.millstone_mayhem_bunch_8:
-                lambda state: self.has_tires(state) and self.can_slap(state) and (self.can_roll(state) or self.has_winky(state)),
+                lambda state: self.has_tires(state) and (self.can_roll(state) or self.has_winky(state)),
             LocationName.millstone_mayhem_bunch_9:
-                lambda state: self.has_tires(state) and self.can_slap(state) and (self.can_roll(state) or self.has_winky(state)),
+                lambda state: self.has_tires(state) and self.can_slap(state),
 
             LocationName.necky_nuts_clear:
                 self.has_tires,
