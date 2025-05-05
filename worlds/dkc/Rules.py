@@ -922,7 +922,7 @@ class DKCStrictRules(DKCRules):
             LocationName.tanked_up_trouble_bonus_1:
                 lambda state: self.has_platforms(state) and self.has_kannons(state),
             LocationName.tanked_up_trouble_kong:
-                self.has_platforms,
+                lambda state: self.has_platforms(state) and self.has_tires(state) and self.has_kannons(state),
             LocationName.tanked_up_trouble_bunch_1:
                 self.has_platforms,
             LocationName.tanked_up_trouble_bunch_2:
@@ -1771,7 +1771,7 @@ class DKCLooseRules(DKCRules):
             LocationName.tanked_up_trouble_bonus_1:
                 lambda state: self.has_platforms(state) and self.has_kannons(state),
             LocationName.tanked_up_trouble_kong:
-                self.has_platforms,
+                lambda state: self.has_platforms(state) and self.has_tires(state) and self.has_kannons(state),
             LocationName.tanked_up_trouble_bunch_1:
                 self.has_platforms,
             LocationName.tanked_up_trouble_bunch_2:
