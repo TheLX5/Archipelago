@@ -979,7 +979,7 @@ class DKCStrictRules(DKCRules):
             LocationName.loopy_lights_bonus_2:
                 lambda state: self.has_switches(state) and self.has_tires(state) and self.can_carry(state),
             LocationName.loopy_lights_kong:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.has_kannons(state) and self.can_roll(state),
+                lambda state: self.has_switches(state) and self.has_tires(state) and self.has_kannons(state) and self.can_roll(state) and self.can_carry(state),
             LocationName.loopy_lights_bunch_1:
                 lambda state: self.has_switches(state) and self.has_tires(state),
             LocationName.loopy_lights_bunch_2:
@@ -1828,7 +1828,7 @@ class DKCLooseRules(DKCRules):
             LocationName.loopy_lights_bonus_2:
                 lambda state: self.has_tires(state) and self.can_carry(state),
             LocationName.loopy_lights_kong:
-                lambda state: self.has_tires(state) and self.has_kannons(state) and self.can_roll(state),
+                lambda state: self.has_tires(state) and self.has_kannons(state) and self.can_roll(state) and self.can_carry(state),
             LocationName.loopy_lights_bunch_1:
                 self.has_tires,
             LocationName.loopy_lights_bunch_2:
