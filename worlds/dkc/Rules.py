@@ -641,7 +641,7 @@ class DKCStrictRules(DKCRules):
             LocationName.orang_utan_gang_bunch_6:
                 self.has_expresso,
             LocationName.orang_utan_gang_token_1:
-                self.has_expresso,
+                lambda state: self.has_tires(state) and self.has_expresso(state),
             LocationName.orang_utan_gang_bunch_7:
                 lambda state: self.can_slap(state) and (self.can_carry(state) or self.has_expresso(state)),
             LocationName.orang_utan_gang_bunch_8:
@@ -811,7 +811,7 @@ class DKCStrictRules(DKCRules):
             LocationName.oil_drum_alley_bonus_3:
                 lambda state: self.has_tires(state) and self.can_carry(state),
             LocationName.oil_drum_alley_bonus_4:
-                lambda state: self.has_tires(state) and self.can_carry(state),
+                lambda state: self.has_tires(state) and (self.can_carry(state) or self.has_rambi(state)) and self.has_kannons(state),
             LocationName.oil_drum_alley_kong:
                 lambda state: self.has_tires(state) and self.can_roll(state) and self.has_kannons(state) and (self.can_carry(state) and self.has_rambi(state)),
             LocationName.oil_drum_alley_bunch_1:
@@ -922,7 +922,7 @@ class DKCStrictRules(DKCRules):
             LocationName.tanked_up_trouble_bonus_1:
                 lambda state: self.has_platforms(state) and self.has_kannons(state),
             LocationName.tanked_up_trouble_kong:
-                self.has_platforms,
+                lambda state: self.has_platforms(state) and self.has_tires(state) and self.has_kannons(state),
             LocationName.tanked_up_trouble_bunch_1:
                 self.has_platforms,
             LocationName.tanked_up_trouble_bunch_2:
@@ -979,7 +979,7 @@ class DKCStrictRules(DKCRules):
             LocationName.loopy_lights_bonus_2:
                 lambda state: self.has_switches(state) and self.has_tires(state) and self.can_carry(state),
             LocationName.loopy_lights_kong:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.has_kannons(state) and self.can_roll(state),
+                lambda state: self.has_switches(state) and self.has_tires(state) and self.has_kannons(state) and self.can_roll(state) and self.can_carry(state),
             LocationName.loopy_lights_bunch_1:
                 lambda state: self.has_switches(state) and self.has_tires(state),
             LocationName.loopy_lights_bunch_2:
@@ -1490,7 +1490,7 @@ class DKCLooseRules(DKCRules):
             LocationName.orang_utan_gang_bunch_6:
                 lambda state: self.has_expresso(state) or (self.has_diddy(state) and self.can_roll(state)),
             LocationName.orang_utan_gang_token_1:
-                self.has_expresso,
+                lambda state: self.has_tires(state) and self.has_expresso(state),
             LocationName.orang_utan_gang_bunch_7:
                 lambda state: self.can_slap(state) and (self.can_carry(state) or self.has_expresso(state)),
             LocationName.orang_utan_gang_bunch_8:
@@ -1660,7 +1660,13 @@ class DKCLooseRules(DKCRules):
             LocationName.oil_drum_alley_bonus_3:
                 lambda state: self.has_tires(state) and self.can_carry(state) and self.can_carry(state),
             LocationName.oil_drum_alley_bonus_4:
-                lambda state: (self.has_tires(state) or self.can_roll(state)) and self.can_carry(state),
+                lambda state: (
+                              (
+                              (self.has_tires(state) and self.has_rambi(state)) or
+                              (self.has_tires(state) and self.can_carry(state)) or
+                              (self.can_roll(state) and self.can_carry(state))
+                              )
+                              and self.has_kannons(state)),
             LocationName.oil_drum_alley_kong:
                 lambda state: self.has_tires(state) and self.can_roll(state) and self.has_kannons(state) and (self.can_carry(state) or self.has_rambi(state)),
             LocationName.oil_drum_alley_bunch_1:
@@ -1771,7 +1777,7 @@ class DKCLooseRules(DKCRules):
             LocationName.tanked_up_trouble_bonus_1:
                 lambda state: self.has_platforms(state) and self.has_kannons(state),
             LocationName.tanked_up_trouble_kong:
-                self.has_platforms,
+                lambda state: self.has_platforms(state) and self.has_tires(state) and self.has_kannons(state),
             LocationName.tanked_up_trouble_bunch_1:
                 self.has_platforms,
             LocationName.tanked_up_trouble_bunch_2:
@@ -1828,7 +1834,7 @@ class DKCLooseRules(DKCRules):
             LocationName.loopy_lights_bonus_2:
                 lambda state: self.has_tires(state) and self.can_carry(state),
             LocationName.loopy_lights_kong:
-                lambda state: self.has_tires(state) and self.has_kannons(state) and self.can_roll(state),
+                lambda state: self.has_tires(state) and self.has_kannons(state) and self.can_roll(state) and self.can_carry(state),
             LocationName.loopy_lights_bunch_1:
                 self.has_tires,
             LocationName.loopy_lights_bunch_2:
