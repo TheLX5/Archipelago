@@ -641,7 +641,7 @@ class DKCStrictRules(DKCRules):
             LocationName.orang_utan_gang_bunch_6:
                 self.has_expresso,
             LocationName.orang_utan_gang_token_1:
-                self.has_expresso,
+                lambda state: self.has_tires(state) and self.has_expresso(state),
             LocationName.orang_utan_gang_bunch_7:
                 lambda state: self.can_slap(state) and (self.can_carry(state) or self.has_expresso(state)),
             LocationName.orang_utan_gang_bunch_8:
@@ -1490,7 +1490,7 @@ class DKCLooseRules(DKCRules):
             LocationName.orang_utan_gang_bunch_6:
                 lambda state: self.has_expresso(state) or (self.has_diddy(state) and self.can_roll(state)),
             LocationName.orang_utan_gang_token_1:
-                self.has_expresso,
+                lambda state: self.has_tires(state) and self.has_expresso(state),
             LocationName.orang_utan_gang_bunch_7:
                 lambda state: self.can_slap(state) and (self.can_carry(state) or self.has_expresso(state)),
             LocationName.orang_utan_gang_bunch_8:
