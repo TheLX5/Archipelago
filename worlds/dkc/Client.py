@@ -120,6 +120,7 @@ class DKCSNIClient(SNIClient):
             self.game_state = True
             
         if not self.game_state:
+            self.current_map = 0
             return
 
         current_level = await snes_read(ctx, DKC_CURRENT_LEVEL, 0x01)
@@ -209,6 +210,18 @@ class DKCSNIClient(SNIClient):
             
         # Add a label that shows how many Barrels are left
         await self.handle_barrel_label(ctx)
+
+        # Send current map to poptracker
+        if self.current_map != loaded_level:
+            self.current_map = loaded_level
+            await ctx.send_msgs([{
+                "cmd": "Set", 
+                "key": f"dkc2_current_map_{ctx.team}_{ctx.slot}", 
+                "default": 0,
+                "want_reply": False,
+                "operations":
+                    [{"operation": "replace", "value": self.current_map}],
+            }])
 
         # Receive items
         rom = await snes_read(ctx, DKC_ROMHASH_START, ROMHASH_SIZE)
