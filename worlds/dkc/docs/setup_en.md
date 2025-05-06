@@ -1,4 +1,4 @@
-# Donkey Kong Country 2 setup guide
+# Donkey Kong Country setup guide
 
 ## Required Software
 
@@ -7,13 +7,12 @@
 - Software capable of loading and playing SNES ROM files:
    - [snes9x-nwa](https://github.com/Skarsnik/snes9x-emunwa/releases)
    - [snes9x-rr](https://github.com/gocha/snes9x-rr/releases)
-   - [BSNES-plus](https://github.com/black-sliver/bsnes-plus). **Note:** Do not reset within the emulator. It will cause 
-   RAM corruption.
-- Your Donkey Kong Country 2 v1.1 US ROM file from the original cartridge. Archipelago can't provide these.
-   - SNES v1.1 US MD5: `d323e6bb4ccc85fd7b416f58350bc1a2`
+   - [BSNES-plus](https://github.com/black-sliver/bsnes-plus). **Note:** Do not reset within the emulator. It will cause RAM corruption.
+- Your Donkey Kong Country v1.0 US ROM file from the original cartridge. Archipelago can't provide these.
+   - SNES v1.1 US MD5: `30c5f292ff4cbbfcc00fd8fa96c2de3b`
 
 ## Optional Software
-- [Map & Level tracker for Donkey Kong Country 2 Archipelago](https://github.com/pwkfisher/ap-dkc2-tracker/releases/), 
+- [Map & Level tracker for Donkey Kong Country Archipelago](https://github.com/pwkfisher/ap-dkc-tracker/releases/), 
 to be used with [PopTracker](https://github.com/black-sliver/PopTracker/releases)
 - [Universal Tracker](https://github.com/FarisTheAncient/Archipelago/releases?q="Tracker_"&expanded=true)
 
@@ -44,15 +43,15 @@ an experience customized for their taste, and different players in the same mult
 
 ### Where do I get a YAML file?
 
-You can generate a yaml or download a template by visiting the [Donkey Kong Country 2 Player Options Page](/games/Donkey%20Kong%20Country%20%202/player-options)
+You can generate a yaml or download a template by visiting the [Donkey Kong Country Player Options Page](/games/Donkey%20Kong%20Country%20%202/player-options)
 
 ## Joining a MultiWorld Game
 
-### Get your Donkey Kong Country 2 patch
+### Get your Donkey Kong Country patch
 
 When you join a multiworld game, you will be asked to provide your config file to whoever is hosting. Once that is done,
 the host will provide you with either a link to download your patch file, or with a zip file containing everyone's patch
-files. Your patch file should have a `.apdkc2` extension.
+files. Your patch file should have a `.apdkc` extension.
 
 Put your patch file on your desktop or somewhere convenient, and double click it. This should automatically launch the
 client, and will also create your ROM in the same place as your patch file.

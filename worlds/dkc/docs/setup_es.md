@@ -1,4 +1,4 @@
-# Guía de instalación para Donkey Kong Country 2
+# Guía de instalación para Donkey Kong Country
 
 ## Software requerido
 
@@ -7,13 +7,12 @@
 - Software capaz de cargar y permitir jugar archivos ROM de SNES:
    - [snes9x-nwa](https://github.com/Skarsnik/snes9x-emunwa/releases)
    - [snes9x-rr](https://github.com/gocha/snes9x-rr/releases)
-   - [BSNES-plus](https://github.com/black-sliver/bsnes-plus). **Nota:** No usen el `Reset` del emulador, causa 
-   corrupción de RAM y puede mandar Checks de manera aleatoria.
-- Una copia de tu Donkey Kong Country 2 v1.1 US proveniente del cartucho original. La comunidad de Archipelago no puede proveer ni uno de estos.
-   - SNES v1.1 US MD5: `d323e6bb4ccc85fd7b416f58350bc1a2`
+   - [BSNES-plus](https://github.com/black-sliver/bsnes-plus). **Nota:** No usen el `Reset` del emulador, causa corrupción de RAM y puede mandar Checks de manera aleatoria.
+- Una copia de tu Donkey Kong Country v1.1 US proveniente del cartucho original. La comunidad de Archipelago no puede proveer ni uno de estos.
+   - SNES v1.0 US MD5: `30c5f292ff4cbbfcc00fd8fa96c2de3b`
 
 ## Software opcional
-- [Tracker de mapa y niveles para Donkey Kong Country 2 Archipelago](https://github.com/pwkfisher/ap-dkc2-tracker/releases/), 
+- [Tracker de mapa y niveles para Donkey Kong Country Archipelago](https://github.com/pwkfisher/ap-dkc-tracker/releases/), 
 para usar con [PopTracker](https://github.com/black-sliver/PopTracker/releases)
 - [Universal Tracker](https://github.com/FarisTheAncient/Archipelago/releases?q="Tracker_"&expanded=true)
 
@@ -46,17 +45,17 @@ opciones.
 
 ### ¿Dónde puedo obtener un archivo YAML?
 
-Puedes generar un archivo YAML or descargar su plantilla en la [página de configuración de jugador de Donkey Kong Country 2](/games/Donkey%20Kong%20Country%20%202/player-options)
+Puedes generar un archivo YAML or descargar su plantilla en la [página de configuración de jugador de Donkey Kong Country](/games/Donkey%20Kong%20Country%20%202/player-options)
 
 ## Unirse a un juego MultiWorld
 
-### Obtener tu parche de Donkey Kong Country 2
+### Obtener tu parche de Donkey Kong Country
 
 Cuando te unes a un juego multiworld, se te pedirá que entregues tu archivo YAML a quien lo esté organizando.
 Una vez que la generación acabe, el anfitrión te dará un enlace a tu archivo, o un .zip con los archivos de
-todos. Tu archivo tiene una extensión `.apdkc2`.
+todos. Tu archivo tiene una extensión `.apdkc`.
 
-Haz doble clic en tu archivo `.apdkc2` para que se ejecute el cliente y realice el parcheado del ROM.
+Haz doble clic en tu archivo `.apdkc` para que se ejecute el cliente y realice el parcheado del ROM.
 Una vez acabe ese proceso (esto puede tardar un poco), el cliente y el emulador se abrirán automáticamente (si es que se
 ha asociado la extensión al emulador tal como fue recomendado)
 
