@@ -416,10 +416,11 @@ class TrackerGameContext(CommonContext):
 
     def build_gui(self, manager: "GameManager"):
         from kivy.uix.boxlayout import BoxLayout
-        from kvui import MDTabsItem, MDTabsItemText, MDRecycleView, HoverBehavior
+        from kvui import MDTabsItem, MDTabsItemText, MDRecycleView, HoverBehavior, MDLabel, MDDivider
         from kivymd.uix.tooltip import MDTooltip
         from kivy.uix.widget import Widget
         from kivy.properties import StringProperty, NumericProperty, BooleanProperty
+        from kivy.metrics import dp
         from kvui import ApAsyncImage, ToolTip
         from .TrackerKivy import SomethingNeatJustToMakePythonHappy
 
@@ -599,9 +600,26 @@ class TrackerGameContext(CommonContext):
         map_page = MDTabsItem(MDTabsItemText(text="Map Page"))
 
         try:
-            tracker = TrackerLayout(orientation="horizontal")
+            tracker = TrackerLayout(orientation="vertical")
             tracker_view = TrackerView()
+
+            # Creates a header
+            tracker_header = BoxLayout(orientation="horizontal", size_hint_y=None, height=dp(36))
+            tracker_divider = MDDivider(size_hint_y=None, height=dp(1))
+            self.tracker_total_locs_label = MDLabel(text="Locations: 0/0", halign="center")
+            self.tracker_logic_locs_label = MDLabel(text="In Logic: 0", halign="center")
+            self.tracker_glitched_locs_label = MDLabel(text="Glitched: 0",  halign="center")
+            self.tracker_hinted_locs_label = MDLabel(text="Hinted: 0", halign="center")
+            tracker_header.add_widget(self.tracker_total_locs_label)
+            tracker_header.add_widget(self.tracker_logic_locs_label)
+            tracker_header.add_widget(self.tracker_glitched_locs_label)
+            tracker_header.add_widget(self.tracker_hinted_locs_label)
+
+            # Adds the tracker list at the bottom
+            tracker.add_widget(tracker_header)
+            tracker.add_widget(tracker_divider)
             tracker.add_widget(tracker_view)
+
             self.tracker_page = tracker_view
             tracker_page.content = tracker
             self.location_icon = ApLocationIcon()
@@ -1258,6 +1276,15 @@ def updateTracker(ctx: TrackerGameContext) -> CurrentTrackerState:
             for i in readable_locations:
                 logger.error(i)
         ctx.exit_event.set()
+
+    if hasattr(ctx, "tracker_total_locs_label"):
+        ctx.tracker_total_locs_label.text = f"Locations: {len(ctx.checked_locations)}/{ctx.total_locations}"
+    if hasattr(ctx, "tracker_logic_locs_label"):
+        ctx.tracker_logic_locs_label.text = f"In Logic: {len(locations)}"
+    if hasattr(ctx, "tracker_glitched_locs_label"):
+        ctx.tracker_glitched_locs_label.text = f"Glitched: {len(glitches_locations)}"
+    if hasattr(ctx, "tracker_hinted_locs_label"):
+        ctx.tracker_hinted_locs_label.text = f"Hinted: {len(hints)}"
 
     return CurrentTrackerState(all_items, prog_items, glitches_locations, events, state)
 
