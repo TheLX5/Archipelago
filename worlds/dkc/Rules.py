@@ -998,7 +998,7 @@ class DKCStrictRules(DKCRules):
             LocationName.platform_perils_token_1:
                 lambda state: self.has_platforms(state) and self.can_carry(state) and (self.has_donkey(state) or self.can_roll(state)),
             LocationName.platform_perils_bunch_1:
-                lambda state: self.has_platforms(state) and self.can_carry(state),
+                lambda state: self.has_platforms(state) and self.can_carry(state) and self.has_tires(state),
 
             LocationName.necky_revenge_clear:
                 lambda state: self.has_both_kongs(state) and self.has_tires(state),
@@ -1658,7 +1658,7 @@ class DKCLooseRules(DKCRules):
             LocationName.oil_drum_alley_bonus_2:
                 lambda state: self.has_tires(state) and self.can_carry(state),
             LocationName.oil_drum_alley_bonus_3:
-                lambda state: self.has_tires(state) and self.can_carry(state) and self.can_carry(state),
+                lambda state: self.has_tires(state) and self.can_carry(state),
             LocationName.oil_drum_alley_bonus_4:
                 lambda state: (
                               (
@@ -1853,7 +1853,7 @@ class DKCLooseRules(DKCRules):
             LocationName.platform_perils_token_1:
                 lambda state: self.has_platforms(state) and self.can_carry(state) and (self.has_donkey(state) or self.can_roll(state)),
             LocationName.platform_perils_bunch_1:
-                lambda state: self.has_platforms(state) and self.can_carry(state),
+                lambda state: self.has_platforms(state) and self.can_carry(state) and self.has_tires(state),
 
             LocationName.necky_revenge_clear:
                 self.has_tires,
