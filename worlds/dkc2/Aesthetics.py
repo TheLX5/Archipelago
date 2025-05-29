@@ -212,7 +212,9 @@ dixie_palettes = {
 # Code taken from https://stackoverflow.com/a/69083087
 def adjust_color(r, g, b, factor):
     h, l, s = rgb_to_hls(r / 255.0, g / 255.0, b / 255.0)
+    # Scale both luminescence and saturation but don't adjust hue
     l = max(min(l * factor, 1.0), 0.0)
+    s = max(min(s * factor * 2.0/3.0, 1.0), 0.0)
     r, g, b = hls_to_rgb(h, l, s)
     return int(r * 255), int(g * 255), int(b * 255)
     
