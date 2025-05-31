@@ -56,7 +56,7 @@ class DKCWeb(WebWorld):
 
 class DKCWorld(World):
     """
-    Donkey Kong Country WIP
+    monke
     """
     game = "Donkey Kong Country"
     web = DKCWeb()
@@ -68,8 +68,9 @@ class DKCWorld(World):
     
     required_client_version = (0, 6, 0)
     
-    using_ut: bool # so we can check if we're using UT only once
-    ut_can_gen_without_yaml = True  # class var that tells it to ignore the player yaml
+    using_ut: bool
+    ut_can_gen_without_yaml = True
+    glitches_item_name = ItemName.glitched
 
     item_name_to_id = {name: data.code for name, data in item_table.items()}
     location_name_to_id = all_locations
@@ -102,11 +103,18 @@ class DKCWorld(World):
             DKCLooseRules(self).set_dkc_rules()
         elif logic == Logic.option_strict:
             DKCStrictRules(self).set_dkc_rules()
-        #elif logic == Logic.option_expert:
-        #    DKCExpertRules(self).set_dkc_rules()
+        elif logic == Logic.option_expert:
+            DKCExpertRules(self).set_dkc_rules()
         else:
             raise ValueError(f"Somehow you have a logic option that's currently invalid."
                              f" {logic} for {self.multiworld.get_player_name(self.player)}")
+
+        # Universal Tracker: If we're using UT, scan the rules again to build "glitched logic" during the regen
+        if self.using_ut:
+            if logic == Logic.option_strict:
+                DKCLooseRules(self).set_dkc_glitched_rules()
+            elif logic == Logic.option_loose:
+                DKCExpertRules(self).set_dkc_glitched_rules()
 
  
     def create_items(self) -> None:
@@ -312,7 +320,7 @@ class DKCWorld(World):
                     continue
                 if "Token" in loc_name and not self.options.token_checks:
                     continue
-                if "Balloon" in loc_name and not self.options.kong_checks:
+                if "Balloon" in loc_name and not self.options.balloon_checks:
                     continue
                 if "Banana Bunch" in loc_name and not self.options.banana_checks:
                     continue

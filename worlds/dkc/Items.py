@@ -51,6 +51,7 @@ misc_table = {
     ItemName.red_balloon:           ItemData(STARTING_ID + 0x0031, ItemClassification.filler),
     ItemName.dk_barrel:             ItemData(STARTING_ID + 0x0032, ItemClassification.filler),
     ItemName.extractinator:         ItemData(STARTING_ID + 0x0033, ItemClassification.useful),
+    ItemName.glitched:              ItemData(None, ItemClassification.progression_skip_balancing),
 }
 
 trap_table = {
