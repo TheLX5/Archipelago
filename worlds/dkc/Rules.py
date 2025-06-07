@@ -185,11 +185,11 @@ class DKCStrictRules(DKCRules):
             LocationName.jungle_hijinxs_bunch_5:
                 self.can_slap,
             LocationName.jungle_hijinxs_bunch_6:
-                lambda state: self.can_slap(state) or self.can_roll(state),
+                lambda state: self.can_slap(state) and self.can_roll(state),
             LocationName.jungle_hijinxs_balloon_2:
                 self.can_roll,
             LocationName.jungle_hijinxs_bunch_7:
-                lambda state: self.can_slap(state) or self.can_roll(state),
+                lambda state: self.can_slap(state) and self.can_roll(state),
             LocationName.jungle_hijinxs_bunch_8:
                 self.can_slap,
             LocationName.jungle_hijinxs_bunch_9:
