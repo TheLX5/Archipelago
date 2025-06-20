@@ -355,7 +355,7 @@ boss_excluded_weapons = {
         "Charged Silk Shot (Leaves)",
         "Charged Speed Burner",
         "Charged Bubble Splash",
-        "Uncharged Speed Burner (Underwater)",
+        "Speed Burner (Underwater)",
     ],
     "Violen": [
         "Speed Burner (Underwater)",
@@ -401,6 +401,10 @@ weapons = {
         [[ItemName.bubble_splash], 0x08, WEAKNESS_UNCHARGED_DMG],
         [[ItemName.bubble_splash], 0x11, WEAKNESS_CHARGED_DMG],
     ],
+    "Silk Shot": [
+        [[ItemName.silk_shot], 0x09, WEAKNESS_UNCHARGED_DMG],
+        [[ItemName.silk_shot], 0x12, WEAKNESS_CHARGED_DMG],
+    ],
     "Speed Burner": [
         [[ItemName.speed_burner], 0x0E, WEAKNESS_UNCHARGED_DMG],
         [[ItemName.speed_burner], 0x17, WEAKNESS_CHARGED_DMG],
@@ -408,6 +412,20 @@ weapons = {
     "Speed Burner (Underwater)": [
         [[ItemName.speed_burner], 0x23, WEAKNESS_UNCHARGED_DMG],
     ],
+    "Magnet Mine": [
+        [[ItemName.magnet_mine], 0x0D, WEAKNESS_UNCHARGED_DMG],
+        [[ItemName.magnet_mine], 0x16, WEAKNESS_CHARGED_DMG],
+    ],
+    #"Crystal Hunter": [  <- removed because it crashes the game
+    #    [[ItemName.crystal_hunter], 0x07, WEAKNESS_UNCHARGED_DMG],
+    #],
+    "Sonic Slicer": [
+        [[ItemName.sonic_slicer], 0x0B, WEAKNESS_UNCHARGED_DMG],
+        [[ItemName.sonic_slicer], 0x14, WEAKNESS_CHARGED_DMG],
+    ],
+}
+
+weapons_silk_shot = {
     "Silk Shot (Rocks)": [
         [[ItemName.silk_shot], 0x09, WEAKNESS_UNCHARGED_DMG],
         [[ItemName.silk_shot], 0x12, WEAKNESS_CHARGED_DMG],
@@ -427,17 +445,6 @@ weapons = {
     "Silk Shot (Black Rock)": [
         [[ItemName.silk_shot], 0x18, WEAKNESS_UNCHARGED_DMG],
         [[ItemName.silk_shot], 0x1F, WEAKNESS_CHARGED_DMG],
-    ],
-    "Magnet Mine": [
-        [[ItemName.magnet_mine], 0x0D, WEAKNESS_UNCHARGED_DMG],
-        [[ItemName.magnet_mine], 0x16, WEAKNESS_CHARGED_DMG],
-    ],
-    #"Crystal Hunter": [  <- removed because it crashes the game
-    #    [[ItemName.crystal_hunter], 0x07, WEAKNESS_UNCHARGED_DMG],
-    #],
-    "Sonic Slicer": [
-        [[ItemName.sonic_slicer], 0x0B, WEAKNESS_UNCHARGED_DMG],
-        [[ItemName.sonic_slicer], 0x14, WEAKNESS_CHARGED_DMG],
     ],
 }
 
@@ -484,6 +491,30 @@ weapons_chaotic = {
     "Charged Speed Burner": [
         [["Check Charge 2", ItemName.speed_burner], 0x17, WEAKNESS_CHARGED_DMG],
     ],
+    "Silk Shot": [
+        [[ItemName.silk_shot], 0x09, WEAKNESS_UNCHARGED_DMG],
+    ],
+    "Charged Silk Shot": [
+        [["Check Charge 2", ItemName.silk_shot], 0x12, WEAKNESS_CHARGED_DMG],
+    ],
+    "Magnet Mine": [
+        [[ItemName.magnet_mine], 0x0D, WEAKNESS_UNCHARGED_DMG],
+    ],
+    "Charged Magnet Mine": [
+        [["Check Charge 2", ItemName.magnet_mine], 0x16, WEAKNESS_CHARGED_DMG],
+    ],
+    #"Crystal Hunter": [   <- removed because it crashes the game
+    #    [[ItemName.crystal_hunter], 0x07, WEAKNESS_UNCHARGED_DMG],
+    #],
+    "Sonic Slicer": [
+        [[ItemName.sonic_slicer], 0x0B, WEAKNESS_UNCHARGED_DMG],
+    ],
+    "Charged Sonic Slicer": [
+        [["Check Charge 2", ItemName.sonic_slicer], 0x14, WEAKNESS_CHARGED_DMG],
+    ],
+}
+
+weapons_chaotic_silk_shot = {
     "Silk Shot (Rocks)": [
         [[ItemName.silk_shot], 0x09, WEAKNESS_UNCHARGED_DMG],
     ],
@@ -514,34 +545,6 @@ weapons_chaotic = {
     "Charged Silk Shot (Black Rock)": [
         [["Check Charge 2", ItemName.silk_shot], 0x1F, WEAKNESS_CHARGED_DMG],
     ],
-    "Magnet Mine": [
-        [[ItemName.magnet_mine], 0x0D, WEAKNESS_UNCHARGED_DMG],
-    ],
-    "Charged Magnet Mine": [
-        [["Check Charge 2", ItemName.magnet_mine], 0x16, WEAKNESS_CHARGED_DMG],
-    ],
-    #"Crystal Hunter": [   <- removed because it crashes the game
-    #    [[ItemName.crystal_hunter], 0x07, WEAKNESS_UNCHARGED_DMG],
-    #],
-    "Sonic Slicer": [
-        [[ItemName.sonic_slicer], 0x0B, WEAKNESS_UNCHARGED_DMG],
-    ],
-    "Charged Sonic Slicer": [
-        [["Check Charge 2", ItemName.sonic_slicer], 0x14, WEAKNESS_CHARGED_DMG],
-    ],
-}
-
-silk_shot_family = {
-    "Silk Shot (Rocks)",
-    "Silk Shot (Junk)",
-    "Silk Shot (Leaves)",
-    "Silk Shot (Crystals)",
-    "Silk Shot (Black Rock)",
-    "Charged Silk Shot (Rocks)",
-    "Charged Silk Shot (Junk)",
-    "Charged Silk Shot (Leaves)",
-    "Charged Silk Shot (Crystals)",
-    "Charged Silk Shot (Black Rock)",
 }
 
 def handle_weaknesses(world):
@@ -572,7 +575,10 @@ def handle_weaknesses(world):
             if shuffle_type != "vanilla":
                 chosen_weapon = boss_weakness_plando[boss]
                 if chosen_weapon not in boss_excluded_weapons[boss]:
-                    data = weapons_chaotic[chosen_weapon].copy()
+                    if "Silk Shot" in chosen_weapon:
+                        data = weapons_chaotic_silk_shot[chosen_weapon].copy()
+                    else:
+                        data = weapons_chaotic[chosen_weapon].copy()
                     for entry in data:
                         world.boss_weaknesses[boss].append(entry)
                         damage = entry[2]
@@ -590,7 +596,10 @@ def handle_weaknesses(world):
 
         if shuffle_type == 1:
             chosen_weapon = world.random.choice(copied_weapon_list)
-            data = weapons[chosen_weapon]
+            if "Silk Shot" in chosen_weapon:
+                data = weapons_silk_shot[world.random.choice(list(weapons_silk_shot.keys()))].copy
+            else:
+                data = weapons[chosen_weapon]
             for entry in data:
                 world.boss_weaknesses[boss].append(entry)
                 damage = entry[2]
@@ -600,13 +609,11 @@ def handle_weaknesses(world):
         elif shuffle_type >= 2:
             for _ in range(shuffle_type - 1):
                 chosen_weapon = world.random.choice(copied_weapon_list)
-                data = weapons_chaotic[chosen_weapon].copy()
-                if chosen_weapon in silk_shot_family:
-                    for silk_shot in silk_shot_family:
-                        if silk_shot in copied_weapon_list:
-                            copied_weapon_list.remove(silk_shot)
+                if "Silk Shot" in chosen_weapon:
+                    data = weapons_chaotic_silk_shot[world.random.choice(list(weapons_chaotic_silk_shot.keys()))].copy()
                 else:
-                    copied_weapon_list.remove(chosen_weapon)
+                    data = weapons_chaotic[chosen_weapon].copy()
+                copied_weapon_list.remove(chosen_weapon)
                 for entry in data:
                     world.boss_weaknesses[boss].append(entry)
                     damage = entry[2]
@@ -618,3 +625,4 @@ def handle_weaknesses(world):
                 world.boss_weaknesses[boss].append(entry)
                 damage = entry[2]
                 damage_table[entry[1]] = damage
+    
