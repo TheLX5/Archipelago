@@ -51,6 +51,12 @@ boss_access_rom_data = {
     STARTING_ID + 0x000A: [0x07],
 }
 
+chip_rom_data = {
+    STARTING_ID + 0x0040: [0x4A],       # Quick Charge
+    STARTING_ID + 0x0041: [0x4B],       # Speedster
+    STARTING_ID + 0x0042: [0x4C],       # Super Recover
+}
+
 refill_rom_data = {
     STARTING_ID + 0x0030: ["hp refill", 2],
     STARTING_ID + 0x0031: ["hp refill", 8],

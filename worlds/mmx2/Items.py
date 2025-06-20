@@ -6,8 +6,7 @@ from .Names import ItemName
 
 class ItemData(typing.NamedTuple):
     code: typing.Optional[int]
-    progression: bool
-    trap: bool = False
+    classsification: ItemClassification
     quantity: int = 1
 
 STARTING_ID = 0xBE0C00
@@ -17,51 +16,57 @@ class MMX2Item(Item):
 
 # Item tables
 event_table = {
-    ItemName.victory:           ItemData(STARTING_ID + 0x00, True),
-    ItemName.maverick_medal:    ItemData(STARTING_ID + 0x01, True),
+    ItemName.victory:           ItemData(STARTING_ID + 0x00, ItemClassification.progression_skip_balancing | ItemClassification.useful),
+    ItemName.maverick_medal:    ItemData(STARTING_ID + 0x01, ItemClassification.progression_skip_balancing),
 }
 
 access_codes_table = {
-    ItemName.stage_wheel_gator:         ItemData(STARTING_ID + 0x02, True),
-    ItemName.stage_bubble_crab:         ItemData(STARTING_ID + 0x03, True),
-    ItemName.stage_flame_stag:          ItemData(STARTING_ID + 0x04, True),
-    ItemName.stage_morph_moth:          ItemData(STARTING_ID + 0x05, True),
-    ItemName.stage_magna_centipede:     ItemData(STARTING_ID + 0x06, True),
-    ItemName.stage_crystal_snail:       ItemData(STARTING_ID + 0x07, True),
-    ItemName.stage_overdrive_ostrich:   ItemData(STARTING_ID + 0x08, True),
-    ItemName.stage_wire_sponge:         ItemData(STARTING_ID + 0x09, True),
-    ItemName.stage_x_hunter:            ItemData(STARTING_ID + 0x0A, True),
-    ItemName.stage_sigma:               ItemData(STARTING_ID + 0x35, True),
+    ItemName.stage_wheel_gator:         ItemData(STARTING_ID + 0x02, ItemClassification.progression | ItemClassification.useful),
+    ItemName.stage_bubble_crab:         ItemData(STARTING_ID + 0x03, ItemClassification.progression | ItemClassification.useful),
+    ItemName.stage_flame_stag:          ItemData(STARTING_ID + 0x04, ItemClassification.progression | ItemClassification.useful),
+    ItemName.stage_morph_moth:          ItemData(STARTING_ID + 0x05, ItemClassification.progression | ItemClassification.useful),
+    ItemName.stage_magna_centipede:     ItemData(STARTING_ID + 0x06, ItemClassification.progression | ItemClassification.useful),
+    ItemName.stage_crystal_snail:       ItemData(STARTING_ID + 0x07, ItemClassification.progression | ItemClassification.useful),
+    ItemName.stage_overdrive_ostrich:   ItemData(STARTING_ID + 0x08, ItemClassification.progression | ItemClassification.useful),
+    ItemName.stage_wire_sponge:         ItemData(STARTING_ID + 0x09, ItemClassification.progression | ItemClassification.useful),
+    ItemName.stage_x_hunter:            ItemData(STARTING_ID + 0x0A, ItemClassification.progression | ItemClassification.useful),
+    ItemName.stage_sigma:               ItemData(STARTING_ID + 0x35, ItemClassification.progression | ItemClassification.useful),
 }
 
 weapons = {
-    ItemName.spin_wheel:        ItemData(STARTING_ID + 0x0B, True),
-    ItemName.bubble_splash:     ItemData(STARTING_ID + 0x0C, True),
-    ItemName.speed_burner:      ItemData(STARTING_ID + 0x0D, True),
-    ItemName.silk_shot:         ItemData(STARTING_ID + 0x0E, True),
-    ItemName.magnet_mine:       ItemData(STARTING_ID + 0x0F, True),
-    ItemName.crystal_hunter:    ItemData(STARTING_ID + 0x10, True),
-    ItemName.sonic_slicer:      ItemData(STARTING_ID + 0x11, True),
-    ItemName.strike_chain:      ItemData(STARTING_ID + 0x12, True),
-    ItemName.shoryuken:         ItemData(STARTING_ID + 0x1A, True),
+    ItemName.spin_wheel:        ItemData(STARTING_ID + 0x0B, ItemClassification.progression),
+    ItemName.bubble_splash:     ItemData(STARTING_ID + 0x0C, ItemClassification.progression),
+    ItemName.speed_burner:      ItemData(STARTING_ID + 0x0D, ItemClassification.progression),
+    ItemName.silk_shot:         ItemData(STARTING_ID + 0x0E, ItemClassification.progression),
+    ItemName.magnet_mine:       ItemData(STARTING_ID + 0x0F, ItemClassification.progression),
+    ItemName.crystal_hunter:    ItemData(STARTING_ID + 0x10, ItemClassification.progression),
+    ItemName.sonic_slicer:      ItemData(STARTING_ID + 0x11, ItemClassification.progression),
+    ItemName.strike_chain:      ItemData(STARTING_ID + 0x12, ItemClassification.progression),
+    ItemName.shoryuken:         ItemData(STARTING_ID + 0x1A, ItemClassification.useful),
 }
 
 tanks_table = {
-    ItemName.heart_tank:        ItemData(STARTING_ID + 0x13, True),
-    ItemName.sub_tank:          ItemData(STARTING_ID + 0x14, True),
+    ItemName.heart_tank:        ItemData(STARTING_ID + 0x13, ItemClassification.progression),
+    ItemName.sub_tank:          ItemData(STARTING_ID + 0x14, ItemClassification.progression),
 }
 
 armor_table = {
-    ItemName.helmet:    ItemData(STARTING_ID + 0x1C, True), 
-    ItemName.body:      ItemData(STARTING_ID + 0x1D, True), 
-    ItemName.arms:      ItemData(STARTING_ID + 0x1E, True), 
-    ItemName.legs:      ItemData(STARTING_ID + 0x1F, True), 
+    ItemName.helmet:    ItemData(STARTING_ID + 0x1C, ItemClassification.progression),
+    ItemName.body:      ItemData(STARTING_ID + 0x1D, ItemClassification.progression),
+    ItemName.arms:      ItemData(STARTING_ID + 0x1E, ItemClassification.progression),
+    ItemName.legs:      ItemData(STARTING_ID + 0x1F, ItemClassification.progression),
 }
 
 junk_table = {
-    ItemName.small_hp:      ItemData(STARTING_ID + 0x30, False),
-    ItemName.large_hp:      ItemData(STARTING_ID + 0x31, False),
-    ItemName.life:          ItemData(STARTING_ID + 0x34, False),
+    ItemName.small_hp:      ItemData(STARTING_ID + 0x30, ItemClassification.filler),
+    ItemName.large_hp:      ItemData(STARTING_ID + 0x31, ItemClassification.filler),
+    ItemName.life:          ItemData(STARTING_ID + 0x34, ItemClassification.filler),
+}
+
+enhancements_table = {
+    ItemName.chip_quick_charge:        ItemData(STARTING_ID + 0x40, ItemClassification.useful),
+    ItemName.chip_speedster:           ItemData(STARTING_ID + 0x41, ItemClassification.useful),
+    ItemName.chip_super_recover:       ItemData(STARTING_ID + 0x42, ItemClassification.useful),
 }
 
 item_groups = {
@@ -101,6 +106,7 @@ item_table = {
     **weapons,
     **tanks_table,
     **armor_table,
+    **enhancements_table,
     **junk_table,
 }
 

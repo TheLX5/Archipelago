@@ -135,9 +135,6 @@ class MMX2World(World):
         itempool += [self.create_item(ItemName.crystal_hunter)]
         itempool += [self.create_item(ItemName.sonic_slicer)]
         itempool += [self.create_item(ItemName.strike_chain)]
-        
-        if self.options.shoryuken_in_pool:
-            itempool += [self.create_item(ItemName.shoryuken, ItemClassification.useful)]
 
         # Add armor upgrades into the pool
         base_open = self.options.base_open.value
@@ -160,7 +157,6 @@ class MMX2World(World):
             i = self.options.base_heart_tank_count.value
             itempool += [self.create_item(ItemName.heart_tank) for _ in range(i)]
             if i != 8:
-                i = 8 - i
                 itempool += [self.create_item(ItemName.heart_tank, ItemClassification.useful) for _ in range(8 - i)]
         else:
             itempool += [self.create_item(ItemName.heart_tank, ItemClassification.useful) for _ in range(8)]
@@ -173,6 +169,16 @@ class MMX2World(World):
                 itempool += [self.create_item(ItemName.sub_tank, ItemClassification.useful) for _ in range(4 - i)]
         else:
             itempool += [self.create_item(ItemName.sub_tank, ItemClassification.useful) for _ in range(4)]
+
+        # Add optional upgrades into the pool
+        if self.options.shoryuken_in_pool:
+            itempool += [self.create_item(ItemName.shoryuken)]
+        if self.options.quick_charge_in_pool:
+            itempool += [self.create_item(ItemName.chip_quick_charge)]
+        if self.options.speedster_in_pool:
+            itempool += [self.create_item(ItemName.chip_speedster)]
+        if self.options.super_recover_in_pool:
+            itempool += [self.create_item(ItemName.chip_super_recover)]
 
         # Setup junk items
         junk_count = total_required_locations - len(itempool)
@@ -212,17 +218,13 @@ class MMX2World(World):
         # Finish
         self.multiworld.itempool += itempool
 
-    def create_item(self, name: str, force_classification=False) -> Item:
+    def create_item(self, name: str, force_classification=False) -> MMX2Item:
         data = item_table[name]
 
         if force_classification:
             classification = force_classification
-        elif data.progression:
-            classification = ItemClassification.progression
-        elif data.trap:
-            classification = ItemClassification.trap
         else:
-            classification = ItemClassification.filler
+            classification = data.classsification
         
         created_item = MMX2Item(name, classification, data.code, self.player)
 

@@ -5,7 +5,12 @@ from Options import Choice, Range, Toggle, DefaultOnToggle, OptionDict, OptionSe
 from schema import Schema, And, Use, Optional
 
 from .Rom import action_buttons, action_names, x_palette_set_offsets
-from .Weaknesses import boss_weaknesses, weapons_chaotic
+from .Weaknesses import boss_weaknesses, weapons_chaotic, weapons_chaotic_silk_shot
+
+actual_weapon_list = {
+    **weapons_chaotic,
+    **weapons_chaotic_silk_shot,
+}
 
 class EnergyLink(DefaultOnToggle):
     """
@@ -139,6 +144,30 @@ class ShoryukenUseHadoukenInput(Toggle):
     """
     display_name = "Shoryuken Uses Hadouken Input"
 
+class QuickChargeInPool(DefaultOnToggle):
+    """
+    Adds Quick Charge Chip from Mega Man X5 into the item pool.
+
+    Halves charge time for X-Buster and Special Weapon shots.
+    """
+    display_name = "Quick Charge In Pool"
+
+class SpeedsterInPool(DefaultOnToggle):
+    """
+    Adds Speedster Chip from Mega Man X5 into the item pool.
+
+    Increases walking speed by 50%
+    """
+    display_name = "Speedster In Pool"
+
+class SuperRecoverInPool(DefaultOnToggle):
+    """
+    Adds Super Recover Chip from Mega Man X5 into the item pool.
+
+    Increases recovery from items by 25%. Also affects EnergyLink deposit rate. Doesn't affect Sub Tanks.
+    """
+    display_name = "Super Recover In Pool"
+
 class PickupSanity(Toggle):
     """
     Whether collecting freestanding 1ups, HP and Weapon Energy capsules will grant a check.
@@ -264,7 +293,7 @@ class PlandoWeaknesses(OptionDict):
     display_name = "Button Configuration"
     schema = Schema({
         Optional(boss_name): 
-            And(str, lambda weapon: weapon in weapons_chaotic.keys()) for boss_name in boss_weaknesses.keys()
+            And(str, lambda weapon: weapon in actual_weapon_list.keys()) for boss_name in boss_weaknesses.keys()
     })
     default = {}
 
@@ -392,6 +421,9 @@ mmx2_option_groups = [
         LongJumps,
         ShoryukenInPool,
         ShoryukenUseHadoukenInput,
+        QuickChargeInPool,
+        SpeedsterInPool,
+        SuperRecoverInPool,
         XHuntersMedalCount,
         LogicHelmetCheckpoints,
     ]),
@@ -444,6 +476,9 @@ class MMX2Options(PerGameCommonOptions):
     long_jumps: LongJumps
     shoryuken_in_pool: ShoryukenInPool
     shoryuken_use_hadouken_input: ShoryukenUseHadoukenInput
+    quick_charge_in_pool: QuickChargeInPool
+    speedster_in_pool: SpeedsterInPool
+    super_recover_in_pool: SuperRecoverInPool
     logic_helmet_checkpoints: LogicHelmetCheckpoints
     logic_boss_weakness: LogicBossWeakness
     base_boss_rematch_count: BaseBossRematchCount

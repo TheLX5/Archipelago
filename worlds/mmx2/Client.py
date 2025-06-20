@@ -55,6 +55,9 @@ MMX2_CHECKPOINTS_REACHED    = MMX2_RAM + 0x001E0
 MMX2_REFILL_REQUEST         = MMX2_RAM + 0x0002F
 MMX2_REFILL_TARGET          = MMX2_RAM + 0x00030
 MMX2_ARSENAL_SYNC           = MMX2_RAM + 0x0003E
+MMX2_UNLOCKED_QUICK_CHARGE  = MMX2_RAM + 0x0004A
+MMX2_UNLOCKED_SPEEDSTER     = MMX2_RAM + 0x0004B
+MMX2_UNLOCKED_SUPER_RECOVER = MMX2_RAM + 0x0004C
 
 MMX2_SFX_FLAG   = MMX2_RAM + 0x00003
 MMX2_SFX_NUMBER = MMX2_RAM + 0x00004
@@ -294,7 +297,7 @@ class MMX2SNIClient(SNIClient):
                     ctx.set_notify(f"EnergyLink{ctx.team}")
                     logger.info(f"Initialized EnergyLink{ctx.team}, use /help to get information about the EnergyLink commands.")
 
-        from .Rom import weapon_rom_data, upgrades_rom_data, boss_access_rom_data, refill_rom_data
+        from .Rom import weapon_rom_data, upgrades_rom_data, boss_access_rom_data, refill_rom_data, chip_rom_data
         from .Levels import location_id_to_level_id
         from worlds import AutoWorldRegister
 
@@ -433,6 +436,9 @@ class MMX2SNIClient(SNIClient):
 
             elif item.item in upgrades_rom_data:
                 self.add_item_to_queue("upgrade", item.item)
+
+            elif item.item in chip_rom_data:
+                self.add_item_to_queue("enhancement", item.item)
 
             elif item.item in boss_access_rom_data:
                 boss_access = bytearray(await snes_read(ctx, MMX2_UNLOCKED_LEVELS, 0x20))
@@ -712,7 +718,7 @@ class MMX2SNIClient(SNIClient):
 
     async def handle_item_queue(self, ctx):
         from SNIClient import snes_buffered_write, snes_flush_writes, snes_read
-        from .Rom import weapon_rom_data, upgrades_rom_data
+        from .Rom import weapon_rom_data, upgrades_rom_data, chip_rom_data
 
         if not hasattr(self, "item_queue") or len(self.item_queue) == 0:
             return
@@ -873,6 +879,14 @@ class MMX2SNIClient(SNIClient):
             self.item_queue.pop(0)
             self.save_arsenal = True
 
+        elif next_item[0] == "enhancement":
+            chip_offset = chip_rom_data[item_id][0]
+            snes_buffered_write(ctx, MMX2_RAM + chip_offset, bytearray([0x80]))
+            snes_buffered_write(ctx, MMX2_SFX_FLAG, bytearray([0x01]))
+            snes_buffered_write(ctx, MMX2_SFX_NUMBER, bytearray([0x1B]))
+            self.save_arsenal = True
+            self.item_queue.pop(0)
+
         await snes_flush_writes(ctx)
 
 
@@ -897,6 +911,7 @@ class MMX2SNIClient(SNIClient):
                     snes_buffered_write(ctx, MMX2_SUB_TANK_ARRAY, bytearray(arsenal["sub_tanks"]))
                     snes_buffered_write(ctx, MMX2_UNLOCKED_CHARGED_SHOT, bytes(arsenal["unlocked_buster"].to_bytes(1, 'little')))
                     snes_buffered_write(ctx, MMX2_WEAPON_ARRAY, bytearray(arsenal["weapons"]))
+                    snes_buffered_write(ctx, MMX2_UNLOCKED_QUICK_CHARGE, bytearray(arsenal["enhancements"]))
                     snes_buffered_write(ctx, MMX2_SHORYUKEN, bytes(arsenal["shoryuken"].to_bytes(1, 'little')))
                     snes_buffered_write(ctx, MMX2_UNLOCKED_LEVELS, bytearray(arsenal["levels"]))
                     snes_buffered_write(ctx, MMX2_BASE_ACCESS, bytes(arsenal["base_access"].to_bytes(1, 'little')))
@@ -916,6 +931,7 @@ class MMX2SNIClient(SNIClient):
             arsenal["sub_tanks"] = list(await snes_read(ctx, MMX2_SUB_TANK_ARRAY, 0x4))
             arsenal["unlocked_buster"] = int.from_bytes(await snes_read(ctx, MMX2_UNLOCKED_CHARGED_SHOT, 0x1), "little")
             arsenal["weapons"] = list(await snes_read(ctx, MMX2_WEAPON_ARRAY, 0x14))
+            arsenal["enhancements"] = list(await snes_read(ctx, MMX2_UNLOCKED_QUICK_CHARGE, 0x03))
             arsenal["shoryuken"] = int.from_bytes(await snes_read(ctx, MMX2_SHORYUKEN, 0x1), "little")
             arsenal["levels"] = list(await snes_read(ctx, MMX2_UNLOCKED_LEVELS, 0x20))
             arsenal["base_access"] = int.from_bytes(await snes_read(ctx, MMX2_BASE_ACCESS, 0x1), "little")
@@ -932,6 +948,8 @@ class MMX2SNIClient(SNIClient):
                     arsenal["max_hp"] = saved_arsenal["max_hp"]
                 for i in range(0x14):
                     arsenal["weapons"][i] |= saved_arsenal["weapons"][i] & 0x40
+                for i in range(0x03):
+                    arsenal["enhancements"][i] |= saved_arsenal["enhancements"][i] & 0x80
                 for level in range(0x20):
                     arsenal["levels"][level] |= saved_arsenal["levels"][level]
                 arsenal["base_access"] = min(saved_arsenal["base_access"], arsenal["base_access"])

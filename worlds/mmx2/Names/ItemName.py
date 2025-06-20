@@ -34,6 +34,11 @@ ride_armor = "Ride Armor"
 heart_tank = "Heart Tank"
 sub_tank = "Sub Tank"
 
+# Enhancements
+chip_quick_charge = "Quick Charge Chip"
+chip_speedster = "Speedster Chip"
+chip_super_recover = "Super Recover Chip"
+
 # Medals
 maverick_medal = "Maverick Medal"
 victory = "Sigma Virus Destroyed"
