@@ -479,17 +479,16 @@ def connect_regions(world: World):
     connect(world, RegionName.x_hunter_stage_4_voice, RegionName.x_hunter_stage_5)
 
     # Connect checkpoints
-    if world.options.logic_helmet_checkpoints.value:
-        # Connect Morph Moth
-        connect(world, RegionName.morph_moth, RegionName.morph_moth_after_parasite_1)
-        connect(world, RegionName.morph_moth, RegionName.morph_moth_after_parasite_2)
+    # Connect Morph Moth
+    connect(world, RegionName.morph_moth, RegionName.morph_moth_after_parasite_1)
+    connect(world, RegionName.morph_moth, RegionName.morph_moth_after_parasite_2)
 
-        # Connect Magna Centipede
-        connect(world, RegionName.magna_centipede, RegionName.magna_centipede_after_blade)
-        connect(world, RegionName.magna_centipede, RegionName.magna_centipede_after_security)
+    # Connect Magna Centipede
+    connect(world, RegionName.magna_centipede, RegionName.magna_centipede_after_blade)
+    connect(world, RegionName.magna_centipede, RegionName.magna_centipede_after_security)
 
-        # Connect Crystal Snail
-        connect(world, RegionName.crystal_snail, RegionName.crystal_snail_downhill)
+    # Connect Crystal Snail
+    connect(world, RegionName.crystal_snail, RegionName.crystal_snail_downhill)
 
 
 def create_region(multiworld: MultiWorld, player: int, active_locations, name: str, locations=None):

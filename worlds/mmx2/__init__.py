@@ -242,7 +242,6 @@ class MMX2World(World):
                     self.pickupsanity = slot_data["pickupsanity"]
                     self.jammed_buster = slot_data["jammed_buster"]
                     self.logic_boss_weakness = slot_data["logic_boss_weakness"]
-                    self.logic_helmet_checkpoints = slot_data["logic_helmet_checkpoints"]
                     self.base_open = slot_data["base_open"]
                     self.base_medal_count = slot_data["base_medal_count"]
                     self.base_weapon_count = slot_data["base_weapon_count"]
@@ -265,7 +264,6 @@ class MMX2World(World):
             "pickupsanity": slot_data["pickupsanity"],
             "jammed_buster": slot_data["jammed_buster"],
             "logic_boss_weakness": slot_data["logic_boss_weakness"],
-            "logic_helmet_checkpoints": slot_data["logic_helmet_checkpoints"],
             "base_open": slot_data["base_open_text"],
             "base_medal_count": slot_data["base_medal_count"],
             "base_weapon_count": slot_data["base_weapon_count"],
@@ -291,7 +289,6 @@ class MMX2World(World):
         slot_data["shoryuken_in_pool"] = self.options.shoryuken_in_pool.value
         slot_data["energy_link"] = self.options.energy_link.value
         slot_data["logic_boss_weakness"] = self.options.logic_boss_weakness.value
-        slot_data["logic_helmet_checkpoints"] = self.options.logic_helmet_checkpoints.value
         
         value = 0
         if "Medals" in self.base_open:
@@ -333,7 +330,6 @@ class MMX2World(World):
         self.pickupsanity = self.options.pickupsanity.value
         self.jammed_buster = self.options.jammed_buster.value
         self.logic_boss_weakness = self.options.logic_boss_weakness.value
-        self.logic_helmet_checkpoints = self.options.logic_helmet_checkpoints.value
         self.base_open = self.options.base_open.value.copy()
         self.base_medal_count = self.options.base_medal_count.value
         self.base_weapon_count = self.options.base_weapon_count.value

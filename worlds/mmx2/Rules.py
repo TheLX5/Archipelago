@@ -287,8 +287,7 @@ def set_rules(world: MMX2World):
         add_pickupsanity_logic(world)
 
     # Handle helmet logic
-    if world.logic_helmet_checkpoints:
-        add_helmet_logic(world)
+    add_helmet_logic(world)
 
 
 def check_weaknesses(state: CollectionState, player: int, rulesets: list) -> bool:
