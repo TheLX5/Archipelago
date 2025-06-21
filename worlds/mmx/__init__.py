@@ -142,8 +142,15 @@ class MMXWorld(World):
         itempool += [self.create_item(ItemName.fire_wave)]
         itempool += [self.create_item(ItemName.boomerang_cutter)]
 
+        # Add optional upgrades into the pool
         if self.options.hadouken_in_pool:
-            itempool += [self.create_item(ItemName.hadouken, ItemClassification.useful)]
+            itempool += [self.create_item(ItemName.hadouken)]
+        if self.options.quick_charge_in_pool:
+            itempool += [self.create_item(ItemName.chip_quick_charge)]
+        if self.options.speedster_in_pool:
+            itempool += [self.create_item(ItemName.chip_speedster)]
+        if self.options.super_recover_in_pool:
+            itempool += [self.create_item(ItemName.chip_super_recover)]
 
         # Add upgrades into the pool
         sigma_open = self.options.sigma_open.value
@@ -217,19 +224,15 @@ class MMXWorld(World):
 
         # Finish
         self.multiworld.itempool += itempool
-
-
-    def create_item(self, name: str, force_classification: ItemClassification = False) -> Item:
+    
+    
+    def create_item(self, name: str, force_classification=False) -> MMXItem:
         data = item_table[name]
 
         if force_classification:
             classification = force_classification
-        elif data.progression:
-            classification = ItemClassification.progression
-        elif data.trap:
-            classification = ItemClassification.trap
         else:
-            classification = ItemClassification.filler
+            classification = data.classsification
         
         created_item = MMXItem(name, classification, data.code, self.player)
 
@@ -244,7 +247,7 @@ class MMXWorld(World):
         build_rules(self)
 
 
-    def fill_slot_data(self) -> Dict[int, Any]:
+    def fill_slot_data(self) -> Dict[str, Any]:
         slot_data = {}
         # Write options to slot_data
         slot_data["energy_link"] = self.options.energy_link.value
@@ -391,7 +394,7 @@ class MMXWorld(World):
             self.rom_name_available_event.set()  # make sure threading continues and errors are collected
 
 
-    def modify_multidata(self, multidata: dict) -> None:
+    def modify_multidata(self, multidata: Dict[str, Any]) -> None:
         import base64
         # wait for self.rom_name to be available.
         self.rom_name_available_event.wait()

@@ -1,5 +1,5 @@
-from worlds.generic.Rules import add_rule, set_rule
-from BaseClasses import CollectionState
+from worlds.generic.Rules import add_rule, set_rule, add_item_rule
+from BaseClasses import CollectionState, ItemClassification
 
 from .Names import LocationName, ItemName, RegionName, EventName
   
@@ -196,8 +196,7 @@ def build_rules(world: "MMXWorld") -> None:
         add_charged_shotgun_ice_logic(world)
 
     # Handle helmet logic
-    if world.options.logic_helmet_checkpoints:
-        add_helmet_logic(world)
+    add_helmet_logic(world)
 
 
 def add_pickupsanity_logic(world: "MMXWorld") -> None:

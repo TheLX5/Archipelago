@@ -61,6 +61,12 @@ refill_rom_data = {
     STARTING_ID + 0x0033: ["weapon refill", 8],
 }
 
+chip_rom_data = {
+    STARTING_ID + 0x0040: [0x2A],       # Quick Charge
+    STARTING_ID + 0x0041: [0x2B],       # Speedster
+    STARTING_ID + 0x0042: [0x2C],       # Super Recover
+}
+
 x_palette_set_offsets = {
     "Default": 0x02B700,
     "Homing Torpedo": 0x02CC40,
@@ -312,17 +318,17 @@ def patch_rom(world: "MMXWorld", patch: MMXProcedurePatch) -> None:
         patch.write_byte(action_offsets[action], button_values[button])
 
     # Write tweaks
-    enemy_tweaks_available = {
-        "Chill Penguin": world.options.chill_penguin_tweaks.value,
-        "Armored Armadillo": world.options.armored_armadillo_tweaks.value,
-        "Spark Mandrill": world.options.spark_mandrill_tweaks.value,
-    }
-    for boss, offset in enemy_tweaks_offsets.items():
-        selected_tweaks = enemy_tweaks_available[boss]
-        final_value = 0
-        for tweak in selected_tweaks:
-            final_value |= enemy_tweaks_indexes[boss][tweak]
-        patch.write_bytes(offset, bytearray([final_value & 0xFF, (final_value >> 8) & 0xFF]))
+    #enemy_tweaks_available = {
+    #    "Chill Penguin": world.options.chill_penguin_tweaks.value,
+    #    "Armored Armadillo": world.options.armored_armadillo_tweaks.value,
+    #    "Spark Mandrill": world.options.spark_mandrill_tweaks.value,
+    #}
+    #for boss, offset in enemy_tweaks_offsets.items():
+    #    selected_tweaks = enemy_tweaks_available[boss]
+    #    final_value = 0
+    #    for tweak in selected_tweaks:
+    #        final_value |= enemy_tweaks_indexes[boss][tweak]
+    #    patch.write_bytes(offset, bytearray([final_value & 0xFF, (final_value >> 8) & 0xFF]))
 
     # Edit the ROM header
     from Utils import __version__

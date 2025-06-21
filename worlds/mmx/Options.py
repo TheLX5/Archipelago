@@ -121,6 +121,30 @@ class EarlyLegs(Toggle):
     """
     display_name = "Early Legs"
 
+class QuickChargeInPool(DefaultOnToggle):
+    """
+    Adds Quick Charge Chip from Mega Man X5 into the item pool.
+
+    Halves charge time for X-Buster and Special Weapon shots.
+    """
+    display_name = "Quick Charge In Pool"
+
+class SpeedsterInPool(DefaultOnToggle):
+    """
+    Adds Speedster Chip from Mega Man X5 into the item pool.
+
+    Increases walking speed by 50%
+    """
+    display_name = "Speedster In Pool"
+
+class SuperRecoverInPool(DefaultOnToggle):
+    """
+    Adds Super Recover Chip from Mega Man X5 into the item pool.
+
+    Increases recovery from items by 25%. Also affects EnergyLink deposit rate. Doesn't affect Sub Tanks.
+    """
+    display_name = "Super Recover In Pool"
+
 class PickupSanity(Toggle):
     """
     Whether collecting freestanding 1ups, HP and Weapon Energy capsules will grant a check.
@@ -267,70 +291,64 @@ class LongJumps(Toggle):
     """
     display_name = "Long Jumps"
 
-class LogicHelmetCheckpoints(Toggle):
-    """
-    Makes the "Use Any Checkpoint" feature from the Helmet Upgrade be in logic
-    """
-    display_name = "Helmet Checkpoints In Logic"
-
-class ChillPenguinTweaks(OptionSet):
-    """
-    Behavior options for Chill Penguin. Everything can be stacked.
-    """
-    display_name = "Chill Penguin Tweaks"
-    valid_keys = {
-        "Random horizontal slide speed",
-        "Jumps when starting slide",
-        "Random ice block horizontal speed",
-        "Random ice block vertical speed",
-        "Shoot random amount of ice blocks",
-        "Ice block shooting rate enhancer #1",
-        "Ice block shooting rate enhancer #2",
-        "Ice block shooting rate enhancer #3",
-        "Random blizzard strength",
-        "Fast falls after jumping",
-        "Random mist range",
-        "Can't be stunned/set on fire with incoming damage",
-        "Can't be set on fire with weakness",
-    }
-    default = {}
+#class ChillPenguinTweaks(OptionSet):
+#    """
+#    Behavior options for Chill Penguin. Everything can be stacked.
+#    """
+#    display_name = "Chill Penguin Tweaks"
+#    valid_keys = {
+#        "Random horizontal slide speed",
+#        "Jumps when starting slide",
+#        "Random ice block horizontal speed",
+#        "Random ice block vertical speed",
+#        "Shoot random amount of ice blocks",
+#        "Ice block shooting rate enhancer #1",
+#        "Ice block shooting rate enhancer #2",
+#        "Ice block shooting rate enhancer #3",
+#        "Random blizzard strength",
+#        "Fast falls after jumping",
+#        "Random mist range",
+#        "Can't be stunned/set on fire with incoming damage",
+#        "Can't be set on fire with weakness",
+#    }
+#    default = {}
 
 
-class ArmoredArmadilloTweaks(OptionSet):
-    """
-    Behavior options for Armored Armadillo. Everything can be stacked.
-    """
-    display_name = "Armored Armadillo Tweaks"
-    valid_keys = {
-        "Random bouncing speed",
-        "Random bouncing angle",
-        "Random energy horizontal speed",
-        "Random energy vertical speed",
-        "Energy shooting rate enhancer #1",
-        "Energy shooting rate enhancer #2",
-        "Don't absorb any projectile",
-        "Absorbs any projectile except weakness",
-        "Don't flinch from incoming damage without armor",
-        "Can't block incoming projectiles",
-    }
-    default = {}
+#class ArmoredArmadilloTweaks(OptionSet):
+#    """
+#    Behavior options for Armored Armadillo. Everything can be stacked.
+#    """
+#    display_name = "Armored Armadillo Tweaks"
+#    valid_keys = {
+#        "Random bouncing speed",
+#        "Random bouncing angle",
+#        "Random energy horizontal speed",
+#        "Random energy vertical speed",
+#        "Energy shooting rate enhancer #1",
+#        "Energy shooting rate enhancer #2",
+#        "Don't absorb any projectile",
+#        "Absorbs any projectile except weakness",
+#        "Don't flinch from incoming damage without armor",
+#        "Can't block incoming projectiles",
+#    }
+#    default = {}
 
 
-class SparkMandrillTweaks(OptionSet):
-    """
-    Behavior options for Spark Mandrill. Everything can be stacked.
-    """
-    display_name = "Spark Mandrill Tweaks"
-    valid_keys = {
-        "Random Electric Spark speed",
-        "Additional Electric Spark #1",
-        "Additional Electric Spark #2",
-        "Landing creates Electric Spark",
-        "Hitting a wall creates Electric Spark",
-        "Can't be stunned during Dash Punch with weakness",
-        "Can't be frozen with weakness",
-    }
-    default = {}
+#class SparkMandrillTweaks(OptionSet):
+#    """
+#    Behavior options for Spark Mandrill. Everything can be stacked.
+#    """
+#    display_name = "Spark Mandrill Tweaks"
+#    valid_keys = {
+#        "Random Electric Spark speed",
+#        "Additional Electric Spark #1",
+#        "Additional Electric Spark #2",
+#        "Landing creates Electric Spark",
+#        "Hitting a wall creates Electric Spark",
+#        "Can't be stunned during Dash Punch with weakness",
+#        "Can't be frozen with weakness",
+#    }
+#    default = {}
 
 class BasePalette(Choice):
     """
@@ -450,8 +468,10 @@ mmx_option_groups = [
         LongJumps,
         AirDash,
         HadoukenInPool,
+        QuickChargeInPool,
+        SpeedsterInPool,
+        SuperRecoverInPool,
         LogicChargedShotgunIce,
-        LogicHelmetCheckpoints,
     ]),
     OptionGroup("Sigma Fortress Options", [
         SigmaOpen,
@@ -470,11 +490,11 @@ mmx_option_groups = [
         BossRandomizedHP,
         LogicBossWeakness,
     ]),
-    OptionGroup("Enemy Tweaks", [
-        ChillPenguinTweaks,
-        ArmoredArmadilloTweaks,
-        SparkMandrillTweaks,
-    ]),
+    #OptionGroup("Enemy Tweaks", [
+    #    ChillPenguinTweaks,
+    #    ArmoredArmadilloTweaks,
+    #    SparkMandrillTweaks,
+    #]),
     OptionGroup("Aesthetic", [
         SetPalettes,
         PaletteDefault,
@@ -507,12 +527,14 @@ class MMXOptions(PerGameCommonOptions):
     air_dash: AirDash
     long_jumps: LongJumps
     hadouken_in_pool: HadoukenInPool
+    quick_charge_in_pool: QuickChargeInPool
+    speedster_in_pool: SpeedsterInPool
+    super_recover_in_pool: SuperRecoverInPool
     pickupsanity: PickupSanity
     early_legs: EarlyLegs
     logic_boss_weakness: LogicBossWeakness
     logic_leg_sigma: LogicLegSigma
     logic_charged_shotgun_ice: LogicChargedShotgunIce
-    logic_helmet_checkpoints: LogicHelmetCheckpoints
     sigma_all_levels: FortressBundleUnlock
     sigma_open: SigmaOpen
     sigma_medal_count: SigmaMedalCount
@@ -520,9 +542,9 @@ class MMXOptions(PerGameCommonOptions):
     sigma_upgrade_count: SigmaArmorUpgradeCount
     sigma_heart_tank_count: SigmaHeartTankCount
     sigma_sub_tank_count: SigmaSubTankCount
-    chill_penguin_tweaks: ChillPenguinTweaks
-    armored_armadillo_tweaks: ArmoredArmadilloTweaks
-    spark_mandrill_tweaks: SparkMandrillTweaks
+    #chill_penguin_tweaks: ChillPenguinTweaks
+    #armored_armadillo_tweaks: ArmoredArmadilloTweaks
+    #spark_mandrill_tweaks: SparkMandrillTweaks
     player_palettes: SetPalettes
     palette_default: PaletteDefault
     palette_homing_torpedo: PaletteHomingTorpedo

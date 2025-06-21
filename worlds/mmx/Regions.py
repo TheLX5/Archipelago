@@ -329,7 +329,7 @@ def create_regions(world: "MMXWorld", active_locations: Dict[int, str]) -> None:
         add_location_to_region(multiworld, player, active_locations, RegionName.sigma_fortress_3_after_rematch_4, LocationName.sigma_fortress_3_1up)
 
 
-def connect_regions(world: World) -> None:
+def connect_regions(world: "MMXWorld") -> None:
     connect(world, "Menu", RegionName.intro)
     
     connect(world, RegionName.intro, RegionName.armored_armadillo)
@@ -430,20 +430,19 @@ def connect_regions(world: World) -> None:
         connect(world, RegionName.sigma_fortress_3_boss, RegionName.sigma_fortress_4)
 
     # Connect checkpoints
-    if world.options.logic_helmet_checkpoints.value:
-        connect(world, RegionName.spark_mandrill, RegionName.spark_mandrill_deep)
+    connect(world, RegionName.spark_mandrill, RegionName.spark_mandrill_deep)
 
-        connect(world, RegionName.sigma_fortress_1, RegionName.sigma_fortress_1_vertical)
-        connect(world, RegionName.sigma_fortress_1, RegionName.sigma_fortress_1_before_boss)
+    connect(world, RegionName.sigma_fortress_1, RegionName.sigma_fortress_1_vertical)
+    connect(world, RegionName.sigma_fortress_1, RegionName.sigma_fortress_1_before_boss)
 
-        connect(world, RegionName.sigma_fortress_2, RegionName.sigma_fortress_2_ride)
-        connect(world, RegionName.sigma_fortress_2, RegionName.sigma_fortress_2_before_boss)
+    connect(world, RegionName.sigma_fortress_2, RegionName.sigma_fortress_2_ride)
+    connect(world, RegionName.sigma_fortress_2, RegionName.sigma_fortress_2_before_boss)
 
-        connect(world, RegionName.sigma_fortress_3, RegionName.sigma_fortress_3_after_rematch_1)
-        connect(world, RegionName.sigma_fortress_3, RegionName.sigma_fortress_3_after_rematch_2)
-        connect(world, RegionName.sigma_fortress_3, RegionName.sigma_fortress_3_after_rematch_3)
-        connect(world, RegionName.sigma_fortress_3, RegionName.sigma_fortress_3_after_rematch_4)
-        connect(world, RegionName.sigma_fortress_3, RegionName.sigma_fortress_3_after_rematch_5)
+    connect(world, RegionName.sigma_fortress_3, RegionName.sigma_fortress_3_after_rematch_1)
+    connect(world, RegionName.sigma_fortress_3, RegionName.sigma_fortress_3_after_rematch_2)
+    connect(world, RegionName.sigma_fortress_3, RegionName.sigma_fortress_3_after_rematch_3)
+    connect(world, RegionName.sigma_fortress_3, RegionName.sigma_fortress_3_after_rematch_4)
+    connect(world, RegionName.sigma_fortress_3, RegionName.sigma_fortress_3_after_rematch_5)
 
 
 def create_region(multiworld: MultiWorld, player: int, active_locations, name: str, locations=None) -> Region:

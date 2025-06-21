@@ -69,6 +69,10 @@ MMX_DEATH_LINK_ACTIVE      = MMX_SETTINGS + 0x09
 MMX_JAMMED_BUSTER_ACTIVE   = MMX_SETTINGS + 0x0A
 MMX_ABILITIES_FLAGS        = MMX_SETTINGS + 0x11
 
+MMX_UNLOCKED_QUICK_CHARGE = MMX_RAM + 0x02A
+MMX_UNLOCKED_SPEEDSTER    = MMX_RAM + 0x02B
+MMX_UNLOCKED_SUPER_RECOVER = MMX_RAM + 0x02C
+
 MMX_ENERGY_LINK_COUNT      = MMX_RAM + 0x00100
 MMX_GLOBAL_TIMER           = MMX_RAM + 0x00106
 MMX_GLOBAL_DEATHS          = MMX_RAM + 0x0010A
@@ -277,7 +281,7 @@ class MMXSNIClient(SNIClient):
                     ctx.set_notify(f"mmx_arsenal_{ctx.team}_{ctx.slot}")
 
             if screen_brightness[0] == 0x0F:
-                self.handle_item_queue(ctx, game_ram)
+                await self.handle_item_queue(ctx, game_ram)
 
             if self.trade_request is not None:
                 self.handle_hp_trade(ctx, game_ram)
@@ -299,7 +303,7 @@ class MMXSNIClient(SNIClient):
 
         await snes_flush_writes(ctx)
 
-        from .Rom import weapon_rom_data, upgrades_rom_data, boss_access_rom_data, refill_rom_data
+        from .Rom import weapon_rom_data, upgrades_rom_data, boss_access_rom_data, refill_rom_data, chip_rom_data
         from .Levels import location_id_to_level_id
         from worlds import AutoWorldRegister
 
@@ -432,6 +436,9 @@ class MMXSNIClient(SNIClient):
 
             elif item.item in upgrades_rom_data:
                 self.add_item_to_queue("upgrade", item.item)
+
+            elif item.item in chip_rom_data:
+                self.add_item_to_queue("enhancement", item.item)
 
             elif item.item in boss_access_rom_data:
                 if item.item == STARTING_ID + 0x000A:
@@ -724,9 +731,9 @@ class MMXSNIClient(SNIClient):
         self.item_queue.append([item_type, item_id, item_additional])
 
 
-    def handle_item_queue(self, ctx, game_ram):
-        from SNIClient import snes_buffered_write
-        from .Rom import weapon_rom_data, upgrades_rom_data
+    async def handle_item_queue(self, ctx, game_ram):
+        from SNIClient import snes_buffered_write, snes_flush_writes
+        from .Rom import weapon_rom_data, upgrades_rom_data, chip_rom_data
 
         if not hasattr(self, "item_queue") or len(self.item_queue) == 0:
             return
@@ -882,6 +889,16 @@ class MMXSNIClient(SNIClient):
             self.item_queue.pop(0)
             self.save_arsenal = True
 
+        elif next_item[0] == "enhancement":
+            chip_offset = chip_rom_data[item_id][0]
+            snes_buffered_write(ctx, MMX_RAM + chip_offset, bytearray([0x80]))
+            snes_buffered_write(ctx, MMX_SFX_FLAG, bytearray([0x01]))
+            snes_buffered_write(ctx, MMX_SFX_NUMBER, bytearray([0x2B]))
+            self.save_arsenal = True
+            self.item_queue.pop(0)
+
+        await snes_flush_writes(ctx)
+
 
     async def handle_data_storage(self, ctx, game_ram):
         from SNIClient import snes_read, snes_buffered_write, snes_flush_writes
@@ -910,6 +927,7 @@ class MMXSNIClient(SNIClient):
                     snes_buffered_write(ctx, MMX_SUB_TANK_ARRAY, bytearray(arsenal["sub_tanks"]))
                     snes_buffered_write(ctx, MMX_UNLOCKED_CHARGED_SHOT, bytes(arsenal["unlocked_buster"].to_bytes(1, 'little')))
                     snes_buffered_write(ctx, MMX_UNLOCKED_AIR_DASH, bytes(arsenal["unlocked_air_dash"].to_bytes(1, 'little')))
+                    snes_buffered_write(ctx, MMX_UNLOCKED_QUICK_CHARGE, bytearray(arsenal["enhancements"]))
                     snes_buffered_write(ctx, MMX_WEAPON_ARRAY, bytearray(arsenal["weapons"]))
                     snes_buffered_write(ctx, MMX_HADOUKEN, bytes(arsenal["hadouken"].to_bytes(1, 'little')))
                     snes_buffered_write(ctx, MMX_UNLOCKED_LEVELS, bytearray(arsenal["levels"]))
@@ -931,6 +949,7 @@ class MMXSNIClient(SNIClient):
             arsenal["unlocked_air_dash"] = game_data[0x22]
             arsenal["weapons"] = list(game_progress_data[0x78:0x88])
             arsenal["hadouken"] = game_progress_data[0x6E]
+            arsenal["enhancements"] = list(game_data[0x2A:0x2D])
             arsenal["levels"] = list(game_data[0x40:0x60])
             arsenal["sigma_access"] = game_data[0x02]
             
@@ -945,6 +964,8 @@ class MMXSNIClient(SNIClient):
                     arsenal["max_hp"] = saved_arsenal["max_hp"]
                 for i in range(0x10):
                     arsenal["weapons"][i] |= saved_arsenal["weapons"][i] & 0x40
+                for i in range(0x03):
+                    arsenal["enhancements"][i] |= saved_arsenal["enhancements"][i] & 0x80
                 for level in range(0x20):
                     arsenal["levels"][level] |= saved_arsenal["levels"][level]
                 arsenal["sigma_access"] = min(saved_arsenal["sigma_access"], arsenal["sigma_access"])
