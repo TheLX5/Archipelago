@@ -143,10 +143,7 @@ class MMX2World(World):
             itempool += [self.create_item(ItemName.helmet)]
         else:
             itempool += [self.create_item(ItemName.body, ItemClassification.useful)]
-            if self.options.logic_helmet_checkpoints.value:
-                itempool += [self.create_item(ItemName.helmet)]
-            else:
-                itempool += [self.create_item(ItemName.helmet, ItemClassification.useful)]
+            itempool += [self.create_item(ItemName.helmet)]
         itempool += [self.create_item(ItemName.arms)]
         if self.options.jammed_buster.value:
             itempool += [self.create_item(ItemName.arms)]
