@@ -297,12 +297,6 @@ class PlandoWeaknesses(OptionDict):
     })
     default = {}
 
-class LogicHelmetCheckpoints(Toggle):
-    """
-    Makes the "Use Any Checkpoint" feature from the Helmet Upgrade be in logic
-    """
-    display_name = "Helmet Checkpoints In Logic"
-
 class BasePalette(Choice):
     """
     Base class for palettes
@@ -425,7 +419,6 @@ mmx2_option_groups = [
         SpeedsterInPool,
         SuperRecoverInPool,
         XHuntersMedalCount,
-        LogicHelmetCheckpoints,
     ]),
     OptionGroup("Boss Weakness Options", [
         BossWeaknessRando,
@@ -479,7 +472,6 @@ class MMX2Options(PerGameCommonOptions):
     quick_charge_in_pool: QuickChargeInPool
     speedster_in_pool: SpeedsterInPool
     super_recover_in_pool: SuperRecoverInPool
-    logic_helmet_checkpoints: LogicHelmetCheckpoints
     logic_boss_weakness: LogicBossWeakness
     base_boss_rematch_count: BaseBossRematchCount
     base_all_levels: BaseBundleUnlock
