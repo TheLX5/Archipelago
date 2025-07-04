@@ -43,3 +43,6 @@ stun_trap = "Stun Trap"
 
 # Energy Link
 extractinator = "Banana Extractinator"
+
+# Tracker
+glitched = "UT's Glitched Item"
