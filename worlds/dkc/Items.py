@@ -50,6 +50,9 @@ progression_table = {
 misc_table = {
     ItemName.red_balloon:           ItemData(STARTING_ID + 0x0031, ItemClassification.filler),
     ItemName.dk_barrel:             ItemData(STARTING_ID + 0x0032, ItemClassification.filler),
+}
+
+extra_table = {
     ItemName.extractinator:         ItemData(STARTING_ID + 0x0033, ItemClassification.useful),
     ItemName.glitched:              ItemData(None, ItemClassification.progression_skip_balancing),
 }
@@ -145,6 +148,7 @@ item_table = {
     **worlds_table,
     **progression_table,
     **misc_table,
+    **extra_table,
     **trap_table,
 }
 

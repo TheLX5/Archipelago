@@ -4,7 +4,7 @@ if TYPE_CHECKING:
 
 from .Names import LocationName, ItemName, RegionName, EventName
 
-from worlds.generic.Rules import CollectionRule
+from worlds.generic.Rules import CollectionRule, add_rule
 from BaseClasses import CollectionState
   
 class DKCRules:
@@ -155,7 +155,15 @@ class DKCRules:
             
         multiworld.completion_condition[self.player] = lambda state: state.has(EventName.k_rool, self.player)
         
-            
+    # Universal Tracker: Append the next logic level rule that has UT's glitched item to the actual logic rule
+    def set_dkc_glitched_rules(self) -> None:
+        multiworld = self.world.multiworld
+
+        for loc in multiworld.get_locations(self.player):
+            if loc.name in self.location_rules:
+                glitched_rule = lambda state, rule=self.location_rules[loc.name]: state.has(ItemName.glitched, self.player) and rule(state)
+                add_rule(loc, glitched_rule, combine="or")
+ 
 
 class DKCStrictRules(DKCRules):
     def __init__(self, world: "DKCWorld") -> None:
