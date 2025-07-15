@@ -2,6 +2,7 @@ import typing
 import Utils
 import hashlib
 import os
+import json
 
 from typing import TYPE_CHECKING, List
 
@@ -87,8 +88,61 @@ trap_data = {
     STARTING_ID + 0x0033: [0x22, 0x2F], # Banana Extractinator (not a trap, but this system works better lol)
 }
 
+letter_addr = {
+    "A": 0x347519,
+    "B": 0x3475A3,
+    "C": 0x34762D,
+    "D": 0x3476B7,
+    "E": 0x347741,
+    "F": 0x3477CB,
+    "G": 0x347855,
+    "H": 0x3478DF,
+    "I": 0x347969,
+    "J": 0x3479F3,
+    "K": 0x347A7D,
+    "L": 0x347B07,
+    "M": 0x347B91,
+    "N": 0x347C1B,
+    "O": 0x347CA5,
+    "P": 0x347D2F,
+    "Q": 0x347DB9,
+    "R": 0x347E43,
+    "S": 0x347ECD,
+    "T": 0x347F57,
+    "U": 0x347FE1,
+    "V": 0x34806B,
+    "W": 0x3480F5,
+    "X": 0x34817F,
+    "Y": 0x348209,
+    "Z": 0x348293,
+}
+
+# DKC1_NorSpr16_KongLetter_Main
+
 class DKCPatchExtension(APPatchExtension):
     game = "Donkey Kong Country"
+
+    @staticmethod
+    def swap_kong_letters(caller: APProcedurePatch, rom: bytes) -> bytes:
+        rom = bytearray(rom)
+        json_data = json.loads(caller.get_file("data.json").decode("UTF-8"))
+        offset = 0x39E465
+        ptr = 0x3BE5EC
+        for letter in json_data["kong"]:
+            if letter not in letter_addr.keys():
+                letter = "A"
+            # Copy asset
+            addr = letter_addr[letter] + 10
+            rom[offset:offset+0x40] = rom[addr:addr+0x40]
+            rom[offset+0x200:offset+0x240] = rom[addr+0x40:addr+0x80]
+            offset += 0x40
+
+            # Repoint data
+            addr = letter_addr[letter]
+            rom[ptr:ptr+4] = (addr | 0xF00000).to_bytes(4,"little")
+            ptr += 4
+        
+        return bytes(rom)
 
 class DKCProcedurePatch(APProcedurePatch, APTokenMixin):
     hash = [HASH_US]
@@ -99,6 +153,7 @@ class DKCProcedurePatch(APProcedurePatch, APTokenMixin):
     procedure = [
         ("apply_tokens", ["token_patch.bin"]),
         ("apply_bsdiff4", ["dkc_basepatch.bsdiff4"]),
+        ("swap_kong_letters", []),
     ]
 
     @classmethod
@@ -112,6 +167,13 @@ class DKCProcedurePatch(APProcedurePatch, APTokenMixin):
         self.write_token(APTokenTypes.WRITE, offset, bytes(value))
 
 def patch_rom(world: "DKCWorld", patch: DKCProcedurePatch):
+    # Write additional data for generation
+    data_dict = {
+        "seed": world.random.getrandbits(64),
+        "kong": world.options.kong_letters.value[:4].upper(),
+    }
+    patch.write_file("data.json", json.dumps(data_dict).encode("UTF-8"))
+
     # Edit the ROM header
     from Utils import __version__
     patch.name = bytearray(f'DKC1{__version__.replace(".", "")[0:3]}_{world.player}_{world.multiworld.seed:11}\0', 'utf8')[:21]

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from .Items import item_groups
 from .Aesthetics import player_palette_set_offsets
 
-from Options import OptionGroup, Choice, Range, Toggle, DefaultOnToggle, OptionSet, OptionDict, PerGameCommonOptions, StartInventoryPool
+from Options import OptionGroup, Choice, Range, Toggle, DefaultOnToggle, OptionSet, OptionDict, PerGameCommonOptions, StartInventoryPool, FreeText
 from schema import Schema, Optional
 
 class StartingLifeCount(Range):
@@ -247,6 +247,13 @@ class BonusTrapWeight(BaseTrapWeight):
     """
     display_name = "Animal Bonus Trap Weight"
 
+class KONGLetters(FreeText):
+    """
+    Which word will be displayed by the KONG letters.
+    Limited to 4 characters from A to Z.
+    """
+    display_name = "KONG Letters"
+    default = "KONG"
 
 class BaseDonkeyPalette(Choice):
     """
@@ -404,6 +411,7 @@ dkc_option_groups = [
         DonkeyInactive,
         DiddyActive,
         DiddyInactive,
+        KONGLetters,
     ]),
 ]
 
@@ -445,3 +453,4 @@ class DKCOptions(PerGameCommonOptions):
     palette_donkey_inactive: DonkeyInactive
     palette_diddy_active: DiddyActive
     palette_diddy_inactive: DiddyInactive
+    kong_letters: KONGLetters
