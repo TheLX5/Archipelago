@@ -84,7 +84,7 @@ class ExtraLostWorldRocks(Range):
     How many additional Lost World Rocks can be found in the multiworld
     """
     display_name = "Extra Lost World Rocks"
-    range_start = 1
+    range_start = 0
     range_end = 5
     default = 3
 
