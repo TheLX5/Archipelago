@@ -79,17 +79,17 @@ class DKC2World(World):
     
     required_client_version = (0, 6, 0)
     
-    using_ut: bool # so we can check if we're using UT only once
-    ut_can_gen_without_yaml = False  # class var that tells it to ignore the player yaml
+    using_ut: bool
+    ut_can_gen_without_yaml = True
     glitches_item_name = ItemName.glitched
-    tracker_world = {  # map tracker data for UT
-        "map_page_maps": ["maps/maps.json"],
-        "map_page_locations": Tracker.map_locations,
-        "map_page_setting_key": r"dkc2_current_map_{team}_{player}",
-        "map_page_index": Tracker.map_page_index,
-        "external_pack_key": "ut_poptracker_path",
-        "poptracker_name_mapping": Tracker.poptracker_data,
-    }
+    #tracker_world = {  # map tracker data for UT
+    #    "map_page_maps": ["maps/maps.json"],
+    #    "map_page_locations": Tracker.map_locations,
+    #    "map_page_setting_key": r"dkc2_current_map_{team}_{player}",
+    #    "map_page_index": Tracker.map_page_index,
+    #    "external_pack_key": "ut_poptracker_path",
+    #    "poptracker_name_mapping": Tracker.poptracker_data,
+    #}
 
     item_name_to_id = {name: data.code for name, data in item_table.items()}
     location_name_to_id = all_locations
