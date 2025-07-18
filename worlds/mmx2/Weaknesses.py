@@ -597,7 +597,7 @@ def handle_weaknesses(world):
         if shuffle_type == 1:
             chosen_weapon = world.random.choice(copied_weapon_list)
             if "Silk Shot" in chosen_weapon:
-                data = weapons_silk_shot[world.random.choice(list(weapons_silk_shot.keys()))].copy
+                data = weapons_silk_shot[world.random.choice(list(weapons_silk_shot.keys()))].copy()
             else:
                 data = weapons[chosen_weapon]
             for entry in data:
