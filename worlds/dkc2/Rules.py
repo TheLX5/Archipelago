@@ -1674,8 +1674,6 @@ class DKC2StrictRules(DKC2Rules):
                     self.has_squawks(state)  and self.has_kannons(state) and self.has_rattly(state),
         }
 
-    def set_dkc2_rules(self) -> None:
-        super().set_dkc2_rules()
 
 
 class DKC2LooseRules(DKC2Rules):
@@ -3125,9 +3123,6 @@ class DKC2LooseRules(DKC2Rules):
                     self.has_enguarde(state) and self.can_swim(state) and self.has_squitter(state) and 
                     self.has_squawks(state)  and self.has_kannons(state) and self.has_rattly(state),
         }
-
-    def set_dkc2_rules(self) -> None:
-        super().set_dkc2_rules()
 
 
 class DKC2ExpertRules(DKC2Rules):
@@ -4841,6 +4836,3 @@ class DKC2ExpertRules(DKC2Rules):
                     ),
 
         }
-
-    def set_dkc2_rules(self) -> None:
-        super().set_dkc2_rules()
