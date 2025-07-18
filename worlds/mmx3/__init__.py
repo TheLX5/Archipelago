@@ -71,7 +71,10 @@ class MMX3World(World):
     options_dataclass = MMX3Options
     options: MMX3Options
 
-    required_client_version = (0, 5, 0)
+    required_client_version = (0, 6, 2)
+
+    using_ut: bool
+    ut_can_gen_without_yaml = True
 
     item_name_to_id = {name: data.code for name, data in item_table.items()}
     location_name_to_id = all_locations
