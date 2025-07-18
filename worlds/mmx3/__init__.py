@@ -144,31 +144,47 @@ class MMX3World(World):
         itempool += [self.create_item(ItemName.ride_hawk)]
         itempool += [self.create_item(ItemName.ride_frog)]
         
+        # Add optional upgrades into the pool
         if self.options.zsaber_in_pool:
-            itempool += [self.create_item(ItemName.z_saber, ItemClassification.useful)]
+            itempool += [self.create_item(ItemName.z_saber)]
+        if self.options.quick_charge_in_pool:
+            itempool += [self.create_item(ItemName.chip_quick_charge)]
+        if self.options.speedster_in_pool:
+            itempool += [self.create_item(ItemName.chip_speedster)]
+        if self.options.super_recover_in_pool:
+            itempool += [self.create_item(ItemName.chip_super_recover)]
+        if self.options.rapid_five_in_pool:
+            itempool += [self.create_item(ItemName.chip_rapid_five)]
+        if self.options.speed_shot_in_pool:
+            itempool += [self.create_item(ItemName.chip_speed_shot)]
+        if self.options.buster_plus_in_pool:
+            itempool += [self.create_item(ItemName.chip_buster_plus)]
+        if self.options.weapon_plus_in_pool:
+            itempool += [self.create_item(ItemName.chip_weapon_plus)]
+        if self.options.item_plus_in_pool:
+            itempool += [self.create_item(ItemName.chip_item_plus)]
 
         # Add armor upgrades into the pool
-        doppler_open = self.options.doppler_open
-        vile_open = self.options.vile_open
-        if ("Armor Upgrades" in doppler_open and self.options.doppler_upgrade_count > 0) or \
-           ("Armor Upgrades" in vile_open and self.options.vile_upgrade_count > 0):
+        doppler_open = self.options.doppler_open.value
+        vile_open = self.options.vile_open.value
+        if ("Armor Upgrades" in doppler_open and self.options.doppler_upgrade_count.value > 0) or \
+           ("Armor Upgrades" in vile_open and self.options.vile_upgrade_count.value > 0):
             itempool += [self.create_item(ItemName.third_armor_helmet) for _ in range(2)]
             itempool += [self.create_item(ItemName.third_armor_body) for _ in range(2)]
-            itempool += [self.create_item(ItemName.third_armor_arms) for _ in range(2 + self.options.jammed_buster)]
+            itempool += [self.create_item(ItemName.third_armor_arms) for _ in range(2 + self.options.jammed_buster.value)]
         else:
-            itempool += [self.create_item(ItemName.third_armor_helmet, ItemClassification.useful)]
-            itempool += [self.create_item(ItemName.third_armor_helmet)]
+            itempool += [self.create_item(ItemName.third_armor_helmet) for _ in range(2)]
             itempool += [self.create_item(ItemName.third_armor_body, ItemClassification.useful) for _ in range(2)]
             itempool += [self.create_item(ItemName.third_armor_arms, ItemClassification.useful)]
-            itempool += [self.create_item(ItemName.third_armor_arms) for _ in range(1 + self.options.jammed_buster)]
+            itempool += [self.create_item(ItemName.third_armor_arms) for _ in range(1 + self.options.jammed_buster.value)]
         itempool += [self.create_item(ItemName.third_armor_legs) for _ in range(2)]
 
         # Add heart tanks into the pool
-        doppler_logic = "Heart Tanks" in doppler_open and self.options.doppler_heart_tank_count > 0
+        doppler_logic = "Heart Tanks" in doppler_open and self.options.doppler_heart_tank_count.value > 0
         highest_count = self.options.doppler_heart_tank_count.value if doppler_logic else 0
-        vile_logic = "Heart Tanks" in vile_open and self.options.vile_heart_tank_count > 0
+        vile_logic = "Heart Tanks" in vile_open and self.options.vile_heart_tank_count.value > 0
         if vile_logic:
-            if self.options.vile_heart_tank_count > highest_count:
+            if self.options.vile_heart_tank_count.value > highest_count:
                 highest_count = self.options.vile_heart_tank_count.value
         if highest_count > 0:
             i = highest_count
@@ -179,11 +195,11 @@ class MMX3World(World):
             itempool += [self.create_item(ItemName.heart_tank, ItemClassification.useful) for _ in range(8)]
 
         # Add sub tanks into the pool
-        doppler_logic = "Sub Tanks" in doppler_open and self.options.doppler_sub_tank_count > 0
+        doppler_logic = "Sub Tanks" in doppler_open and self.options.doppler_sub_tank_count.value > 0
         highest_count = self.options.doppler_sub_tank_count.value if doppler_logic else 0
-        vile_logic = "Sub Tanks" in vile_open and self.options.vile_sub_tank_count > 0
+        vile_logic = "Sub Tanks" in vile_open and self.options.vile_sub_tank_count.value > 0
         if vile_logic:
-            if self.options.vile_sub_tank_count > highest_count:
+            if self.options.vile_sub_tank_count.value > highest_count:
                 highest_count = self.options.vile_sub_tank_count.value
         if highest_count > 0:
             i = highest_count
@@ -228,31 +244,21 @@ class MMX3World(World):
         # Finish
         self.multiworld.itempool += itempool
 
-    def create_item(self, name: str, force_classification=False) -> Item:
+    def create_item(self, name: str, force_classification=False) -> MMX3Item:
         data = item_table[name]
-
         if force_classification:
             classification = force_classification
-        elif data.progression:
-            classification = ItemClassification.progression
-        elif data.trap:
-            classification = ItemClassification.trap
         else:
-            classification = ItemClassification.filler
+            classification = data.classsification
         
         created_item = MMX3Item(name, classification, data.code, self.player)
 
         return created_item
 
-
     def set_rules(self):
         from .Rules import set_rules
         set_rules(self)
 
-
-    def interpret_slot_data(self, slot_data: Dict[str, Any]) -> Dict[str, Any]:
-        return slot_data
-    
 
     def fill_slot_data(self):
         # Write options to slot_data
@@ -324,22 +330,22 @@ class MMX3World(World):
 
     def generate_early(self):
         # Enforce Vile stage options to have lower count than the Lab
-        if self.options.doppler_medal_count >= self.options.vile_medal_count:
+        if self.options.doppler_medal_count.value <= self.options.vile_medal_count.value:
             self.options.vile_medal_count.value = max(self.options.doppler_medal_count.value - 1, 0)
-        if self.options.doppler_weapon_count >= self.options.vile_weapon_count:
+        if self.options.doppler_weapon_count.value <= self.options.vile_weapon_count.value:
             self.options.vile_weapon_count.value = max(self.options.doppler_weapon_count.value - 1, 0)
-        if self.options.doppler_upgrade_count >= self.options.vile_upgrade_count:
+        if self.options.doppler_upgrade_count.value <= self.options.vile_upgrade_count.value:
             self.options.vile_upgrade_count.value = max(self.options.doppler_upgrade_count.value - 1, 0)
-        if self.options.doppler_heart_tank_count >= self.options.vile_heart_tank_count:
+        if self.options.doppler_heart_tank_count.value <= self.options.vile_heart_tank_count.value:
             self.options.vile_heart_tank_count.value = max(self.options.doppler_heart_tank_count.value - 1, 0)
-        if self.options.doppler_sub_tank_count >= self.options.vile_sub_tank_count:
+        if self.options.doppler_sub_tank_count.value <= self.options.vile_sub_tank_count.value:
             self.options.vile_sub_tank_count.value = max(self.options.doppler_sub_tank_count.value - 1, 0)
 
         # Adjust bit and byte medal counts
-        if self.options.bit_medal_count == 0 and self.options.byte_medal_count == 0:
+        if self.options.bit_medal_count.value == 0 and self.options.byte_medal_count.value == 0:
             self.options.byte_medal_count.value = 1
-        elif self.options.bit_medal_count >= self.options.byte_medal_count:
-            if self.options.bit_medal_count == 7:
+        elif self.options.bit_medal_count.value >= self.options.byte_medal_count.value:
+            if self.options.bit_medal_count.value == 7:
                 self.options.bit_medal_count.value = 6
             self.options.byte_medal_count.value = self.options.bit_medal_count.value + 1
 
@@ -376,6 +382,10 @@ class MMX3World(World):
                 self.options.bit_medal_count.value = passthrough["bit_medal_count"]
                 self.options.byte_medal_count.value = passthrough["byte_medal_count"]
 
+
+    def interpret_slot_data(self, slot_data: Dict[str, Any]) -> Dict[str, Any]:
+        return slot_data
+    
 
     def write_spoiler(self, spoiler_handle: typing.TextIO) -> None:
         spoiler_handle.write(f"\nMega Man X3 boss weaknesses for {self.multiworld.player_name[self.player]}:\n")

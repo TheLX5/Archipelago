@@ -1,9 +1,11 @@
 
 import Utils
 import hashlib
+import struct
 import os
 import io
 from pathlib import Path
+from pkgutil import get_data
 
 from typing import TYPE_CHECKING, Iterable
 
@@ -58,6 +60,17 @@ boss_access_rom_data = {
     0xBD000A: [0x07],
     0xBD0004: [0x08],
     0xBD0007: [0x09],
+}
+
+chip_rom_data = {
+    0xBD0040: [0x18A],       # Quick Charge
+    0xBD0041: [0x180],       # Speedster
+    0xBD0042: [0x187],       # Super Recover
+    0xBD0043: [0x183],       # Rapid Five
+    0xBD0044: [0x185],       # Speed Shot
+    0xBD0045: [0x184],       # Buster Plus
+    0xBD0046: [0x18D],       # Weapon Plus
+    0xBD0047: [0x186],       # Item Plus
 }
 
 refill_rom_data = {
@@ -136,32 +149,6 @@ boss_hp_threshold_offsets = {
     "Volt Catfish": 0x9ECC3,
     "Toxic Seahorse": 0x9E76B,
     "Gravity Beetle": 0x9F57F,
-}
-
-enemy_tweaks_offsets = {
-    "Volt Catfish": 0xD8000,
-}
-
-enemy_tweaks_indexes = {
-    "Volt Catfish": {
-        "Spawns a spark after landing #1": 0x000001,
-        "Spawns a spark after landing #2": 0x000002,
-        "Spawns a spark after landing #3": 0x000004,
-        "Spawns a spark after landing #4": 0x000008,
-        "Bounces after landing #1": 0x000010,
-        "Bounces after landing #2": 0x000020,
-        "Bounces after landing #3": 0x000040,
-        "Bounces after landing #4": 0x000080,
-        "Leap random vertical speed": 0x000100,
-        "Leap random horizontal speed": 0x000200,
-        "Spawn a volt sphere #1": 0x000400,
-        "Spawn a volt sphere #2": 0x000800,
-        "Can't be stunned with incoming damage": 0x001000,
-        "Can't receive damage during Volt Shower": 0x002000,
-        "Halve barrier HP #1": 0x010000,
-        "Halve barrier HP #2": 0x020000,
-        "Halve barrier HP #3": 0x040000,
-    },
 }
 
 class MMX3PatchExtension(APPatchExtension):
@@ -376,17 +363,6 @@ def patch_rom(world: "MMX3World", patch: MMX3ProcedurePatch):
     button_config = world.options.button_configuration.value
     for action, button in button_config.items():
         patch.write_byte(action_offsets[action], button_values[button])
-
-    # Write tweaks
-    enemy_tweaks_available = {
-        "Volt Catfish": world.options.volt_catfish_tweaks.value,
-    }
-    for boss, offset in enemy_tweaks_offsets.items():
-        selected_tweaks = enemy_tweaks_available[boss]
-        final_value = 0
-        for tweak in selected_tweaks:
-            final_value |= enemy_tweaks_indexes[boss][tweak]
-        patch.write_bytes(offset, bytearray([final_value & 0xFF, (final_value >> 8) & 0xFF, (final_value >> 16) & 0xFF]))
 
     # Setup starting HP
     patch.write_byte(0x007487, world.options.starting_hp.value)

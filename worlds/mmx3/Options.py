@@ -150,6 +150,70 @@ class ZSaberInPool(DefaultOnToggle):
     """
     display_name = "Z-Saber In Pool"
 
+class QuickChargeInPool(DefaultOnToggle):
+    """
+    Adds Quick Charge Chip from Mega Man X5 into the item pool.
+
+    Halves charge time for X-Buster and Special Weapon shots.
+    """
+    display_name = "Quick Charge In Pool"
+
+class SpeedsterInPool(DefaultOnToggle):
+    """
+    Adds Speedster Chip from Mega Man X5 into the item pool.
+
+    Increases walking speed by 50%
+    """
+    display_name = "Speedster In Pool"
+
+class SuperRecoverInPool(DefaultOnToggle):
+    """
+    Adds Super Recover Chip from Mega Man X5 into the item pool.
+
+    Increases recovery from items by 25%. Also affects EnergyLink deposit rate. Doesn't affect Sub Tanks.
+    """
+    display_name = "Super Recover In Pool"
+
+class RapidFiveInPool(DefaultOnToggle):
+    """
+    Adds Super Recover Chip from Mega Man X5 into the item pool.
+
+    Increases the amount of buster shots on screen to 5.
+    """
+    display_name = "Rapid Five In Pool"
+
+class SpeedShotInPool(DefaultOnToggle):
+    """
+    Adds Speed Shot Chip from Mega Man X5 into the item pool.
+
+    Increases X's buster shots (lemons) horizontal speed by 50%.
+    """
+    display_name = "Speed Shot In Pool"
+
+class BusterPlusInPool(DefaultOnToggle):
+    """
+    Adds Buster Plus Chip from Mega Man X5 into the item pool.
+
+    Increases Buster (lemon) damage by 1.
+    """
+    display_name = "Buster Plus In Pool"
+
+class WeaponPlusInPool(DefaultOnToggle):
+    """
+    Adds Weapon Plus Chip from Mega Man X6 into the item pool.
+
+    Increases Weapon damage by 1.
+    """
+    display_name = "Weapon Plus In Pool"
+
+class ItemPlusInPool(DefaultOnToggle):
+    """
+    Adds Item Plus Chip from Mega Man X7 into the item pool.
+
+    Increases item drop rates by roughly 33%.
+    """
+    display_name = "Item Plus In Pool"
+
 class PickupSanity(Toggle):
     """
     Whether collecting freestanding 1ups, HP and Weapon Energy capsules will grant a check.
@@ -369,50 +433,6 @@ class PlandoWeaknesses(OptionDict):
     })
     default = {}
 
-class VoltCatfishTweaks(OptionSet):
-    """
-    Behavior options for Volt Catfish. Everything can be stacked.
-    """
-    display_name = "Volt Catfish Tweaks"
-    valid_keys = {
-        "Spawns a spark after landing #1",
-        "Spawns a spark after landing #2",
-        "Spawns a spark after landing #3",
-        "Spawns a spark after landing #4",
-        "Bounces after landing #1",
-        "Bounces after landing #2",
-        "Bounces after landing #3",
-        "Bounces after landing #4",
-        "Leap random vertical speed",
-        "Leap random horizontal speed",
-        "Spawn a volt sphere #1",
-        "Spawn a volt sphere #2",
-        "Can't be stunned with incoming damage",
-        "Can't receive damage during Volt Shower",
-        "Halve barrier HP #1",
-        "Halve barrier HP #2",
-        "Halve barrier HP #3",
-    }
-    default = {
-        "Spawns a spark after landing #1",
-        "Spawns a spark after landing #2",
-        "Spawns a spark after landing #3",
-        "Spawns a spark after landing #4",
-        "Bounces after landing #1",
-        "Bounces after landing #2",
-        "Bounces after landing #3",
-        "Bounces after landing #4",
-        "Leap random vertical speed",
-        "Leap random horizontal speed",
-        "Spawn a volt sphere #1",
-        "Spawn a volt sphere #2",
-        "Can't be stunned with incoming damage",
-        "Can't receive damage during Volt Shower",
-        "Halve barrier HP #1",
-        "Halve barrier HP #2",
-        "Halve barrier HP #3",
-    }
-
 class BasePalette(Choice):
     """
     Base class for palettes
@@ -576,7 +596,22 @@ class SetPalettes(OptionDict):
     schema = Schema({
         Optional(color_set): list for color_set in x_palette_set_offsets.keys()
     })
-    default = {}
+    default = {
+        "Default": [],
+        "Gold Armor": [],
+        "Charge Blue": [],
+        "Charge Pink": [],
+        "Charge Red": [],
+        "Charge Green": [],
+        "Acid Burst": [],
+        "Parasitic Bomb": [],
+        "Triad Thunder": [],
+        "Spinning Blade": [],
+        "Ray Splasher": [],
+        "Gravity Well": [],
+        "Frost Shield": [],
+        "Tornado Fang": [],
+    }
 
 mmx3_option_groups = [
     OptionGroup("Gameplay Options", [
@@ -587,6 +622,14 @@ mmx3_option_groups = [
         DisableChargeFreeze,
         LongJumps,
         ZSaberInPool,
+        QuickChargeInPool,
+        SpeedsterInPool,
+        SuperRecoverInPool,
+        RapidFiveInPool,
+        SpeedShotInPool,
+        BusterPlusInPool,
+        WeaponPlusInPool,
+        ItemPlusInPool,
     ]),
     OptionGroup("Boss Weakness Options", [
         BossWeaknessRando,
@@ -618,9 +661,6 @@ mmx3_option_groups = [
     OptionGroup("Bit & Byte Options", [
         BitMedalCount,
         ByteMedalCount,
-    ]),
-    OptionGroup("Enemy Tweaks", [
-        VoltCatfishTweaks,
     ]),
     OptionGroup("Aesthetic", [
         SetPalettes,
@@ -657,6 +697,14 @@ class MMX3Options(PerGameCommonOptions):
     pickupsanity: PickupSanity
     jammed_buster: JammedBuster
     zsaber_in_pool: ZSaberInPool
+    quick_charge_in_pool: QuickChargeInPool
+    speedster_in_pool: SpeedsterInPool
+    super_recover_in_pool: SuperRecoverInPool
+    rapid_five_in_pool: RapidFiveInPool
+    speed_shot_in_pool: SpeedShotInPool
+    buster_plus_in_pool: BusterPlusInPool
+    weapon_plus_in_pool: WeaponPlusInPool
+    item_plus_in_pool: ItemPlusInPool
     disable_charge_freeze: DisableChargeFreeze
     long_jumps: LongJumps
     doppler_open: DopplerOpen
@@ -678,7 +726,6 @@ class MMX3Options(PerGameCommonOptions):
     byte_medal_count: ByteMedalCount
     logic_boss_weakness: LogicBossWeakness
     logic_vile_required: LogicRequireVileDefeatForDoppler
-    volt_catfish_tweaks: VoltCatfishTweaks
     player_palettes: SetPalettes
     palette_default: PaletteDefault
     palette_gold_armor: PaletteGoldArmor

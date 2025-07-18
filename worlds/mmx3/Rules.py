@@ -350,7 +350,7 @@ def set_rules(world: MMX3World):
 
     # Handle pickupsanity logic
     if world.options.pickupsanity.value:
-        add_pickupsanity_logic(world)
+        add_pickupsanity_logic(world) 
 
 
 def check_weaknesses(state: CollectionState, player: int, rulesets: list) -> bool:
@@ -442,3 +442,4 @@ def add_pickupsanity_logic(world: MMX3World):
              lambda state: state.has(ItemName.tornado_fang, player))
     set_rule(multiworld.get_location(LocationName.crush_crawfish_1up_2, player),
              lambda state: state.has(ItemName.tornado_fang, player))
+    
