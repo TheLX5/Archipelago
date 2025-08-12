@@ -265,17 +265,18 @@ class DKC2PatchExtension(APPatchExtension):
         world_settings = getattr(settings.get_settings(), world_type.settings_key, None)
         if world_settings:
             folder = world_settings.trivia_path
-            for file in os.listdir(folder):
-                if file.endswith(".txt"):
-                    topic = file[:-4]
-                    with open(folder+"/"+file, "r") as f:
-                        topic_data = f.readlines()
-                    print (f"Parsing trivia found in {topic}")
-                    new_trivia_database = parse_custom_trivia(topic_data)
-                    if new_trivia_database is None:
-                        continue
-                    custom_trivia[topic] = copy.deepcopy(new_trivia_database)
-                    games_in_session.append(topic)
+            if os.path.isdir(folder):
+                for file in os.listdir(folder):
+                    if file.endswith(".txt"):
+                        topic = file[:-4]
+                        with open(folder+"/"+file, "r") as f:
+                            topic_data = f.readlines()
+                        print (f"Parsing trivia found in {topic}")
+                        new_trivia_database = parse_custom_trivia(topic_data)
+                        if new_trivia_database is None:
+                            continue
+                        custom_trivia[topic] = copy.deepcopy(new_trivia_database)
+                        games_in_session.append(topic)
 
         # Build database from original questions
         start_addr = 0x34C591
