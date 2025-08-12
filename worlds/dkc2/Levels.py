@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from . import DKC2World
 
-from .Names import RegionName, LocationName
+from .Names import RegionName, LocationName, EventName
 
 
 # Data format: location_type, data
@@ -649,6 +649,16 @@ boss_list = [
     [RegionName.kreepy_krow_level, 0x0D],
     [RegionName.stronghold_showdown_level, 0xB9],
 ]
+
+regional_events = {
+    RegionName.gangplank_galleon: EventName.galleon_level,
+    RegionName.crocodile_cauldron: EventName.cauldron_level,
+    RegionName.krem_quay: EventName.quay_level,
+    RegionName.krazy_kremland: EventName.kremland_level,
+    RegionName.gloomy_gulch: EventName.gulch_level,
+    RegionName.krools_keep: EventName.keep_level,
+    RegionName.the_flying_krock: EventName.krock_level,
+}
 
 level_map = {
     RegionName.pirate_panic_map: RegionName.gangplank_galleon,

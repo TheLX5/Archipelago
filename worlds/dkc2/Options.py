@@ -3,10 +3,10 @@ from dataclasses import dataclass
 from .Items import item_groups
 from .data.Trivia import trivia_data
 
-from Options import OptionGroup, Choice, Range, Toggle, DefaultOnToggle, OptionSet, OptionList, OptionDict, PerGameCommonOptions, StartInventoryPool, DeathLink, Visibility
+from Options import OptionGroup, Choice, Range, Toggle, DefaultOnToggle, OptionSet, OptionList, OptionDict, PerGameCommonOptions, StartInventoryPool, DeathLink, Visibility, FreeText
 from schema import Schema, Optional
 
-from .Aesthetics import player_palette_set_offsets
+from .Aesthetics import palette_set_offsets
 
 class StartingLifeCount(Range):
     """
@@ -15,7 +15,7 @@ class StartingLifeCount(Range):
     display_name = "Starting Life Count"
     range_start = 0
     range_end = 99
-    default = 5
+    default = 15
 
 class StartingKong(Choice):
     """
@@ -25,7 +25,7 @@ class StartingKong(Choice):
     option_diddy = 1
     option_dixie = 2
     option_both = 3
-    default = 1
+    default = 3
 
 class Logic(Choice):
     """
@@ -39,6 +39,69 @@ class Logic(Choice):
     option_loose = 1
     option_expert = 2
     default = 0
+
+class RequiredGalleonLevels(Range):
+    """
+    How many levels in Gangplank Galleon need to be cleared to fight the area boss
+    """
+    display_name = "Galleon Levels Required"
+    range_start = 0
+    range_end = 5
+    default = 4
+
+class RequiredCauldronLevels(Range):
+    """
+    How many levels in Crocodile Cauldron need to be cleared to fight the area boss
+    """
+    display_name = "Cauldron Levels Required"
+    range_start = 0
+    range_end = 5
+    default = 4
+
+class RequiredQuayLevels(Range):
+    """
+    How many levels in Krem Quay need to be cleared to fight the area boss
+    """
+    display_name = "Quay Levels Required"
+    range_start = 0
+    range_end = 6
+    default = 4
+
+class RequiredKremlandLevels(Range):
+    """
+    How many levels in Krazy Kremland need to be cleared to fight the area boss
+    """
+    display_name = "Kremland Levels Required"
+    range_start = 0
+    range_end = 6
+    default = 4
+
+class RequiredGulchLevels(Range):
+    """
+    How many levels in Gloomy Gulch need to be cleared to fight the area boss
+    """
+    display_name = "Gulch Levels Required"
+    range_start = 0
+    range_end = 5
+    default = 4
+
+class RequiredKeepLevels(Range):
+    """
+    How many levels in K. Rool's Keep need to be cleared to fight the area boss
+    """
+    display_name = "Keep Levels Required"
+    range_start = 0
+    range_end = 6
+    default = 4
+
+class RequiredKrockLevels(Range):
+    """
+    How many levels in The Flying Krock need to be cleared to fight the area boss
+    """
+    display_name = "Krock Levels Required"
+    range_start = 0
+    range_end = 1
+    default = 1
 
 class ShuffleLevels(Toggle):
     """
@@ -428,6 +491,110 @@ class DixieSlow(BaseDixiePalette):
     display_name = "Dixie Slow Palette"
     default = 5
 
+class RambiPalette(Choice):
+    """
+    Which color to use for Rambi
+    """
+    display_name = "Rambi Palette"
+    default = 0
+    option_original = 0
+    option_gray = 1
+    option_blue = 2
+    option_green = 3
+    option_red = 4
+    option_dkc2_frozen = 5
+    option_dkc2_reversed = 6
+    option_dkc2_slow = 7
+    option_golden = 8
+    option_pink = 9
+    option_whatsapp = 10
+
+class EnguardePalette(Choice):
+    """
+    Which color to use for Enguarde
+    """
+    display_name = "Enguarde Palette"
+    default = 0
+    option_original = 0
+    option_red = 1
+    option_purple = 2
+    option_silver = 3
+    option_blue_white_belly = 4
+    option_golden = 5
+    option_dkc2_frozen = 6
+    option_dkc2_reversed = 7
+    option_whatsapp = 8
+    option_black = 9
+
+class SquitterPalette(Choice):
+    """
+    Which color to use for Squitter
+    """
+    display_name = "Squitter Palette"
+    default = 0
+    option_original = 0
+    option_blue = 1
+    option_green = 2
+    option_pink = 3
+    option_aqua = 4
+    option_purple = 5
+    option_gray = 6
+    option_golden = 7
+    option_dkc2_frozen = 8
+    option_dkc2_reversed = 9
+    option_whatsapp = 10
+
+class RattlyPalette(Choice):
+    """
+    Which color to use for Rattly
+    """
+    display_name = "Rattly Palette"
+    default = 0
+    option_original = 0
+    option_black = 1
+    option_blue = 2
+    option_white = 3
+    option_golden = 4
+    option_dkc2_frozen = 5
+    option_dkc2_reversed = 6
+    option_whatsapp = 7
+
+class SquawksPalette(Choice):
+    """
+    Which color to use for Squawks
+    """
+    display_name = "Squawks Palette"
+    default = 0
+    option_original = 0
+    option_quawks = 1
+    option_red = 2
+    option_blue = 3
+    option_black = 4
+    option_white = 5
+    option_purple = 6
+    option_dkc2_reversed = 7
+    option_dkc2_frozen = 8
+    option_whatsapp = 9
+    option_golden = 10
+
+class QuawksPalette(Choice):
+    """
+    Which color to use for Quawks
+    """
+    display_name = "Quawks Palette"
+    default = 0
+    option_original = 0
+    option_squawks = 1
+    option_red = 2
+    option_blue = 3
+    option_black = 4
+    option_white = 5
+    option_purple = 6
+    option_dkc2_reversed = 7
+    option_dkc2_frozen = 8
+    option_whatsapp = 9
+    option_golden = 10
+
 class PaletteFilter(OptionDict):
     """
     Applies a filter that can brighten or darken your selected palette
@@ -440,14 +607,14 @@ class PaletteFilter(OptionDict):
     """
     display_name = "Palette Filters"
     schema = Schema({
-        Optional(color_set): int for color_set in player_palette_set_offsets.keys()
+        Optional(color_set): int for color_set in palette_set_offsets.keys()
     })
-    default = {color_set: 0 for color_set in player_palette_set_offsets.keys()}
+    default = {color_set: 0 for color_set in palette_set_offsets.keys()}
 
 
 class SetPalettes(OptionDict):
     """
-    Allows you to create colors for each Kong status. Includes K.Rool effects and the invincibility barrel
+    Allows you to create colors for each Kong status and Animal Buddies.
     This will override the option preset
     
     Each one expects 15 values which are mapped to the Kongs colors
@@ -455,7 +622,7 @@ class SetPalettes(OptionDict):
     """
     display_name = "Set Custom Palettes"
     schema = Schema({
-        Optional(color_set): list for color_set in player_palette_set_offsets.keys()
+        Optional(color_set): list for color_set in palette_set_offsets.keys()
     })
     default = {}
 
@@ -477,10 +644,62 @@ class TrapLink(Toggle):
     display_name = "Trap Link"
 
 
+class DisplayMessages(Choice):
+    """
+    The game may summon a pop up message on items sent and received
+    Messages are considerably delayed from the actual effect, you actually receive and send items quite fast
+
+    This feature is highly experimental, use it if you don't mind some visual bugs under certain scenarios,
+    mainly during lag frames and pausing in certain moments
+    """
+    display_name = "Message Display"
+    option_off = 0
+    option_on_only_sent = 1
+    option_on_only_received = 2
+    option_on_everything = 3
+    default = 3
+
+class ReceivedMessageFilter(OptionList):
+    """
+    Applies an item classification filter on RECEIVED items
+
+    Only the items with the classifications listed below will be included
+    """
+    display_name = "Received Message Filter"
+    valid_keys = [
+        "Progression",
+        "Useful",
+        "Filler",
+        "Trap",
+    ]
+    default = valid_keys
+
+class SentMessageFilter(OptionList):
+    """
+    Applies an item classification filter on SENT items
+
+    Only the items with the classifications listed below will be included
+    """
+    display_name = "Sent Message Filter"
+    valid_keys = [
+        "Progression",
+        "Useful",
+        "Filler",
+        "Trap",
+    ]
+    default = valid_keys
+
 dkc2_option_groups = [
     OptionGroup("Goal", [
         Goal,
         FlyingKrockTokens,
+        RequiredGalleonLevels,
+        RequiredCauldronLevels,
+        RequiredQuayLevels,
+        RequiredKremlandLevels,
+        RequiredGulchLevels,
+        RequiredKeepLevels,
+        RequiredKrockLevels,
         LostWorldRocks,
         ExtraLostWorldRocks,
         LostWorldRockPlacement,
@@ -531,6 +750,12 @@ dkc2_option_groups = [
         DixieFrozen,
         DixieReversed,
         DixieSlow,
+        RambiPalette,
+        EnguardePalette,
+        SquitterPalette,
+        RattlyPalette,
+        SquawksPalette,
+        QuawksPalette,
     ]),
 ]
 
@@ -540,6 +765,9 @@ class DKC2Options(PerGameCommonOptions):
     death_link: DeathLink
     energy_link: EnergyLink
     trap_link: TrapLink
+    display_messages: DisplayMessages
+    received_message_filter: ReceivedMessageFilter
+    sent_message_filter: SentMessageFilter
     starting_life_count: StartingLifeCount
     starting_kong: StartingKong
     goal: Goal
@@ -548,6 +776,13 @@ class DKC2Options(PerGameCommonOptions):
     extra_lost_world_rocks: ExtraLostWorldRocks
     lost_world_rock_placement: LostWorldRockPlacement
     logic: Logic
+    required_galleon_levels: RequiredGalleonLevels
+    required_cauldron_levels: RequiredCauldronLevels
+    required_quay_levels: RequiredQuayLevels
+    required_kremland_levels: RequiredKremlandLevels
+    required_gulch_levels: RequiredGulchLevels
+    required_keep_levels: RequiredKeepLevels
+    required_krock_levels: RequiredKrockLevels
     shuffle_levels: ShuffleLevels
     shuffle_abilities: AbilityShuffle
     shuffle_animals: AnimalShuffle
@@ -569,8 +804,8 @@ class DKC2Options(PerGameCommonOptions):
     tnt_barrel_trap_weight: TNTBarrelTrapWeight
     damage_trap_weight: DamageTrapWeight
     insta_death_trap_weight: InstaDeathTrapWeight
-    player_palettes: SetPalettes
-    player_palette_filters: PaletteFilter
+    palettes: SetPalettes
+    palette_filters: PaletteFilter
     palette_diddy_active: DiddyActive
     palette_diddy_inactive: DiddyInactive
     palette_diddy_invincible: DiddyInvincible
@@ -583,4 +818,9 @@ class DKC2Options(PerGameCommonOptions):
     palette_dixie_frozen: DixieFrozen
     palette_dixie_reversed: DixieReversed
     palette_dixie_slow: DixieSlow
-
+    palette_rambi: RambiPalette
+    palette_enguarde: EnguardePalette
+    palette_squitter: SquitterPalette
+    palette_rattly: RattlyPalette
+    palette_squawks: SquawksPalette
+    palette_quawks: QuawksPalette

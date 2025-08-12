@@ -35,6 +35,14 @@ class DKC2Settings(settings.Group):
 
     ut_poptracker_path: Union[UTPoptrackerPath, str] = UTPoptrackerPath()
 
+    class TriviaPath(settings.OptionalUserFolderPath):
+        """
+        Folder path of the trivia database
+        Preferably point it to /data/trivia/dkc2/
+        """
+
+    trivia_path: TriviaPath = "data/trivia/dkc2"
+
 
 class DKC2Web(WebWorld):
     theme = "grass"
@@ -79,7 +87,7 @@ class DKC2World(World):
     
     required_client_version = (0, 6, 0)
     
-    using_ut: bool
+    using_ut: bool = False
     ut_can_gen_without_yaml = True
     glitches_item_name = ItemName.glitched
     #tracker_world = {  # map tracker data for UT
@@ -289,9 +297,9 @@ class DKC2World(World):
 
         # Add junk items into the pool
         junk_weights = []
-        junk_weights += ([ItemName.dk_barrel] * 30)
-        junk_weights += ([ItemName.red_balloon] * 30)
-        junk_weights += ([ItemName.banana_coin] * 20)
+        junk_weights += ([ItemName.dk_barrel] * 40)
+        junk_weights += ([ItemName.red_balloon] * 25)
+        junk_weights += ([ItemName.banana_coin] * 10)
 
         junk_pool = []
         for _ in range(junk_count):
@@ -338,6 +346,13 @@ class DKC2World(World):
         slot_data["goal"] = self.options.goal.value
         slot_data["logic"] = self.options.logic.value
         slot_data["starting_kong"] = self.options.starting_kong.value
+        slot_data["required_galleon_levels"] = self.options.required_galleon_levels.value
+        slot_data["required_cauldron_levels"] = self.options.required_cauldron_levels.value
+        slot_data["required_quay_levels"] = self.options.required_quay_levels.value
+        slot_data["required_kremland_levels"] = self.options.required_kremland_levels.value
+        slot_data["required_gulch_levels"] = self.options.required_gulch_levels.value
+        slot_data["required_keep_levels"] = self.options.required_keep_levels.value
+        slot_data["required_krock_levels"] = self.options.required_krock_levels.value
         slot_data["lost_world_rocks"] = self.options.lost_world_rocks.value
         slot_data["krock_boss_tokens"] = self.options.krock_boss_tokens.value
         slot_data["shuffled_abilities"] = self.options.shuffle_abilities.value
@@ -350,6 +365,9 @@ class DKC2World(World):
         slot_data["coinsanity"] = self.options.coinsanity.value
         slot_data["bananasanity"] = self.options.bananasanity.value
         slot_data["energy_link"] = self.options.energy_link.value
+        slot_data["display_messages"] = self.options.display_messages.value
+        slot_data["received_message_filter"] = self.options.received_message_filter.value
+        slot_data["sent_message_filter"] = self.options.sent_message_filter.value
         slot_data["trap_weights"] = self.output_trap_weights()
 
         return slot_data
@@ -376,7 +394,7 @@ class DKC2World(World):
         # Shuffle levels
         self.level_connections: Dict[str, str] = dict()
         self.boss_connections: Dict[str, str] = dict()
-        self.rom_connections: Dict[str, str] = dict()
+        self.rom_connections: Dict[str, List[str, int]] = dict()
         self.lost_world_levels: Set[str] = set()
         generate_level_list(self)
 
@@ -390,6 +408,13 @@ class DKC2World(World):
                 self.level_connections = passthrough["level_connections"]
                 self.boss_connections = passthrough["boss_connections"]
                 self.options.goal.value = passthrough["goal"]
+                self.options.required_galleon_levels.value = passthrough["required_galleon_levels"]
+                self.options.required_cauldron_levels.value = passthrough["required_cauldron_levels"]
+                self.options.required_quay_levels.value = passthrough["required_quay_levels"]
+                self.options.required_kremland_levels.value = passthrough["required_kremland_levels"]
+                self.options.required_gulch_levels.value = passthrough["required_gulch_levels"]
+                self.options.required_keep_levels.value = passthrough["required_keep_levels"]
+                self.options.required_krock_levels.value = passthrough["required_krock_levels"]
                 self.options.logic.value = passthrough["logic"]
                 self.options.starting_kong.value = passthrough["starting_kong"]
                 self.options.lost_world_rocks.value = passthrough["lost_world_rocks"]
@@ -434,7 +459,7 @@ class DKC2World(World):
 
 
     def get_filler_item_name(self) -> str:
-        return self.random.choice(list(misc_table.keys()))
+        return ItemName.dk_barrel
 
 
     def generate_output(self, output_directory: str):

@@ -2,6 +2,7 @@
 from typing import Dict, TYPE_CHECKING
 if TYPE_CHECKING:
     from . import DKC2World
+    from BaseClasses import Location
 
 from .Names import LocationName, ItemName, RegionName, EventName
 from .Options import Goal
@@ -45,6 +46,20 @@ class DKC2Rules:
                 self.can_access_lost_world_gulch,
             f"{RegionName.krools_keep} -> {RegionName.lost_world_keep}":
                 self.can_access_lost_world_keep,
+            f"{RegionName.gangplank_galleon} -> {RegionName.krows_nest_map}":
+                self.can_access_nest,
+            f"{RegionName.crocodile_cauldron} -> {RegionName.kleevers_kiln_map}":
+                self.can_access_kiln,
+            f"{RegionName.krem_quay} -> {RegionName.kudgels_kontest_map}":
+                self.can_access_kontest,
+            f"{RegionName.krazy_kremland} -> {RegionName.king_zing_sting_map}":
+                self.can_access_king,
+            f"{RegionName.gloomy_gulch} -> {RegionName.kreepy_krow_map}":
+                self.can_access_kreepy,
+            f"{RegionName.krools_keep} -> {RegionName.stronghold_showdown_map}":
+                self.can_access_showdown,
+            f"{RegionName.the_flying_krock} -> {RegionName.k_rool_duel_map}":
+                self.can_access_duel,
         }
 
         if world.options.goal != Goal.option_flying_krock:
@@ -104,6 +119,27 @@ class DKC2Rules:
     
     def can_access_kore(self, state: CollectionState) -> bool:
         return state.has(ItemName.lost_world_rock, self.player, self.world.options.lost_world_rocks.value)
+    
+    def can_access_nest(self, state: CollectionState) -> bool:
+        return state.has(EventName.galleon_level, self.player, self.world.options.required_galleon_levels.value)
+    
+    def can_access_kiln(self, state: CollectionState) -> bool:
+        return state.has(EventName.cauldron_level, self.player, self.world.options.required_cauldron_levels.value)
+    
+    def can_access_kontest(self, state: CollectionState) -> bool:
+        return state.has(EventName.quay_level, self.player, self.world.options.required_quay_levels.value)
+    
+    def can_access_king(self, state: CollectionState) -> bool:
+        return state.has(EventName.kremland_level, self.player, self.world.options.required_kremland_levels.value)
+    
+    def can_access_kreepy(self, state: CollectionState) -> bool:
+        return state.has(EventName.gulch_level, self.player, self.world.options.required_gulch_levels.value)
+    
+    def can_access_showdown(self, state: CollectionState) -> bool:
+        return state.has(EventName.keep_level, self.player, self.world.options.required_keep_levels.value)
+    
+    def can_access_duel(self, state: CollectionState) -> bool:
+        return state.has(EventName.krock_level, self.player, self.world.options.required_krock_levels.value)
 
     def has_diddy(self, state: CollectionState) -> bool:
         return state.has(ItemName.diddy, self.player)
@@ -186,14 +222,26 @@ class DKC2Rules:
         for entrance_name, rule in self.connection_rules.items():
             entrance = multiworld.get_entrance(entrance_name, self.player)
             entrance.access_rule = rule
+
         for loc in multiworld.get_locations(self.player):
+            # Skip events so we don't have to type duplicate entries...
+            if "(Map Event)" in loc.name:
+                continue
             if loc.name in self.location_rules:
                 loc.access_rule = self.location_rules[loc.name]
+                # Set event rules at the same time as the real location
+                if "- Clear" in loc.name:
+                    try:
+                        map_event: Location = multiworld.get_location(f"{loc.name} (Map Event)", self.player)
+                        map_event.access_rule = loc.access_rule
+                    except KeyError:
+                        # Filter out missing locations
+                        continue
                 
-        if self.world.options.goal.value == 0x01:
+        if self.world.options.goal == Goal.option_flying_krock:
             multiworld.completion_condition[self.player] = lambda state: state.has(EventName.k_rool_duel_clear, self.player)
             
-        elif self.world.options.goal.value == 0x02:
+        elif self.world.options.goal.value == Goal.option_lost_world:
             multiworld.completion_condition[self.player] = lambda state: state.has(EventName.krocodile_core_clear, self.player)
         
         else:
@@ -207,9 +255,20 @@ class DKC2Rules:
         multiworld = self.world.multiworld
 
         for loc in multiworld.get_locations(self.player):
+            # Skip events so we don't have to type duplicate entries...
+            if "(Map Event)" in loc.name:
+                continue
             if loc.name in self.location_rules:
                 glitched_rule = lambda state, rule=self.location_rules[loc.name]: state.has(ItemName.glitched, self.player) and rule(state)
                 add_rule(loc, glitched_rule, combine="or")
+                # Set event rules at the same time as the real location
+                if "- Clear" in loc.name:
+                    try:
+                        map_event: Location = multiworld.get_location(f"{loc.name} (Map Event)", self.player)
+                        add_rule(map_event, glitched_rule, combine="or")
+                    except KeyError:
+                        # Filter out missing locations
+                        continue
             
 
 class DKC2StrictRules(DKC2Rules):

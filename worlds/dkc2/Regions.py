@@ -3,6 +3,7 @@ from .Locations import DKC2Location
 from .Items import DKC2Item
 from .Names import LocationName, RegionName, EventName
 from .Options import Goal
+from .Levels import level_map, regional_events, boss_connections
 from worlds.AutoWorld import World
 
 from typing import TYPE_CHECKING
@@ -304,6 +305,15 @@ def create_regions(world: "DKC2World", active_locations):
     add_location_to_region(multiworld, player, active_locations, RegionName.klobber_karnage_level, LocationName.klobber_karnage_clear)
     add_location_to_region(multiworld, player, active_locations, RegionName.fiery_furnace_level, LocationName.fiery_furnace_clear)
     add_location_to_region(multiworld, player, active_locations, RegionName.animal_antics_level, LocationName.animal_antics_clear)
+
+    # Level clears (Events)
+    for map_level, level in world.level_connections.items():
+        current_world = level_map[map_level]
+        if "Lost World" in current_world or map_level in boss_connections.keys():
+            continue
+        event_name = level.replace(": Level", " - Clear (Map Event)")
+        event_item = regional_events[current_world]
+        add_event_to_region(multiworld, player, level, event_name, event_item)
 
     add_location_to_region(multiworld, player, active_locations, RegionName.krows_nest_level, LocationName.krow_defeated)
     add_location_to_region(multiworld, player, active_locations, RegionName.kleevers_kiln_level, LocationName.kleever_defeated)

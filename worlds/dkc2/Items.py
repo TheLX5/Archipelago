@@ -1,7 +1,6 @@
 import typing
 
 from BaseClasses import Item, ItemClassification
-from worlds.AutoWorld import World
 from .Names import ItemName
 
 class ItemData(typing.NamedTuple):
@@ -27,7 +26,7 @@ worlds_table = {
 
 mcguffin_table = {
     ItemName.boss_token:            ItemData(STARTING_ID + 0x002F, ItemClassification.progression_skip_balancing),
-    ItemName.lost_world_rock:       ItemData(STARTING_ID + 0x0008, ItemClassification.progression),
+    ItemName.lost_world_rock:       ItemData(STARTING_ID + 0x0008, ItemClassification.progression_skip_balancing),
 }
 
 hints_table = {
@@ -118,6 +117,14 @@ trap_name_to_value: typing.Dict[str, int] = {
     "Posession Trap":       STARTING_ID + 0x0045,  # Damage Trap 
     "Ghost":                STARTING_ID + 0x0044,  # TNT Barrel Trap
     "Fire Trap":            STARTING_ID + 0x0044,  # TNT Barrel Trap
+    "Army Trap":            STARTING_ID + 0x0044,  # TNT Barrel Trap
+    "Nut Trap":             STARTING_ID + 0x0044,  # TNT Barrel Trap
+    "Blue Balls Curse":     STARTING_ID + 0x0046,  # Instant Death Trap 
+    "Electrocution Trap":   STARTING_ID + 0x0045,  # Damage Trap 
+    "Iron Boots Trap":      STARTING_ID + 0x0042,  # Honey Trap 
+    "Squash Trap":          STARTING_ID + 0x0045,  # Damage Trap 
+    "Slow Trap":            STARTING_ID + 0x0042,  # Honey Trap 
+    "Slowness Trap":        STARTING_ID + 0x0042,  # Honey Trap 
 }
 
 trap_value_to_name: typing.Dict[int, str] = {

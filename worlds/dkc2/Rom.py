@@ -4,6 +4,8 @@ import hashlib
 import os
 import json
 import base64
+import settings
+import copy
 
 from typing import TYPE_CHECKING, List
 
@@ -17,9 +19,12 @@ from .Items import item_groups
 from .Text import string_to_bytes, goal_texts
 from .Levels import level_map
 from .Options import Goal
-from .Aesthetics import get_palette_bytes, diddy_palettes, dixie_palettes, player_palette_set_offsets
+from .data import Palettes
+from .Aesthetics import get_palette_bytes, palette_set_offsets
+from .Names import RegionName
 from Options import OptionError
 
+from worlds.AutoWorld import AutoWorldRegister
 from worlds.Files import APProcedurePatch, APTokenMixin, APTokenTypes, APPatchExtension
 
 from .data.Trivia import TriviaQuestion, trivia_data, trivia_addrs, original_correct_answers, excluded_questions
@@ -111,6 +116,112 @@ trap_data = {
     STARTING_ID + 0x0033: [0x4C, 0x00], # Banana Extractinator (not a trap, but this system works better lol)
 }
 
+trivia_aliases = {
+    "Celeste (Open World)": "Celeste",
+    "Ship of Harkinian": "Ocarina of Time",
+    "SMW: Warped Archipelago Product": "Super Mario World",
+    "yrtnuoC gnoK yeknoD": "Donkey Kong Country",
+}
+
+def parse_custom_trivia(topic_data):
+    trivia_easy = []
+    trivia_medium = []
+    trivia_hard = []
+
+    from .data.Trivia import TriviaQuestion
+
+    processed_question = False
+    processed_answers = False
+    idx = 0
+    while idx < len(topic_data):
+        if "---" in topic_data[idx]:
+            if not processed_question or not processed_answers:
+                print (f"A question had invalid format before line {idx+1}.")
+                return None
+            idx += 1
+            processed_question = False
+            processed_answers = False
+        elif "QUESTION:" in topic_data[idx]:
+            difficulty = topic_data[idx].split(": ")[1].rstrip()
+            if difficulty not in ["EASY", "MEDIUM", "HARD"]:
+                print (f"Unknown difficulty detected at line {idx+1}.")
+                return None
+            idx += 1
+            question = []
+            for idy in range(7):
+                line = topic_data[idx+idy].strip()
+                if len(line) > 32:
+                    print (f"Line {idx+1} exceeded the maximum allowed length of 32 (it has {len(line)}).")
+                    return None
+                # End of question
+                if "ANSWERS:" in line:
+                    break
+                question.append(f"{line.center(32, " ").rstrip()}°")
+            else:
+                print (f"A question exceeded the max amount of allowed lines at line {idx+idy+1}.")
+                return None
+            idx += idy
+            total_lines = len(question)
+            if total_lines == 1:
+                question.insert(0, "°")
+                question.insert(0, "°")
+                question.append("°")
+                question.append("°")
+                question.append("°")
+            elif total_lines == 2:
+                question.insert(0, "°")
+                question.insert(0, "°")
+                question.append("°")
+                question.append("°")
+            elif total_lines == 3:
+                question.insert(0, "°")
+                question.append("°")
+                question.append("°")
+            elif total_lines == 4:
+                question.insert(0, "°")
+                question.append("°")
+            elif total_lines == 5:
+                question.append("°")
+            processed_question = True
+
+        elif "ANSWERS:" in topic_data[idx]:
+            idx += 1
+            answers = []
+            for idy in range(3):
+                answer = topic_data[idx+idy].strip()
+                if "°" in answer:
+                    if len(answer.split("°")[0]) > 24 or len(answer.split("°")[1].rstrip()) > 24:
+                        print (f"Line {idx+idy+1} exceeded the maximum allowed length of 24 for one of its lines (it has {len(answer)}).")
+                        return None
+                    answer += "°"
+                else:
+                    if len(answer) > 24:
+                        print (f"Line {idx+idy+1} exceeded the maximum allowed length of 24 (it has {len(answer)}).")
+                        return None
+                    answer += "°°"
+                answers.append(answer)
+            idx += 3
+            question_data = TriviaQuestion(question, answers[0], answers[1], answers[2])
+
+            if difficulty == "EASY":
+                trivia_easy.append(question_data)
+            elif difficulty == "MEDIUM":
+                trivia_medium.append(question_data)
+            elif difficulty == "HARD":
+                trivia_hard.append(question_data)
+
+            processed_answers = True
+
+        else:
+            print (f"Found an issue while parsing line {idx+1}:\n{topic_data[idx]}")
+            return None
+
+    return  [
+        trivia_easy.copy(),
+        trivia_medium.copy(),
+        trivia_hard.copy(),
+    ]
+
 class DKC2PatchExtension(APPatchExtension):
     game = "Donkey Kong Country 2"
 
@@ -140,17 +251,35 @@ class DKC2PatchExtension(APPatchExtension):
 
     @staticmethod
     def generate_trivia(caller: APProcedurePatch, rom: bytes) -> bytes:
-        import random
-
         rom = bytearray(rom)
+        
+        import random
 
         json_data = json.loads(caller.get_file("data.json").decode("UTF-8"))
         random.seed(json_data["seed"])
-        games_in_session = json_data["games_in_session"]
+        games_in_session: list = json_data["games_in_session"]
+
+        # Build custom database
+        custom_trivia = {}
+        world_type = AutoWorldRegister.world_types[DKC2PatchExtension.game]
+        world_settings = getattr(settings.get_settings(), world_type.settings_key, None)
+        if world_settings:
+            folder = world_settings.trivia_path
+            for file in os.listdir(folder):
+                if file.endswith(".txt"):
+                    topic = file[:-4]
+                    with open(folder+"/"+file, "r") as f:
+                        topic_data = f.readlines()
+                    print (f"Parsing trivia found in {topic}")
+                    new_trivia_database = parse_custom_trivia(topic_data)
+                    if new_trivia_database is None:
+                        continue
+                    custom_trivia[topic] = copy.deepcopy(new_trivia_database)
+                    games_in_session.append(topic)
 
         # Build database from original questions
         start_addr = 0x34C591
-        local_trivia_data = {**trivia_data}
+        local_trivia_data = {**trivia_data, **custom_trivia}
 
         for idx in range(0, 0x1B0, 8):
             if idx in excluded_questions:
@@ -199,6 +328,11 @@ class DKC2PatchExtension(APPatchExtension):
         answer_a = "     A. "
         answer_b = "     B. "
         answer_c = "     C. "
+
+        #for difficulty, questions in selected_trivia.items():
+        #    for question in questions:
+        #        question: TriviaQuestion
+        #        print (difficulty, question.question, question.correct_answer, question.incorrect_answer_1, question.incorrect_answer_2)
 
         # Choose questions and write them to ROM
         write_addr = 0x378466
@@ -355,6 +489,67 @@ def patch_rom(world: "DKC2World", patch: DKC2ProcedurePatch):
     patch.write_byte(0x3DFFA4, world.options.bananasanity.value)
     patch.write_byte(0x3DFFA5, world.options.swanky_checks.value)
 
+    # Set level restrictions
+    patch.write_bytes(0x3DFF00, world.options.required_galleon_levels.value.to_bytes(2, "little"))
+    patch.write_bytes(0x3DFF02, world.options.required_cauldron_levels.value.to_bytes(2, "little"))
+    patch.write_bytes(0x3DFF04, world.options.required_quay_levels.value.to_bytes(2, "little"))
+    patch.write_bytes(0x3DFF06, world.options.required_kremland_levels.value.to_bytes(2, "little"))
+    patch.write_bytes(0x3DFF08, world.options.required_gulch_levels.value.to_bytes(2, "little"))
+    patch.write_bytes(0x3DFF0A, world.options.required_keep_levels.value.to_bytes(2, "little"))
+    patch.write_bytes(0x3DFF0C, world.options.required_krock_levels.value.to_bytes(2, "little"))
+
+    order = [
+        RegionName.krows_nest_level,
+        RegionName.pirate_panic_level,
+        RegionName.mainbrace_mayhem_level,
+        RegionName.gangplank_galley_level,
+        RegionName.lockjaws_locker_level,
+        RegionName.topsail_trouble_level,
+        RegionName.kleevers_kiln_level,
+        RegionName.hot_head_hop_level,
+        RegionName.kannons_klaim_level,
+        RegionName.lava_lagoon_level,
+        RegionName.red_hot_ride_level,
+        RegionName.squawks_shaft_level,
+        RegionName.kudgels_kontest_level,
+        RegionName.barrel_bayou_level,
+        RegionName.glimmers_galleon_level,
+        RegionName.krockhead_klamber_level,
+        RegionName.rattle_battle_level,
+        RegionName.slime_climb_level,
+        RegionName.bramble_blast_level,
+        RegionName.king_zing_sting_level,
+        RegionName.hornet_hole_level,
+        RegionName.target_terror_level,
+        RegionName.bramble_scramble_level,
+        RegionName.rickety_race_level,
+        RegionName.mudhole_marsh_level,
+        RegionName.rambi_rumble_level,
+        RegionName.kreepy_krow_level,
+        RegionName.ghostly_grove_level,
+        RegionName.haunted_hall_level,
+        RegionName.gusty_glade_level,
+        RegionName.parrot_chute_panic_level,
+        RegionName.web_woods_level,
+        RegionName.stronghold_showdown_level,
+        RegionName.arctic_abyss_level,
+        RegionName.windy_well_level,
+        RegionName.castle_crush_level,
+        RegionName.clappers_cavern_level,
+        RegionName.chain_link_chamber_level,
+        RegionName.toxic_tower_level,
+        RegionName.k_rool_duel_level,
+        RegionName.screechs_sprint_level,
+    ]
+    for idx, map_level in enumerate(order):
+        if map_level == RegionName.k_rool_duel_level:
+            patch.write_bytes(0x3DFF5C, (0x61).to_bytes(2, "little"))
+        elif map_level ==  RegionName.pirate_panic_level:
+            patch.write_bytes(0x3DFF10, (0x03).to_bytes(2, "little"))
+        else:
+            shuffled_level: int = world.rom_connections[map_level][1]
+            patch.write_bytes(0x3DFF0E+(idx*2), shuffled_level.to_bytes(2, "little"))
+
     # Enabled traps
     patch.write_byte(0x3DFFA8, world.options.freeze_trap_weight.value)
     patch.write_byte(0x3DFFA9, world.options.reverse_trap_weight.value)
@@ -458,6 +653,7 @@ def compute_cranky_hints(world: "DKC2World", patch: DKC2ProcedurePatch):
             world_name = level_map[level_map_name]
         world_name = world_name.split(" (")[0]
 
+        # Let's ignore tags that we don't care about
         classification = location.item.classification
         classification &= ItemClassification.skip_balancing^0xFFFF
 
@@ -618,7 +814,10 @@ def generate_game_trivia(world: "DKC2World"):
     games_in_session = set()
     for game in trivia_data.keys():
         if len(world.multiworld.get_game_worlds(game)) != 0:
-            games_in_session.add(game)
+            if game in trivia_aliases.keys():
+                games_in_session.add(trivia_aliases[game])
+            else:
+                games_in_session.add(game)
     for game in world.options.swanky_excluded_topics.value:
         if game in games_in_session:
             games_in_session.remove(game)
@@ -667,24 +866,32 @@ def adjust_palettes(world: "DKC2World", patch: DKC2ProcedurePatch):
         "Dixie Frozen": world.options.palette_dixie_frozen.current_key,
         "Dixie Reversed": world.options.palette_dixie_reversed.current_key,
         "Dixie Slow": world.options.palette_dixie_slow.current_key,
+        "Rambi": world.options.palette_rambi.current_key,
+        "Enguarde": world.options.palette_enguarde.current_key,
+        "Squitter": world.options.palette_squitter.current_key,
+        "Rattly": world.options.palette_rattly.current_key,
+        "Squawks": world.options.palette_squawks.current_key,
+        "Quawks": world.options.palette_quawks.current_key,
     }
-    player_custom_palettes = world.options.player_palettes
-    player_palette_filters = world.options.player_palette_filters
-    for palette_set, offset in player_palette_set_offsets.items():
+    custom_palettes = world.options.palettes
+    palette_filters = world.options.palette_filters
+    for palette_set, offset in palette_set_offsets.items():
         palette_option = palette_options[palette_set]
         if "Diddy" in palette_set:
-            palette = diddy_palettes[palette_option]
+            palette = Palettes.palettes["Diddy"][palette_option]
+        elif "Dixie" in palette_set:
+            palette = Palettes.palettes["Dixie"][palette_option]
         else:
-            palette = dixie_palettes[palette_option]
-
-        if palette_set in player_custom_palettes.keys():
-            if len(player_custom_palettes[palette_set]) == 0x0F:
-                palette = player_custom_palettes[palette_set]
+            palette = Palettes.palettes[palette_set][palette_option]
+        
+        if palette_set in custom_palettes.keys():
+            if len(custom_palettes[palette_set]) == 0x0F:
+                palette = custom_palettes[palette_set]
             else:
                 print (f"[{world.multiworld.player_name[world.player]}] Custom palette set for {palette_set} doesn't have exactly 15 colors. Falling back to the selected preset ({palette_option})")
         
-        if palette_set in player_palette_filters:
-            filter_option = player_palette_filters[palette_set]
+        if palette_set in palette_filters:
+            filter_option = palette_filters[palette_set]
         else:
             filter_option = 0
         data = get_palette_bytes(palette, filter_option)
@@ -707,7 +914,7 @@ def get_base_rom_bytes(file_name: str = "") -> bytes:
 
 
 def get_base_rom_path(file_name: str = "") -> str:
-    options = Utils.get_options()
+    options: settings.Settings = settings.get_settings()
     if not file_name:
         file_name = options["dkc2_options"]["rom_file"]
     if not os.path.exists(file_name):

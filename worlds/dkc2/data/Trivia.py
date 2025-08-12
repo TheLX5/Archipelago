@@ -519,6 +519,230 @@ trivia_easy_donkey_kong_64 = [
         """Stash Snatch°°""", 
         """Speedy Swing Sortie°°""", 
     ),
+    TriviaQuestion(
+        [
+            """   Which of these treacherous°""", 
+            """   Kremlings will give you a°""", 
+            """ Golden Banana if you retrieve°""", 
+            """ one of their stolen blueprints°""", 
+            """       in Donkey Kong 64?°""", 
+            """°""", 
+        ],
+        """Snide the Weasel°°""", 
+        """Kevin the Kasplat°°""", 
+        """K. Lumsy°°""", 
+    ),
+]
+
+trivia_easy_donkey_kong_country = [
+    TriviaQuestion(
+        [
+            """°""", 
+            """       Which animal buddy°""", 
+            """    from Donkey Kong Country°""", 
+            """      allows the player to°""", 
+            """       jump really high?°""", 
+            """°""", 
+        ],
+        """Winky°°""", 
+        """Squawks°°""", 
+        """Expresso°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """       Which animal buddy°""", 
+            """    from Donkey Kong Country°""", 
+            """      allows the player to°""", 
+            """   slowly descend in the air?°""", 
+            """°""", 
+        ],
+        """Expresso°°""", 
+        """Winky°°""", 
+        """Rambi°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """ In Donkey Kong Country, which°""", 
+            """    of the following animal°""", 
+            """    buddies isn't rideable?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Squawks°°""", 
+        """Enguarde°°""", 
+        """Expresso°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which Kong allows the player°""", 
+            """     to save their game in°""", 
+            """      Donkey Kong Country?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Candy Kong°°""", 
+        """Dixie Kong°°""", 
+        """Funky Kong°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """ In Donkey Kong Country, which°""", 
+            """ world has ruin themed levels?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Vine Valley°°""", 
+        """Kremkroc Industries Inc°°""", 
+        """Chimp Caverns°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """ In Donkey Kong Country, which°""", 
+            """     world does NOT feature°""", 
+            """       underwater levels?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Monkey Mines°°""", 
+        """Kongo Jungle°°""", 
+        """Vine Valley°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """ How many ice cave levels exist°""", 
+            """    in Donkey Kong Country?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """1°°""", 
+        """3°°""", 
+        """4°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """   enemy protects their head°""", 
+            """   when Diddy lands on them?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Klump°°""", 
+        """Krusha°°""", 
+        """Kritter°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """ In Donkey Kong Country, which°""", 
+            """     world hosts Queen B.?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Vine Valley°°""", 
+        """Monkey Mines°°""", 
+        """Gorilla Glacier°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """ In Donkey Kong Country, which°""", 
+            """   world hosts Really Gnawty?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Gorilla Glacier°°""", 
+        """Vine Valley°°""", 
+        """Monkey Mines°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """ In Donkey Kong Country, which°""", 
+            """ world hosts Master Necky Snr.?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Chimp Caverns°°""", 
+        """Kongo Jungle°°""", 
+        """Kremkroc Industries Inc°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """   world has factory levels?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Kremkroc Industries Inc°°""", 
+        """Kongo Jungle°°""", 
+        """Chimp Caverns°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """ How many minecart levels exist°""", 
+            """    in Donkey Kong Country?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """2°°""", 
+        """3°°""", 
+        """4°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """ How many unique animal tokens°""", 
+            """ exists in Donkey Kong Country?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """4°°""", 
+        """5°°""", 
+        """2°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """ How many bananas are obtained°""", 
+            """     from Banana Bunches in°""", 
+            """      Donkey Kong Country?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """10 bananas°°""", 
+        """5 bananas°°""", 
+        """20 bananas°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which of the following is a°""", 
+            """    valid method to open up°""", 
+            """     hidden bonus levels in°""", 
+            """      Donkey Kong Country?°""", 
+            """°""", 
+        ],
+        """Throwing a barrel at°        the entrance°""", 
+        """Jump on top of it°        with Winky°""", 
+        """Let a Klaptrap bite°        the wall°""", 
+    ),
 ]
 
 trivia_easy_donkey_kong_country_2 = [
@@ -787,6 +1011,19 @@ trivia_easy_hollow_knight = [
 ]
 
 trivia_easy_kingdom_hearts = [
+    TriviaQuestion(
+        [
+            """°""", 
+            """   In Kingdom Hearts, who can°""", 
+            """      be found running the°""", 
+            """      Accessory Shop upon°""", 
+            """        first arriving?°""", 
+            """°""", 
+        ],
+        """Cid°°""", 
+        """Huey, Dewey, and Louie°°""", 
+        """Geppetto°°""", 
+    ),
 ]
 
 trivia_easy_kingdom_hearts_2 = [
@@ -1289,6 +1526,48 @@ trivia_easy_mario__luigi_superstar_saga = [
         """Mario°°""", 
         """Wario°°""", 
     ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """  Who's the main villain from°""", 
+            """ Mario & Luigi Superstar Saga?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Cackletta°°""", 
+        """Popple°°""", 
+        """Toadsworth°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """ What's the name of the master°""", 
+            """  blacksmiths that upgrade the°""", 
+            """  main character's hammers in°""", 
+            """ Mario & Luigi Superstar Saga?°""", 
+            """°""", 
+        ],
+        """Hammerhead Bros.°°""", 
+        """Gigi and Merri°°""", 
+        """Cork and Cask°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """   Who teaches Mario & Luigi°""", 
+            """     the High Jump move in°""", 
+            """ Mario & Luigi Superstar Saga?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Starshade Bros°°""", 
+        """Hammerhead Bros°°""", 
+        """Popple and Rookie°°""", 
+    ),
+]
+
+trivia_easy_mario_kart_double_dash = [
 ]
 
 trivia_easy_math = [
@@ -1812,6 +2091,35 @@ trivia_easy_paper_mario = [
     ),
 ]
 
+trivia_easy_paper_mario_the_thousand_year_door = [
+    TriviaQuestion(
+        [
+            """°""", 
+            """  In Paper Mario The Thousand°""", 
+            """  Year Door, who is the wicked°""", 
+            """     leader of the X-Nauts?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Sir Grodus°°""", 
+        """TEC°°""", 
+        """Lord Crump°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """  In Paper Mario The Thousand°""", 
+            """    Year Door, what item was°""", 
+            """   Garf the Craw missing when°""", 
+            """   asking for assistance from°""", 
+            """      the Trouble Center?°""", 
+            """°""", 
+        ],
+        """A House Key°°""", 
+        """A Coin Pouch°°""", 
+        """A Life Shroom°°""", 
+    ),
+]
+
 trivia_easy_pokemon_crystal = [
     TriviaQuestion(
         [
@@ -2249,6 +2557,217 @@ trivia_easy_skyward_sword = [
 trivia_easy_sonic_adventure_2_battle = [
 ]
 
+trivia_easy_subnautica = [
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which items are required to°""", 
+            """      fabricate Fiber Mesh°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Creepvine Sample x2°°""", 
+        """Glass & Stalker Tooth°°""", 
+        """Metal Salvage°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which items are required to°""", 
+            """   fabricate a Titatium Ingot°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Titanium x10°°""", 
+        """Titanium & Lithium x2°°""", 
+        """Metal Salvage°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which items are required to°""", 
+            """        fabricate Glass°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Quartz x2°°""", 
+        """Acid Mushroom x2°        and Copper°""", 
+        """Quartz & Titanium°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which items are required to°""", 
+            """      fabricate a Battery°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Acid Mushroom x2°        and Copper°""", 
+        """Deep shroom x3°        and Salt Deposit°""", 
+        """Titanium ingot          and Lithium x2°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which items are required to°""", 
+            """    fabricate Filtered Water°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Bladderfish°°""", 
+        """Bleach°°""", 
+        """Hydrochloric Acid°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which items are required to°""", 
+            """      fabricate Lubricant°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Creepvine Seed Cluster°°""", 
+        """Deep Shroom x3°        and Salt Deposit°""", 
+        """Blood Oil x3°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which items are required to°""", 
+            """   fabricate Silicone Rubber°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Creepvine Seed Cluster°°""", 
+        """Creepvine Sample x2°°""", 
+        """Metal Salvage°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which items are required to°""", 
+            """     fabricate a Wiring Kit°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Silver Ore x2°°""", 
+        """Gold x2°°""", 
+        """Gold and Copper Wire°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which items are required to°""", 
+            """   fabricate a Survival Knife°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Silicone Rubber°        and Titanium°""", 
+        """Battery and Glass°°""", 
+        """Titanium x4°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which machine or tool allows°""", 
+            """ players to see in dark places°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Flashlight°°""", 
+        """Repair tool°°""", 
+        """Habitat Builder°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which items are required to°""", 
+            """      fabricate a Scanner°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Battery and Titanium°°""", 
+        """Battery, Copper Ore°        and Titanium°""", 
+        """Battery and Glass°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which items are required to°""", 
+            """       fabricate a Beacon°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Titanium and Copper Ore°°""", 
+        """Titanium and Magnetite°°""", 
+        """Titanium and Wiring Kit°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which craft station is used°""", 
+            """      to create a Seamoth°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Mobile Vehicle Bay°°""", 
+        """Neptune Launch Platform°°""", 
+        """Fabricator°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """ Where can you find the Neptune°""", 
+            """   Launch Platform blueprints°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Captain's Quarters°°""", 
+        """Dunes Wreck°°""", 
+        """Lifepod 4°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which items are required to°""", 
+            """ fabricate a Fire Extinguisher°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Titanium x3°°""", 
+        """Battery and Titanium°°""", 
+        """Fiber Mesh°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """    How can players restore°""", 
+            """  their oxygen in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Rise to the surface°°""", 
+        """Stay near a Creepvine°°""", 
+        """Hitting a Gasopod°°""", 
+    ),
+]
+
 trivia_easy_super_mario_64 = [
     TriviaQuestion(
         [
@@ -2618,6 +3137,22 @@ trivia_easy_vvvvvv = [
         """Trinkets°°""", 
         """Artifacts°°""", 
         """Orbs°°""", 
+    ),
+]
+
+trivia_easy_xenoblade_x = [
+    TriviaQuestion(
+        [
+            """°""", 
+            """        What's the name°""", 
+            """     of the adorable Nopon°""", 
+            """   who joins your adventures°""", 
+            """   in Xenoblade Chronicles X?°""", 
+            """°""", 
+        ],
+        """Tatsu°°""", 
+        """Satsu°°""", 
+        """Tora°°""", 
     ),
 ]
 
@@ -3044,6 +3579,204 @@ trivia_hard_donkey_kong_64 = [
         """Peril Path Panic°°""", 
         """Stash Snatch°°""", 
         """Big Bug Bash°°""", 
+    ),
+]
+
+trivia_hard_donkey_kong_country = [
+    TriviaQuestion(
+        [
+            """°""", 
+            """ In Donkey Kong Country, which°""", 
+            """    of the following levels°""", 
+            """  has a bonus inside a bonus?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Oil Drum Alley°°""", 
+        """Orang-utan Gang°°""", 
+        """Barrel Cannon Canyon°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """   What's the order in which°""", 
+            """      Boss Dumb Drum from°""", 
+            """      Donkey Kong Country°""", 
+            """       releases enemies?°""", 
+            """°""", 
+        ],
+        """Kritter,Slippa°        Klaptrap,Klump,Army°""", 
+        """Slippa,Klaptrap,Army°        Klump,Kritter°""", 
+        """Kritter,Klaptrap°        Klump,Slippa,Army°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """  level has a Expresso Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Poison Pond°°""", 
+        """Bouncy Bonanza°°""", 
+        """Reptile Rumble°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """  level has a Expresso Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Ice Age Alley°°""", 
+        """Reptile Rumble°°""", 
+        """Slipslide Ride°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """  level has a Expresso Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Coral Capers°°""", 
+        """Clam City°°""", 
+        """Croctopus Chase°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """    level has a Winky Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Platform Perils°°""", 
+        """Loopy Lights°°""", 
+        """Millstone Mayhem°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """    level has a Winky Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Stop & Go Station°°""", 
+        """Poison Pond°°""", 
+        """Mine Cart Carnage°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """    level has a Winky Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Rope Bridge Rumble°°""", 
+        """Reptile Rumble°°""", 
+        """Tanked Up Trouble°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """    level has a Rambi Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Rope Bridge Rumble°°""", 
+        """Oil Drum Alley°°""", 
+        """Manic Mincers°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """    level has a Rambi Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Orang-Utan Gang°°""", 
+        """Clam City°°""", 
+        """Elevator Antics°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """    level has a Rambi Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Misty Mine°°""", 
+        """Coral Capers°°""", 
+        """Loopy Lights°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """  level has a Enguarde Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Barrel Cannon Canyon°°""", 
+        """Stop & Go Station°°""", 
+        """Vulture Culture°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """  level has a Enguarde Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Blackout Basement°°""", 
+        """Poison Pond°°""", 
+        """Tree Top Town°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """  level has a Enguarde Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Forest Frenzy°°""", 
+        """Ice Age Alley°°""", 
+        """Temple Tempest°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which of the following is a°""", 
+            """    valid method to open up°""", 
+            """     hidden bonus levels in°""", 
+            """      Donkey Kong Country?°""", 
+            """°""", 
+        ],
+        """Blasting through it°        via a Barrel Kannon°""", 
+        """Hitting the entrance°        with Gorilla Slap°""", 
+        """Hit the entrance with°        Enguarde's charge°""", 
     ),
 ]
 
@@ -3687,6 +4420,22 @@ trivia_hard_majoras_mask_recompiled = [
 trivia_hard_mario__luigi_superstar_saga = [
 ]
 
+trivia_hard_mario_kart_double_dash = [
+    TriviaQuestion(
+        [
+            """   In Mario Kart Double Dash,°""", 
+            """       the battle course°""", 
+            """     "Tilt-a-Kart" plays a°""", 
+            """  unique music track in every°""", 
+            """     mode except which one?°""", 
+            """°""", 
+        ],
+        """Shine Thief°°""", 
+        """Balloon Battle°°""", 
+        """Bob-omb Blast°°""", 
+    ),
+]
+
 trivia_hard_math = [
     TriviaQuestion(
         [
@@ -4104,6 +4853,22 @@ trivia_hard_paper_mario = [
     ),
 ]
 
+trivia_hard_paper_mario_the_thousand_year_door = [
+    TriviaQuestion(
+        [
+            """      Flavio, the boastful°""", 
+            """    entrepreneur from Paper°""", 
+            """    Mario The Thousand Year°""", 
+            """      Door, was originally°""", 
+            """         designed to be°""", 
+            """         which species?°""", 
+        ],
+        """Toad°°""", 
+        """Bob-omb°°""", 
+        """Squeek°°""", 
+    ),
+]
+
 trivia_hard_pokemon_crystal = [
     TriviaQuestion(
         [
@@ -4369,6 +5134,35 @@ trivia_hard_sonic_adventure_2_battle = [
         """Holding all the rings°°""", 
         """Getting all animals°°""", 
         """Getting a low time°°""", 
+    ),
+]
+
+trivia_hard_subnautica = [
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which craft station is used°""", 
+            """   to create a Vortex Torpedo°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Vehicle Upgrade Console°°""", 
+        """Mobile Vehicle Bay°°""", 
+        """Fabricator°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """    How can players restore°""", 
+            """  their oxygen in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Eat a raw Bladderfish°°""", 
+        """Open up a Snacks bag°°""", 
+        """Touch Aerogel°°""", 
     ),
 ]
 
@@ -4874,6 +5668,9 @@ trivia_hard_the_legend_of_zelda = [
 trivia_hard_vvvvvv = [
 ]
 
+trivia_hard_xenoblade_x = [
+]
+
 trivia_hard_yoshis_island = [
 ]
 
@@ -4974,6 +5771,19 @@ trivia_medium_a_link_to_the_past = [
         """Ether & Quake°°""", 
         """Quake & Bombos°°""", 
         """Bombos & Ether°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """     In A Link to the Past,°""", 
+            """     which of the following°""", 
+            """   items can be found in the°""", 
+            """     Thieves' Town dungeon?°""", 
+            """°""", 
+        ],
+        """The Titan's Mitt°°""", 
+        """The Blue Mail°°""", 
+        """The Magic Hammer°°""", 
     ),
 ]
 
@@ -5443,6 +6253,269 @@ trivia_medium_donkey_kong_64 = [
     ),
 ]
 
+trivia_medium_donkey_kong_country = [
+    TriviaQuestion(
+        [
+            """°""", 
+            """ In Donkey Kong Country, which°""", 
+            """ Kremling laughs at the player°""", 
+            """     when they weren't able°""", 
+            """        to defeat them?°""", 
+            """°""", 
+        ],
+        """Krusha°°""", 
+        """Klaptrap°°""", 
+        """Klump°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """ In Donkey Kong Country, which°""", 
+            """    of the following levels°""", 
+            """    has five bonuses inside?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Orang-utan Gang°°""", 
+        """Ice Age Alley°°""", 
+        """Oil Drum Alley°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """  level has a Expresso Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Rope Bridge Rumble°°""", 
+        """Mine Cart Madness°°""", 
+        """Croctopus Chase°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """  level has a Expresso Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Stop & Go Station°°""", 
+        """Millstone Mayhem°°""", 
+        """Blackout Basement°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """  level has a Expresso Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Misty Mine°°""", 
+        """Trick Track Trek°°""", 
+        """Tanked Up Trouble°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """    level has a Winky Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Croctopus Chase°°""", 
+        """Jungle Hijinxs°°""", 
+        """Bouncy Bonanza°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """    level has a Winky Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Trick Track Trek°°""", 
+        """Vulture Culture°°""", 
+        """Forest Frenzy°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """    level has a Winky Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Barrel Cannon Canyon°°""", 
+        """Tree Top Town°°""", 
+        """Torchlight Trouble°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """    level has a Rambi Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Snow Barrel Blast°°""", 
+        """Jungle Hijinxs°°""", 
+        """Platform Perils°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """    level has a Rambi Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Bouncy Bonanza°°""", 
+        """Blackout Basement°°""", 
+        """Stop & Go Station°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """    level has a Rambi Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Ropey Rampage°°""", 
+        """Mine Cart Carnage°°""", 
+        """Tree Top Town°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """  level has a Enguarde Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Reptile Rumble°°""", 
+        """Vulture Culture°°""", 
+        """Snow Barrel Blast°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """  level has a Enguarde Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Croctopus Chase°°""", 
+        """Trick Track Trek°°""", 
+        """Manic Mincers°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """   Which Donkey Kong Country°""", 
+            """  level has a Enguarde Token?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Mine Cart Madness°°""", 
+        """Winky's Walkway°°""", 
+        """Bouncy Bonanza°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """ In Donkey Kong Country, which°""", 
+            """ world has ruin themed levels?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Monkey Mines°°""", 
+        """Kongo Jungle°°""", 
+        """Gorilla Glacier°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """ In Donkey Kong Country, which°""", 
+            """     world does NOT feature°""", 
+            """       underwater levels?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Chimp Caverns°°""", 
+        """Kremkroc Industries Inc°°""", 
+        """Gorilla Glacier°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """ Which Klaptrap color jumps at°""", 
+            """  the same time as the player°""", 
+            """    in Donkey Kong Country?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Purple°°""", 
+        """Blue°°""", 
+        """Black°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """ In Donkey Kong Country, which°""", 
+            """   world hosts Master Necky?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Monkey Mines°°""", 
+        """Kongo Jungle°°""", 
+        """Chimp Caverns°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """ In Donkey Kong Country, which°""", 
+            """    world hosts Very Gnawty?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Kongo Jungle°°""", 
+        """Gorilla Glacier°°""", 
+        """Kremkroc Industries Inc°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which of the following is a°""", 
+            """    valid method to open up°""", 
+            """     hidden bonus levels in°""", 
+            """      Donkey Kong Country?°""", 
+            """°""", 
+        ],
+        """Using Rambi's horn°°""", 
+        """Light up the wall°        with Squawks' lamp°""", 
+        """Poking the wall with°        Expresso's beak°""", 
+    ),
+]
+
 trivia_medium_donkey_kong_country_2 = [
     TriviaQuestion(
         [
@@ -5566,6 +6639,19 @@ trivia_medium_earthbound = [
         """Tiny Ruby°°""", 
         """Hieroglyph Copy°°""", 
         """Brain Stone°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """  In EarthBound, you can cure°""", 
+            """  homesickness by calling your°""", 
+            """   mom. Which of these is NOT°""", 
+            """   an alternative way to cure°""", 
+            """         homesickness?°""", 
+            """°""", 
+        ],
+        """Using a Chick°°""", 
+        """Resting in a hot spring°°""", 
+        """Falling unconscious°°""", 
     ),
 ]
 
@@ -5774,9 +6860,35 @@ trivia_medium_kingdom_hearts = [
         """Bungee Cord°°""", 
         """Duck Tape°°""", 
     ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """    In Kingdom Hearts, what°""", 
+            """  is the name of the Heartless°""", 
+            """  that Clayton summons during°""", 
+            """       his final battle?°""", 
+            """°""", 
+        ],
+        """Stealth Sneak°°""", 
+        """Pot Centipede°°""", 
+        """Parasite Cage°°""", 
+    ),
 ]
 
 trivia_medium_kingdom_hearts_2 = [
+    TriviaQuestion(
+        [
+            """   In Kingdom Hearts 2, which°""", 
+            """        villain says the°""", 
+            """     following line before°""", 
+            """  battle: "How dare you get a°""", 
+            """ happy ending! How DARE you!"?°""", 
+            """°""", 
+        ],
+        """Hades°°""", 
+        """Jafar°°""", 
+        """Oogie Boogie°°""", 
+    ),
 ]
 
 trivia_medium_kirby_64_the_crystal_shards = [
@@ -6276,6 +7388,22 @@ trivia_medium_majoras_mask_recompiled = [
 ]
 
 trivia_medium_mario__luigi_superstar_saga = [
+    TriviaQuestion(
+        [
+            """°""", 
+            """ Where do the Hammerhead Bros.°""", 
+            """     live before relocating°""", 
+            """      to East Beanbean in°""", 
+            """ Mario & Luigi Superstar Saga?°""", 
+            """°""", 
+        ],
+        """Hoohoo Village°°""", 
+        """Oho Oasis°°""", 
+        """Chucklehuck Woods°°""", 
+    ),
+]
+
+trivia_medium_mario_kart_double_dash = [
 ]
 
 trivia_medium_math = [
@@ -6799,6 +7927,22 @@ trivia_medium_paper_mario = [
     ),
 ]
 
+trivia_medium_paper_mario_the_thousand_year_door = [
+    TriviaQuestion(
+        [
+            """°""", 
+            """  In Paper Mario The Thousand°""", 
+            """   Year Door, how much BP is°""", 
+            """     required to equip the°""", 
+            """     "Spike Shield" badge?°""", 
+            """°""", 
+        ],
+        """3 BP°°""", 
+        """2 BP°°""", 
+        """4 BP°°""", 
+    ),
+]
+
 trivia_medium_pokemon_crystal = [
     TriviaQuestion(
         [
@@ -7236,6 +8380,139 @@ trivia_medium_sonic_adventure_2_battle = [
     ),
 ]
 
+trivia_medium_subnautica = [
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which items are required to°""", 
+            """  fabricate Disinfected Water°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Bleach°°""", 
+        """Bladderfish°°""", 
+        """Hydrochloric Acid°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which items are required to°""", 
+            """       fabricate Benzene°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Blood Oil x3°°""", 
+        """Deep Shroom x3°        and Salt Deposit°""", 
+        """Hydrochloric Acid°        and Gold°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which items are required to°""", 
+            """   fabricate a Computer Chip°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Table Coral Sample x2°        Gold and Copper Wire°""", 
+        """Acid Mushroom x2°        and Copper°""", 
+        """Ion Cube, Gold°        and Silver Ore°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which items are required to°""", 
+            """  fabricate Hydrochloric Acid°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Deep Shroom x3°        and Salt Deposit°""", 
+        """Blood Oil x3°°""", 
+        """Creepvine Seed Cluster°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which items are required to°""", 
+            """       fabricate Aerogel°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Gel Sack and Ruby°°""", 
+        """Creepvine Seed Cluster°°""", 
+        """Benzene and Fiber Mesh°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which machine or tool allows°""", 
+            """ players to see in dark places°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Seaglider°°""", 
+        """Beacon°°""", 
+        """Air Bladder°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which items are required to°""", 
+            """    fabricate a Thermoblade°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Survival Knife°        and Battery°""", 
+        """Titanium and Magnetite°°""", 
+        """Survival Knife°        and Polyaniline°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which craft station is used°""", 
+            """      to create a Seaglide°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Fabricator°°""", 
+        """Mobile Vehicle Bay°°""", 
+        """Vehicle Upgrade Console°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """  Which craft station is used°""", 
+            """    to create a Thermoblade°""", 
+            """         in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Modification Station°°""", 
+        """Fabricator°°""", 
+        """Vehicle Upgrade Console°°""", 
+    ),
+    TriviaQuestion(
+        [
+            """°""", 
+            """°""", 
+            """    How can players restore°""", 
+            """  their oxygen in Subnautica?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Approach the end of a°        functioning Pipe°""", 
+        """Using a Seaglide°°""", 
+        """Enter an unpowered base°°""", 
+    ),
+]
+
 trivia_medium_super_mario_64 = [
     TriviaQuestion(
         [
@@ -7517,6 +8794,9 @@ trivia_medium_the_legend_of_zelda = [
 trivia_medium_vvvvvv = [
 ]
 
+trivia_medium_xenoblade_x = [
+]
+
 trivia_medium_yoshis_island = [
     TriviaQuestion(
         [
@@ -7625,6 +8905,11 @@ trivia_data = {
         trivia_medium_donkey_kong_64, 
         trivia_hard_donkey_kong_64,
     ],
+    "Donkey Kong Country": [
+        trivia_easy_donkey_kong_country, 
+        trivia_medium_donkey_kong_country, 
+        trivia_hard_donkey_kong_country,
+    ],
     "Donkey Kong Country 2": [
         trivia_easy_donkey_kong_country_2, 
         trivia_medium_donkey_kong_country_2, 
@@ -7695,6 +8980,11 @@ trivia_data = {
         trivia_medium_mario__luigi_superstar_saga, 
         trivia_hard_mario__luigi_superstar_saga,
     ],
+    "Mario Kart Double Dash": [
+        trivia_easy_mario_kart_double_dash, 
+        trivia_medium_mario_kart_double_dash, 
+        trivia_hard_mario_kart_double_dash,
+    ],
     "Math": [
         trivia_easy_math, 
         trivia_medium_math, 
@@ -7740,6 +9030,11 @@ trivia_data = {
         trivia_medium_paper_mario, 
         trivia_hard_paper_mario,
     ],
+    "Paper Mario The Thousand Year Door": [
+        trivia_easy_paper_mario_the_thousand_year_door, 
+        trivia_medium_paper_mario_the_thousand_year_door, 
+        trivia_hard_paper_mario_the_thousand_year_door,
+    ],
     "Pokemon Crystal": [
         trivia_easy_pokemon_crystal, 
         trivia_medium_pokemon_crystal, 
@@ -7775,6 +9070,11 @@ trivia_data = {
         trivia_medium_sonic_adventure_2_battle, 
         trivia_hard_sonic_adventure_2_battle,
     ],
+    "Subnautica": [
+        trivia_easy_subnautica, 
+        trivia_medium_subnautica, 
+        trivia_hard_subnautica,
+    ],
     "Super Mario 64": [
         trivia_easy_super_mario_64, 
         trivia_medium_super_mario_64, 
@@ -7809,6 +9109,11 @@ trivia_data = {
         trivia_easy_vvvvvv, 
         trivia_medium_vvvvvv, 
         trivia_hard_vvvvvv,
+    ],
+    "Xenoblade X": [
+        trivia_easy_xenoblade_x, 
+        trivia_medium_xenoblade_x, 
+        trivia_hard_xenoblade_x,
     ],
     "Yoshi's Island": [
         trivia_easy_yoshis_island, 
