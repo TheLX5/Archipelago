@@ -27,6 +27,7 @@ DKC2_SETTINGS = ROM_START + 0x3DFF80
 DKC2_MISC_FLAGS = WRAM_START + 0x08D2
 DKC2_GAME_FLAGS = WRAM_START + 0x59B2
 
+DKC2_SOUND_PLAYBACK = WRAM_START + 0x1F7E6
 DKC2_EFFECT_BUFFER = WRAM_START + 0x0619
 DKC2_SOUND_BUFFER = WRAM_START + 0x0622
 DKC2_SPC_NEXT_INDEX = WRAM_START + 0x0634
@@ -449,10 +450,7 @@ class DKC2SNIClient(SNIClient):
                         await self.send_trap_link(ctx, trap_value_to_name[item.item])
 
             if sfx:
-                snes_buffered_write(ctx, DKC2_SOUND_BUFFER, bytearray([sfx, 0x05]))
-                snes_buffered_write(ctx, DKC2_EFFECT_BUFFER + 0x05, bytearray([sfx]))
-                snes_buffered_write(ctx, DKC2_SPC_INDEX, bytearray([0x00]))
-                snes_buffered_write(ctx, DKC2_SPC_NEXT_INDEX, bytearray([0x00]))
+                snes_buffered_write(ctx, DKC2_SOUND_PLAYBACK, (0x0500 | sfx).to_bytes(2, "little"))
 
             snes_buffered_write(ctx, DKC2_RECV_INDEX, recv_index.to_bytes(2, "little"))
 

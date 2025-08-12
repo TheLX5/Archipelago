@@ -112,8 +112,8 @@ trap_data = {
     STARTING_ID + 0x0044: [0x50, 0x00], # TNT Barrel Trap
     STARTING_ID + 0x0045: [0x44, 0x00], # Damage Trap
     STARTING_ID + 0x0046: [0x46, 0x00], # Instant Death Trap
-    STARTING_ID + 0x0032: [0x48, 0x00], # Instant DK Barrel (not a trap, but this system works better lol)
-    STARTING_ID + 0x0033: [0x4C, 0x00], # Banana Extractinator (not a trap, but this system works better lol)
+    STARTING_ID + 0x0032: [0x48, 0x1B], # Instant DK Barrel (not a trap, but this system works better lol)
+    STARTING_ID + 0x0033: [0x4C, 0x2D], # Banana Extractinator (not a trap, but this system works better lol)
 }
 
 trivia_aliases = {
@@ -657,6 +657,7 @@ def compute_cranky_hints(world: "DKC2World", patch: DKC2ProcedurePatch):
         # Let's ignore tags that we don't care about
         classification = location.item.classification
         classification &= ItemClassification.skip_balancing^0xFFFF
+        classification &= ItemClassification.deprioritized^0xFFFF
 
         data = CrankyHint(
             location_type,
