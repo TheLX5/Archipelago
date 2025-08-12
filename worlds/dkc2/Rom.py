@@ -156,7 +156,7 @@ def parse_custom_trivia(topic_data):
                 # End of question
                 if "ANSWERS:" in line:
                     break
-                question.append(f"{line.center(32, " ").rstrip()}°")
+                question.append(f"{line.center(32, ' ').rstrip()}°")
             else:
                 print (f"A question exceeded the max amount of allowed lines at line {idx+idy+1}.")
                 return None
