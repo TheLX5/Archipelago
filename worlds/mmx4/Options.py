@@ -1,14 +1,5 @@
-from typing import List, Dict, Any
 from dataclasses import dataclass
-from worlds.AutoWorld import PerGameCommonOptions
-from Options import Choice, OptionGroup, Toggle, Range
-
-def create_option_groups() -> List[OptionGroup]:
-    option_group_list: List[OptionGroup] = []
-    for name, options in option_groups.items():
-        option_group_list.append(OptionGroup(name=name, options=options))
-
-    return option_group_list
+from Options import Choice, OptionGroup, Toggle, Range, PerGameCommonOptions
 
 class PickupSanity(Toggle):
     """
@@ -20,7 +11,14 @@ class PickupSanity(Toggle):
 class MMX4Options(PerGameCommonOptions):
     pickupsanity: PickupSanity
 
-option_groups: Dict[str, List[Any]] = {
-    "General Options": [PickupSanity],
-    #"Trap Options": [TrapChance, ForcefemTrapWeight, SpeedChangeTrapWeight]
-}
+
+mmx4_option_groups = [
+    OptionGroup("General Options", [
+        PickupSanity,
+    ]),
+    #OptionGroup("Trap Options", [
+    #    TrapChance,
+    #    ForcefemTrapWeight,
+    #    SpeedChangeTrapWeight,
+    #]),
+]

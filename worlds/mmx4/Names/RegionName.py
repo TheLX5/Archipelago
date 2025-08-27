@@ -1,0 +1,16 @@
+intro_stage = "Intro Stage"
+stage_select = "Stage Select"
+
+web_spider = "Web Spider Stage"
+cyber_peacock = "Cyber Peacock Stage"
+storm_owl = "Storm Owl Stage"
+magma_dragoon = "Magma Dragoon Stage"
+jet_stingray = "Jet Stingray Stage"
+split_mushroom = "Split Mushroom Stage"
+slash_beast = "Slash Beast Stage"
+frost_walrus = "Frost Walrus Stage"
+
+memorial_hall = "Memorial Hall"
+space_port = "Space Port"
+final_weapon_1 = "Final Weapon 1"
+final_weapon_2 = "Final Weapon 2"

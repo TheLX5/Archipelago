@@ -2,140 +2,131 @@ from typing import Dict, TYPE_CHECKING
 import logging
 
 from .Types import LocData
+from .Names import LocationName, RegionName
 
 if TYPE_CHECKING:
     from . import MMX4World
 
-def did_include_pickup_locations(world: "MMX4World") -> bool:
-    return bool(world.options.pickupsanity)
-
-def get_total_locations(world: "MMX4World") -> int:
-    total = 0
-    for name in location_table:
-        if not did_include_pickup_locations(world) and name in pickup_locations:
-            continue
-
-        if is_valid_location(world, name):
-            total += 1
-
-    return total
-
-def get_location_names() -> Dict[str, int]:
-    names = {name: data.ap_code for name, data in location_table.items()}
-    return names
-
-def is_valid_location(world: "MMX4World", name) -> bool:
-    if not did_include_pickup_locations(world) and name in pickup_locations:
-        return False
-    return True
-
 mmx4_locations = {
     # Intro
-    "Intro Boss Defeated": LocData(14574100, "Intro Stage"),   
-    "Intro Stage Completed": LocData(14574101, "Intro Stage"),   
+    LocationName.intro_boss_defeated: LocData(14574100, RegionName.intro_stage),
+    LocationName.intro_clear: LocData(14574101, RegionName.intro_stage),
     # Web Spider
-    "Legs Upgrade": LocData(14574102, "Web Spider"),   
-    "Web Spider Heart Tank": LocData(14574103, "Web Spider"),   
-    "Web Spider Defeated": LocData(14574104, "Web Spider"),   
-    "Web Spider Weapon": LocData(14574105, "Web Spider"),   
+    LocationName.web_spider_capsule: LocData(14574102, RegionName.web_spider),
+    LocationName.web_spider_heart_tank: LocData(14574103, RegionName.web_spider),
+    LocationName.web_spider_defeated: LocData(14574104, RegionName.web_spider),
+    LocationName.web_spider_weapon: LocData(14574105, RegionName.web_spider),
     # Cyber Peacock
-    "Cyber Peacock Heart Tank": LocData(14574106, "Cyber Peacock"),   
-    "Cyber Peacock Sub Tank": LocData(14574107, "Cyber Peacock"),   
-    "Helmet Upgrade": LocData(14574108, "Cyber Peacock"),   
-    "Cyber Peacock Defeated": LocData(14574109, "Cyber Peacock"),   
-    "Cyber Peacock Weapon": LocData(14574110, "Cyber Peacock"),  
+    LocationName.cyber_peacock_heart_tank: LocData(14574106, RegionName.cyber_peacock),
+    LocationName.cyber_peacock_sub_tank: LocData(14574107, RegionName.cyber_peacock),
+    LocationName.cyber_peacock_capsule: LocData(14574108, RegionName.cyber_peacock),
+    LocationName.cyber_peacock_defeated: LocData(14574109, RegionName.cyber_peacock),
+    LocationName.cyber_peacock_weapon: LocData(14574110, RegionName.cyber_peacock),
     # Storm Owl
-    "Storm Owl Heart Tank": LocData(14574111, "Storm Owl"),  
-    "Arms Upgrade 1": LocData(14574112, "Storm Owl"),  
-    "Arms Upgrade 2": LocData(14574113, "Storm Owl"),  
-    "Storm Owl Defeated": LocData(14574114, "Storm Owl"),  
-    "Storm Owl Weapon": LocData(14574115, "Storm Owl"),  
+    LocationName.storm_owl_heart_tank: LocData(14574111, RegionName.storm_owl),
+    LocationName.storm_owl_capsule_1: LocData(14574112, RegionName.storm_owl),
+    LocationName.storm_owl_capsule_2: LocData(14574113, RegionName.storm_owl),
+    LocationName.storm_owl_defeated: LocData(14574114, RegionName.storm_owl),
+    LocationName.storm_owl_weapon: LocData(14574115, RegionName.storm_owl),
     # Magma Dragoon
-    "Magma Dragoon Heart Tank": LocData(14574116, "Magma Dragoon"),  
-    "Body Upgrade": LocData(14574117, "Magma Dragoon"),  
-    "Magma Dragoon Defeated": LocData(14574118, "Magma Dragoon"),  
-    "Magma Dragoon Weapon": LocData(14574119, "Magma Dragoon"),  
+    LocationName.magma_dragoon_heart_tank: LocData(14574116, RegionName.magma_dragoon),
+    LocationName.magma_dragoon_capsule: LocData(14574117, RegionName.magma_dragoon),
+    LocationName.magma_dragoon_defeated: LocData(14574118, RegionName.magma_dragoon),
+    LocationName.magma_dragoon_weapon: LocData(14574119, RegionName.magma_dragoon),
     # Jet Stingray
-    "Jet Stingray Heart Tank": LocData(14574120, "Jet Stingray"),  
-    "Jet Stingray Sub Tank": LocData(14574121, "Jet Stingray"),  
-    "Jet Stingray Defeated": LocData(14574122, "Jet Stingray"),  
-    "Jet Stingray Weapon": LocData(14574123, "Jet Stingray"),  
+    LocationName.jet_stingray_heart_tank: LocData(14574120, RegionName.jet_stingray),
+    LocationName.jet_stingray_sub_tank: LocData(14574121, RegionName.jet_stingray),
+    LocationName.jet_stingray_defeated: LocData(14574122, RegionName.jet_stingray),
+    LocationName.jet_stingray_weapon: LocData(14574123, RegionName.jet_stingray),
     # Split Mushroom
-    "Split Mushroom Heart Tank": LocData(14574124, "Split Mushroom"),  
-    "Split Mushroom Defeated": LocData(14574125, "Split Mushroom"),  
-    "Split Mushroom Weapon": LocData(14574126, "Split Mushroom"),  
+    LocationName.split_mushroom_heart_tank: LocData(14574124, RegionName.split_mushroom),
+    LocationName.split_mushroom_defeated: LocData(14574125, RegionName.split_mushroom),
+    LocationName.split_mushroom_weapon: LocData(14574126, RegionName.split_mushroom),
     # Slash Beast
-    "Slash Beast Heart Tank": LocData(14574127, "Slash Beast"),  
-    "Slash Beast Defeated": LocData(14574128, "Slash Beast"),  
-    "Slash Beast Weapon": LocData(14574129, "Slash Beast"),  
+    LocationName.slash_beast_heart_tank: LocData(14574127, RegionName.slash_beast),
+    LocationName.slash_beast_defeated: LocData(14574128, RegionName.slash_beast),
+    LocationName.slash_beast_weapon: LocData(14574129, RegionName.slash_beast),
     # Frost Walrus
-    "Frost Walrus Heart Tank": LocData(14574130, "Frost Walrus"),  
-    "Frost Walrus Extra Lives Tank": LocData(14574131, "Frost Walrus"),  
-    "Frost Walrus Weapon Tank": LocData(14574132, "Frost Walrus"),  
-    "Frost Walrus Defeated": LocData(14574133, "Frost Walrus"),  
-    "Frost Walrus Weapon": LocData(14574134, "Frost Walrus"), 
+    LocationName.frost_walrus_heart_tank: LocData(14574130, RegionName.frost_walrus),
+    LocationName.frost_walrus_extra_lives_tank: LocData(14574131, RegionName.frost_walrus),
+    LocationName.frost_walrus_weapon_tank: LocData(14574132, RegionName.frost_walrus),
+    LocationName.frost_walrus_defeated: LocData(14574133, RegionName.frost_walrus),
+    LocationName.frost_walrus_weapon: LocData(14574134, RegionName.frost_walrus),
     # Special / End Stages
-    "Memorial Hall Colonel Defeated": LocData(14574135, "Memorial Hall"),  
-    "Space Port Colonel Defeated": LocData(14574136, "Space Port"),  
-    "Double / Iris Defeated": LocData(14574137, "Final Weapon 1"),  
-    "General Defeated": LocData(14574138, "Final Weapon 1"),  
-    "Web Spider Rematch Defeated": LocData(14574139, "Final Weapon 2"),  
-    "Cyber Peacock Rematch Defeated": LocData(14574140, "Final Weapon 2"),  
-    "Storm Owl Rematch Defeated": LocData(14574141, "Final Weapon 2"),  
-    "Magma Dragoon Rematch Defeated": LocData(14574142, "Final Weapon 2"),  
-    "Jet Stingray Rematch Defeated": LocData(14574143, "Final Weapon 2"),  
-    "Split Mushroom Rematch Defeated": LocData(14574144, "Final Weapon 2"),  
-    "Slash Beast Rematch Defeated": LocData(14574145, "Final Weapon 2"),  
-    "Frost Walrus Rematch Defeated": LocData(14574146, "Final Weapon 2"),  
+    LocationName.colonel_memorial_hall_defeated: LocData(14574135, RegionName.memorial_hall),
+    LocationName.colonel_space_port_defeated: LocData(14574136, RegionName.space_port),
+    LocationName.double_iris_defeated: LocData(14574137, RegionName.final_weapon_1),
+    LocationName.general_defeated: LocData(14574138, RegionName.final_weapon_1),
+    LocationName.rematch_web_spider: LocData(14574139, RegionName.final_weapon_2),
+    LocationName.rematch_cyber_peacock: LocData(14574140, RegionName.final_weapon_2),
+    LocationName.rematch_storm_owl: LocData(14574141, RegionName.final_weapon_2),
+    LocationName.rematch_magma_dragoon: LocData(14574142, RegionName.final_weapon_2),
+    LocationName.rematch_jet_stingray: LocData(14574143, RegionName.final_weapon_2),
+    LocationName.rematch_split_mushroom: LocData(14574144, RegionName.final_weapon_2),
+    LocationName.rematch_slash_beast: LocData(14574145, RegionName.final_weapon_2),
+    LocationName.rematch_frost_walrus: LocData(14574146, RegionName.final_weapon_2),
 }
 
 pickup_locations = {
-    "Intro Stage Life Energy (1)": LocData(14574200, "Intro Stage"),
-    "Intro Stage Max Life Energy (1)": LocData(14574201, "Intro Stage"),
-    "Intro Stage 1 Up (1)": LocData(14574202, "Intro Stage"),
-    "Web Spider Life Energy (1)": LocData(14574203, "Web Spider"),
-    "Web Spider Max Life Energy (1)": LocData(14574204, "Web Spider"),
-    "Storm Owl Life Energy (1)": LocData(14574205, "Storm Owl"),
-    "Storm Owl Max Life Energy (1)": LocData(14574206, "Storm Owl"),
-    "Magma Dragoon Life Energy (1)": LocData(14574207, "Magma Dragoon"),
-    "Magma Dragoon Life Energy (2)": LocData(14574208, "Magma Dragoon"),
-    "Magma Dragoon Life Energy (3)": LocData(14574209, "Magma Dragoon"),
-    "Jet Stingray Max Life Energy (1)": LocData(14574210, "Jet Stingray"),
-    "Split Mushroom Life Energy (1)": LocData(14574211, "Split Mushroom"),
-    "Split Mushroom Weapon Energy (1)": LocData(14574212, "Split Mushroom"),
-    "Slash Beast Max Life Energy (1)": LocData(14574213, "Slash Beast"),
-    "Frost Walrus Weapon Energy (1)": LocData(14574214, "Frost Walrus"),
-    "Frost Walrus Weapon Energy (2)": LocData(14574215, "Frost Walrus"),
-    "Frost Walrus Life Energy (1)": LocData(14574216, "Frost Walrus"),
-    "Frost Walrus Life Energy (2)": LocData(14574217, "Frost Walrus"),
-    "Frost Walrus 1 Up (1)": LocData(14574218, "Frost Walrus"),
-    "Frost Walrus Life Energy (3)": LocData(14574219, "Frost Walrus"),
-    "Frost Walrus Life Energy (4)": LocData(14574220, "Frost Walrus"),
-    "Frost Walrus Life Energy (5)": LocData(14574221, "Frost Walrus"),
-    "Frost Walrus Life Energy (6)": LocData(14574222, "Frost Walrus"),
-    "Frost Walrus Life Energy (7)": LocData(14574223, "Frost Walrus"),
-    "Frost Walrus Life Energy (8)": LocData(14574224, "Frost Walrus"),
-    "Frost Walrus 1 Up (2)": LocData(14574225, "Frost Walrus"),
-    "Frost Walrus Max Life Energy (1)": LocData(14574226, "Frost Walrus"),
-    "Frost Walrus Max Weapon Energy (1)": LocData(14574227, "Frost Walrus"),
-    "Final Weapon Life Energy (1)": LocData(14574228, "Final Weapon 1"),
-    "Final Weapon Max Life Energy (1)": LocData(14574229, "Final Weapon 1"),
-    "Final Weapon Max Life Energy (2)": LocData(14574230, "Final Weapon 1"),
-    "Final Weapon Max Life Energy (3)": LocData(14574231, "Final Weapon 2"),
-    "Final Weapon Life Energy (2)": LocData(14574232, "Final Weapon 2"),
-    "Final Weapon Life Energy (Boss Rush)": LocData(14574233, "Final Weapon 2"),
-    "Final Weapon Weapon Energy (Boss Rush)": LocData(14574234, "Final Weapon 2"),
-    "Final Weapon Max Life Energy (4)": LocData(14574235, "Final Weapon 2"),
-    "Final Weapon Max Weapon Energy (1)": LocData(14574236, "Final Weapon 2"),
-    "Final Weapon Life Energy (3)": LocData(14574237, "Final Weapon 2"),
+    LocationName.intro_hp_1: LocData(14574200, RegionName.intro_stage),
+    LocationName.intro_hp_2: LocData(14574201, RegionName.intro_stage),
+    LocationName.intro_1up: LocData(14574202, RegionName.intro_stage),
+    LocationName.web_spider_hp_1: LocData(14574203, RegionName.web_spider),
+    LocationName.web_spider_hp_2: LocData(14574204, RegionName.web_spider),
+    LocationName.storm_owl_hp_1: LocData(14574205, RegionName.storm_owl),
+    LocationName.storm_owl_hp_2: LocData(14574206, RegionName.storm_owl),
+    LocationName.magma_dragoon_hp_1: LocData(14574207, RegionName.magma_dragoon),
+    LocationName.magma_dragoon_hp_2: LocData(14574208, RegionName.magma_dragoon),
+    LocationName.magma_dragoon_hp_3: LocData(14574209, RegionName.magma_dragoon),
+    LocationName.jet_stingray_hp_1: LocData(14574210, RegionName.jet_stingray),
+    LocationName.split_mushroom_hp_1: LocData(14574211, RegionName.split_mushroom),
+    LocationName.split_mushroom_wpn_1: LocData(14574212, RegionName.split_mushroom),
+    LocationName.slash_beast_hp_1: LocData(14574213, RegionName.slash_beast),
+    LocationName.frost_walrus_wpn_1: LocData(14574214, RegionName.frost_walrus),
+    LocationName.frost_walrus_wpn_2: LocData(14574215, RegionName.frost_walrus),
+    LocationName.frost_walrus_hp_1: LocData(14574216, RegionName.frost_walrus),
+    LocationName.frost_walrus_hp_2: LocData(14574217, RegionName.frost_walrus),
+    LocationName.frost_walrus_1up_1: LocData(14574218, RegionName.frost_walrus),
+    LocationName.frost_walrus_hp_3: LocData(14574219, RegionName.frost_walrus),
+    LocationName.frost_walrus_hp_4: LocData(14574220, RegionName.frost_walrus),
+    LocationName.frost_walrus_hp_5: LocData(14574221, RegionName.frost_walrus),
+    LocationName.frost_walrus_hp_6: LocData(14574222, RegionName.frost_walrus),
+    LocationName.frost_walrus_hp_7: LocData(14574223, RegionName.frost_walrus),
+    LocationName.frost_walrus_hp_8: LocData(14574224, RegionName.frost_walrus),
+    LocationName.frost_walrus_1up_2: LocData(14574225, RegionName.frost_walrus),
+    LocationName.frost_walrus_hp_9: LocData(14574226, RegionName.frost_walrus),
+    LocationName.frost_walrus_wpn_3: LocData(14574227, RegionName.frost_walrus),
+    LocationName.final_weapon_hp_1: LocData(14574228, RegionName.final_weapon_1),
+    LocationName.final_weapon_hp_2: LocData(14574229, RegionName.final_weapon_1),
+    LocationName.final_weapon_hp_3: LocData(14574230, RegionName.final_weapon_1),
+    LocationName.final_weapon_hp_4: LocData(14574231, RegionName.final_weapon_2),
+    LocationName.final_weapon_hp_5: LocData(14574232, RegionName.final_weapon_2),
+    LocationName.final_weapon_hp_6: LocData(14574233, RegionName.final_weapon_2),
+    LocationName.final_weapon_wpn_1: LocData(14574234, RegionName.final_weapon_2),
+    LocationName.final_weapon_hp_7: LocData(14574235, RegionName.final_weapon_2),
+    LocationName.final_weapon_wpn_2: LocData(14574236, RegionName.final_weapon_2),
+    LocationName.final_weapon_hp_8: LocData(14574237, RegionName.final_weapon_2),
 }
 
 event_locations = {
-    "Sigma Defeated": LocData(14574300, "Final Weapon 2"),
+    LocationName.final_weapon_clear: LocData(14574300, RegionName.final_weapon_2),
 }
 
-location_table = {
+all_locations = {
     **mmx4_locations,
     **pickup_locations,
-    **event_locations
+    **event_locations,
 }
+
+def setup_locations(world: "MMX4World"):
+    location_table = {
+        **mmx4_locations,
+        **event_locations,
+    }
+
+    if world.options.pickupsanity:
+        location_table.update(pickup_locations)
+
+    return location_table
+
+lookup_id_to_name: Dict[int, str] = {loc_data.ap_code: name for name, loc_data in all_locations.items()}

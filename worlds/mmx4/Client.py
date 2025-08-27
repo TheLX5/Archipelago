@@ -1,5 +1,4 @@
 import logging
-from collections import deque
 from typing import TYPE_CHECKING
 
 from NetUtils import ClientStatus
@@ -30,6 +29,7 @@ ADDRESS_ITEMS_PICKED_UP = 0x0EE558
 class MMX4Client(BizHawkClient):
     game = "Mega Man X4"
     system = "PSX"
+    patch_suffix = ".apmmx4"
 
     def __init__(self) -> None:
         self.ram = "MainRAM"
@@ -40,9 +40,9 @@ class MMX4Client(BizHawkClient):
             if (await get_memory_size(ctx.bizhawk_ctx, self.ram)) < 0x0F1870:
                 return False
             # Check ROM name/patch version
+            # TODO: Read an unique string in RAM per generation to inform we're using the correct seed
             rom_name = ((await bizhawk.read(ctx.bizhawk_ctx, [(ADDRESS_PATCH_NAME, 0x10, self.ram)]))[0])
-            rom_name = rom_name.decode("ascii")
-            if rom_name != "MMX4_ARCHIPELAGO":
+            if rom_name[:4] != b"MMX4":
                 return False  # Not our patched ROM
         except bizhawk.RequestFailedError:
             return False  # Not able to get a response, say no for now
@@ -59,6 +59,8 @@ class MMX4Client(BizHawkClient):
         if ctx.slot is None:
             return
         try:
+            # TODO: Rewrite this while saving an index inside the game's save data
+            #       that way we can implement HP refills that are only given once
             await self.location_check(ctx)
             #await self.received_items_check(ctx)
             # Calculate our unlocked items
@@ -150,106 +152,22 @@ class MMX4Client(BizHawkClient):
 
     async def location_check(self, ctx: "BizHawkClientContext"):
         locs_to_send = set()
+
+        from .Rom import boss_data, armor_data, item_data
         # Read Armor Picked Up
         unlocked_armor = (await bizhawk.read(ctx.bizhawk_ctx, [(ADDRESS_ARMOR_PICKED_UP, 5, self.ram)]))[0]
-        for i in range(0, 5):
-            if unlocked_armor[i] > 0:
-                # Head
-                if i == 0:
-                    locs_to_send.add(14574108)
-                # Body
-                elif i == 1:
-                    locs_to_send.add(14574117)
-                # Arms 1
-                elif i == 2:
-                    locs_to_send.add(14574112)
-                # Arms 2
-                elif i == 3:
-                    locs_to_send.add(14574113)
-                # Legs
-                elif i == 4:
-                    locs_to_send.add(14574102)
+        for idx, ram_read in enumerate(unlocked_armor):
+            if ram_read <= 0:
+                continue
+            locs_to_send.add(armor_data[idx])
 
         # Read Bosses Defeated
         defeated_bosses = (await bizhawk.read(ctx.bizhawk_ctx, [(ADDRESS_BOSSES_DEFEATED, 22, self.ram)]))[0]
-        if len(defeated_bosses) == 22:
-            for i in range(0, 22):
-                if defeated_bosses[i] > 0:
-                    # Intro Boss
-                    if i == 0:
-                        locs_to_send.add(14574100)
-                        locs_to_send.add(14574101)
-                    # Web Spider
-                    elif i == 1:
-                        locs_to_send.add(14574104)
-                        locs_to_send.add(14574105)
-                    # Cyber Peacock
-                    elif i == 2:
-                        locs_to_send.add(14574109)
-                        locs_to_send.add(14574110)
-                    # Storm Owl
-                    elif i == 3:
-                        locs_to_send.add(14574114)
-                        locs_to_send.add(14574115)
-                    # Magma Dragoon
-                    elif i == 4:
-                        locs_to_send.add(14574118)
-                        locs_to_send.add(14574119)
-                    # Jet Stingray
-                    elif i == 5:
-                        locs_to_send.add(14574122)
-                        locs_to_send.add(14574123)
-                    # Split Mushroom
-                    elif i == 6:
-                        locs_to_send.add(14574125)
-                        locs_to_send.add(14574126)
-                    # Slash Beast
-                    elif i == 7:
-                        locs_to_send.add(14574128)
-                        locs_to_send.add(14574129)
-                    # Frost Walrus
-                    elif i == 8:
-                        locs_to_send.add(14574133)
-                        locs_to_send.add(14574134)
-                    # Memorial Hall Colonel
-                    elif i == 9:
-                        locs_to_send.add(14574135)
-                    # Space Port Colonel
-                    elif i == 10:
-                        locs_to_send.add(14574136)
-                    # Double / Iris
-                    elif i == 11:
-                        locs_to_send.add(14574137)
-                    # General
-                    elif i == 12:
-                        locs_to_send.add(14574138)
-                    # Web Spider Rematch
-                    elif i == 13:
-                        locs_to_send.add(14574139)
-                    # Cyber Peacock Rematch
-                    elif i == 14:
-                        locs_to_send.add(14574140)
-                    # Storm Owl Rematch
-                    elif i == 15:
-                        locs_to_send.add(14574141)
-                    # Magma Dragoon Rematch
-                    elif i == 16:
-                        locs_to_send.add(14574142)
-                    # Jet Stingray Rematch
-                    elif i == 17:
-                        locs_to_send.add(14574143)
-                    # Split Mushroom Rematch
-                    elif i == 18:
-                        locs_to_send.add(14574144)
-                    # Slash Beast Rematch
-                    elif i == 19:
-                        locs_to_send.add(14574145)
-                    # Frost Walrus Rematch
-                    elif i == 20:
-                        locs_to_send.add(14574146)
-                    # Sigma
-                    elif i == 21:
-                        locs_to_send.add(14574300)
+        for idx, ram_read in enumerate(defeated_bosses):
+            if ram_read <= 0:
+                continue
+            for loc_id in boss_data[idx]:
+                locs_to_send.add(loc_id)
 
         # Read Items Picked Up
         offset = 0
@@ -258,122 +176,13 @@ class MMX4Client(BizHawkClient):
             item_data_location = int.from_bytes(items_picked_up, "little")
             if item_data_location == 0:
                 break
-            # Intro Stage
-            elif item_data_location == 0x800F4D30:
-                locs_to_send.add(14574200)
-            elif item_data_location == 0x800F4D40:
-                locs_to_send.add(14574201)
-            elif item_data_location == 0x800F4D38:
-                locs_to_send.add(14574202)
-            # Web Spider
-            elif item_data_location == 0x800F52B0:
-                locs_to_send.add(14574203)
-            elif item_data_location == 0x800F52C0:
-                locs_to_send.add(14574204)
-            elif item_data_location == 0x800F52B8:
-                locs_to_send.add(14574103)
-            # Cyber Peacock
-            elif item_data_location == 0x800F7438:
-                locs_to_send.add(14574106)
-            elif item_data_location == 0x800F7440:
-                locs_to_send.add(14574107)
-            # Storm Owl
-            elif item_data_location == 0x800F7700:
-                locs_to_send.add(14574205)
-            elif item_data_location == 0x800F7978:
-                locs_to_send.add(14574206)
-            elif item_data_location == 0x800F76F8:
-                locs_to_send.add(14574111)
-            # Magma Dragoon
-            elif item_data_location == 0x800F6854:
-                locs_to_send.add(14574116)
-            elif item_data_location == 0x800F66B4:
-                locs_to_send.add(14574207)
-            elif item_data_location == 0x800F66BC:
-                locs_to_send.add(14574208)
-            elif item_data_location == 0x800F685C:
-                locs_to_send.add(14574209)
-            # Jet Stingray
-            elif item_data_location == 0x800F6C40:
-                locs_to_send.add(14574120)
-            elif item_data_location == 0x800F6E98:
-                locs_to_send.add(14574121)
-            elif item_data_location == 0x800F6EA0:
-                locs_to_send.add(14574210)
-            # Split Mushroom
-            elif item_data_location == 0x800F6320:
-                locs_to_send.add(14574124)
-            elif item_data_location == 0x800F6328:
-                locs_to_send.add(14574211)
-            elif item_data_location == 0x800F6330:
-                locs_to_send.add(14574212)
-            # Slash Beast
-            elif item_data_location == 0x800F7D3C:
-                locs_to_send.add(14574127)
-            elif item_data_location == 0x800F7D44:
-                locs_to_send.add(14574213)
-            # Frost Walrus
-            elif item_data_location == 0x800F56C0:
-                locs_to_send.add(14574214)
-            elif item_data_location == 0x800F56C8:
-                locs_to_send.add(14574215)
-            elif item_data_location == 0x800F56B8:
-                locs_to_send.add(14574216)
-            elif item_data_location == 0x800F56B0:
-                locs_to_send.add(14574217)
-            elif item_data_location == 0x800F5660:
-                locs_to_send.add(14574218)
-            elif item_data_location == 0x800F5680:
-                locs_to_send.add(14574219)
-            elif item_data_location == 0x800F5688:
-                locs_to_send.add(14574220)
-            elif item_data_location == 0x800F5690:
-                locs_to_send.add(14574221)
-            elif item_data_location == 0x800F5698:
-                locs_to_send.add(14574222)
-            elif item_data_location == 0x800F56A0:
-                locs_to_send.add(14574223)
-            elif item_data_location == 0x800F56A8:
-                locs_to_send.add(14574224)
-            elif item_data_location == 0x800F5668:
-                locs_to_send.add(14574225)
-            elif item_data_location == 0x800F5678:
-                locs_to_send.add(14574226)
-            elif item_data_location == 0x800F5868:
-                locs_to_send.add(14574227)
-            elif item_data_location == 0x800F5658:
-                locs_to_send.add(14574130)
-            elif item_data_location == 0x800F5670:
-                locs_to_send.add(14574131)
-            elif item_data_location == 0x800F5860:
-                locs_to_send.add(14574132)
-            # Final Weapon 1
-            elif item_data_location == 0x800F86CC:
-                locs_to_send.add(14574228)
-            elif item_data_location == 0x800F8564:
-                locs_to_send.add(14574229)
-            elif item_data_location == 0x800F855C:
-                locs_to_send.add(14574230)
-            # Final Weapon 2
-            elif item_data_location == 0x800F87E0:
-                locs_to_send.add(14574231)
-            elif item_data_location == 0x800F87E8:
-                locs_to_send.add(14574232)
-            elif item_data_location == 0x800F87F0:
-                locs_to_send.add(14574233)
-            elif item_data_location == 0x800F87F8:
-                locs_to_send.add(14574234)
-            elif item_data_location == 0x800F8910:
-                locs_to_send.add(14574235)
-            elif item_data_location == 0x800F8918:
-                locs_to_send.add(14574236)
-            elif item_data_location == 0x800F8920:
-                locs_to_send.add(14574237)
+            elif item_data_location in item_data.keys():
+                locs_to_send.add(item_data[item_data_location])
             offset += 4
 
         if locs_to_send is not None:
             await ctx.send_msgs([{"cmd": "LocationChecks", "locations": list(locs_to_send)}])
-        return
+            
 
     async def received_items_check(self, ctx: "BizHawkClientContext") -> None:
         return

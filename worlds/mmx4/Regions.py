@@ -1,46 +1,80 @@
-from BaseClasses import Region
-from .Types import MMX4Location
-from .Locations import location_table, is_valid_location
-from typing import TYPE_CHECKING
+from BaseClasses import Region, MultiWorld
+from .Types import MMX4Location, LocData
+from .Locations import mmx4_locations
+from .Names import RegionName
+from typing import TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:
     from . import MMX4World
 
 def create_regions(world: "MMX4World"):
-    # Intro
-    menu = create_region(world, "Menu")
-    intro_stage = create_region_and_connect(world, "Intro Stage", "Menu -> Intro Stage", menu)
-    stage_select = create_region_and_connect(world, "Stage Select", "Intro Stage -> Stage Select", intro_stage)
-    # Main Stages
-    web_spider = create_region_and_connect(world, "Web Spider", "Stage Select -> Web Spider", stage_select)
-    cyber_peacock = create_region_and_connect(world, "Cyber Peacock", "Stage Select -> Cyber Peacock", stage_select)
-    storm_owl = create_region_and_connect(world, "Storm Owl", "Stage Select -> Storm Owl", stage_select)
-    magma_dragoon = create_region_and_connect(world, "Magma Dragoon", "Stage Select -> Magma Dragoon", stage_select)
-    jet_stingray = create_region_and_connect(world, "Jet Stingray", "Stage Select -> Jet Stingray", stage_select)
-    split_mushroom = create_region_and_connect(world, "Split Mushroom", "Stage Select -> Split Mushroom", stage_select)
-    slash_beast = create_region_and_connect(world, "Slash Beast", "Stage Select -> Slash Beast", stage_select)
-    frost_walrus = create_region_and_connect(world, "Frost Walrus", "Stage Select -> Frost Walrus", stage_select)
-    # Special / End Stages
-    memorial_hall = create_region_and_connect(world, "Memorial Hall", "Stage Select -> Memorial Hall", stage_select)
-    space_port = create_region_and_connect(world, "Space Port", "Stage Select -> Space Port", stage_select)
-    final_weapon_1 = create_region_and_connect(world, "Final Weapon 1", "Space Port -> Final Weapon 1", space_port)
-    final_weapon_2 = create_region_and_connect(world, "Final Weapon 2", "Final Weapon 1 -> Final Weapon 2", final_weapon_1)
+    multiworld = world.multiworld
+    player = world.player
 
-def create_region(world: "MMX4World", name: str) -> Region:
-    reg = Region(name, world.player, world.multiworld)
+    menu = Region("Menu", player, multiworld)
+    intro_stage = Region(RegionName.intro_stage, player, multiworld)
+    stage_select = Region(RegionName.stage_select, player, multiworld)
+    web_spider = Region(RegionName.web_spider, player, multiworld)
+    cyber_peacock = Region(RegionName.cyber_peacock, player, multiworld)
+    storm_owl = Region(RegionName.storm_owl, player, multiworld)
+    magma_dragoon = Region(RegionName.magma_dragoon, player, multiworld)
+    jet_stingray = Region(RegionName.jet_stingray, player, multiworld)
+    split_mushroom = Region(RegionName.split_mushroom, player, multiworld)
+    slash_beast = Region(RegionName.slash_beast, player, multiworld)
+    frost_walrus = Region(RegionName.frost_walrus, player, multiworld)
+    memorial_hall = Region(RegionName.memorial_hall, player, multiworld)
+    space_port = Region(RegionName.space_port, player, multiworld)
+    final_weapon_1 = Region(RegionName.final_weapon_1, player, multiworld)
+    final_weapon_2 = Region(RegionName.final_weapon_2, player, multiworld)
 
-    for key, data in location_table.items():
-        if data.region == name:
-            if not is_valid_location(world, key):
-                continue
-            location = MMX4Location(world.player, key, data.ap_code, reg)
-            reg.locations.append(location)
-    
-    world.multiworld.regions.append(reg)
-    return reg
+    multiworld.regions += [
+        menu,
+        intro_stage,
+        stage_select,
+        web_spider,
+        cyber_peacock,
+        storm_owl,
+        magma_dragoon,
+        jet_stingray,
+        split_mushroom,
+        slash_beast,
+        frost_walrus,
+        memorial_hall,
+        space_port,
+        final_weapon_1,
+        final_weapon_2,
+    ]
 
-def create_region_and_connect(world: "MMX4World",
-                               name: str, entrancename: str, connected_region: Region) -> Region:
-    reg: Region = create_region(world, name)
-    connected_region.connect(reg, entrancename)
-    return reg
+    for loc_name, loc_data in world.location_table.items():
+        add_location_to_region(multiworld, player, loc_data, loc_name)
+
+
+def add_location_to_region(multiworld: MultiWorld, player: int, location_data: LocData, location_name: str):
+    region = multiworld.get_region(location_data.region, player)
+    location = MMX4Location(player, location_name, location_data.ap_code, region)
+    region.locations.append(location)
+
+
+def connect_regions(world: "MMX4World"):
+    connect(world, "Menu", RegionName.intro_stage)
+    connect(world, RegionName.intro_stage, RegionName.stage_select)
+
+    connect(world, RegionName.stage_select, RegionName.web_spider)
+    connect(world, RegionName.stage_select, RegionName.cyber_peacock)
+    connect(world, RegionName.stage_select, RegionName.storm_owl)
+    connect(world, RegionName.stage_select, RegionName.magma_dragoon)
+    connect(world, RegionName.stage_select, RegionName.jet_stingray)
+    connect(world, RegionName.stage_select, RegionName.split_mushroom)
+    connect(world, RegionName.stage_select, RegionName.slash_beast)
+    connect(world, RegionName.stage_select, RegionName.frost_walrus)
+
+    connect(world, RegionName.stage_select, RegionName.memorial_hall)
+    connect(world, RegionName.stage_select, RegionName.space_port)
+    connect(world, RegionName.space_port, RegionName.final_weapon_1)
+    connect(world, RegionName.final_weapon_1, RegionName.final_weapon_2)
+
+
+def connect(world: "MMX4World", source: str, target: str):
+    source_region: Region = world.multiworld.get_region(source, world.player)
+    target_region: Region = world.multiworld.get_region(target, world.player)
+    source_region.connect(target_region)
