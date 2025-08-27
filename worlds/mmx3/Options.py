@@ -176,7 +176,7 @@ class SuperRecoverInPool(DefaultOnToggle):
 
 class RapidFiveInPool(DefaultOnToggle):
     """
-    Adds Super Recover Chip from Mega Man X5 into the item pool.
+    Adds Rapid Five Chip from Mega Man X5 into the item pool.
 
     Increases the amount of buster shots on screen to 5.
     """
