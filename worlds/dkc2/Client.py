@@ -43,6 +43,7 @@ DKC2_DEATH_LINK_FORCE = DKC2_SRAM + 0x05A
 DKC2_DEATH_LINK_FLAG = DKC2_SRAM + 0x058
 
 DKC2_TRACKED_LEVELS = DKC2_SRAM + 0x80
+DKC2_TRACKED_CLEARS = DKC2_SRAM + 0x70
 
 DKC2_GAME_TIME = WRAM_START + 0x00D5
 DKC2_IN_LEVEL = WRAM_START + 0x01FF
@@ -319,7 +320,8 @@ class DKC2SNIClient(SNIClient):
 
         # Send current map to poptracker
         reached_levels = await snes_read(ctx, DKC2_TRACKED_LEVELS, 0x20)
-        if reached_levels is None:
+        current_clears = await snes_read(ctx, DKC2_TRACKED_CLEARS, 0x0E)
+        if reached_levels is None or current_clears is None:
             return
 
         if nmi_pointer == 0x8CE9 or nmi_pointer == 0x8CF1:
@@ -358,6 +360,21 @@ class DKC2SNIClient(SNIClient):
                 "operations":
                     [{"operation": "replace", "value": self.current_map}],
             }])
+
+            level_clear_list = []
+            for idx in range(0, len(current_clears), 2):
+                current_world_count = int.from_bytes(current_clears[idx:idx+2], "little")
+                level_clear_list.append(current_world_count)
+
+            await ctx.send_msgs([{
+                    "cmd": "Set", 
+                    "key": f"dkc2_clear_count_{ctx.team}_{ctx.slot}", 
+                    "default": 0,
+                    "want_reply": False,
+                    "operations":
+                        [{"operation": "replace", "value": level_clear_list}],
+                }])
+        
 
         # Receive items
         rom = await snes_read(ctx, DKC2_ROMHASH_START, ROMHASH_SIZE)

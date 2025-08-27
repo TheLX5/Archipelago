@@ -220,8 +220,11 @@ class DKC2Rules:
         multiworld = self.world.multiworld
 
         for entrance_name, rule in self.connection_rules.items():
-            entrance = multiworld.get_entrance(entrance_name, self.player)
-            entrance.access_rule = rule
+            try:
+                entrance = multiworld.get_entrance(entrance_name, self.player)
+                entrance.access_rule = rule
+            except KeyError:
+                continue
 
         for loc in multiworld.get_locations(self.player):
             # Skip events so we don't have to type duplicate entries...
