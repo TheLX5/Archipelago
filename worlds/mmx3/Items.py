@@ -28,7 +28,7 @@ access_codes_table = {
     ItemName.stage_neon_tiger:          ItemData(0xBD0007, ItemClassification.progression | ItemClassification.useful),
     ItemName.stage_gravity_beetle:      ItemData(0xBD0008, ItemClassification.progression | ItemClassification.useful),
     ItemName.stage_blast_hornet:        ItemData(0xBD0009, ItemClassification.progression | ItemClassification.useful),
-    ItemName.stage_doppler_lab:         ItemData(0xBD000A, ItemClassification.progression | ItemClassification.useful),
+    ItemName.stage_doppler_lab:         ItemData(0xBD000A, ItemClassification.progression_skip_balancing | ItemClassification.useful),
     ItemName.stage_vile:                ItemData(0xBD0019, ItemClassification.progression | ItemClassification.useful),
 }
 

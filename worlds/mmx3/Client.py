@@ -58,6 +58,7 @@ MMX3_REFILL_REQUEST         = MMX3_RAM + 0x00138
 MMX3_REFILL_TARGET          = MMX3_RAM + 0x00139
 MMX3_ARSENAL_SYNC           = MMX3_RAM + 0x0013A
 MMX3_UNLOCKED_CHIPS         = MMX3_RAM + 0x00180
+MMX3_PROCESS_UNLOCKS        = MMX3_RAM + 0x000FE
 
 MMX3_SFX_FLAG   = WRAM_START + 0x0F469
 MMX3_SFX_NUMBER = WRAM_START + 0x0F46A
@@ -1051,6 +1052,9 @@ class MMX3SNIClient(SNIClient):
                     [{"operation": "replace", "value": arsenal}],
             }])
             self.save_arsenal = False
+            
+            snes_buffered_write(ctx, MMX3_PROCESS_UNLOCKS, bytearray([0x03]))
+            await snes_flush_writes(ctx)
         
         keys = {
             f"mmx3_checkpoints_{ctx.team}_{ctx.slot}",

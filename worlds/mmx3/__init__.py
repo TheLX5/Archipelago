@@ -332,17 +332,47 @@ class MMX3World(World):
 
 
     def generate_early(self):
-        # Enforce Vile stage options to have lower count than the Lab
-        if self.options.doppler_medal_count.value <= self.options.vile_medal_count.value:
-            self.options.vile_medal_count.value = max(self.options.doppler_medal_count.value - 1, 0)
-        if self.options.doppler_weapon_count.value <= self.options.vile_weapon_count.value:
-            self.options.vile_weapon_count.value = max(self.options.doppler_weapon_count.value - 1, 0)
-        if self.options.doppler_upgrade_count.value <= self.options.vile_upgrade_count.value:
-            self.options.vile_upgrade_count.value = max(self.options.doppler_upgrade_count.value - 1, 0)
-        if self.options.doppler_heart_tank_count.value <= self.options.vile_heart_tank_count.value:
-            self.options.vile_heart_tank_count.value = max(self.options.doppler_heart_tank_count.value - 1, 0)
-        if self.options.doppler_sub_tank_count.value <= self.options.vile_sub_tank_count.value:
-            self.options.vile_sub_tank_count.value = max(self.options.doppler_sub_tank_count.value - 1, 0)
+        # Set some Vile options to 0 if they're not required
+        vile_open = self.options.vile_open.value
+        if "Medals" not in vile_open:
+            self.options.vile_medal_count.value = 0
+        if "Weapons" not in vile_open:
+            self.options.vile_weapon_count.value = 0
+        if "Armor Upgrades" not in vile_open:
+            self.options.vile_upgrade_count.value = 0
+        if "Heart Tanks" not in vile_open:
+            self.options.vile_heart_tank_count.value = 0
+        if "Sub Tanks" not in vile_open:
+            self.options.vile_sub_tank_count.value = 0
+
+        # Set some Doppler options to 0 if they're not required
+        # Also enforce Vile stage options to have lower count than the Lab ones if applicable
+        doppler_open = self.options.doppler_open.value
+        if "Medals" not in doppler_open:
+            self.options.doppler_medal_count.value = 0
+        else:
+            if self.options.doppler_medal_count.value <= self.options.vile_medal_count.value:
+                self.options.vile_medal_count.value = max(self.options.doppler_medal_count.value - 1, 0)
+        if "Weapons" not in doppler_open:
+            self.options.doppler_weapon_count.value = 0
+        else:
+            if self.options.doppler_weapon_count.value <= self.options.vile_weapon_count.value:
+                self.options.vile_weapon_count.value = max(self.options.doppler_weapon_count.value - 1, 0)
+        if "Armor Upgrades" not in doppler_open:
+            self.options.doppler_upgrade_count.value = 0
+        else:
+            if self.options.doppler_upgrade_count.value <= self.options.vile_upgrade_count.value:
+                self.options.vile_upgrade_count.value = max(self.options.doppler_upgrade_count.value - 1, 0)
+        if "Heart Tanks" not in doppler_open:
+            self.options.doppler_heart_tank_count.value = 0
+        else:
+            if self.options.doppler_heart_tank_count.value <= self.options.vile_heart_tank_count.value:
+                self.options.vile_heart_tank_count.value = max(self.options.doppler_heart_tank_count.value - 1, 0)
+        if "Sub Tanks" not in doppler_open:
+            self.options.doppler_sub_tank_count.value = 0
+        else:
+            if self.options.doppler_sub_tank_count.value <= self.options.vile_sub_tank_count.value:
+                self.options.vile_sub_tank_count.value = max(self.options.doppler_sub_tank_count.value - 1, 0)
 
         # Adjust bit and byte medal counts
         if self.options.bit_medal_count.value == 0 and self.options.byte_medal_count.value == 0:
