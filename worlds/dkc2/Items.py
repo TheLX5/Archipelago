@@ -58,7 +58,7 @@ progression_table = {
     ItemName.squitter:              ItemData(STARTING_ID + 0x001C, ItemClassification.progression),
     ItemName.rattly:                ItemData(STARTING_ID + 0x001D, ItemClassification.progression),
     ItemName.clapper:               ItemData(STARTING_ID + 0x001E, ItemClassification.progression),
-    ItemName.glimmer:               ItemData(STARTING_ID + 0x001F, ItemClassification.progression),
+    ItemName.glimmer:               ItemData(STARTING_ID + 0x001F, ItemClassification.progression_deprioritized),
     ItemName.barrel_kannons:        ItemData(STARTING_ID + 0x0020, ItemClassification.progression),
     ItemName.barrel_exclamation:    ItemData(STARTING_ID + 0x0021, ItemClassification.progression),
     ItemName.barrel_kong:           ItemData(STARTING_ID + 0x0022, ItemClassification.progression),

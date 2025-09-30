@@ -104,6 +104,7 @@ class DKC2SNIClient(SNIClient):
         self.message_queue = []
         self.last_message = []
         self.current_session_locations = set()
+        self.processed_locations = set()
 
 
     async def validate_rom(self, ctx: "SNIContext"):
@@ -323,7 +324,7 @@ class DKC2SNIClient(SNIClient):
         current_clears = await snes_read(ctx, DKC2_TRACKED_CLEARS, 0x0E)
         if reached_levels is None or current_clears is None:
             return
-
+        
         if nmi_pointer == 0x8CE9 or nmi_pointer == 0x8CF1:
             poptracker_id = 0x100 | int.from_bytes(current_map, "little")
         else:
@@ -913,7 +914,9 @@ class DKC2SNIClient(SNIClient):
 
         elif cmd == "LocationInfo":
             for item in args["locations"]:
-                if item.player != ctx.slot and item.location in self.current_session_locations:
+                item: NetworkItem
+                if item.player != ctx.slot and item.location in self.current_session_locations and item.location not in self.processed_locations:
+                    self.processed_locations.add(item.location)
                     self.message_queue.append([False, ctx.player_names[item.player], ctx.item_names.lookup_in_slot(item.item, item.player), item.flags, False])
 
 
