@@ -2120,6 +2120,22 @@ trivia_easy_paper_mario_the_thousand_year_door = [
     ),
 ]
 
+trivia_easy_plok = [
+    TriviaQuestion(
+        [
+            """°""", 
+            """  In Plok, what item does Plok°""", 
+            """   set out to recover at the°""", 
+            """     beginning of the game?°""", 
+            """°""", 
+            """°""", 
+        ],
+        """Plok's flag°°""", 
+        """Grandpappy's amulet°°""", 
+        """Grandpappy's journal°°""", 
+    ),
+]
+
 trivia_easy_pokemon_crystal = [
     TriviaQuestion(
         [
@@ -4867,6 +4883,9 @@ trivia_hard_paper_mario_the_thousand_year_door = [
         """Bob-omb°°""", 
         """Squeek°°""", 
     ),
+]
+
+trivia_hard_plok = [
 ]
 
 trivia_hard_pokemon_crystal = [
@@ -7943,6 +7962,9 @@ trivia_medium_paper_mario_the_thousand_year_door = [
     ),
 ]
 
+trivia_medium_plok = [
+]
+
 trivia_medium_pokemon_crystal = [
     TriviaQuestion(
         [
@@ -9034,6 +9056,11 @@ trivia_data = {
         trivia_easy_paper_mario_the_thousand_year_door, 
         trivia_medium_paper_mario_the_thousand_year_door, 
         trivia_hard_paper_mario_the_thousand_year_door,
+    ],
+    "Plok": [
+        trivia_easy_plok, 
+        trivia_medium_plok, 
+        trivia_hard_plok,
     ],
     "Pokemon Crystal": [
         trivia_easy_pokemon_crystal, 
