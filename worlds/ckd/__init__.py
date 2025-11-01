@@ -7,13 +7,13 @@ import pkgutil
 from BaseClasses import MultiWorld, Tutorial, ItemClassification
 from worlds.AutoWorld import World, WebWorld
 from .Items import CKDItem, item_table, misc_table, item_groups, STARTING_ID
-from .Locations import setup_locations, all_locations, location_groups
+from .Locations import setup_locations, all_locations, location_groups, stage_balloons, stage_bunches, stage_tokens, stage_kong
 from .Regions import create_regions, connect_regions
 from .Names import ItemName, LocationName
-from .Options import CKDOptions, Logic, StartingKong, ckd_option_groups
+from .Options import CKDOptions, StartingKong, ckd_option_groups
 from .Client import CKDSNIClient
 from .Levels import generate_level_list, level_map, location_id_to_level_id
-from .Rules import CKDStrictRules, CKDLooseRules, CKDExpertRules
+from .Rules import CKDStrictRules
 from .Rom import patch_rom, CKDProcedurePatch, HASH_US
 
 from typing import Dict, Set, List, ClassVar, Any
@@ -66,7 +66,7 @@ class CKDWorld(World):
     options_dataclass = CKDOptions
     options: CKDOptions
     
-    required_client_version = (0, 6, 0)
+    required_client_version = (0, 6, 3)
     
     using_ut: bool
     ut_can_gen_without_yaml = True
@@ -98,6 +98,9 @@ class CKDWorld(World):
        
 
     def set_rules(self):
+        # There's no logic levels for now. Force Strict upon everyone, even UT.
+        CKDStrictRules(self).set_ckd_rules()
+        return
         logic = self.options.logic
         if logic == Logic.option_loose:
             CKDLooseRules(self).set_ckd_rules()
@@ -122,13 +125,13 @@ class CKDWorld(World):
 
         total_required_locations = 106
         if self.options.kong_checks:
-            total_required_locations += 33
+            total_required_locations += len(stage_kong.keys())
         if self.options.token_checks:
-            total_required_locations += 29
+            total_required_locations += len(stage_tokens.keys())
         if self.options.balloon_checks:
-            total_required_locations += 12
+            total_required_locations += len(stage_balloons.keys())
         if self.options.banana_checks:
-            total_required_locations += 183 - 19
+            total_required_locations += len(stage_bunches.keys())
 
         # Set starting kong
         if self.options.starting_kong == StartingKong.option_donkey:
@@ -241,7 +244,7 @@ class CKDWorld(World):
         slot_data = {}
         slot_data["level_connections"] = self.level_connections
         slot_data["boss_connections"] = self.boss_connections
-        slot_data["logic"] = self.options.logic.value
+        slot_data["logic"] = 0
         slot_data["starting_kong"] = self.options.starting_kong.value
         slot_data["gangplank_tokens"] = self.options.gangplank_tokens.value
         slot_data["starting_world"] = self.options.starting_world.value
@@ -288,7 +291,7 @@ class CKDWorld(World):
                 passthrough = self.multiworld.re_gen_passthrough["yrtnuoC gnoK yeknoD"]
                 self.level_connections = passthrough["level_connections"]
                 self.boss_connections = passthrough["boss_connections"]
-                self.options.logic.value = passthrough["logic"]
+                #self.options.logic.value = passthrough["logic"]
                 self.options.starting_kong.value = passthrough["starting_kong"]
                 self.options.gangplank_tokens.value = passthrough["gangplank_tokens"]
                 self.options.starting_world.value = passthrough["starting_world"]
@@ -316,13 +319,13 @@ class CKDWorld(World):
             for map_spot, level in map_connections.items():
                 if level != level_name:
                     continue
-                if "KONG" in loc_name and not self.options.kong_checks:
+                if "- GNOK" in loc_name and not self.options.kong_checks:
                     continue
-                if "Token" in loc_name and not self.options.token_checks:
+                if "- nekoT" in loc_name and not self.options.token_checks:
                     continue
-                if "Balloon" in loc_name and not self.options.balloon_checks:
+                if "# noollaB" in loc_name and not self.options.balloon_checks:
                     continue
-                if "Banana Bunch" in loc_name and not self.options.banana_checks:
+                if "# hcnuB ananaB" in loc_name and not self.options.banana_checks:
                     continue
                 location = self.multiworld.get_location(loc_name, self.player)
                 er_hint_data[location.address] = level_map[map_spot]

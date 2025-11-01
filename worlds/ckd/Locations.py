@@ -190,8 +190,8 @@ stage_tokens = {
     LocationName.croctopus_chase_token_1:       STARTING_ID + 0x0111,
     LocationName.croctopus_chase_token_2:       STARTING_ID + 0x0112,
     LocationName.trick_track_trek_token_1:      STARTING_ID + 0x0113,
-    LocationName.poison_pond_token_1:           STARTING_ID + 0x0114,
-    LocationName.poison_pond_token_2:           STARTING_ID + 0x0115,
+    #LocationName.poison_pond_token_1:           STARTING_ID + 0x0114,
+    #LocationName.poison_pond_token_2:           STARTING_ID + 0x0115,
     LocationName.mine_cart_madness_token_1:     STARTING_ID + 0x0116,
     LocationName.blackout_basement_token_1:     STARTING_ID + 0x0117,
     LocationName.tanked_up_trouble_token_1:     STARTING_ID + 0x0118,
@@ -212,7 +212,7 @@ stage_balloons = {
     LocationName.mine_cart_carnage_balloon_1:   STARTING_ID + 0x0207,
     LocationName.forest_frenzy_balloon_1:       STARTING_ID + 0x0208,
     LocationName.snow_barrel_blast_balloon_1:   STARTING_ID + 0x0209,
-    LocationName.snow_barrel_blast_balloon_2:   STARTING_ID + 0x020A,
+    #LocationName.snow_barrel_blast_balloon_2:   STARTING_ID + 0x020A,
     LocationName.croctopus_chase_balloon_1:     STARTING_ID + 0x020B,
 }
 
@@ -401,7 +401,7 @@ stage_bunches = {
     LocationName.misty_mine_bunch_1:            STARTING_ID + 0x03B2,
     LocationName.misty_mine_bunch_2:            STARTING_ID + 0x03B3,
     LocationName.loopy_lights_bunch_1:          STARTING_ID + 0x03B4,
-    LocationName.loopy_lights_bunch_2:          STARTING_ID + 0x03B5,
+    #LocationName.loopy_lights_bunch_2:          STARTING_ID + 0x03B5,
     LocationName.platform_perils_bunch_1:       STARTING_ID + 0x03B6,
 }
 

@@ -271,8 +271,8 @@ location_id_to_level_id = {
 
     LocationName.stop_go_station_bunch_1: [0x05, 0x31, 0x63],
     LocationName.stop_go_station_bunch_2: [0x05, 0x31, 0x59],
-    LocationName.stop_go_station_bunch_3: [0x05, 0x31, 0x55],
-    LocationName.stop_go_station_token_1: [0x03, 0x31, 0x4A],
+    LocationName.stop_go_station_bunch_3: [0x05, 0x31, 0x4A],
+    LocationName.stop_go_station_token_1: [0x03, 0x31, 0x46],
     #LocationName.stop_go_station_bunch_4: [0x05, 0x31, 0xFF], # Missing
     LocationName.stop_go_station_bunch_5: [0x05, 0x31, 0x2C],
     LocationName.stop_go_station_bunch_6: [0x05, 0x31, 0x24],
@@ -295,7 +295,7 @@ location_id_to_level_id = {
     LocationName.vulture_culture_bunch_5: [0x05, 0xA5, 0x20],
     #LocationName.vulture_culture_bunch_6: [0x05, 0xA5, 0xFF], # Missing
 
-    LocationName.tree_top_town_bunch_1: [0x05, 0xA4, 0x58],
+    LocationName.tree_top_town_bunch_1: [0x05, 0xA4, 0x56],
     #LocationName.tree_top_town_bunch_2: [0x05, 0xA4, 0xFF], # Missing
     #LocationName.tree_top_town_bunch_3: [0x05, 0xA4, 0xFF], # Missing
     LocationName.tree_top_town_token_1: [0x03, 0xA4, 0x01],
@@ -310,7 +310,7 @@ location_id_to_level_id = {
 
     LocationName.temple_tempest_token_1: [0x03, 0x43, 0x55],
     LocationName.temple_tempest_bunch_1: [0x05, 0x43, 0x52],
-    #LocationName.temple_tempest_bunch_2: [0x05, 0x43, 0xFF], # Missing
+    #LocationName.temple_tempest_bunch_2: [0x05, 0x43, 0x48], 
     LocationName.temple_tempest_bunch_3: [0x05, 0x43, 0x40],
     LocationName.temple_tempest_bunch_4: [0x05, 0x43, 0x33],
     LocationName.temple_tempest_bunch_5: [0x05, 0x43, 0x1F],
@@ -331,7 +331,7 @@ location_id_to_level_id = {
 
     LocationName.clam_city_bunch_1: [0x05, 0xDE, 0x2F],
     LocationName.clam_city_bunch_2: [0x05, 0xDE, 0x02],
-    LocationName.clam_city_token_1: [0x03, 0xDE, 0x2E],
+    LocationName.clam_city_token_1: [0x03, 0xDE, 0x2B],
 
     #LocationName.snow_barrel_blast_bunch_1:     [0x05, 0x24, 0xFF], # Missing
     LocationName.snow_barrel_blast_balloon_1:   [0x04, 0x24, 0x77], 
@@ -342,17 +342,17 @@ location_id_to_level_id = {
     LocationName.snow_barrel_blast_bunch_4:     [0x05, 0x24, 0x04],
     #LocationName.snow_barrel_blast_bunch_5:     [0x05, 0x24, 0xFF], # Missing
 
-    LocationName.slipslide_ride_token_1:  [0x03, 0x6D, 0x3E],
+    LocationName.slipslide_ride_token_1:  [0x03, 0x6D, 0x3D],
     LocationName.slipslide_ride_bunch_1:  [0x05, 0x6D, 0x1D],
     LocationName.slipslide_ride_bunch_2:  [0x05, 0x6D, 0x44],
     LocationName.slipslide_ride_bunch_3:  [0x05, 0x6D, 0x42],
     LocationName.slipslide_ride_bunch_4:  [0x05, 0x6D, 0x2E],
-    LocationName.slipslide_ride_bunch_5:  [0x05, 0x6D, 0x46],
-    LocationName.slipslide_ride_bunch_6:  [0x05, 0x6D, 0x48],
-    LocationName.slipslide_ride_bunch_7:  [0x05, 0x6D, 0x45],
+    LocationName.slipslide_ride_bunch_5:  [0x05, 0x6D, 0x48],
+    LocationName.slipslide_ride_bunch_6:  [0x05, 0x6D, 0x49],
+    LocationName.slipslide_ride_bunch_7:  [0x05, 0x6D, 0x4B],
     LocationName.slipslide_ride_bunch_8:  [0x05, 0x6D, 0x31],
     LocationName.slipslide_ride_bunch_9:  [0x05, 0x6D, 0x54],
-    LocationName.slipslide_ride_bunch_10: [0x05, 0x6D, 0x66],
+    LocationName.slipslide_ride_bunch_10: [0x05, 0x6D, 0x65],
     LocationName.slipslide_ride_bunch_11: [0x05, 0x6D, 0x6A],
 
     #LocationName.ice_age_alley_bunch_1: [0x05, 0xA7, 0xFF], # Missing
@@ -361,11 +361,11 @@ location_id_to_level_id = {
 
     LocationName.croctopus_chase_bunch_1:   [0x05, 0x3E, 0x05],
     LocationName.croctopus_chase_token_1:   [0x03, 0x3E, 0x18],
-    LocationName.croctopus_chase_token_2:   [0x03, 0x3E, 0x29],
-    LocationName.croctopus_chase_bunch_2:   [0x05, 0x3E, 0x2B],
-    LocationName.croctopus_chase_bunch_3:   [0x05, 0x3E, 0x2A],
-    LocationName.croctopus_chase_bunch_4:   [0x05, 0x3E, 0x28],
-    LocationName.croctopus_chase_bunch_5:   [0x05, 0x3E, 0x27],
+    LocationName.croctopus_chase_token_2:   [0x03, 0x3E, 0x2C],
+    #LocationName.croctopus_chase_bunch_2:   [0x05, 0x3E, 0x2B],
+    #LocationName.croctopus_chase_bunch_3:   [0x05, 0x3E, 0x2A],
+    #LocationName.croctopus_chase_bunch_4:   [0x05, 0x3E, 0x28],
+    LocationName.croctopus_chase_bunch_5:   [0x05, 0x3E, 0x33],
     LocationName.croctopus_chase_balloon_1: [0x04, 0x3E, 0x40],
 
     #LocationName.torchlight_trouble_bunch_1: [0x05, 0x14, 0xFF], # Missing
@@ -375,22 +375,22 @@ location_id_to_level_id = {
     LocationName.oil_drum_alley_bunch_1: [0x05, 0x40, 0x2C],
     LocationName.oil_drum_alley_bunch_2: [0x05, 0x40, 0x15],
 
-    LocationName.trick_track_trek_bunch_1: [0x05, 0x2F, 0x3B],
+    LocationName.trick_track_trek_bunch_1: [0x05, 0x2F, 0x36],
     LocationName.trick_track_trek_token_1: [0x03, 0x2F, 0x00],
 
     LocationName.elevator_antics_bunch_1: [0x05, 0x18, 0x46],
     LocationName.elevator_antics_bunch_2: [0x05, 0x18, 0x2B],
     LocationName.elevator_antics_bunch_3: [0x05, 0x18, 0x23],
 
-    LocationName.poison_pond_bunch_1: [0x05, 0x22, 0x07],
-    LocationName.poison_pond_bunch_2: [0x05, 0x22, 0x0F],
+    LocationName.poison_pond_bunch_1: [0x05, 0x22, 0x05],
+    LocationName.poison_pond_bunch_2: [0x05, 0x22, 0x0D],
     LocationName.poison_pond_bunch_3: [0x05, 0x22, 0x01],
-    LocationName.poison_pond_bunch_4: [0x05, 0x22, 0x36],
-    LocationName.poison_pond_bunch_5: [0x05, 0x22, 0x35],
-    LocationName.poison_pond_token_1: [0x03, 0x22, 0x3D],
-    LocationName.poison_pond_token_2: [0x03, 0x22, 0x54],
-    LocationName.poison_pond_bunch_6: [0x05, 0x22, 0x4A],
-    LocationName.poison_pond_bunch_7: [0x05, 0x22, 0x5B],
+    LocationName.poison_pond_bunch_4: [0x05, 0x22, 0x2E],
+    LocationName.poison_pond_bunch_5: [0x05, 0x22, 0x2D],
+    #LocationName.poison_pond_token_1: [0x03, 0x22, 0x3D],
+    #LocationName.poison_pond_token_2: [0x03, 0x22, 0x54],
+    LocationName.poison_pond_bunch_6: [0x05, 0x22, 0x3B],
+    LocationName.poison_pond_bunch_7: [0x05, 0x22, 0x48],
 
     LocationName.mine_cart_madness_token_1: [0x03, 0x27, 0x33],
     LocationName.mine_cart_madness_bunch_1: [0x05, 0x27, 0x0D],

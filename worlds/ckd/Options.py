@@ -34,18 +34,18 @@ class GangplankTokens(Range):
     range_end = 6
     default = 4
 
-class Logic(Choice):
-    """
-    Logic difficulty. May become irrelevant if not a lot of items are added to the item pool.
-    - **Strict**: Ensures everything is reachable as the original devs intended. For beginners or people who want to go out of logic with some tricks.
-    - **Loose**: Reaching locations may require some level of mastery about the game's mechanics.
-    - **Expert**: Locations expects players to be extremely good at the game with minimal amount of abilities. Hard to go out of logic. (NOT IMPLEMENTED YET)
-    """
-    display_name = "Logic Difficulty"
-    option_strict = 0
-    option_loose = 1
-    option_expert = 2
-    default = 0
+#class Logic(Choice):
+#    """
+#    Logic difficulty. May become irrelevant if not a lot of items are added to the item pool.
+#    - **Strict**: Ensures everything is reachable as the original devs intended. For beginners or people who want to go out of logic with some tricks.
+#    - **Loose**: Reaching locations may require some level of mastery about the game's mechanics.
+#    - **Expert**: Locations expects players to be extremely good at the game with minimal amount of abilities. Hard to go out of logic. (NOT IMPLEMENTED YET)
+#    """
+#    display_name = "Logic Difficulty"
+#    option_strict = 0
+#    option_loose = 1
+#    option_expert = 2
+#    default = 0
 
 class RequiredJungleLevels(Range):
     """
@@ -381,7 +381,7 @@ ckd_option_groups = [
         RequiredCavernsLevels,
     ]),
     OptionGroup("Locations", [
-        Logic,
+        #Logic,
         KONGChecks,
         BalloonChecks,
         BananaChecks,
@@ -423,7 +423,7 @@ class CKDOptions(PerGameCommonOptions):
     trap_link: TrapLink
     starting_life_count: StartingLifeCount
     starting_kong: StartingKong
-    logic: Logic
+    #logic: Logic
     gangplank_tokens: GangplankTokens
     required_jungle_levels: RequiredJungleLevels
     required_mines_levels: RequiredMinesLevels
