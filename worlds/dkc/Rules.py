@@ -49,7 +49,7 @@ class DKCRules:
 
     def can_access_jungle(self, state: CollectionState) -> bool:
         return state.has(ItemName.kongo_jungle, self.player)
-
+        
     def can_access_mines(self, state: CollectionState) -> bool:
         return state.has(ItemName.monkey_mines, self.player)
 
@@ -64,10 +64,45 @@ class DKCRules:
 
     def can_access_caverns(self, state: CollectionState) -> bool:
         return state.has(ItemName.chimp_caverns, self.player)
-    
+        
     def can_access_ship(self, state: CollectionState) -> bool:
         return state.has(ItemName.boss_token, self.player, self.world.options.gangplank_tokens.value)
     
+
+    def can_access_jungle_glitched(self, state: CollectionState) -> bool:
+        return self.can_access_jungle(state) or (
+                self.can_access_valley_glitched(state) and self.has_both_kongs(state) and self.can_carry(state) and (
+                self.has_expresso(state) or self.can_roll(state))
+            )
+    
+    def can_access_mines_glitched(self, state: CollectionState) -> bool:
+        return self.can_access_mines(state) or (
+                self.has_both_kongs(state) and self.can_carry(state) and (
+                self.can_access_caverns_glitched(state) or (self.can_access_valley_glitched(state) and self.has_expresso(state)))
+            )
+    
+    def can_access_valley_glitched(self, state: CollectionState) -> bool:
+        return self.can_access_valley(state) or self.can_access_jungle(state)
+
+    def can_access_glacier_glitched(self, state: CollectionState) -> bool:
+        return self.can_access_glacier(state) or (
+                self.can_carry(state) and ((
+                    self.can_access_jungle_glitched(state) and self.has_donkey(state)) or (
+                    self.can_access_caverns_glitched(state) and self.has_both_kongs(state)) or (
+                    self.can_access_valley_glitched(state) and self.has_both_kongs(state) and self.has_expresso(state))
+                )
+            )
+    
+    def can_access_industries_glitched(self, state: CollectionState) -> bool:
+        return self.can_access_industries(state) or (
+                self.can_access_valley_glitched(state) and self.has_both_kongs(state) and self.can_carry(state) and self.has_expresso(state)
+            )
+
+    def can_access_caverns_glitched(self, state: CollectionState) -> bool:
+        return self.can_access_caverns(state) or (
+                self.can_access_valley_glitched(state) and self.has_both_kongs(state) and self.can_carry(state) and self.has_expresso(state)
+            )
+
     def can_access_very_gnawty(self, state: CollectionState) -> bool:
         return state.has(EventName.jungle_level, self.player, self.world.options.required_jungle_levels.value)
     
@@ -145,6 +180,24 @@ class DKCRules:
     
     def set_dkc_rules(self) -> None:
         multiworld = self.world.multiworld
+
+        if self.world.options.glitched_world_access:
+            self.connection_rules.update(
+                {
+                    f"{RegionName.dk_isle} -> {RegionName.kongo_jungle}":
+                        self.can_access_jungle_glitched,
+                    f"{RegionName.dk_isle} -> {RegionName.monkey_mines}":
+                        self.can_access_mines_glitched,
+                    f"{RegionName.dk_isle} -> {RegionName.vine_valley}":
+                        self.can_access_valley_glitched,
+                    f"{RegionName.dk_isle} -> {RegionName.gorilla_glacier}":
+                        self.can_access_glacier_glitched,
+                    f"{RegionName.dk_isle} -> {RegionName.kremkroc_industries}":
+                        self.can_access_industries_glitched,
+                    f"{RegionName.dk_isle} -> {RegionName.chimp_caverns}":
+                        self.can_access_caverns_glitched,
+                }
+            )
 
         for entrance_name, rule in self.connection_rules.items():
             entrance = multiworld.get_entrance(entrance_name, self.player)

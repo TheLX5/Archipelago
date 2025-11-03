@@ -242,6 +242,7 @@ class DKCWorld(World):
         slot_data["level_connections"] = self.level_connections
         slot_data["boss_connections"] = self.boss_connections
         slot_data["logic"] = self.options.logic.value
+        slot_data["glitched_world_access"] = self.options.glitched_world_access.value
         slot_data["starting_kong"] = self.options.starting_kong.value
         slot_data["gangplank_tokens"] = self.options.gangplank_tokens.value
         slot_data["starting_world"] = self.options.starting_world.value
@@ -289,6 +290,7 @@ class DKCWorld(World):
                 self.level_connections = passthrough["level_connections"]
                 self.boss_connections = passthrough["boss_connections"]
                 self.options.logic.value = passthrough["logic"]
+                self.options.glitched_world_access.value = passthrough["glitched_world_access"]
                 self.options.starting_kong.value = passthrough["starting_kong"]
                 self.options.gangplank_tokens.value = passthrough["gangplank_tokens"]
                 self.options.starting_world.value = passthrough["starting_world"]

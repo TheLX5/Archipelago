@@ -47,6 +47,12 @@ class Logic(Choice):
     option_expert = 2
     default = 0
 
+class GlitchedWorldAccess(Toggle):
+    """
+    Level warping across worlds via glitches will be in logic
+    """
+    display_name = "Glitched World Access"
+
 class RequiredJungleLevels(Range):
     """
     How many levels in Kongo Jungle need to be cleared to fight Very Gnawty
@@ -382,6 +388,7 @@ dkc_option_groups = [
     ]),
     OptionGroup("Locations", [
         Logic,
+        GlitchedWorldAccess,
         KONGChecks,
         BalloonChecks,
         BananaChecks,
@@ -424,6 +431,7 @@ class DKCOptions(PerGameCommonOptions):
     starting_life_count: StartingLifeCount
     starting_kong: StartingKong
     logic: Logic
+    glitched_world_access: GlitchedWorldAccess
     gangplank_tokens: GangplankTokens
     required_jungle_levels: RequiredJungleLevels
     required_mines_levels: RequiredMinesLevels
