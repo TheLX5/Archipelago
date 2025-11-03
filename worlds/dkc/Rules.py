@@ -794,9 +794,9 @@ class DKCStrictRules(DKCRules):
                 self.has_tires,
             EventName.rope_bridge_rumble_clear:
                 self.has_tires,
-            LocationName.rope_bridge_rumble_bonus_2:
-                self.has_kannons,
             LocationName.rope_bridge_rumble_bonus_1:
+                lambda state: self.has_tires(state) and self.has_kannons(state),
+            LocationName.rope_bridge_rumble_bonus_2:
                 lambda state: self.has_tires(state) and self.has_kannons(state),
             LocationName.rope_bridge_rumble_kong:
                 lambda state: self.has_tires(state) and self.can_roll(state),
@@ -1643,9 +1643,9 @@ class DKCLooseRules(DKCRules):
                 self.has_tires,
             EventName.rope_bridge_rumble_clear:
                 self.has_tires,
-            LocationName.rope_bridge_rumble_bonus_2:
-                self.has_kannons,
             LocationName.rope_bridge_rumble_bonus_1:
+                self.has_kannons,
+            LocationName.rope_bridge_rumble_bonus_2:
                 lambda state: self.has_tires(state) and self.has_kannons(state),
             LocationName.rope_bridge_rumble_kong:
                 lambda state: self.has_tires(state) and self.can_roll(state),
@@ -2528,9 +2528,9 @@ class DKCExpertRules(DKCRules):
                 self.has_tires,
             EventName.rope_bridge_rumble_clear:
                 self.has_tires,
-            LocationName.rope_bridge_rumble_bonus_2:
-                self.has_kannons,
             LocationName.rope_bridge_rumble_bonus_1:
+                self.has_kannons,
+            LocationName.rope_bridge_rumble_bonus_2:
                 lambda state: self.has_tires(state) and self.has_kannons(state),
             LocationName.rope_bridge_rumble_kong:
                 lambda state: self.has_tires(state) and self.can_roll(state),
