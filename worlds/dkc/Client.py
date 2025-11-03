@@ -374,45 +374,44 @@ class DKCSNIClient(SNIClient):
         barrels = await snes_read(ctx, DKC_BARRELS, 0x02)
         if unlocked_kongs is None or barrels is None:
             return
+    
+        barrels = int.from_bytes(barrels, "little")
         
-        if unlocked_kongs[0] == 0x03:
-            barrels = int.from_bytes(barrels, "little")
-            
-            if self.barrel_request == "place_request":
-                self.barrel_request_tag = f"dkc2-dkbarrel-{ctx.team}-{ctx.slot}-{random.randint(0, 0xFFFFFFFF)}"
-                value = DK_BARREL_BANANA_COST * DKC_EXCHANGE_RATE
-                await ctx.send_msgs([{ 
-                    "cmd": "Set", 
-                    "key": f"EnergyLink{ctx.team}", 
-                    "slot": ctx.slot,
-                    "tag": self.barrel_request_tag,
-                    "default": 0,
-                    "want_reply": True,
-                    "operations":
-                        [{"operation": "add", "value": -value},
-                        {"operation": "max", "value": 0}],
-                }])
-                self.barrel_request = "pending"
+        if self.barrel_request == "place_request":
+            self.barrel_request_tag = f"dkc2-dkbarrel-{ctx.team}-{ctx.slot}-{random.randint(0, 0xFFFFFFFF)}"
+            value = DK_BARREL_BANANA_COST * DKC_EXCHANGE_RATE
+            await ctx.send_msgs([{ 
+                "cmd": "Set", 
+                "key": f"EnergyLink{ctx.team}", 
+                "slot": ctx.slot,
+                "tag": self.barrel_request_tag,
+                "default": 0,
+                "want_reply": True,
+                "operations":
+                    [{"operation": "add", "value": -value},
+                    {"operation": "max", "value": 0}],
+            }])
+            self.barrel_request = "pending"
 
-            elif self.barrel_request == "successful":
-                barrels += 1
-                barrels &= 0x00FF
-                snes_buffered_write(ctx, DKC_BARRELS, bytes([barrels]))
-                self.barrel_request = ""
-                logger.info(f"Delivered DK Barrel! You have {barrels} barrels pending to be actually delivered in game.")
-            
-            elif self.barrel_request == "not_enough_funds":
-                await ctx.send_msgs([{
-                    "cmd": "Set", 
-                    "key": f"EnergyLink{ctx.team}", 
-                    "slot": ctx.slot,
-                    "default": 0,
-                    "operations":
-                        [{"operation": "add", "value": self.barrel_request_refund}],
-                }])
-                self.barrel_request_refund = 0
-                self.barrel_request = ""
-                logger.info(f"Not enough bananas to summon a barrel! You need at least {DK_BARREL_BANANA_COST} bananas.")
+        elif self.barrel_request == "successful":
+            barrels += 1
+            barrels &= 0x00FF
+            snes_buffered_write(ctx, DKC_BARRELS, bytes([barrels]))
+            self.barrel_request = ""
+            logger.info(f"Delivered DK Barrel! You have {barrels} barrels pending to be actually delivered in game.")
+        
+        elif self.barrel_request == "not_enough_funds":
+            await ctx.send_msgs([{
+                "cmd": "Set", 
+                "key": f"EnergyLink{ctx.team}", 
+                "slot": ctx.slot,
+                "default": 0,
+                "operations":
+                    [{"operation": "add", "value": self.barrel_request_refund}],
+            }])
+            self.barrel_request_refund = 0
+            self.barrel_request = ""
+            logger.info(f"Not enough bananas to summon a barrel! You need at least {DK_BARREL_BANANA_COST} bananas.")
 
         await snes_flush_writes(ctx)
 
