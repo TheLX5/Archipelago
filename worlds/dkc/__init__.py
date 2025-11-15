@@ -66,7 +66,7 @@ class DKCWorld(World):
     options_dataclass = DKCOptions
     options: DKCOptions
     
-    required_client_version = (0, 6, 0)
+    required_client_version = (0, 6, 3)
     
     using_ut: bool
     ut_can_gen_without_yaml = True
