@@ -4,10 +4,10 @@ import settings
 import threading
 import pkgutil
 
-from BaseClasses import MultiWorld, Tutorial, ItemClassification
+from BaseClasses import MultiWorld, Tutorial, ItemClassification, CollectionState
 from worlds.AutoWorld import World, WebWorld
-from .Items import CKDItem, item_table, misc_table, item_groups, STARTING_ID
-from .Locations import setup_locations, all_locations, location_groups, stage_balloons, stage_bunches, stage_tokens, stage_kong
+from .Items import CKDItem, item_table, misc_table, item_groups, STARTING_ID, option_name_to_world_name, items_that_open_checks
+from .Locations import setup_locations, all_locations, location_groups
 from .Regions import create_regions, connect_regions
 from .Names import ItemName, LocationName
 from .Options import CKDOptions, StartingKong, ckd_option_groups
@@ -98,88 +98,106 @@ class CKDWorld(World):
        
 
     def set_rules(self):
-        # There's no logic levels for now. Force Strict upon everyone, even UT.
+        # Only one logic rule
         CKDStrictRules(self).set_ckd_rules()
-        return
-        logic = self.options.logic
-        if logic == Logic.option_loose:
-            CKDLooseRules(self).set_ckd_rules()
-        elif logic == Logic.option_strict:
-            CKDStrictRules(self).set_ckd_rules()
-        elif logic == Logic.option_expert:
-            CKDExpertRules(self).set_ckd_rules()
-        else:
-            raise ValueError(f"Somehow you have a logic option that's currently invalid."
-                             f" {logic} for {self.multiworld.get_player_name(self.player)}")
+        
+        if not self.using_ut:
+            # Test if sphere 1 has at least 2 reachable locations
+            state = CollectionState(self.multiworld)
+            initial_world = option_name_to_world_name[self.options.starting_world.current_option_name]
+            available_items = items_that_open_checks[initial_world].copy()
+            self.random.shuffle(available_items)
+            available_items.append(initial_world)
+            loc_count = 0
+            while loc_count < 2:
+                if len(available_items) == 0 and initial_world != ItemName.kongo_jungle:
+                    available_items.append(ItemName.kongo_jungle)
+                selected_item = available_items.pop()
+                item = self.create_item(selected_item)
+                state.collect(item)
+                loc_count = self.test_starting_world(state)
+                self.multiworld.push_precollected(item)
+            
+            self.create_item_late()
 
-        # Universal Tracker: If we're using UT, scan the rules again to build "glitched logic" during the regen
-        if self.using_ut:
-            if logic == Logic.option_strict:
-                CKDLooseRules(self).set_ckd_glitched_rules()
-            elif logic == Logic.option_loose:
-                CKDExpertRules(self).set_ckd_glitched_rules()
 
+    def test_starting_world(self, state: CollectionState):
+        loc_count = 0
+        state.update_reachable_regions(self.player)
+        regions = state.reachable_regions[self.player]
+        for region in regions:
+            for location in region.locations:
+                if location.can_reach(state) and "(Event)" not in location.name:
+                    loc_count += 1
+
+        return loc_count
+    
  
     def create_items(self) -> None:
-        itempool: List[CKDItem] = []
+        return 
+    
 
-        total_required_locations = 106
+    def create_item_late(self) -> None:
+        self.itempool: List[CKDItem] = []
+
+        self.total_required_locations = 106
         if self.options.kong_checks:
-            total_required_locations += len(stage_kong.keys())
+            self.total_required_locations += 33
         if self.options.token_checks:
-            total_required_locations += len(stage_tokens.keys())
+            self.total_required_locations += 29
         if self.options.balloon_checks:
-            total_required_locations += len(stage_balloons.keys())
+            self.total_required_locations += 12
         if self.options.banana_checks:
-            total_required_locations += len(stage_bunches.keys())
+            self.total_required_locations += 183
 
         # Set starting kong
         if self.options.starting_kong == StartingKong.option_donkey:
             self.multiworld.push_precollected(self.create_item(ItemName.donkey))
-            itempool += [self.create_item(ItemName.diddy)]
+            self.itempool += [self.create_item(ItemName.diddy)]
         elif self.options.starting_kong == StartingKong.option_diddy:
             self.multiworld.push_precollected(self.create_item(ItemName.diddy))
-            itempool += [self.create_item(ItemName.donkey)]
+            self.itempool += [self.create_item(ItemName.donkey)]
         elif self.options.starting_kong == StartingKong.option_both:
             self.multiworld.push_precollected(self.create_item(ItemName.donkey))
             self.multiworld.push_precollected(self.create_item(ItemName.diddy))
 
-        starting_world = self.options.starting_world.current_option_name 
+        # Submit item pool
         for world_ in item_groups["Worlds"]:
-            if starting_world in world_:
-                self.multiworld.push_precollected(self.create_item(world_))
+            if world_ in self.multiworld.precollected_items[self.player]:
+                continue
             else:
-                itempool.append(self.create_item(world_))
-
-        # Add progression items
+                self.itempool.append(self.create_item(world_))
+                
         for item in item_groups["Abilities"]:
-            if item in self.options.shuffle_abilities.value:
+            if item in self.multiworld.precollected_items[self.player]:
+                continue
+            elif item in self.options.shuffle_abilities.value:
                 classification = False
-                if self.options.banana_checks and item == ItemName.slap:
+                if self.options.banana_checks.value and item == ItemName.slap:
                     classification = ItemClassification.progression | ItemClassification.useful
-                itempool += [self.create_item(item, classification)]
+                self.itempool += [self.create_item(item, classification)]
             else:
                 self.multiworld.push_precollected(self.create_item(item))
 
         for item in item_groups["Animals"]:
             if item in self.options.shuffle_animals.value:
-                itempool += [self.create_item(item)]
+                self.itempool += [self.create_item(item)]
             else:
                 self.multiworld.push_precollected(self.create_item(item))
                 
         for item in item_groups["Objects"]:
             if item in self.options.shuffle_objects.value:
-                itempool += [self.create_item(item)]
+                self.itempool += [self.create_item(item)]
             else:
                 self.multiworld.push_precollected(self.create_item(item))
 
         if self.options.energy_link:
-            itempool += [self.create_item(ItemName.extractinator) for _ in range(3)]
+            self.itempool += [self.create_item(ItemName.extractinator) for _ in range(3)]
 
-        itempool += [self.create_item(ItemName.radar)]
+        self.itempool += [self.create_item(ItemName.radar)]
 
         # Add trap items into the pool
-        junk_count = total_required_locations - len(itempool)
+        junk_count = self.total_required_locations - len(self.itempool)
         trap_weights = []
         trap_weights += ([ItemName.jump_trap] * self.options.jump_trap_weight.value)
         trap_weights += ([ItemName.nut_trap] * self.options.nut_trap_weight.value)
@@ -196,7 +214,7 @@ class CKDWorld(World):
             trap_item = self.random.choice(trap_weights)
             trap_pool.append(self.create_item(trap_item))
         
-        itempool += trap_pool
+        self.itempool += trap_pool
 
         # Add junk items into the pool
         junk_weights = []
@@ -208,7 +226,7 @@ class CKDWorld(World):
             junk_item = self.random.choice(junk_weights)
             junk_pool.append(self.create_item(junk_item))
 
-        itempool += junk_pool
+        self.itempool += junk_pool
 
         boss_locations = [
             LocationName.defeated_gnawty_1,
@@ -221,8 +239,7 @@ class CKDWorld(World):
         for location in boss_locations:
             self.multiworld.get_location(location, self.player).place_locked_item(self.create_item(ItemName.boss_token))
 
-        # Finish
-        self.multiworld.itempool += itempool
+        self.multiworld.itempool += self.itempool
 
 
     def create_item(self, name: str, force_classification=False) -> CKDItem:

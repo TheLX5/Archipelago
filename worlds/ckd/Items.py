@@ -144,6 +144,46 @@ item_groups = {
     }
 }
 
+option_name_to_world_name = {
+    "Kongo Jungle": ItemName.kongo_jungle,
+    "Monkey Mines": ItemName.monkey_mines,
+    "Vine Valley": ItemName.vine_valley,
+    "Gorilla Glacier": ItemName.gorilla_glacier,
+    "Kremkroc Industries": ItemName.kremkroc_industries,
+    "Chimp Caverns": ItemName.chimp_caverns,
+}
+
+items_that_open_checks = {
+    ItemName.kongo_jungle: [
+        ItemName.rambi,
+        ItemName.swim,
+    ],
+    ItemName.monkey_mines: [
+        ItemName.carry,
+        ItemName.kannons,
+        ItemName.tires,
+    ],
+    ItemName.vine_valley: [
+        ItemName.climb,
+        ItemName.kannons,
+        ItemName.expresso,
+    ],
+    ItemName.gorilla_glacier: [
+        ItemName.swim,
+        ItemName.kannons,
+        ItemName.expresso,
+    ],
+    ItemName.kremkroc_industries: [
+        ItemName.climb,
+        ItemName.minecart,
+        ItemName.platforms,
+    ],
+    ItemName.chimp_caverns: [
+        ItemName.platforms,
+        ItemName.climb,
+    ],
+}
+
 item_table = {
     **mcguffin_table,
     **worlds_table,
