@@ -86,6 +86,7 @@ trap_data = {
     STARTING_ID + 0x0086: [0x44, 0x63], # Ice Trap
     STARTING_ID + 0x0032: [0x24, 0x6C], # Instant DK Barrel (not a trap, but this system works better lol)
     STARTING_ID + 0x0033: [0x22, 0x2F], # Banana Extractinator (not a trap, but this system works better lol)
+    STARTING_ID + 0x0034: [0x11, 0x2F], # Cache Radar (not a trap, but this system works better lol)
 }
 
 letter_addr = {

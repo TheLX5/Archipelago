@@ -176,6 +176,8 @@ class CKDWorld(World):
         if self.options.energy_link:
             itempool += [self.create_item(ItemName.extractinator) for _ in range(3)]
 
+        itempool += [self.create_item(ItemName.radar)]
+
         # Add trap items into the pool
         junk_count = total_required_locations - len(itempool)
         trap_weights = []
