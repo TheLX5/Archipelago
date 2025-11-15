@@ -54,6 +54,7 @@ misc_table = {
 
 extra_table = {
     ItemName.extractinator:         ItemData(STARTING_ID + 0x0033, ItemClassification.useful),
+    ItemName.radar:                 ItemData(STARTING_ID + 0x0034, ItemClassification.useful),
     ItemName.glitched:              ItemData(None, ItemClassification.progression_skip_balancing),
 }
 

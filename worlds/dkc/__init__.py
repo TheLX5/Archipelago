@@ -152,7 +152,7 @@ class DKCWorld(World):
         for item in item_groups["Abilities"]:
             if item in self.options.shuffle_abilities.value:
                 classification = False
-                if self.options.banana_checks and item == ItemName.slap:
+                if self.options.banana_checks.value and item == ItemName.slap:
                     classification = ItemClassification.progression | ItemClassification.useful
                 itempool += [self.create_item(item, classification)]
             else:
@@ -172,6 +172,8 @@ class DKCWorld(World):
 
         if self.options.energy_link:
             itempool += [self.create_item(ItemName.extractinator) for _ in range(3)]
+
+        itempool += [self.create_item(ItemName.radar)]
 
         # Add trap items into the pool
         junk_count = total_required_locations - len(itempool)

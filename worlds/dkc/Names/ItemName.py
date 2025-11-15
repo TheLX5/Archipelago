@@ -41,8 +41,9 @@ sticky_floor_trap = "Sticky Floor Trap"
 ice_trap = "Ice Trap"
 stun_trap = "Stun Trap"
 
-# Energy Link
+# Misc
 extractinator = "Banana Extractinator"
+radar = "Cache Detector"
 
 # Tracker
 glitched = "UT's Glitched Item"
