@@ -138,7 +138,7 @@ class CKDWorld(World):
     
 
     def create_item_late(self) -> None:
-        self.itempool: List[CKDItem] = []
+        itempool: List[CKDItem] = []
 
         self.total_required_locations = 106
         if self.options.kong_checks:
@@ -153,10 +153,10 @@ class CKDWorld(World):
         # Set starting kong
         if self.options.starting_kong == StartingKong.option_donkey:
             self.multiworld.push_precollected(self.create_item(ItemName.donkey))
-            self.itempool += [self.create_item(ItemName.diddy)]
+            itempool += [self.create_item(ItemName.diddy)]
         elif self.options.starting_kong == StartingKong.option_diddy:
             self.multiworld.push_precollected(self.create_item(ItemName.diddy))
-            self.itempool += [self.create_item(ItemName.donkey)]
+            itempool += [self.create_item(ItemName.donkey)]
         elif self.options.starting_kong == StartingKong.option_both:
             self.multiworld.push_precollected(self.create_item(ItemName.donkey))
             self.multiworld.push_precollected(self.create_item(ItemName.diddy))
@@ -166,7 +166,7 @@ class CKDWorld(World):
             if world_ in self.multiworld.precollected_items[self.player]:
                 continue
             else:
-                self.itempool.append(self.create_item(world_))
+                itempool.append(self.create_item(world_))
                 
         for item in item_groups["Abilities"]:
             if item in self.multiworld.precollected_items[self.player]:
@@ -175,29 +175,29 @@ class CKDWorld(World):
                 classification = False
                 if self.options.banana_checks.value and item == ItemName.slap:
                     classification = ItemClassification.progression | ItemClassification.useful
-                self.itempool += [self.create_item(item, classification)]
+                itempool += [self.create_item(item, classification)]
             else:
                 self.multiworld.push_precollected(self.create_item(item))
 
         for item in item_groups["Animals"]:
             if item in self.options.shuffle_animals.value:
-                self.itempool += [self.create_item(item)]
+                itempool += [self.create_item(item)]
             else:
                 self.multiworld.push_precollected(self.create_item(item))
                 
         for item in item_groups["Objects"]:
             if item in self.options.shuffle_objects.value:
-                self.itempool += [self.create_item(item)]
+                itempool += [self.create_item(item)]
             else:
                 self.multiworld.push_precollected(self.create_item(item))
 
         if self.options.energy_link:
-            self.itempool += [self.create_item(ItemName.extractinator) for _ in range(3)]
+            itempool += [self.create_item(ItemName.extractinator) for _ in range(3)]
 
-        self.itempool += [self.create_item(ItemName.radar)]
+        itempool += [self.create_item(ItemName.radar)]
 
         # Add trap items into the pool
-        junk_count = self.total_required_locations - len(self.itempool)
+        junk_count = self.total_required_locations - len(itempool)
         trap_weights = []
         trap_weights += ([ItemName.jump_trap] * self.options.jump_trap_weight.value)
         trap_weights += ([ItemName.nut_trap] * self.options.nut_trap_weight.value)
@@ -214,7 +214,7 @@ class CKDWorld(World):
             trap_item = self.random.choice(trap_weights)
             trap_pool.append(self.create_item(trap_item))
         
-        self.itempool += trap_pool
+        itempool += trap_pool
 
         # Add junk items into the pool
         junk_weights = []
@@ -226,7 +226,7 @@ class CKDWorld(World):
             junk_item = self.random.choice(junk_weights)
             junk_pool.append(self.create_item(junk_item))
 
-        self.itempool += junk_pool
+        itempool += junk_pool
 
         boss_locations = [
             LocationName.defeated_gnawty_1,
@@ -239,7 +239,7 @@ class CKDWorld(World):
         for location in boss_locations:
             self.multiworld.get_location(location, self.player).place_locked_item(self.create_item(ItemName.boss_token))
 
-        self.multiworld.itempool += self.itempool
+        self.multiworld.itempool += itempool
 
 
     def create_item(self, name: str, force_classification=False) -> CKDItem:
