@@ -430,9 +430,9 @@ class WaffleSNIClient(SNIClient):
                         loc_data &= 0x0FFF
                         if loc_data == current_sublevel_value or loc_data + 0x01 == current_sublevel_value:
                             new_checks.append(loc_id)
+                    # Wing rooms 
                     elif room_type == 0x02:
-                        loc_data &= 0x00FF
-                        if loc_data == current_sublevel_value:
+                        if loc_data & 0x00FF == current_sublevel_value & 0x00FF:
                             new_checks.append(loc_id)
                     else:
                         continue
