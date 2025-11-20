@@ -94,11 +94,11 @@ class Hidden1UpChecks(Toggle):
     display_name = "Hidden 1-Up Checks"
 
 
-class BonusBlockChecks(Toggle):
+class StarBlockChecks(Toggle):
     """
-    Whether collecting a 1-Up mushroom from a Bonus Block in a level will grant a check
+    Whether collecting a prize from a Star Block in a level will grant a check
     """
-    display_name = "Bonus Block Checks"
+    display_name = "Star Block Checks"
 
 
 class MidwayChecks(Toggle):
@@ -106,6 +106,13 @@ class MidwayChecks(Toggle):
     Whether collecting a Midway Point in a level will grant a check
     """
     display_name = "Midway Point Checks"
+
+
+class RoomChecks(Toggle):
+    """
+    Whether visiting a room in levels will grant a check
+    """
+    display_name = "Room Checks"
 
 
 class BlockChecks(OptionSet):
@@ -119,13 +126,13 @@ class BlockChecks(OptionSet):
     """
     display_name = "Block Checks"
     default = {
-        #"Coin Blocks",
+        "Coin Blocks",
         "Item Blocks",
-        #"Yellow Switch Palace Blocks",
-        #"Green Switch Palace Blocks",
-        #"Invisible Blocks",
-        #"P-Switch Blocks",
-        #"Flying Blocks",
+        "Yellow Switch Palace Blocks",
+        "Green Switch Palace Blocks",
+        "Invisible Blocks",
+        "P-Switch Blocks",
+        "Flying Blocks",
     }
     valid_keys = {
         "Coin Blocks",
@@ -244,13 +251,13 @@ class MapTransitionShuffle(Toggle):
     display_name = "Map Transition Shuffle"
     
 
-class ExcludeSpecialZone(Toggle):
-    """
-    If active, this option will prevent any progression items from being placed in Special Zone levels.
-
-    Additionally, if Level Shuffle is active, Special Zone levels will not be shuffled away from their vanilla tiles.
-    """
-    display_name = "Exclude Special Zone"
+#class ExcludeSpecialZone(Toggle):
+#    """
+#    If active, this option will prevent any progression items from being placed in Special Zone levels.
+#
+#    Additionally, if Level Shuffle is active, Special Zone levels will not be shuffled away from their vanilla tiles.
+#    """
+#    display_name = "Exclude Special Zone"
 
 
 class SwapDonutGhostHouseExits(DefaultOnToggle):
@@ -290,6 +297,52 @@ class EnemyShuffle(Toggle):
     Shuffles around enemies.
     """
     display_name = "Enemy Shuffle"
+
+
+class AbilityItemShuffle(OptionSet):
+    """
+    Which abilities and items will be added as items in the item pool
+    If an ability is not present in the list they will be treated as unlocked from the start
+    """
+    display_name = "Ability Shuffle"
+    default = {
+        "Run",
+        "Carry",
+        "Swim",
+        "Spin Jump",
+        "Climb",
+        "P-Balloon",
+        "Yoshi",
+        "Powerups",
+        "Super Star",
+        "P-Switch",
+        "Item Box",
+        "Midway Points",
+        "Yellow Switch Palace",
+        "Green Switch Palace",
+        "Red Switch Palace",
+        "Blue Switch Palace",
+        "Special World",
+    }
+    valid_keys = {
+        "Run",
+        "Carry",
+        "Swim",
+        "Spin Jump",
+        "Climb",
+        "P-Balloon",
+        "Yoshi",
+        "Powerups",
+        "Super Star",
+        "P-Switch",
+        "Item Box",
+        "Midway Points",
+        "Yellow Switch Palace",
+        "Green Switch Palace",
+        "Red Switch Palace",
+        "Blue Switch Palace",
+        "Special World",
+    }
 
 
 class GameLogicDifficulty(Choice):
@@ -561,15 +614,17 @@ waffle_option_groups = [
         PercentageOfYoshiEggs,
     ]),
     OptionGroup("Logic", [
+        AbilityItemShuffle,
         GameLogicDifficulty,
         InventoryYoshiLogic,
     ]),
-    OptionGroup("Sanity Options", [
+    OptionGroup("Location Options", [
         DragonCoinChecks,
         MoonChecks,
         Hidden1UpChecks,
-        BonusBlockChecks,
+        StarBlockChecks,
         MidwayChecks,
+        RoomChecks,
         BlockChecks,
     ]),
     OptionGroup("Level Shuffling", [
@@ -577,7 +632,7 @@ waffle_option_groups = [
         LevelEffects,
         MapTeleportShuffle,
         MapTransitionShuffle,
-        ExcludeSpecialZone,
+        #ExcludeSpecialZone,
         EnemyShuffle,
         BowserCastleDoors,
         BowserCastleRooms,
@@ -620,6 +675,7 @@ class WaffleOptions(PerGameCommonOptions):
     ring_link: RingLink
     trap_link: TrapLink
     energy_link: EnergyLink
+    ability_shuffle: AbilityItemShuffle
     game_logic_difficulty: GameLogicDifficulty
     inventory_yoshi_logic: InventoryYoshiLogic
     goal: Goal
@@ -629,8 +685,9 @@ class WaffleOptions(PerGameCommonOptions):
     dragon_coin_checks: DragonCoinChecks
     moon_checks: MoonChecks
     hidden_1up_checks: Hidden1UpChecks
-    bonus_block_checks: BonusBlockChecks
+    star_block_checks: StarBlockChecks
     midway_point_checks: MidwayChecks
+    room_checks: RoomChecks
     block_checks: BlockChecks
     bowser_castle_doors: BowserCastleDoors
     bowser_castle_rooms: BowserCastleRooms
@@ -638,7 +695,7 @@ class WaffleOptions(PerGameCommonOptions):
     level_shuffle: LevelShuffle
     map_teleport_shuffle: MapTeleportShuffle
     map_transition_shuffle: MapTransitionShuffle
-    exclude_special_zone: ExcludeSpecialZone
+    #exclude_special_zone: ExcludeSpecialZone
     boss_shuffle: BossShuffle
     enemy_shuffle: EnemyShuffle
     swap_donut_gh_exits: SwapDonutGhostHouseExits

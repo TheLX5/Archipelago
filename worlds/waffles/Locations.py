@@ -24,7 +24,7 @@ MOON = 0x400000
 HIDDEN = 0x500000
 CHECKPOINT = 0x600000
 PRIZE = 0x700000
-BONUS = 0x800000
+ROOM = 0x800000
 ENEMY = 0x900000
 BLOCK = 0xA00000
 GOAL = 0xF00000
@@ -312,11 +312,202 @@ hidden_1ups_location_table = {
     LocationName.special_zone_1_hidden_1up: HIDDEN | SZ1,
 }
 
-bonus_block_location_table = {
-    LocationName.yoshis_island_3_bonus_block: PRIZE | YI3,
-    LocationName.donut_plains_3_bonus_block: PRIZE | DP3,
-    LocationName.butter_bridge_1_bonus_block: PRIZE | BB1,
-    LocationName.chocolate_island_3_bonus_block: PRIZE | CI3,
+prize_location_table = {
+    LocationName.yoshis_island_3_prize: PRIZE | YI3,
+    LocationName.donut_plains_3_prize: PRIZE | DP3,
+    LocationName.butter_bridge_1_prize: PRIZE | BB1,
+    LocationName.chocolate_island_3_prize: PRIZE | CI3,
+}
+
+room_location_table = {
+    LocationName.yoshis_island_1_room_1: ROOM | YI1 | 0x0105,
+    LocationName.yoshis_island_1_room_2: ROOM | YI1 | 0x01CB,
+    LocationName.yoshis_island_2_room_1: ROOM | YI2 | 0x0106,
+    LocationName.yoshis_island_2_room_2: ROOM | YI2 | 0x01CA,
+    LocationName.yoshis_island_3_room_1: ROOM | YI3 | 0x0103,
+    LocationName.yoshis_island_3_room_2: ROOM | YI3 | 0x01FD,
+    LocationName.yoshis_island_4_room_1: ROOM | YI4 | 0x0102,
+    LocationName.yoshis_island_4_room_2: ROOM | YI4 | 0x01BE,
+    LocationName.yoshis_island_4_room_3: ROOM | YI4 | 0x01FF,
+    LocationName.yoshis_island_castle_room_1: ROOM | YIC | 0x0101,
+    LocationName.yoshis_island_castle_room_2: ROOM | YIC | 0x01FC,
+    #LocationName.yoshis_island_castle_room_3: ROOM | YIC | 0x01F6,
+    LocationName.yellow_switch_palace_room_1: ROOM | YSP | 0x0014,
+    LocationName.yellow_switch_palace_room_2: ROOM | YSP | 0x00CA,
+
+    LocationName.donut_plains_1_room_1: ROOM | DP1 | 0x0015,
+    LocationName.donut_plains_1_room_2: ROOM | DP1 | 0x00FD,
+    LocationName.donut_plains_1_room_3: ROOM | DP1 | 0x00E3,
+    LocationName.donut_plains_2_room_1: ROOM | DP2 | 0x0009,
+    LocationName.donut_plains_2_room_2: ROOM | DP2 | 0x00E9,
+    LocationName.donut_plains_2_room_3: ROOM | DP2 | 0x00FF,
+    LocationName.donut_plains_3_room_1: ROOM | DP3 | 0x0005,
+    LocationName.donut_plains_3_room_2: ROOM | DP3 | 0x00F4,
+    LocationName.donut_plains_4_room_1: ROOM | DP4 | 0x0006,
+    LocationName.donut_plains_4_room_2: ROOM | DP4 | 0x00C3,
+    LocationName.donut_plains_4_room_3: ROOM | DP4 | 0x00D2,
+    LocationName.donut_secret_1_room_1: ROOM | DS1 | 0x000A,
+    LocationName.donut_secret_1_room_2: ROOM | DS1 | 0x00C2,
+    LocationName.donut_secret_2_room_1: ROOM | DS2 | 0x010B,
+    LocationName.donut_secret_2_room_2: ROOM | DS2 | 0x01C6,
+    LocationName.donut_ghost_house_room_1: ROOM | DGH | 0x0004,
+    LocationName.donut_ghost_house_room_2: ROOM | DGH | 0x00C4,
+    LocationName.donut_ghost_house_room_3: ROOM | DGH | 0x00F9,
+    LocationName.donut_ghost_house_room_4: ROOM | DGH | 0x00FE,
+    LocationName.donut_ghost_house_room_5: ROOM | DGH | 0x00FA,
+    LocationName.donut_ghost_house_room_6: ROOM | DGH | 0x00EB,
+    LocationName.donut_secret_house_room_1: ROOM | DSH | 0x0013,
+    LocationName.donut_secret_house_room_2: ROOM | DSH | 0x00ED,
+    LocationName.donut_secret_house_room_3: ROOM | DSH | 0x00F1,
+    LocationName.donut_secret_house_room_4: ROOM | DSH | 0x00F0,
+    LocationName.donut_secret_house_room_5: ROOM | DSH | 0x00E4,
+    LocationName.donut_plains_castle_room_1: ROOM | DPC | 0x0007,
+    LocationName.donut_plains_castle_room_2: ROOM | DPC | 0x00E6,
+    LocationName.donut_plains_castle_room_3: ROOM | DPC | 0x00E8,
+    LocationName.donut_plains_castle_room_4: ROOM | DPC | 0x00E7,
+    #LocationName.donut_plains_castle_room_5: ROOM | DPC | 0x00E5,
+    LocationName.green_switch_palace_room_1: ROOM | GSP | 0x0008,
+    LocationName.green_switch_palace_room_2: ROOM | GSP | 0x00C9,
+
+    LocationName.vanilla_dome_1_room_1: ROOM | VD1 | 0x011A,
+    LocationName.vanilla_dome_1_room_2: ROOM | VD1 | 0x01EF,
+    LocationName.vanilla_dome_2_room_1: ROOM | VD2 | 0x0118,
+    LocationName.vanilla_dome_2_room_2: ROOM | VD2 | 0x01C3,
+    LocationName.vanilla_dome_3_room_1: ROOM | VD3 | 0x010A,
+    LocationName.vanilla_dome_3_room_2: ROOM | VD3 | 0x01F7,
+    LocationName.vanilla_dome_3_room_3: ROOM | VD3 | 0x01C2,
+    LocationName.vanilla_dome_4_room_1: ROOM | VD4 | 0x0119,
+    LocationName.vanilla_dome_4_room_2: ROOM | VD4 | 0x01F5,
+    LocationName.vanilla_secret_1_room_1: ROOM | VS1 | 0x0109,
+    LocationName.vanilla_secret_1_room_2: ROOM | VS1 | 0x01F1,
+    LocationName.vanilla_secret_1_room_3: ROOM | VS1 | 0x01F0,
+    LocationName.vanilla_secret_2_room_1: ROOM | VS2 | 0x0001,
+    LocationName.vanilla_secret_2_room_2: ROOM | VS2 | 0x00D8,
+    LocationName.vanilla_secret_3_room_1: ROOM | VS3 | 0x0002,
+    LocationName.vanilla_secret_3_room_2: ROOM | VS3 | 0x00CB,
+    LocationName.vanilla_ghost_house_room_1: ROOM | VDH | 0x0107,
+    LocationName.vanilla_ghost_house_room_2: ROOM | VDH | 0x01EA,
+    LocationName.vanilla_ghost_house_room_3: ROOM | VDH | 0x01F9,
+    LocationName.vanilla_fortress_room_1: ROOM | VDF | 0x000B,
+    LocationName.vanilla_fortress_room_2: ROOM | VDF | 0x10E0,
+    #LocationName.vanilla_fortress_room_3: ROOM | VDF | 0x00DF,
+    LocationName.vanilla_dome_castle_room_1: ROOM | VDC | 0x011C,
+    LocationName.vanilla_dome_castle_room_2: ROOM | VDC | 0x01F4,
+    LocationName.vanilla_dome_castle_room_3: ROOM | VDC | 0x01F3,
+    #LocationName.vanilla_dome_castle_room_4: ROOM | VDC | 0x01F2,
+    LocationName.red_switch_palace_room_1: ROOM | RSP | 0x011B,
+    LocationName.red_switch_palace_room_2: ROOM | RSP | 0x01D8,
+
+    LocationName.butter_bridge_1_room_1: ROOM | BB1 | 0x000C,
+    LocationName.butter_bridge_1_room_2: ROOM | BB1 | 0x00F3,
+    LocationName.butter_bridge_2_room_1: ROOM | BB2 | 0x000D,
+    LocationName.butter_bridge_2_room_2: ROOM | BB2 | 0x00DD,
+    LocationName.cheese_bridge_room_1: ROOM | CBA | 0x000F,
+    LocationName.cheese_bridge_room_2: ROOM | CBA | 0x00BF,
+    LocationName.cheese_bridge_room_3: ROOM | CBA | 0x20C8,
+    LocationName.cookie_mountain_room_1: ROOM | COM | 0x0010,
+    LocationName.cookie_mountain_room_2: ROOM | COM | 0x00C1,
+    LocationName.soda_lake_room_1: ROOM | SOL | 0x0011,
+    LocationName.soda_lake_room_2: ROOM | SOL | 0x00C6,
+    LocationName.twin_bridges_castle_room_1: ROOM | TWC | 0x000E,
+    LocationName.twin_bridges_castle_room_2: ROOM | TWC | 0x00DA,
+    LocationName.twin_bridges_castle_room_3: ROOM | TWC | 0x00DC,
+    LocationName.twin_bridges_castle_room_4: ROOM | TWC | 0x00DB,
+    #LocationName.twin_bridges_castle_room_5: ROOM | TWC | 0x00D9,
+
+    LocationName.forest_of_illusion_1_room_1: ROOM | FI1 | 0x011E,
+    LocationName.forest_of_illusion_2_room_1: ROOM | FI2 | 0x0120,
+    LocationName.forest_of_illusion_3_room_1: ROOM | FI3 | 0x0123,
+    LocationName.forest_of_illusion_3_room_2: ROOM | FI3 | 0x01BC,
+    LocationName.forest_of_illusion_3_room_3: ROOM | FI3 | 0x01F8,
+    LocationName.forest_of_illusion_4_room_1: ROOM | FI4 | 0x011F,
+    LocationName.forest_of_illusion_4_room_2: ROOM | FI4 | 0x01DF,
+    LocationName.forest_of_illusion_4_room_3: ROOM | FI4 | 0x01C1,
+    LocationName.forest_ghost_house_room_1: ROOM | FGH | 0x011D,
+    LocationName.forest_ghost_house_room_2: ROOM | FGH | 0x01FA,
+    LocationName.forest_ghost_house_room_3: ROOM | FGH | 0x01E7,
+    LocationName.forest_ghost_house_room_4: ROOM | FGH | 0x01E6,
+    LocationName.forest_secret_room_1: ROOM | FSA | 0x0122,
+    LocationName.forest_fortress_room_1: ROOM | FIF | 0x001F,
+    LocationName.forest_fortress_room_2: ROOM | FIF | 0x00D6,
+    #LocationName.forest_fortress_room_3: ROOM | FIF | 0x00D5,
+    LocationName.forest_castle_room_1: ROOM | FIC | 0x0020,
+    #LocationName.forest_castle_room_2: ROOM | FIC | 0x00CC,
+    LocationName.blue_switch_palace_room_1: ROOM | BSP | 0x0121,
+    LocationName.blue_switch_palace_room_2: ROOM | BSP | 0x01D7,
+
+    LocationName.chocolate_island_1_room_1: ROOM | CI1 | 0x0022,
+    LocationName.chocolate_island_1_room_2: ROOM | CI1 | 0x00BE,
+    LocationName.chocolate_island_2_room_1: ROOM | CI2 | 0x0024,
+    LocationName.chocolate_island_2_room_2: ROOM | CI2 | 0x00CF,
+    LocationName.chocolate_island_2_room_3: ROOM | CI2 | 0x00CE,
+    LocationName.chocolate_island_2_room_4: ROOM | CI2 | 0x00CD,
+    LocationName.chocolate_island_3_room_1: ROOM | CI3 | 0x0023,
+    LocationName.chocolate_island_3_room_2: ROOM | CI3 | 0x00D7,
+    LocationName.chocolate_island_4_room_1: ROOM | CI4 | 0x001D,
+    LocationName.chocolate_island_4_room_2: ROOM | CI4 | 0x00EA,
+    LocationName.chocolate_island_5_room_1: ROOM | CI5 | 0x001C,
+    LocationName.chocolate_island_5_room_2: ROOM | CI5 | 0x00BD,
+    LocationName.chocolate_island_5_room_3: ROOM | CI5 | 0x00C0,
+    LocationName.chocolate_ghost_house_room_1: ROOM | CGH | 0x0021,
+    LocationName.chocolate_ghost_house_room_2: ROOM | CGH | 0x00FC,
+    LocationName.chocolate_ghost_house_room_3: ROOM | CGH | 0x00FB,
+    LocationName.chocolate_secret_room_1: ROOM | CSA | 0x0117,
+    LocationName.chocolate_secret_room_2: ROOM | CSA | 0x01C0,
+    LocationName.chocolate_secret_room_3: ROOM | CSA | 0x01ED,
+    LocationName.chocolate_secret_room_4: ROOM | CSA | 0x01EC,
+    LocationName.chocolate_secret_room_5: ROOM | CSA | 0x01EE,
+    LocationName.chocolate_fortress_room_1: ROOM | CIF | 0x001B,
+    LocationName.chocolate_fortress_room_2: ROOM | CIF | 0x00EF,
+    #LocationName.chocolate_fortress_room_3: ROOM | CIF | 0x00E2,
+    LocationName.chocolate_castle_room_1: ROOM | CIC | 0x001A,
+    LocationName.chocolate_castle_room_2: ROOM | CIC | 0x00D4,
+    #LocationName.chocolate_castle_room_3: ROOM | CIC | 0x00D3,
+    LocationName.sunken_ghost_ship_room_1: ROOM | SGS | 0x0018,
+    LocationName.sunken_ghost_ship_room_2: ROOM | SGS | 0x00F8,
+    LocationName.sunken_ghost_ship_room_3: ROOM | SGS | 0x00F7,
+
+    LocationName.valley_of_bowser_1_room_1: ROOM | VB1 | 0x0116,
+    LocationName.valley_of_bowser_1_room_2: ROOM | VB1 | 0x01E4,
+    LocationName.valley_of_bowser_1_room_3: ROOM | VB1 | 0x01E5,
+    LocationName.valley_of_bowser_2_room_1: ROOM | VB2 | 0x0115,
+    LocationName.valley_of_bowser_2_room_2: ROOM | VB2 | 0x01E3,
+    LocationName.valley_of_bowser_2_room_3: ROOM | VB2 | 0x01E2,
+    LocationName.valley_of_bowser_3_room_1: ROOM | VB3 | 0x0113,
+    LocationName.valley_of_bowser_3_room_2: ROOM | VB3 | 0x01BB,
+    LocationName.valley_of_bowser_4_room_1: ROOM | VB4 | 0x010F,
+    LocationName.valley_of_bowser_4_room_2: ROOM | VB4 | 0x01BF,
+    LocationName.valley_ghost_house_room_1: ROOM | VBH | 0x0114,
+    LocationName.valley_ghost_house_room_2: ROOM | VBH | 0x01DD,
+    LocationName.valley_ghost_house_room_3: ROOM | VBH | 0x11DB,
+    LocationName.valley_ghost_house_room_4: ROOM | VBH | 0x01DA,
+    LocationName.valley_fortress_room_1: ROOM | VBF | 0x0111,
+    #LocationName.valley_fortress_room_2: ROOM | VBF | 0x01DE,
+    LocationName.valley_castle_room_1: ROOM | VBC | 0x0110,
+    LocationName.valley_castle_room_2: ROOM | VBC | 0x01FE,
+    #LocationName.valley_castle_room_3: ROOM | VBC | 0x01EB,
+
+    LocationName.star_road_1_room_1: ROOM | SR1 | 0x0134,
+    LocationName.star_road_1_room_2: ROOM | SR1 | 0x01D6,
+    LocationName.star_road_2_room_1: ROOM | SR2 | 0x0130,
+    LocationName.star_road_2_room_2: ROOM | SR2 | 0x01D5,
+    LocationName.star_road_3_room_1: ROOM | SR3 | 0x0132,
+    LocationName.star_road_4_room_1: ROOM | SR4 | 0x0135,
+    LocationName.star_road_5_room_1: ROOM | SR5 | 0x0136,
+
+    LocationName.special_zone_1_room_1: ROOM | SZ1 | 0x012A,
+    LocationName.special_zone_1_room_2: ROOM | SZ1 | 0x11C4,
+    LocationName.special_zone_2_room_1: ROOM | SZ2 | 0x012B,
+    LocationName.special_zone_3_room_1: ROOM | SZ3 | 0x012C,
+    LocationName.special_zone_3_room_2: ROOM | SZ3 | 0x01C9,
+    LocationName.special_zone_3_room_3: ROOM | SZ3 | 0x21C8,
+    LocationName.special_zone_4_room_1: ROOM | SZ4 | 0x012D,
+    LocationName.special_zone_5_room_1: ROOM | SZ5 | 0x0128,
+    LocationName.special_zone_6_room_1: ROOM | SZ6 | 0x0127,
+    LocationName.special_zone_6_room_2: ROOM | SZ6 | 0x01E0,
+    LocationName.special_zone_6_room_3: ROOM | SZ6 | 0x01E1,
+    LocationName.special_zone_7_room_1: ROOM | SZ7 | 0x0126,
+    LocationName.special_zone_8_room_1: ROOM | SZ8 | 0x0125,
 }
 
 midway_point_location_table = {
@@ -1060,7 +1251,7 @@ all_locations = {
     **dragon_coin_location_table,
     **moon_location_table,
     **hidden_1ups_location_table,
-    **bonus_block_location_table,
+    **prize_location_table,
     **midway_point_location_table,
     **ysp_block_location_table,
     **gsp_block_location_table,
@@ -1072,6 +1263,7 @@ all_locations = {
     **bowser_location_table,
     **yoshi_house_location_table,
     **egg_location_table,
+    **room_location_table,
 }
 
 sorted_locations_table: typing.Dict[int, typing.List[int]] = {}
@@ -1232,8 +1424,9 @@ location_groups = {
     "Dragon Coins": {location for location in dragon_coin_location_table.keys()},
     "3-Up Moons": {location for location in moon_location_table.keys()},
     "Hidden 1-Ups": {location for location in hidden_1ups_location_table.keys()},
-    "Bonus Blocks": {location for location in bonus_block_location_table.keys()},
+    "Star Blocks": {location for location in prize_location_table.keys()},
     "Midway Points": {location for location in midway_point_location_table.keys()},
+    "Rooms": {location for location in room_location_table.keys()},
 }
 
 def setup_locations(world: "WaffleWorld"):
@@ -1248,11 +1441,14 @@ def setup_locations(world: "WaffleWorld"):
     if world.options.hidden_1up_checks:
         location_table.update(hidden_1ups_location_table)
 
-    if world.options.bonus_block_checks:
-        location_table.update(bonus_block_location_table)
+    if world.options.star_block_checks:
+        location_table.update(prize_location_table)
 
     if world.options.midway_point_checks:
         location_table.update(midway_point_location_table)
+
+    if world.options.room_checks:
+        location_table.update(room_location_table)
 
     if "Coin Blocks" in world.options.block_checks.value:
         location_table.update(coin_block_location_table)

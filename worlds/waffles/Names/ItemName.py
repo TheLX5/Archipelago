@@ -60,6 +60,7 @@ boo_trap                = "Boo Trap"
 bullet_time_trap        = "Bullet Time Trap"
 invisibility_trap       = "Invisibility Trap"
 empty_item_box_trap     = "Empty Item Box Trap"
+trap_repellent          = "Trap Repellent"
 
 # Other Definitions
 victory   = "The Princess"

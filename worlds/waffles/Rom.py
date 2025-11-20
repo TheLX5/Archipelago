@@ -60,7 +60,7 @@ progressive_items = {
 
 icon_rom_data = {
     0xBC0002: [0x480C], # Yoshi Egg
-    0xBC0012: [0x480E], # Boss Token
+    0xBC0048: [0x480E], # Trap Repellent
 
     0xBC0017: [0x4804], # 1 coin
     0xBC0018: [0x4806], # 5 coins
@@ -253,6 +253,7 @@ class WafflePatchExtension(APPatchExtension):
         patched_gfx_00 = bsdiff4.patch(bytes(decompressed_gfx_00), caller.get_file("sprite_page_1.bsdiff4"))
         patched_gfx_01 = bsdiff4.patch(bytes(decompressed_gfx_01), caller.get_file("sprite_page_2.bsdiff4"))
         patched_inventory_gfx = bsdiff4.patch(bytes(inventory_gfx), caller.get_file("map_sprites.bsdiff4"))
+        patched_midway_point = bsdiff4.patch(bytes(inventory_gfx), caller.get_file("midway_point.bsdiff4"))
 
         rom[0xE0000:0xE0000 + len(decompressed_player_gfx)] = decompressed_player_gfx
         rom[0xE8000:0xE8000 + len(decompressed_animated_gfx)] = decompressed_animated_gfx
@@ -263,6 +264,12 @@ class WafflePatchExtension(APPatchExtension):
         rom[0x100000:0x100000 + len(patched_sprite_graphics)] = bytearray(patched_sprite_graphics)
         rom[0x178000:0x178000 + len(patched_gfx_00)] = bytearray(patched_gfx_00)
         rom[0x179000:0x179000 + len(patched_gfx_01)] = bytearray(patched_gfx_01)
+
+        data = bytearray(patched_midway_point)
+        rom[0xEA080:0xEA100] = data[0x0000:0x0080]
+        rom[0xEA280:0xEA300] = data[0x0080:0x0100]
+        rom[0xEA480:0xEA500] = data[0x0100:0x0180]
+        rom[0xEA680:0xEA700] = data[0x0180:0x0200]
 
         return bytes(rom)
 
@@ -381,7 +388,6 @@ class WafflePatchExtension(APPatchExtension):
         sprite_pointers = rom[SPRITE_POINTERS_ADDR:SPRITE_POINTERS_ADDR+0x400]
         for level_id in range(0x200):
             pointer = int.from_bytes(sprite_pointers[level_id*2:(level_id*2)+2], "little") | 0x38000
-            print (f"{pointer:06X}")
             data = []
             idx = 1
             bytes_read = [0x00]
@@ -400,10 +406,6 @@ class WafflePatchExtension(APPatchExtension):
                 
             enemy_replacement_by_tag = build_enemy_replacements(enemy_list_in_use)
 
-            if level_id == 0x11D:
-                for x,y in enemy_replacement_by_tag.items():
-                    pass #print (x, y)
-
             new_data = []
             for idy, sprite in enumerate(data):
                 sprite = int.from_bytes(sprite, "little")
@@ -415,8 +417,6 @@ class WafflePatchExtension(APPatchExtension):
 
                 # Select a new sprite
                 tag = random.choice(enemy_data.tags)
-                #if level_id == 0x11D:
-                #    print (f"{sprite:06X}", f"{num:02X}", tag, enemy_data)
                 if tag == "skip":
                     new_data += sprite.to_bytes(3, "little")
                     continue
@@ -432,8 +432,6 @@ class WafflePatchExtension(APPatchExtension):
                 y_pos = (sprite & 0xF0) >> 4 | (sprite & 0x01) << 4
 
                 new_enemy_data = enemy_list_in_use[selected_id]
-                #if level_id == 0x11D:
-                #    print (f"    selected: {selected_id:02X} | {new_enemy_data}")
                 
                 y_diff = new_enemy_data.disp[1] - enemy_data.disp[1]
                 x_diff = new_enemy_data.disp[0] - enemy_data.disp[0]
@@ -450,23 +448,15 @@ class WafflePatchExtension(APPatchExtension):
                     x_pos -= x_diff
 
                 # Pack everything again
-                #if level_id == 0x11D:
-                #    print (f"{sprite:06X}")
                 sprite = 0
                 sprite |= selected_id << 16
                 sprite |= extra_bits << 2
                 sprite |= ((x_pos & 0x0F) << 12) | ((x_pos & 0xF0) << 4) | ((x_pos & 0x100) >> 7)
                 sprite |= ((y_pos & 0x0F) << 4) | ((y_pos & 0x10) >> 4)
-                #if level_id == 0x11D:
-                #    print (f"{sprite:06X}")
                 new_data += sprite.to_bytes(3, "little")
 
             rom[pointer+1:(pointer+1+len(data)*3)] = bytearray(new_data)
-            #print (f"{pointer+1:06X}", f"{pointer+1+len(data)*3:06X}")
-            #if level_id == 0x11D:
-            #    print (new_data)
- 
-        #print (list(rom[0x3D523:0x3D56B]))
+
         return bytes(rom)
 
 
@@ -714,10 +704,14 @@ def handle_location_item_info(patch: WaffleProcedurePatch, world: "WaffleWorld")
         
         level_id = location.address >> 24
         loc_type = (location.address >> 20 & 0x0F)
+        level_data = location.address & 0x0F
 
-        if loc_type == 0x00:
+        if level_id in world.swapped_exits:
+            loc_type = loc_type ^ 1
+
+        if loc_type == 0x00 and level_data == 0x00:
             normal_exit_info[level_id] = classification
-        elif loc_type == 0x01:
+        elif loc_type == 0x01 and level_data == 0x00:
             secret_exit_info[level_id] = classification
         elif loc_type == 0x03:
             dragon_coin_info[level_id] = classification
@@ -953,8 +947,9 @@ def patch_rom(world: "WaffleWorld", patch: WaffleProcedurePatch, player: int, ac
     patch.write_byte(0x01BFA7, world.options.swap_donut_gh_exits.value)
     patch.write_byte(0x01BFA8, world.options.moon_checks.value)
     patch.write_byte(0x01BFA9, world.options.hidden_1up_checks.value)
-    patch.write_byte(0x01BFAA, world.options.bonus_block_checks.value)
+    patch.write_byte(0x01BFAA, world.options.star_block_checks.value)
     patch.write_byte(0x01BFAC, world.options.midway_point_checks.value)
+    patch.write_byte(0x01BFAD, world.options.room_checks.value)
     patch.write_byte(0x01BFB0, world.options.level_shuffle.value)
     setting_value = 0
     block_checks = world.options.block_checks.value
@@ -983,7 +978,7 @@ def patch_rom(world: "WaffleWorld", patch: WaffleProcedurePatch, player: int, ac
     patch.name.extend([0] * (21 - len(patch.name)))
     patch.write_bytes(0x7FC0, patch.name)
 
-    patch.write_byte(0x2273, 0x00)
+    #patch.write_byte(0x2273, 0x00)
 
     patch.write_file("token_patch.bin", patch.get_token_binary())
 

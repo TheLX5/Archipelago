@@ -10,9 +10,9 @@ from Options import OptionError
 from worlds.AutoWorld import WebWorld, World
 
 from .Client import WaffleSNIClient
-from .Items import WaffleItem, item_table, junk_table
+from .Items import WaffleItem, item_table, junk_table, option_name_to_item_unlock
 from .Levels import full_level_list, generate_level_list, generate_swapped_exits, special_zone_tile_regions, switch_palace_locations, castle_locations, ghost_house_locations
-from .Locations import all_locations, location_groups, setup_locations, level_location_table, special_zone_level_names, special_zone_dragon_coin_names, special_zone_hidden_1up_names, \
+from .Locations import all_locations, location_groups, setup_locations, level_location_table, \
                        egg_location_table, castle_location_table, switch_palace_location_table, ghost_house_location_table
 from .Names import ItemName, LocationName
 from .Options import WaffleOptions, waffle_option_groups, Goal
@@ -102,11 +102,6 @@ class WaffleWorld(World):
                 raise OptionError(f"{self.player_name} has a very weird combination of settings that will result in a failed generation.\n"
                                 f"Please set less Yoshi Eggs your YAML file or DON'T use minimal accessibility.")
             
-        # Enforce Special World for now
-        if self.options.exclude_special_zone:
-            print(f"Enforcing non-excluded Special Zone for \"{self.player_name}\" (option was not fully tested and possibly is broken).")
-            self.options.exclude_special_zone.value = False
-
         # Enforce disabling DeathLink for now
         if self.options.death_link:
             print(f"Enforcing non-DeathLink session for \"{self.player_name}\" (option doesn't work).")
@@ -226,9 +221,7 @@ class WaffleWorld(World):
 
         if self.using_ut:
             game_difficulty = self.options.game_logic_difficulty.value
-            if game_difficulty == 0:
-                WaffleBasicRules(self).set_glitched_rules(1)
-            elif game_difficulty == 1:
+            if game_difficulty != 2:
                 WaffleBasicRules(self).set_glitched_rules(2)
 
         return     
@@ -243,63 +236,120 @@ class WaffleWorld(World):
     def create_items(self):
         itempool: typing.List[WaffleItem] = []
 
-        exclusion_pool = set()
-        #if self.options.exclude_special_zone:
-        #    exclusion_pool.update(special_zone_level_names)
-        #    if self.options.dragon_coin_checks:
-        #        exclusion_pool.update(special_zone_dragon_coin_names)
-        #    if self.options.hidden_1up_checks:
-        #        exclusion_pool.update(special_zone_hidden_1up_names)
-        #    if self.options.blocksanity:
-        #        exclusion_pool.update(special_zone_blocksanity_names)
-        #
-        #    exclusion_rules(self.multiworld, self.player, exclusion_pool)
-
         total_required_locations = self.count_locations()
 
-        itempool += [self.create_item(ItemName.progressive_powerup) for _ in range(3)]
-        itempool += [self.create_item(ItemName.yoshi) for _ in range(2)]
-        itempool += [self.create_item(ItemName.mario_run) for _ in range(2)]
-        itempool += [self.create_item(ItemName.mario_carry)]
-        itempool += [self.create_item(ItemName.mario_swim) for _ in range(2)]
-        itempool += [self.create_item(ItemName.mario_spin_jump)]
-        itempool += [self.create_item(ItemName.mario_climb)]
-        itempool += [self.create_item(ItemName.p_switch)]
-        itempool += [self.create_item(ItemName.p_balloon)]
-        itempool += [self.create_item(ItemName.super_star_active) for _ in range(9)]
-
-        if "Yellow Switch Palace Blocks" in self.options.block_checks.value:
-            itempool += [self.create_item(ItemName.yellow_switch_palace)]
+        if "Powerups" in self.options.ability_shuffle.value:
+            itempool += [self.create_item(ItemName.progressive_powerup) for _ in range(3)]
         else:
-            itempool += [self.create_item(ItemName.yellow_switch_palace, ItemClassification.progression)]
+            self.multiworld.push_precollected(self.create_item(ItemName.progressive_powerup))
+            self.multiworld.push_precollected(self.create_item(ItemName.progressive_powerup))
+            self.multiworld.push_precollected(self.create_item(ItemName.progressive_powerup))
 
-        if "Green Switch Palace Blocks" in self.options.block_checks.value:
-            itempool += [self.create_item(ItemName.green_switch_palace)]
+        if "Yoshi" in self.options.ability_shuffle.value:
+            itempool += [self.create_item(ItemName.yoshi) for _ in range(2)]
         else:
-            itempool += [self.create_item(ItemName.green_switch_palace, ItemClassification.progression)]
+            self.multiworld.push_precollected(self.create_item(ItemName.yoshi))
+            self.multiworld.push_precollected(self.create_item(ItemName.yoshi))
 
-        itempool += [self.create_item(ItemName.red_switch_palace)]
-        itempool += [self.create_item(ItemName.blue_switch_palace)]
-
-        if self.options.midway_point_checks:
-            itempool += [self.create_item(ItemName.midway_point, ItemClassification.progression | ItemClassification.useful)]
+        if "Run" in self.options.ability_shuffle.value:
+            itempool += [self.create_item(ItemName.mario_run) for _ in range(2)]
         else:
-            if self.options.game_logic_difficulty == "hard":
-                itempool += [self.create_item(ItemName.midway_point, ItemClassification.useful)]
+            itempool += [self.create_item(ItemName.mario_run)]
+            self.multiworld.push_precollected(self.create_item(ItemName.mario_run))
+
+        if "Carry" in self.options.ability_shuffle.value:
+            itempool += [self.create_item(ItemName.mario_carry)]
+        else:
+            self.multiworld.push_precollected(self.create_item(ItemName.mario_carry))
+
+        if "Swim" in self.options.ability_shuffle.value:
+            itempool += [self.create_item(ItemName.mario_swim) for _ in range(2)]
+        else:
+            itempool += [self.create_item(ItemName.mario_swim)]
+            self.multiworld.push_precollected(self.create_item(ItemName.mario_swim))
+
+        if "Spin Jump" in self.options.ability_shuffle.value:
+            itempool += [self.create_item(ItemName.mario_spin_jump)]
+        else:
+            self.multiworld.push_precollected(self.create_item(ItemName.mario_spin_jump))
+
+        if "Climb" in self.options.ability_shuffle.value:
+            itempool += [self.create_item(ItemName.mario_climb)]
+        else:
+            self.multiworld.push_precollected(self.create_item(ItemName.mario_climb))
+
+        if "P-Switch" in self.options.ability_shuffle.value:
+            itempool += [self.create_item(ItemName.p_switch)]
+        else:
+            self.multiworld.push_precollected(self.create_item(ItemName.p_switch))
+
+        if "P-Balloon" in self.options.ability_shuffle.value:
+            itempool += [self.create_item(ItemName.p_balloon)]
+        else:
+            self.multiworld.push_precollected(self.create_item(ItemName.p_balloon))
+
+        if "Super Star" in self.options.ability_shuffle.value:
+            itempool += [self.create_item(ItemName.super_star_active) for _ in range(9)]
+        else:
+            itempool += [self.create_item(ItemName.super_star_active) for _ in range(7)]
+            self.multiworld.push_precollected(self.create_item(ItemName.super_star_active))
+            self.multiworld.push_precollected(self.create_item(ItemName.super_star_active))
+
+        if "Yellow Switch Palace" in self.options.ability_shuffle.value:
+            if "Yellow Switch Palace Blocks" in self.options.block_checks.value:
+                itempool += [self.create_item(ItemName.yellow_switch_palace)]
             else:
-                itempool += [self.create_item(ItemName.midway_point)]
+                itempool += [self.create_item(ItemName.yellow_switch_palace, ItemClassification.progression)]
+        else:
+            self.multiworld.push_precollected(self.create_item(ItemName.yellow_switch_palace))
+
+        if "Green Switch Palace" in self.options.ability_shuffle.value:
+            if "Green Switch Palace Blocks" in self.options.block_checks.value:
+                itempool += [self.create_item(ItemName.green_switch_palace)]
+            else:
+                itempool += [self.create_item(ItemName.green_switch_palace, ItemClassification.progression)]
+        else:
+            self.multiworld.push_precollected(self.create_item(ItemName.green_switch_palace))
+
+        if "Red Switch Palace" in self.options.ability_shuffle.value:
+            itempool += [self.create_item(ItemName.red_switch_palace)]
+        else:
+            self.multiworld.push_precollected(self.create_item(ItemName.red_switch_palace))
+
+        if "Blue Switch Palace" in self.options.ability_shuffle.value:
+            itempool += [self.create_item(ItemName.blue_switch_palace)]
+        else:
+            self.multiworld.push_precollected(self.create_item(ItemName.blue_switch_palace))
+
+        if "Midway Points" in self.options.ability_shuffle.value:
+            if self.options.midway_point_checks:
+                itempool += [self.create_item(ItemName.midway_point, ItemClassification.progression | ItemClassification.useful)]
+            else:
+                if self.options.game_logic_difficulty == "hard":
+                    itempool += [self.create_item(ItemName.midway_point, ItemClassification.useful)]
+                else:
+                    itempool += [self.create_item(ItemName.midway_point)]
+        else:
+            self.multiworld.push_precollected(self.create_item(ItemName.midway_point))
             
-        itempool += [self.create_item(ItemName.special_world_clear)]
+        if "Special World" in self.options.ability_shuffle.value:
+            itempool += [self.create_item(ItemName.special_world_clear)]
+        else:
+            self.multiworld.push_precollected(self.create_item(ItemName.special_world_clear))
+
         itempool += [self.create_item(ItemName.better_timer) for _ in range(3)]
 
-        if self.options.game_logic_difficulty != "hard":
-            itempool += [self.create_item(ItemName.item_box, ItemClassification.progression)]
-            if self.options.game_logic_difficulty == "easy":
-                itempool += [self.create_item(ItemName.extra_defense, ItemClassification.progression)]
+        if "Item Box" in self.options.ability_shuffle.value:
+            if self.options.game_logic_difficulty != "hard":
+                itempool += [self.create_item(ItemName.item_box, ItemClassification.progression)]
             else:
-                itempool += [self.create_item(ItemName.extra_defense)]
+                itempool += [self.create_item(ItemName.item_box)]
         else:
-            itempool += [self.create_item(ItemName.item_box)]
+            self.multiworld.push_precollected(self.create_item(ItemName.item_box))
+
+        if self.options.game_logic_difficulty == "easy":
+            itempool += [self.create_item(ItemName.extra_defense, ItemClassification.progression)]
+        else:
             itempool += [self.create_item(ItemName.extra_defense)]
         
         # Create Golden Yoshi Eggs
@@ -385,8 +435,8 @@ class WaffleWorld(World):
         itempool += trap_pool
 
         junk_weights = []
-        junk_weights += ([ItemName.one_coin] * 5)
-        junk_weights += ([ItemName.five_coins] * 5)
+        junk_weights += ([ItemName.one_coin] * 3)
+        junk_weights += ([ItemName.five_coins] * 4)
         junk_weights += ([ItemName.ten_coins] * 5)
         junk_weights += ([ItemName.fifty_coins] * 7)
         junk_weights += ([ItemName.heart_inventory] * 25)
@@ -398,6 +448,7 @@ class WaffleWorld(World):
         junk_weights += ([ItemName.red_yoshi_inventory] * 10)
         junk_weights += ([ItemName.blue_yoshi_inventory] * 10)
         junk_weights += ([ItemName.yellow_yoshi_inventory] * 10)
+        junk_weights += ([ItemName.trap_repellent] * 8)
 
         junk_pool = [self.create_item(self.random.choice(junk_weights)) for _ in range(junk_count)]
         
@@ -421,10 +472,12 @@ class WaffleWorld(World):
             total_required_locations += len(Locations.moon_location_table.keys())
         if self.options.hidden_1up_checks:
             total_required_locations += len(Locations.hidden_1ups_location_table.keys())
-        if self.options.bonus_block_checks:
-            total_required_locations += len(Locations.bonus_block_location_table.keys())
+        if self.options.star_block_checks:
+            total_required_locations += len(Locations.prize_location_table.keys())
         if self.options.midway_point_checks:
             total_required_locations += len(Locations.midway_point_location_table.keys())
+        if self.options.room_checks:
+            total_required_locations += len(Locations.room_location_table.keys())
         block_checks = self.options.block_checks.value
         if "Coin Blocks" in block_checks:
             total_required_locations += len(Locations.coin_block_location_table.keys())
@@ -471,6 +524,7 @@ class WaffleWorld(World):
             patch.write_file("sprite_page_1.bsdiff4", pkgutil.get_data(__name__, "data/sprite_page_1.bsdiff4"))
             patch.write_file("sprite_page_2.bsdiff4", pkgutil.get_data(__name__, "data/sprite_page_2.bsdiff4"))
             patch.write_file("map_sprites.bsdiff4", pkgutil.get_data(__name__, "data/map_sprites.bsdiff4"))
+            patch.write_file("midway_point.bsdiff4", pkgutil.get_data(__name__, "data/midway_point.bsdiff4"))
             patch_rom(self, patch, self.player, self.active_level_dict)
 
             self.rom_name = patch.name
@@ -561,8 +615,9 @@ class WaffleWorld(World):
             "dragon_coin_checks",
             "moon_checks",
             "hidden_1up_checks",
-            "bonus_block_checks",
+            "star_block_checks",
             "midway_point_checks",
+            "room_checks",
             "block_checks",
             "energy_link",
             "swap_level_exits",
@@ -570,7 +625,6 @@ class WaffleWorld(World):
             "inventory_yoshi_logic",
             "goal",
             "yoshi_egg_count",
-            "exclude_special_zone",
             "enemy_shuffle",
             "yoshi_egg_placement",
         )

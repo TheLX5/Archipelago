@@ -28,6 +28,7 @@ junk_table = {
     ItemName.red_yoshi_inventory:       ItemData(0xBC0045),
     ItemName.blue_yoshi_inventory:      ItemData(0xBC0046),
     ItemName.yellow_yoshi_inventory:    ItemData(0xBC0047),
+    ItemName.trap_repellent:            ItemData(0xBC0048, ItemClassification.useful),
 }
 
 collectable_table = {
@@ -94,6 +95,26 @@ item_table = {
 }
 
 lookup_id_to_name: typing.Dict[int, str] = {data.code: item_name for item_name, data in item_table.items() if data.code}
+
+option_name_to_item_unlock = {
+    "Run": ItemName.mario_run,
+    "Carry": ItemName.mario_carry,
+    "Swim": ItemName.mario_swim,
+    "Spin Jump": ItemName.mario_spin_jump,
+    "Climb": ItemName.mario_spin_jump,
+    "P-Balloon": ItemName.p_balloon,
+    "Yoshi": ItemName.yoshi,
+    "Powerups": ItemName.progressive_powerup,
+    "Super Star": ItemName.super_star_active,
+    "P-Switch": ItemName.p_switch,
+    "Item Box": ItemName.item_box,
+    "Midway Points": ItemName.midway_point,
+    "Yellow Switch Palace": ItemName.yellow_switch_palace,
+    "Green Switch Palace": ItemName.green_switch_palace,
+    "Red Switch Palace": ItemName.red_switch_palace,
+    "Blue Switch Palace": ItemName.blue_switch_palace,
+    "Special Zone": ItemName.special_world_clear,
+}
 
 trap_value_to_name: typing.Dict[int, str] = {
     0xBC0080: ItemName.ice_trap,

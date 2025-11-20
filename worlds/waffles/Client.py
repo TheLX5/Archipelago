@@ -52,6 +52,7 @@ SMW_ENERGY_LINK_PURCHASE    = SMW_BWRAM + 0x0CF8
 SMW_ENERGY_LINK_ITEM        = SMW_BWRAM + 0x0CFA
 SMW_ENERGY_LINK_REPLY       = SMW_BWRAM + 0x0CFB
 SMW_ENERGY_LINK_COUNT       = SMW_BWRAM + 0x0CFC
+SMW_TRAP_REPELLENT          = SMW_BWRAM + 0x0383
 
 
 SMW_GOAL_DATA                = ROM_START + 0x01BFA0
@@ -123,6 +124,7 @@ class SMWMemory(Enum):
     inventory_reply = Read(SMW_ENERGY_LINK_REPLY, 0x01)
     inventory_item = Read(SMW_ENERGY_LINK_ITEM, 0x01)
     inventory_purchase = Read(SMW_ENERGY_LINK_PURCHASE, 0x02)
+    trap_repellent = Read(SMW_TRAP_REPELLENT, 0x01)
 
 class ConnectMemory(Enum):
     settings = Read(SMW_GOAL_DATA, 0x20)
@@ -337,19 +339,6 @@ class WaffleSNIClient(SNIClient):
         # Check for Egg Hunt ending
         goal = rom_settings_data[0x00]
         current_level = state_mirror[0x04]
-        #if game_state == 0x14 and goal == 0x02:
-        #    message_box = state_mirror[0x07]
-        #    egg_count = game_progress[0x24]
-        #    required_egg_count = rom_settings_data[0x02]
-        #
-        #    if current_level == 0x28 and message_box == 0x01 and egg_count >= required_egg_count:
-        #        snes_buffered_write(ctx, SRAM_START + 0x13C6, bytes([0x08]))
-        #        snes_buffered_write(ctx, SRAM_START + 0x13CE, bytes([0x01]))
-        #        snes_buffered_write(ctx, SRAM_START + 0x1DE9, bytes([0x01]))
-        #        snes_buffered_write(ctx, SMW_GAME_STATE_ADDR, bytes([0x18]))
-        #
-        #        await snes_flush_writes(ctx)
-        #        return
 
         egg_count = game_progress[0x24]
         boss_count = game_progress[0x26]
@@ -364,7 +353,8 @@ class WaffleSNIClient(SNIClient):
 
         await self.handle_message_queue(ctx)
 
-        if current_level not in TRAPLESS_LEVELS:
+        trap_repellent = int.from_bytes(snes_data.get(SMWMemory.trap_repellent), "little")
+        if current_level not in TRAPLESS_LEVELS and trap_repellent == 0:
             await self.handle_trap_queue(ctx)
 
         await self.handle_ring_link(ctx, snes_data)
@@ -389,7 +379,10 @@ class WaffleSNIClient(SNIClient):
         prize_block_active = rom_settings_data[0x0A]
         blocksanity_active = rom_settings_data[0x0B]
         midway_points_active = rom_settings_data[0x0C]
+        rooms_active = rom_settings_data[0x0D]
         midway_point_data = list(flags_data[0x20:0x20+0x0C])
+
+        current_sublevel_value = int.from_bytes(state_mirror[0x05:0x07], "little")
 
         # Do not process ANYTHING if the level is 0 or outside of the usual range
         if current_level not in LEVELS_WITHOUT_CHECKS and current_level < 0x60:
@@ -425,6 +418,24 @@ class WaffleSNIClient(SNIClient):
                     if blocksanity_data[block_index]:
                         new_checks.append(loc_id)
                     continue
+                # Room visited
+                elif loc_type == 0x08 and rooms_active:
+                    room_type = (loc_data & 0xF000) >> 12
+                    # Regular rooms
+                    if room_type == 0x00:
+                        if loc_data == current_sublevel_value:
+                            new_checks.append(loc_id)
+                    # Similar rooms
+                    elif room_type == 0x01:
+                        loc_data &= 0x0FFF
+                        if loc_data == current_sublevel_value or loc_data + 0x01 == current_sublevel_value:
+                            new_checks.append(loc_id)
+                    elif room_type == 0x02:
+                        loc_data &= 0x00FF
+                        if loc_data == current_sublevel_value:
+                            new_checks.append(loc_id)
+                    else:
+                        continue
                 # Dragon coins
                 elif loc_type == 0x03 and dragon_coins_active:
                     data = dragon_coins_data[progress_byte]
@@ -452,8 +463,6 @@ class WaffleSNIClient(SNIClient):
                 await ctx.send_msgs([{"cmd": 'LocationChecks', "locations": [new_check_id]}])
 
         # Send Current Room for Tracker
-        current_sublevel_value = int.from_bytes(state_mirror[0x05:0x07], "little")
-
         if game_state != 0x14:
             current_sublevel_value = 0
 
@@ -509,7 +518,6 @@ class WaffleSNIClient(SNIClient):
 
             snes_buffered_write(ctx, SMW_RECV_PROGRESS_ADDR, bytes([recv_index&0xFF, (recv_index>>8)&0xFF]))
 
-            print (f"{item.item:06X} | {ctx.item_names.lookup_in_game(item.item)} | {item.item in trap_rom_data}")
             if item.item in trap_rom_data or item.item == 0xBC0015:
                 item_name = ctx.item_names.lookup_in_game(item.item)
                 player_name = ctx.player_names[item.player]
@@ -701,8 +709,6 @@ class WaffleSNIClient(SNIClient):
 
             # Item from block
             elif loc_type == 0x0A and blocksanity_active:
-                # Blocks can't be collected for now
-                continue
                 block_index = loc_data & 0x0FFFF
                 blocksanity_data[block_index] = 1
                 new_blocksanity = True
@@ -735,9 +741,6 @@ class WaffleSNIClient(SNIClient):
             snes_buffered_write(ctx, SMW_LEVEL_CLEAR_FLAGS, bytearray(level_clear_flags))
             snes_buffered_write(ctx, SMW_PROGRESS_DATA, bytearray(progress_data))
             snes_buffered_write(ctx, SMW_PATH_DATA, bytearray(path_data))
-            # TODO: Fix this
-            print (new_events)
-            print (list(event_data))
             event_count = int.from_bytes(snes_data.get(SMWMemory.event_count), "little")
             snes_buffered_write(ctx, SMW_NUM_EVENTS_ADDR, bytes([event_count + new_events]))
 

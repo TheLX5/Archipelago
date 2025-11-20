@@ -656,11 +656,12 @@ def generate_level_list(world: "WaffleWorld"):
         shuffled_level_dict[0x32] = 0x32
     
     single_levels_copy = (easy_single_levels_copy.copy() + hard_single_levels_copy.copy())
-    if world.options.exclude_special_zone:
-        for level_id in special_zone_levels:
-            shuffled_level_dict[level_id] = level_id
-    else:
-        single_levels_copy.extend(special_zone_levels_copy.copy())
+    #if world.options.exclude_special_zone:
+    #     for level_id in special_zone_levels:
+    #         shuffled_level_dict[level_id] = level_id
+    #else:
+    #    single_levels_copy.extend(special_zone_levels_copy.copy())
+    single_levels_copy.extend(special_zone_levels_copy.copy())
 
     double_levels_copy = (easy_double_levels_copy.copy() + hard_double_levels_copy.copy())
     castle_fortress_levels_copy = (easy_castle_fortress_levels_copy.copy() + hard_castle_fortress_levels_copy.copy())

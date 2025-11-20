@@ -107,8 +107,10 @@ class WaffleRules:
             return True
         
     def forest_of_illusion_2_special_case(self, state: CollectionState) -> bool:
-        if self.world.options.enemy_shuffle.value:
-            return state.has(ItemName.super_star_active, self.player, 9)
+        if self.world.using_ut and self.world.options.enemy_shuffle.value:
+            return state.has(ItemName.glitched, self.player)  
+        elif self.world.options.enemy_shuffle.value:
+            return state.has(ItemName.super_star_active, self.player, 3)
         else:
             return True
     
@@ -208,12 +210,6 @@ class WaffleRules:
             elif " - Yellow Switch Palace Block" in loc.name:
                 add_rule(loc, lambda state: self.has_ysp(state))
 
-        # Add Boss Token amount requirements for map transitions
-        #all_pairs = {**world.teleport_pairs, **world.transition_pairs}
-        #for entrance, tokens in world.boss_token_requirements.items():
-        #    add_rule(world.multiworld.get_entrance(f"{entrance} -> {all_pairs[entrance]}", self.player), 
-        #             lambda state, t=tokens: state.has(ItemName.koopaling, world.player, t))
-
         # Handle goals
         if world.options.goal == Goal.option_yoshi_house:
             add_rule(world.multiworld.get_location(LocationName.yoshis_house, world.player),
@@ -228,15 +224,20 @@ class WaffleRules:
     def set_glitched_rules(self, game_difficulty: int) -> None:
         multiworld = self.world.multiworld
 
-        for loc in multiworld.get_locations(self.player):
-            if "(Event)" in loc.name:
-                continue
+        # Build entrance rules
+        # Basically skips adding the hard/very hard item requirements
+        for entrance_name, rule in self.connection_rules.items():
+            entrance = multiworld.get_entrance(entrance_name, self.player)
+            add_rule(entrance, lambda state, r=rule: r(state) and state.has(ItemName.glitched, self.player), combine="or")
 
+        # Build location rules
+        # Only process this for hard/very hard levels
+        for loc in multiworld.get_locations(self.player):
             if loc.parent_region.name in hard_gameplay_levels or loc.parent_region.name in very_hard_gameplay_levels:
                 if loc.name in self.location_rules:
                     glitched_rule = self.location_rules[loc.name]
                 else:
-                    continue
+                    glitched_rule = lambda state: self.true
                     
                 # Add generic rules for valid locations
                 if "- Midway Point" in loc.name:
@@ -246,12 +247,7 @@ class WaffleRules:
                 elif " - Yellow Switch Palace Block" in loc.name:
                     glitched_rule = lambda state, rule=glitched_rule: self.has_ysp(state) and rule(state)
 
-                if loc.parent_region.name in hard_gameplay_levels:
-                    glitched_rule = lambda state, rule=glitched_rule: self.can_beat_hard_level(state, game_difficulty) and rule(state)
-                elif loc.parent_region.name in very_hard_gameplay_levels:
-                    glitched_rule = lambda state, rule=glitched_rule: self.can_beat_very_hard_level(state, game_difficulty) and rule(state)
-
-                add_rule(loc, lambda state, rule=glitched_rule: rule(state) and state.has(ItemName.glitched, self.player), combine="or")
+                add_rule(loc, lambda state, r=glitched_rule: r(state) and state.has(ItemName.glitched, self.player), combine="or")
 
         # Build entrance rules
         for entrance_name, rule in self.connection_rules.items():
@@ -380,7 +376,7 @@ class WaffleBasicRules(WaffleRules):
             f"{LocationName.forest_of_illusion_2_region} -> {LocationName.forest_of_illusion_2_exit_1}": 
                 lambda state: self.can_swim(state) and self.forest_of_illusion_2_special_case(state),
             f"{LocationName.forest_of_illusion_2_region} -> {LocationName.forest_of_illusion_2_exit_2}": 
-                lambda state: self.can_carry_or_yoshi_tongue(state) and self.can_swim(state),
+                lambda state: self.can_carry_or_yoshi_tongue(state) and self.can_swim(state) and self.forest_of_illusion_2_special_case(state),
             f"{LocationName.forest_of_illusion_3_region} -> {LocationName.forest_of_illusion_3_exit_1}": 
                 lambda state: self.can_carry_or_yoshi_tongue(state),
             f"{LocationName.forest_of_illusion_3_region} -> {LocationName.forest_of_illusion_3_exit_2}": 
@@ -514,6 +510,8 @@ class WaffleBasicRules(WaffleRules):
                 self.true,
             LocationName.yoshis_island_1_powerup_block_1:
                 self.true,
+            LocationName.yoshis_island_1_room_2:
+                self.can_break_turn_blocks,
 
             LocationName.yoshis_island_2_dragon:
                 lambda state: self.has_yoshi(state) or self.can_climb(state),
@@ -554,7 +552,7 @@ class WaffleBasicRules(WaffleRules):
 
             LocationName.yoshis_island_3_dragon:
                 self.has_p_switch,
-            LocationName.yoshis_island_3_bonus_block:
+            LocationName.yoshis_island_3_prize:
                 self.true,
             LocationName.yoshis_island_3_midway:
                 self.true,
@@ -766,6 +764,8 @@ class WaffleBasicRules(WaffleRules):
                 lambda state: self.can_carry(state) or self.can_climb(state),
             LocationName.yoshis_island_castle_flying_block_1:
                 self.can_climb,
+            LocationName.yoshis_island_castle_room_2:
+                self.can_climb,
 
             LocationName.yellow_switch_palace:
                 self.true,
@@ -822,6 +822,8 @@ class WaffleBasicRules(WaffleRules):
                 self.true,
             LocationName.donut_plains_1_yellow_block_3:
                 self.true,
+            LocationName.donut_plains_1_room_2:
+                self.has_ysp,
 
             LocationName.donut_plains_2_dragon:
                 self.true,
@@ -849,7 +851,7 @@ class WaffleBasicRules(WaffleRules):
             LocationName.donut_plains_3_dragon:
                 lambda state: (self.can_break_turn_blocks(state) and self.can_climb(state)) or self.has_yoshi(state) or
                     self.can_cape_fly(state),
-            LocationName.donut_plains_3_bonus_block:
+            LocationName.donut_plains_3_prize:
                 lambda state: (self.can_break_turn_blocks(state) and self.can_climb(state)) or self.has_yoshi(state) or
                     self.can_cape_fly(state),
             LocationName.donut_plains_3_midway:
@@ -904,6 +906,8 @@ class WaffleBasicRules(WaffleRules):
                 self.can_swim,
             LocationName.donut_secret_1_key_block_1:
                 lambda state: self.can_swim(state) and self.can_carry(state) and self.has_p_switch(state),
+            LocationName.donut_secret_1_room_2:
+                self.can_swim,
 
             LocationName.donut_secret_2_dragon:
                 lambda state: self.can_climb(state) or self.has_yoshi(state),
@@ -930,6 +934,12 @@ class WaffleBasicRules(WaffleRules):
                 self.can_cape_fly,
             LocationName.donut_ghost_house_life_block_4:
                 self.can_cape_fly,
+            LocationName.donut_ghost_house_room_2:
+                self.can_cape_fly,
+            LocationName.donut_ghost_house_room_5:
+                self.has_p_switch,
+            LocationName.donut_ghost_house_room_6:
+                self.can_climb,
 
             LocationName.donut_secret_house_powerup_block_1:
                 self.true,
@@ -941,6 +951,14 @@ class WaffleBasicRules(WaffleRules):
                 self.has_p_switch,
             LocationName.donut_secret_house_directional_coin_block_1:
                 self.has_p_switch,
+            LocationName.donut_secret_house_room_3:
+                self.has_p_switch,
+            LocationName.donut_secret_house_room_4:
+                self.has_p_switch,
+            LocationName.donut_secret_house_room_5:
+                lambda state: self.has_p_switch(state) and self.can_carry(state) and (
+                    self.can_climb(state) or self.can_cape_fly(state)
+                ),
 
             LocationName.donut_plains_castle_hidden_1up:
                 self.true,
@@ -964,6 +982,8 @@ class WaffleBasicRules(WaffleRules):
                 self.true,
             LocationName.donut_plains_castle_green_block_1:
                 self.true,
+            LocationName.donut_plains_castle_room_2:
+                self.can_cape_fly,
 
             LocationName.green_switch_palace:
                 self.true,
@@ -1055,6 +1075,10 @@ class WaffleBasicRules(WaffleRules):
                 lambda state: self.can_swim(state) and (
                     self.can_climb(state) or self.has_yoshi(state)
                 ),
+            LocationName.vanilla_dome_2_room_2:
+                lambda state: self.can_swim(state) and (
+                    self.can_climb(state) or self.has_yoshi(state)
+                ),
 
             LocationName.vanilla_dome_3_dragon:
                 self.true,
@@ -1096,6 +1120,8 @@ class WaffleBasicRules(WaffleRules):
                 lambda state: self.can_cape_fly(state) and self.has_p_switch(state),
             LocationName.vanilla_dome_3_pswitch_coin_block_6:
                 lambda state: self.can_cape_fly(state) and self.has_p_switch(state),
+            LocationName.vanilla_dome_3_room_2:
+                self.can_cape_fly,
 
             LocationName.vanilla_dome_4_dragon:
                 self.true,
@@ -1142,6 +1168,10 @@ class WaffleBasicRules(WaffleRules):
                 self.can_climb,
             LocationName.vanilla_secret_1_powerup_block_2:
                 self.can_climb,
+            LocationName.vanilla_secret_1_room_2:
+                self.can_climb,
+            LocationName.vanilla_secret_1_room_3:
+                lambda state: self.can_climb(state) and self.can_carry(state) and self.has_bsp(state),
 
             LocationName.vanilla_secret_2_dragon:
                 self.can_cape_fly,
@@ -1176,6 +1206,8 @@ class WaffleBasicRules(WaffleRules):
                 self.can_swim,
             LocationName.vanilla_secret_3_powerup_block_2:
                 self.can_swim,
+            LocationName.vanilla_secret_3_room_2:
+                self.can_swim,
 
             LocationName.vanilla_ghost_house_dragon:
                 self.can_climb,
@@ -1191,6 +1223,8 @@ class WaffleBasicRules(WaffleRules):
                 self.true,
             LocationName.vanilla_ghost_house_blue_pow_block_1:
                 self.true,
+            LocationName.vanilla_ghost_house_room_3:
+                self.has_p_switch,
                 
             LocationName.vanilla_fortress_hidden_1up:
                 self.can_swim,
@@ -1199,6 +1233,8 @@ class WaffleBasicRules(WaffleRules):
             LocationName.vanilla_fortress_powerup_block_2:
                 self.can_swim,
             LocationName.vanilla_fortress_yellow_block_1:
+                self.can_swim,
+            LocationName.vanilla_fortress_room_2:
                 self.can_swim,
 
             LocationName.vanilla_dome_castle_life_block_1:
@@ -1217,7 +1253,7 @@ class WaffleBasicRules(WaffleRules):
 
             LocationName.butter_bridge_1_dragon:
                 self.butter_bridge_special_case,
-            LocationName.butter_bridge_1_bonus_block:
+            LocationName.butter_bridge_1_prize:
                 self.butter_bridge_special_case,
             LocationName.butter_bridge_1_powerup_block_1:
                 self.butter_bridge_special_case,
@@ -1228,6 +1264,8 @@ class WaffleBasicRules(WaffleRules):
             LocationName.butter_bridge_1_multi_coin_block_3:
                 self.butter_bridge_special_case,
             LocationName.butter_bridge_1_life_block_1:
+                self.butter_bridge_special_case,
+            LocationName.butter_bridge_1_room_2:
                 self.butter_bridge_special_case,
 
             LocationName.butter_bridge_2_dragon:
@@ -1251,6 +1289,8 @@ class WaffleBasicRules(WaffleRules):
                 self.true,
             LocationName.cheese_bridge_powerup_block_3:
                 self.true,
+            LocationName.cheese_bridge_room_3:
+                self.has_yoshi,
 
             LocationName.cookie_mountain_dragon:
                 lambda state: self.can_climb(state) or self.has_yoshi(state),
@@ -1330,6 +1370,8 @@ class WaffleBasicRules(WaffleRules):
             LocationName.soda_lake_dragon:
                 self.can_swim,
             LocationName.soda_lake_powerup_block_1:
+                self.can_swim,
+            LocationName.soda_lake_room_2:
                 self.can_swim,
 
             LocationName.twin_bridges_castle_powerup_block_1:
@@ -1451,6 +1493,8 @@ class WaffleBasicRules(WaffleRules):
                 self.true,
             LocationName.forest_of_illusion_4_coin_block_10:
                 self.true,
+            LocationName.forest_of_illusion_4_room_2:
+                self.can_run,
 
             LocationName.forest_ghost_house_dragon:
                 self.has_p_switch,
@@ -1466,6 +1510,10 @@ class WaffleBasicRules(WaffleRules):
                 self.true,
             LocationName.forest_ghost_house_life_block_1:
                 self.true,
+            LocationName.forest_ghost_house_room_3:
+                self.has_p_switch,
+            LocationName.forest_ghost_house_room_4:
+                self.has_p_switch,
 
             LocationName.forest_secret_dragon:
                 self.true,
@@ -1524,6 +1572,8 @@ class WaffleBasicRules(WaffleRules):
                 ),
             LocationName.chocolate_island_1_life_block_1:
                 lambda state: self.has_p_switch(state) or self.has_yoshi(state),
+            LocationName.chocolate_island_1_room_2:
+                lambda state: self.has_p_switch(state) or self.has_yoshi(state),
                 
             LocationName.chocolate_island_2_dragon:
                 lambda state: self.has_bsp(state) and (
@@ -1567,7 +1617,7 @@ class WaffleBasicRules(WaffleRules):
 
             LocationName.chocolate_island_3_dragon:
                 self.true,
-            LocationName.chocolate_island_3_bonus_block:
+            LocationName.chocolate_island_3_prize:
                 self.true,
             LocationName.chocolate_island_3_powerup_block_1:
                 self.true,
@@ -1594,6 +1644,8 @@ class WaffleBasicRules(WaffleRules):
                 self.true,
             LocationName.chocolate_island_4_powerup_block_1:
                 self.true,
+            LocationName.chocolate_island_4_room_2:
+                self.has_p_switch,
 
             LocationName.chocolate_island_5_dragon:
                 self.true,
@@ -1604,6 +1656,8 @@ class WaffleBasicRules(WaffleRules):
             LocationName.chocolate_island_5_life_block_1:
                 self.has_p_switch,
             LocationName.chocolate_island_5_yellow_block_1:
+                self.has_p_switch,
+            LocationName.chocolate_island_5_room_2:
                 self.has_p_switch,
 
             LocationName.chocolate_ghost_house_powerup_block_1:
@@ -1616,6 +1670,8 @@ class WaffleBasicRules(WaffleRules):
             LocationName.chocolate_secret_powerup_block_1:
                 self.true,
             LocationName.chocolate_secret_powerup_block_2:
+                self.can_run,
+            LocationName.chocolate_secret_room_5:
                 self.can_run,
                 
             LocationName.chocolate_fortress_powerup_block_1:
@@ -1644,6 +1700,10 @@ class WaffleBasicRules(WaffleRules):
                 self.can_swim,
             LocationName.sunken_ghost_ship_star_block_1:
                 self.can_swim,
+            LocationName.sunken_ghost_ship_room_2:
+                self.can_swim,
+            LocationName.sunken_ghost_ship_room_3:
+                self.can_swim,
 
             LocationName.valley_of_bowser_1_dragon:
                 self.true,
@@ -1667,6 +1727,8 @@ class WaffleBasicRules(WaffleRules):
                 self.has_feather,
             LocationName.valley_of_bowser_1_vine_block_1:
                 self.true,
+            LocationName.valley_of_bowser_1_room_2:
+                self.can_climb,
 
             LocationName.valley_of_bowser_2_dragon:
                 self.has_yoshi,
@@ -1730,8 +1792,12 @@ class WaffleBasicRules(WaffleRules):
 
             LocationName.star_road_1_dragon:
                 self.can_break_turn_blocks,
+            LocationName.star_road_1_room_2:
+                self.can_break_turn_blocks,
 
             LocationName.star_road_2_star_block_1:
+                self.can_swim,
+            LocationName.star_road_2_room_2:
                 self.can_swim,
 
             LocationName.star_road_3_key_block_1:
@@ -1894,6 +1960,8 @@ class WaffleBasicRules(WaffleRules):
                 lambda state: self.can_climb(state) and self.has_p_switch(state) and self.has_feather(state),
             LocationName.special_zone_1_pswitch_coin_block_13:
                 lambda state: self.can_climb(state) and self.has_p_switch(state) and self.has_feather(state),
+            LocationName.special_zone_1_room_2:
+                self.can_climb,
 
             LocationName.special_zone_2_dragon:
                 self.has_p_balloon,
@@ -1926,6 +1994,8 @@ class WaffleBasicRules(WaffleRules):
                 self.true,
             LocationName.special_zone_3_wings_block_1:
                 self.true,
+            LocationName.special_zone_3_room_3:
+                self.has_yoshi,
 
             LocationName.special_zone_4_dragon:
                 lambda state: (self.can_carry(state) or self.has_p_switch(state)) and self.has_super_star(state),
@@ -2016,6 +2086,10 @@ class WaffleBasicRules(WaffleRules):
             LocationName.special_zone_6_coin_block_32:
                 self.can_swim,
             LocationName.special_zone_6_coin_block_33:
+                self.can_swim,
+            LocationName.special_zone_6_room_2:
+                self.can_swim,
+            LocationName.special_zone_6_room_3:
                 self.can_swim,
 
             LocationName.special_zone_7_dragon:

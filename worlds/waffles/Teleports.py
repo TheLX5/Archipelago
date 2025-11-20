@@ -310,10 +310,10 @@ def generate_entrance_rando(world: "WaffleWorld"):
         LocationName.valley_chocolate_entrance_pipe: 11,
     }
 
-    if world.options.exclude_special_zone:
-        prefilled_exits[LocationName.star_road_special] = LocationName.special_star_road
-        prefilled_exits[LocationName.special_complete] = LocationName.yoshis_house_tile
-        #local_region_mapping.pop(LocationName.special_star_road)
+    #if world.options.exclude_special_zone:
+    #    prefilled_exits[LocationName.star_road_special] = LocationName.special_star_road
+    #    prefilled_exits[LocationName.special_complete] = LocationName.yoshis_house_tile
+    #    #local_region_mapping.pop(LocationName.special_star_road)
 
     if world.options.map_teleport_shuffle == "off":
         prefilled_exits[LocationName.donut_plains_star_road] = LocationName.star_road_donut
@@ -490,9 +490,9 @@ def generate_entrance_rando(world: "WaffleWorld"):
                         used_exits = list(prefilled_exits.values())
                         break
 
-                    if world.options.exclude_special_zone:
-                        emergency_list.remove(LocationName.special_star_road)
-                        emergency_list.remove(LocationName.yoshis_house_tile)
+                    #if world.options.exclude_special_zone:
+                    #    emergency_list.remove(LocationName.special_star_road)
+                    #    emergency_list.remove(LocationName.yoshis_house_tile)
                     emergency_swap = world.random.choice(emergency_list)
                     processed_exits.remove(emergency_swap)
                     if emergency_swap in used_exits:
