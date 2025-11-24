@@ -22,8 +22,9 @@ easter_season = {
     "dragon_coin_checks": True,
     "moon_checks": True,
     "hidden_1up_checks": True,
-    "bonus_block_checks": True,
+    "star_block_checks": True,
     "midway_point_checks": True,
+    "room_checks": True,
     "block_checks": {
         "Coin Blocks",
         "Item Blocks",
@@ -61,8 +62,9 @@ dev_choice = {
     "dragon_coin_checks": True,
     "moon_checks": True,
     "hidden_1up_checks": True,
-    "bonus_block_checks": True,
+    "star_block_checks": True,
     "midway_point_checks": True,
+    "room_checks": True,
     "block_checks": {
         "Coin Blocks",
         "Item Blocks",
