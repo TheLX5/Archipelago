@@ -409,7 +409,7 @@ class WafflePatchExtension(APPatchExtension):
             new_data = []
             for idy, sprite in enumerate(data):
                 sprite = int.from_bytes(sprite, "little")
-                num = sprite >> 16
+                num = (sprite >> 16) | ((sprite >> 2) & 0x03)
                 if num not in enemy_list_in_use.keys():
                     new_data += sprite.to_bytes(3, "little")
                     continue
@@ -426,8 +426,7 @@ class WafflePatchExtension(APPatchExtension):
                 # yyyyEESY	XXXXssss	NNNNNNNN
                 # NNNNNNNN XXXXssss yyyyEESY
 
-                # Process extra data
-                extra_bits = (sprite >> 2) & 0x03
+                # Process displacement based on tags
                 x_pos = (sprite >> 12) & 0x0F | (sprite >> 4) & 0xF0 | (sprite << 7) & 0x100
                 y_pos = (sprite & 0xF0) >> 4 | (sprite & 0x01) << 4
 
@@ -448,11 +447,14 @@ class WafflePatchExtension(APPatchExtension):
                     x_pos -= x_diff
 
                 # Pack everything again
+                #print (f"{sprite:06X} | {num:04X}")
                 sprite = 0
                 sprite |= selected_id << 16
-                sprite |= extra_bits << 2
+                sprite |= (selected_id & 0x300) >> 6
                 sprite |= ((x_pos & 0x0F) << 12) | ((x_pos & 0xF0) << 4) | ((x_pos & 0x100) >> 7)
                 sprite |= ((y_pos & 0x0F) << 4) | ((y_pos & 0x10) >> 4)
+                #num = (sprite >> 16) | ((sprite >> 2) & 0x03)
+                #print (f"{sprite:06X} | {num:04X}")
                 new_data += sprite.to_bytes(3, "little")
 
             rom[pointer+1:(pointer+1+len(data)*3)] = bytearray(new_data)
@@ -891,9 +893,6 @@ def patch_rom(world: "WaffleWorld", patch: WaffleProcedurePatch, player: int, ac
 
     patch.write_bytes(0x2B7F1, player_name_bytes) # MARIO A
     patch.write_bytes(0x2B726, player_name_bytes) # MARIO A
-
-    # Starting Life Count
-    #patch.write_bytes(0x1E25, bytearray([world.options.starting_life_count.value - 1]))
 
     # Handle Level Shuffle
     handle_level_shuffle(patch, active_level_dict)

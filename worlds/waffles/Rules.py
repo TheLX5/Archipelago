@@ -359,7 +359,7 @@ class WaffleBasicRules(WaffleRules):
             f"{LocationName.butter_bridge_2_region} -> {LocationName.butter_bridge_2_exit_1}": 
                 self.true,
             f"{LocationName.cheese_bridge_region} -> {LocationName.cheese_bridge_exit_1}": 
-                self.can_climb,
+                lambda state: self.can_climb(state) or self.has_yoshi(state),
             f"{LocationName.cheese_bridge_region} -> {LocationName.cheese_bridge_exit_2}": 
                 self.can_cape_fly,
             f"{LocationName.soda_lake_region} -> {LocationName.soda_lake_exit_1}": 
@@ -458,7 +458,7 @@ class WaffleBasicRules(WaffleRules):
             f"{LocationName.star_road_3_region} -> {LocationName.star_road_3_exit_1}": 
                 self.true,
             f"{LocationName.star_road_3_region} -> {LocationName.star_road_3_exit_2}": 
-                lambda state: self.can_carry(state) or (self.can_cape_fly(state) and self.has_yoshi_carry(state)),
+                lambda state: self.can_carry(state) or (self.has_fire_flower(state) and self.has_yoshi_carry(state)),
             f"{LocationName.star_road_4_region} -> {LocationName.star_road_4_exit_1}": 
                 self.true,
             f"{LocationName.star_road_4_region} -> {LocationName.star_road_4_exit_2}": 
@@ -1801,7 +1801,7 @@ class WaffleBasicRules(WaffleRules):
                 self.can_swim,
 
             LocationName.star_road_3_key_block_1:
-                lambda state: self.has_fire_flower(state) or self.can_carry(state),
+                lambda state: self.can_carry(state) or self.has_fire_flower(state),
 
             LocationName.star_road_4_powerup_block_1:
                 self.true,
