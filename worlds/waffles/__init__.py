@@ -466,6 +466,8 @@ class WaffleWorld(World):
 
 
     def count_locations(self):
+        from . import Locations
+
         total_required_locations = 96
         if self.options.dragon_coin_checks:
             total_required_locations += len(Locations.dragon_coin_location_table.keys())
