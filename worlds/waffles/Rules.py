@@ -1247,6 +1247,8 @@ class WaffleBasicRules(WaffleRules):
                 self.has_p_switch,
             LocationName.vanilla_dome_castle_midway:
                 self.has_p_switch,
+            LocationName.vanilla_dome_castle_room_2:
+                self.has_p_switch,
 
             LocationName.red_switch_palace:
                 self.true,
