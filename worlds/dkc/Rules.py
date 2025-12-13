@@ -996,21 +996,21 @@ class DKCStrictRules(DKCRules):
                 lambda state: self.has_platforms(state) and self.has_tires(state) and self.has_kannons(state),
 
             LocationName.manic_mincers_clear:
-                lambda state: (self.has_both_kongs(state) or self.has_rambi(state)) and self.has_tires(state),
+                self.has_tires,
             EventName.manic_mincers_clear:
-                lambda state: (self.has_both_kongs(state) or self.has_rambi(state)) and self.has_tires(state),
+                self.has_tires,
             LocationName.manic_mincers_bonus_1:
-                lambda state: (self.has_both_kongs(state) and self.can_carry(state)) or self.has_rambi(state),
+                lambda state: self.can_carry(state) or self.has_rambi(state),
             LocationName.manic_mincers_bonus_2:
-                lambda state: (self.has_both_kongs(state) and self.can_carry(state)) or self.has_rambi(state),
+                lambda state: self.can_carry(state) or self.has_rambi(state),
             LocationName.manic_mincers_kong:
-                lambda state: self.has_both_kongs(state) or self.has_rambi(state),
+                self.true,
             LocationName.manic_mincers_bunch_1:
-                lambda state: self.has_both_kongs(state) or self.has_rambi(state),
+                self.true,
             LocationName.manic_mincers_bunch_2:
-                lambda state: self.has_both_kongs(state) or self.has_rambi(state),
+                self.true,
             LocationName.manic_mincers_token_1:
-                lambda state: self.has_both_kongs(state) or self.has_rambi(state),
+                self.can_roll,
 
             LocationName.misty_mine_clear:
                 self.can_climb,
@@ -1855,9 +1855,9 @@ class DKCLooseRules(DKCRules):
             EventName.manic_mincers_clear:
                 self.has_tires,
             LocationName.manic_mincers_bonus_1:
-                lambda state: (self.has_both_kongs(state) and self.can_carry(state)) or self.has_rambi(state),
+                lambda state: self.can_carry(state) or self.has_rambi(state),
             LocationName.manic_mincers_bonus_2:
-                lambda state: (self.has_both_kongs(state) and self.can_carry(state)) or self.has_rambi(state),
+                lambda state: self.can_carry(state) or self.has_rambi(state),
             LocationName.manic_mincers_kong:
                 self.true,
             LocationName.manic_mincers_bunch_1:
