@@ -674,9 +674,9 @@ class DKCStrictRules(DKCRules):
                 lambda state: self.can_climb(state) and self.has_tires(state),
 
             LocationName.orang_utan_gang_clear:
-                lambda state: self.can_carry(state) or self.has_expresso(state) or self.can_roll(state) or self.has_both_kongs(state),
+                self.true,
             EventName.orang_utan_gang_clear:
-                lambda state: self.can_carry(state) or self.has_expresso(state) or self.can_roll(state) or self.has_both_kongs(state),
+                self.true,
             LocationName.orang_utan_gang_bonus_1:
                 self.has_expresso,
             LocationName.orang_utan_gang_bonus_2:
@@ -698,13 +698,13 @@ class DKCStrictRules(DKCRules):
             LocationName.orang_utan_gang_bunch_4:
                 self.can_roll,
             LocationName.orang_utan_gang_bunch_5:
-                lambda state: self.can_slap(state) and (self.can_carry(state) or self.has_expresso(state) or self.can_roll(state) or self.has_diddy(state)),
+                self.can_slap,
             LocationName.orang_utan_gang_bunch_6:
                 self.has_expresso,
             LocationName.orang_utan_gang_token_1:
                 lambda state: self.has_tires(state) and self.has_expresso(state),
             LocationName.orang_utan_gang_bunch_7:
-                lambda state: self.can_slap(state) and (self.can_carry(state) or self.has_expresso(state) or self.can_roll(state) or self.has_diddy(state)),
+                self.can_slap,
             LocationName.orang_utan_gang_bunch_8:
                 self.has_expresso,
             LocationName.orang_utan_gang_bunch_9:
@@ -1547,13 +1547,13 @@ class DKCLooseRules(DKCRules):
             LocationName.orang_utan_gang_bunch_4:
                 self.can_roll,
             LocationName.orang_utan_gang_bunch_5:
-                lambda state: self.can_slap(state) and (self.can_carry(state) or self.has_expresso(state)),
+                self.can_slap,
             LocationName.orang_utan_gang_bunch_6:
                 lambda state: self.has_expresso(state) or (self.has_diddy(state) and self.can_roll(state)),
             LocationName.orang_utan_gang_token_1:
                 lambda state: self.has_tires(state) and self.has_expresso(state),
             LocationName.orang_utan_gang_bunch_7:
-                lambda state: self.can_slap(state) and (self.can_carry(state) or self.has_expresso(state)),
+                self.can_slap,
             LocationName.orang_utan_gang_bunch_8:
                 self.true,
             LocationName.orang_utan_gang_bunch_9:
