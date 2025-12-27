@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from Options import Choice, Range, Toggle, DeathLink, DefaultOnToggle, OptionSet, OptionGroup, PerGameCommonOptions
+from Options import Choice, Range, Toggle, DeathLink, DefaultOnToggle, OptionSet, OptionGroup, PerGameCommonOptions, Visibility
 
 
 class Goal(Choice):
@@ -24,7 +24,7 @@ class NumberOfYoshiEggs(Range):
     The amount of eggs rolled by this option will be added to the amount of eggs created by the Local Golden Yoshi Eggs option
     and both of them will not exceed the 255 egg limit.
     """
-    display_name = "Golden Yoshi Eggs in Pool"
+    display_name = "Yoshi Egg Count"
     range_start = 0
     range_end = 255
     default = 50
@@ -38,10 +38,10 @@ class LocalYoshiEggPlacement(OptionSet):
 
     The "Every Level" option has priority over the others, creating an at least 96 egg game.
 
-    The amount of eggs rolled by this option will be added to the amount of eggs created by the Golden Yoshi Eggs in Pool option
+    The amount of eggs rolled by this option will be added to the amount of eggs created by the yoshi_egg_count option
     and both of them will not exceed the 255 egg limit.
     """
-    display_name = "Local Golden Yoshi Eggs"
+    display_name = "Local Yoshi Egg Placement"
     valid_keys = {
         "Every Level",
         "Castles",
@@ -61,7 +61,7 @@ class PercentageOfYoshiEggs(Range):
     """
     What Percentage of Yoshi Eggs are required to finish.
 
-    This option will sum Local Golden Yoshi Eggs and Golden Yoshi Eggs in Pool, then it'll calculate the required amount from that egg count.
+    This option will sum yoshi_egg_placement and yoshi_egg_count, then it'll calculate the required amount from that egg count.
     """
     display_name = "Required Percentage of Golden Yoshi Eggs"
     range_start = 1
@@ -231,6 +231,21 @@ class LevelShuffle(Toggle):
     display_name = "Level Shuffle"
 
 
+class StartingLocation(Choice):
+    """
+    Which location is your starting one
+    May interact incorrectly with forced Collects
+    Will throw errors on certain option combinations, please test your YAML
+    """
+    display_name = "Starting Location"
+    option_yoshis_island = 0
+    option_donut_plains = 1
+    option_vanilla_dome = 2
+    option_forest_of_illusion = 3
+    option_special_zone = 4
+    default = 0
+
+
 class MapTeleportShuffle(Choice):
     """
     Whether map teleports (stars and pipes) are shuffled
@@ -271,6 +286,16 @@ class SwapDonutGhostHouseExits(DefaultOnToggle):
     This option has priority over Swap Level Exits.
     """
     display_name = "Swap Donut GH Exits"
+
+
+class CarrylessExits(Range):
+    """
+    Swaps some Keyholes with a Red Goal Orb which triggers the Secret Exit upon touching it
+    """
+    display_name = "Carryless Exit Count"
+    range_start = 0
+    range_end = 18
+    default = 0
 
 
 class SwapLevelExits(Toggle):
@@ -606,6 +631,14 @@ class TrapLink(Toggle):
     display_name = "Trap Link"
 
 
+class UngoldenEggs(Toggle):
+    """
+    Does exactly what you're thinking of.
+    """
+    display_name = "No mas huevos dorados"
+    visibility = Visibility.template | Visibility.simple_ui | Visibility.complex_ui
+
+
 waffle_option_groups = [
     OptionGroup("Goal Options", [
         Goal,
@@ -630,6 +663,10 @@ waffle_option_groups = [
     OptionGroup("Level Shuffling", [
         LevelShuffle,
         LevelEffects,
+        CarrylessExits,
+        SwapLevelExits,
+        SwapExitCount,
+        SwapDonutGhostHouseExits,
         MapTeleportShuffle,
         MapTransitionShuffle,
         #ExcludeSpecialZone,
@@ -637,9 +674,6 @@ waffle_option_groups = [
         BowserCastleDoors,
         BowserCastleRooms,
         BossShuffle,
-        SwapLevelExits,
-        SwapExitCount,
-        SwapDonutGhostHouseExits,
     ]),
     OptionGroup("Junk and Traps", [
         JunkFillPercentage,
@@ -693,14 +727,16 @@ class WaffleOptions(PerGameCommonOptions):
     bowser_castle_rooms: BowserCastleRooms
     level_effects: LevelEffects
     level_shuffle: LevelShuffle
+    starting_location: StartingLocation
     map_teleport_shuffle: MapTeleportShuffle
     map_transition_shuffle: MapTransitionShuffle
+    carryless_exits: CarrylessExits
+    swap_level_exits: SwapLevelExits
+    swap_exit_count: SwapExitCount
+    swap_donut_gh_exits: SwapDonutGhostHouseExits
     #exclude_special_zone: ExcludeSpecialZone
     boss_shuffle: BossShuffle
     enemy_shuffle: EnemyShuffle
-    swap_donut_gh_exits: SwapDonutGhostHouseExits
-    swap_level_exits: SwapLevelExits
-    swap_exit_count: SwapExitCount
     display_received_item_popups: DisplayReceivedItemPopups
     junk_fill_percentage: JunkFillPercentage
     trap_fill_percentage: TrapFillPercentage
@@ -723,3 +759,4 @@ class WaffleOptions(PerGameCommonOptions):
     music_shuffle: MusicShuffle
     sfx_shuffle: SFXShuffle
     mario_palette: MarioPalette
+    ungolden_eggs: UngoldenEggs

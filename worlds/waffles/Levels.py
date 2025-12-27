@@ -251,6 +251,29 @@ level_info_dict = {
     0x7D: SMWLevel(LocationName.vob_from_ci, (0x00, 0x00), 0xFFFFFF, 0xFF),
 }
 
+
+banned_spoiler_levels = (
+    0x00,
+    0x28,
+    0x03,
+    0x16,
+    0x2C,
+    0x12,
+    0x1E,
+    0x31,
+    0x32,
+    0x30,
+    0x5B,
+    0x53,
+    0x52,
+    0x57,
+    0x5C,
+    0x55,
+    0x4D,
+    0x48,
+)
+
+
 lockable_tiles = [
     0x14,
 
@@ -331,6 +354,7 @@ hard_gameplay_levels = [
     LocationName.vanilla_secret_3_region,
     LocationName.vanilla_fortress_region,
     LocationName.butter_bridge_2_region,
+    LocationName.forest_of_illusion_2_region,
     LocationName.forest_fortress_region,
     LocationName.chocolate_fortress_region,
     LocationName.sunken_ghost_ship_region,
@@ -502,6 +526,15 @@ switch_palace_levels = [
     0x45,
 ]
 
+ghost_house_level_ids = [
+    0x38,
+    0x21,
+    0x41,
+    0x2B,
+    0x04,
+    0x13,
+]
+
 single_levels = easy_single_levels.copy() + hard_single_levels.copy() + special_zone_levels.copy()
 double_levels = easy_double_levels.copy() + hard_double_levels.copy()
 castle_levels = easy_castle_fortress_levels.copy() + hard_castle_fortress_levels.copy()
@@ -568,6 +601,13 @@ reachable_levels_per_path = {
     ],
 }
 
+possible_starting_entrances = [
+    LocationName.yoshis_house_tile,
+    LocationName.dp_from_yi,
+    LocationName.vd_from_dp,
+    LocationName.foi_from_tw,
+    LocationName.special_star_road,
+]
 
 def generate_level_list(world: "WaffleWorld"):
     if not world.options.level_shuffle:
@@ -667,7 +707,8 @@ def generate_level_list(world: "WaffleWorld"):
     castle_fortress_levels_copy = (easy_castle_fortress_levels_copy.copy() + hard_castle_fortress_levels_copy.copy())
         
     remaining_exits = list(world.local_region_mapping.keys())
-    check_next_exits = [LocationName.yoshis_house_tile]
+    starting_location = possible_starting_entrances[world.options.starting_location.value]
+    check_next_exits = [starting_location]
     path_count = 0
     while len(remaining_exits) != 0:
         cache_exits = check_next_exits.copy()
@@ -707,8 +748,9 @@ def generate_level_list(world: "WaffleWorld"):
 
     return shuffled_level_list
 
+
 def generate_swapped_exits(world: "WaffleWorld"):
-    if world.options.swap_level_exits:
+    if world.options.swap_exit_count.value:
         double_levels_copy = easy_double_levels.copy() + hard_double_levels.copy()
         double_levels_copy.remove(0x5A)
         double_levels_copy.remove(0x13)
@@ -718,6 +760,22 @@ def generate_swapped_exits(world: "WaffleWorld"):
             world.swapped_exits.append(level_id)
     if world.options.swap_donut_gh_exits and 0x04 not in world.swapped_exits:
             world.swapped_exits.append(0x04)
+
+
+def generate_carryless_exits(world: "WaffleWorld"):
+    if world.options.carryless_exits.value:
+        double_levels_copy = easy_double_levels.copy() + hard_double_levels.copy()
+        double_levels_copy.remove(0x04)
+        double_levels_copy.remove(0x13)
+        double_levels_copy.remove(0x2D)
+        double_levels_copy.remove(0x0F)
+        double_levels_copy.remove(0x41)
+        double_levels_copy.remove(0x23)
+        world.random.shuffle(double_levels_copy)
+        for _ in range(world.options.carryless_exits.value):
+            level_id = double_levels_copy.pop(0)
+            world.carryless_exits.append(level_id)
+
 
 def swap_level(level_id: int, source: list[int], destination: list[int]):
     if level_id not in source:

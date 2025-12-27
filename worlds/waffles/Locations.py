@@ -5,7 +5,7 @@ from .Names import LocationName
 from .Options import Goal
 from .Levels import castle_locations, ghost_house_locations, switch_palace_locations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 if TYPE_CHECKING:
     from . import WaffleWorld
 
@@ -1232,10 +1232,10 @@ yoshi_house_location_table = {
     LocationName.yoshis_house: GOAL | 2,
 }
 
-egg_location_table = {}
-castle_location_table = {}
-ghost_house_location_table = {}
-switch_palace_location_table = {}
+egg_location_table: dict[str, int] = {}
+castle_location_table: dict[str, int] = {}
+ghost_house_location_table: dict[str, int] = {}
+switch_palace_location_table: dict[str, int] = {}
 for loc_name, loc_id in level_location_table.items():
     egg_loc_name = f"{loc_name} (Hidden Egg)"
     egg_location_table[egg_loc_name] = loc_id | 0x01

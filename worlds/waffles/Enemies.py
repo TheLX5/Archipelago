@@ -206,17 +206,17 @@ enemy_list = {
     0x0C9: EnemyData(0x0C9, "Bullet Bill shooter", 35, (0,0), ["shooter"], ["shooter"]),
     0x0CA: EnemyData(0x0CA, "Torpedo Launcher", 35, (0,0), ["shooter"], ["shooter"]),
 
-    0x0CB: EnemyData(0x0CB, "Eerie, generator", 20, (0,0), ["generator"], ["generator"]),
-    0x0D1: EnemyData(0x0D1, "Jumping fish, generator", 20, (0,0), ["generator"], ["generator"]),
-    0x0CC: EnemyData(0x0CC, "Para-Goomba, generator", 20, (0,0), ["generator"], ["generator"]),
-    0x0CD: EnemyData(0x0CD, "Para-Bomb, generator", 20, (0,0), ["generator"], ["generator"]),
-    0x0CE: EnemyData(0x0CE, "Para-Bomb and Para-Goomba, generator", 20, (0,0), ["generator"], ["generator"]),
-    0x0D3: EnemyData(0x0D3, "Super Koopa, generator", 20, (0,0), ["generator"], ["generator"]),
-    0x0D4: EnemyData(0x0D4, "Bubble with Goomba and Bob-omb, generator", 20, (0,0), ["generator"], ["generator"]),
-    0x0D5: EnemyData(0x0D5, "Bullet Bill, generator", 20, (0,0), ["generator"], ["generator"]),
-    0x0D6: EnemyData(0x0D6, "Bullet Bill surrounded, generator", 20, (0,0), ["generator"], ["generator"]),
-    0x0D7: EnemyData(0x0D7, "Bullet Bill diagonal, generator", 20, (0,0), ["generator"], ["generator"]),
-    0x0D8: EnemyData(0x0D8, "Bowser statue fire breath, generator", 20, (0,0), ["generator"], ["generator"]),
+    0x0CB: EnemyData(0x0CB, "Eerie, generator", 5, (0,0), ["generator"], ["generator"]),
+    0x0D1: EnemyData(0x0D1, "Jumping fish, generator", 5, (0,0), ["generator"], ["generator"]),
+    0x0CC: EnemyData(0x0CC, "Para-Goomba, generator", 5, (0,0), ["generator"], ["generator"]),
+    0x0CD: EnemyData(0x0CD, "Para-Bomb, generator", 5, (0,0), ["generator"], ["generator"]),
+    0x0CE: EnemyData(0x0CE, "Para-Bomb and Para-Goomba, generator", 5, (0,0), ["generator"], ["generator"]),
+    0x0D3: EnemyData(0x0D3, "Super Koopa, generator", 5, (0,0), ["generator"], ["generator"]),
+    0x0D4: EnemyData(0x0D4, "Bubble with Goomba and Bob-omb, generator", 5, (0,0), ["generator"], ["generator"]),
+    0x0D5: EnemyData(0x0D5, "Bullet Bill, generator", 5, (0,0), ["generator"], ["generator"]),
+    0x0D6: EnemyData(0x0D6, "Bullet Bill surrounded, generator", 5, (0,0), ["generator"], ["generator"]),
+    0x0D7: EnemyData(0x0D7, "Bullet Bill diagonal, generator", 5, (0,0), ["generator"], ["generator"]),
+    0x0D8: EnemyData(0x0D8, "Bowser statue fire breath, generator", 5, (0,0), ["generator"], ["generator"]),
 }
 
 tag_list = {
@@ -470,9 +470,6 @@ enemy_list_special_cases = {
         0x0B0: EnemyData(0x0B0, "Reflecting stream of Boo Buddies", 10, (0,0), ["flying"], ["boss enemy"]),
         0x037: EnemyData(0x037, "Boo", 17, (0,0), ["floating"], ["boss enemy"]),
     },
-    0x118: {
-        0x091: EnemyData(0x091, "Chargin' Chuck", 15, (0,0), ["skip"], ["skip"]),
-    },
     0x11C: {
         0x028: EnemyData(0x028, "Big Boo", 1, (0,3), ["floating"], ["skip"]),
         0x037: EnemyData(0x037, "Boo", 17, (0,0), ["floating"], ["skip"]),
@@ -485,7 +482,7 @@ enemy_list_special_cases = {
     },
     0x1C2: {
         0x00A: EnemyData(0x00A, "Red vertical flying Koopa", 20, (0,0), ["flying koopa"], ["flying", "floating", "flying koopa"]),
-        0x00B: EnemyData(0x00B, "Red horizontal flying Koopa", 20, (0,0), ["flying koopa"], ["flying", "floating", "flying koopa"]),
+        #0x00B: EnemyData(0x00B, "Red horizontal flying Koopa", 20, (0,0), ["flying koopa"], ["flying", "floating", "flying koopa"]),
         0x0AF: EnemyData(0x0AF, "Boo Block", 12, (0,0), ["skip"],  ["flying koopa"]),
         0x020: EnemyData(0x020, "Magikoopa's magic, stationary", 20, (0,0), ["skip"], ["skip"]),
         0x099: EnemyData(0x099, "Volcano Lotus", 15, (0,0), ["skip"], ["skip"]),
@@ -500,10 +497,6 @@ enemy_list_special_cases = {
     0x10F: {
         0x00B: EnemyData(0x00B, "Red horizontal flying Koopa", 20, (0,0), ["flying koopa"], ["flying", "floating", "flying koopa"]),
         0x0A1: EnemyData(0x0A1, "Bowser's bowling ball", 20, (0,0), ["flying koopa"], ["skip"]),
-    },
-    0x116: {
-        0x091: EnemyData(0x091, "Chargin' Chuck", 15, (0,0), ["skip"], ["skip"]),
-        #0xBF: EnemyData(0x0BF, "Mega Mole", 15, (0,0), ["skip"], ["skip"]),
     },
     0x00B: {
         0x02E: EnemyData(0x02E, "Spike Top", 20, (0,0), ["ground", "wall"], ["skip"]),
@@ -655,6 +648,8 @@ enemy_list_special_cases = {
         0x046: EnemyData(0x046, "Diggin' Chuck", 10, (0,0), ["skip"], ["skip"]),
         0x090: EnemyData(0x090, "Large green gas bubble", 5, (0,3), ["skip"], ["skip"]),
         0x0BF: EnemyData(0x0BF, "Mega Mole", 10, (0,0), ["skip"], ["skip"]),
+        0x01D: EnemyData(0x01D, "Hopping flame", 15, (0,0), ["skip"], ["skip"]),
+        0x03D: EnemyData(0x03D, "Rip Van Fish", 15, (0,0), ["skip"], ["skip"]),
     },
     0x020: {
         0x090: EnemyData(0x090, "Large green gas bubble", 5, (0,3), ["skip"], ["skip"]),
@@ -673,6 +668,7 @@ enemy_list_special_cases = {
         0x0BC: EnemyData(0x0BC, "Bowser statue, normal/fire/leap (X&3)", 20, (0,0), ["skip"], ["skip"]),
     },
     0x116: {
+        0x091: EnemyData(0x091, "Chargin' Chuck", 15, (0,0), ["skip"], ["ground"]),
         0x03A: EnemyData(0x03A, "Urchin, fixed vertical/horizontal (X&1)", 15, (0,0), ["skip"], ["skip"]),
         0x03B: EnemyData(0x03B, "Urchin, wall detect v/h (X&1)", 20, (0,0), ["skip"], ["skip"]),
         0x03C: EnemyData(0x03C, "Urchin, wall follow clockwise/counter (X&1)", 20, (0,0), ["skip"], ["skip"]),
@@ -749,12 +745,22 @@ enemy_list_special_cases = {
         0x011: EnemyData(0x011, "Buzzy Beetle", 15, (0,0), ["bounceable", "kickable"], ["ground", "kickable", "bounceable"]),
     },
     0x118: {
+        0x091: EnemyData(0x091, "Chargin' Chuck", 15, (0,0), ["skip"], ["skip"]),
         0x011: EnemyData(0x011, "Buzzy Beetle", 15, (0,0), ["bounceable", "kickable"], ["ground", "kickable", "bounceable"]),
     },
     0x010: {
         0x0C5: EnemyData(0x0C5, "Big Boo Boss", 20, (0,0), ["kickable"], ["skip"]),
         0x0A1: EnemyData(0x0A1, "Bowser's bowling ball", 20, (0,0), ["bounceable"], ["skip"]),
     },
+    0x125: {
+        0x094: EnemyData(0x094, "Whistlin' Chuck, fish/Koopa (X&1)", 5, (0,0), ["ground", "generator"], ["ground"]),
+    },
+    0x12D: {
+        0x00A: EnemyData(0x00A, "Red vertical flying Koopa", 20, (0,0), ["skip"], ["skip"]),
+    },
+    0x0DC: {
+        0x028: EnemyData(0x028, "Big Boo", 3, (0,3), ["floating"], ["floating", "flying", "ground", "water", "rotating", "buried", "shooter", "pipe", "upsidedown pipe"]),
+    }
 }
 
 full_displacement_tags = [
@@ -1061,5 +1067,9 @@ def modify_sprite_data(rom: bytearray, seed: int) -> bytearray:
     rom[0x03D06E+2] = 0xA1
     rom[0x03D071+2] = 0xA1
     rom[0x03D074+2] = 0xA1
+
+    # Funky (125)
+    # Move Whistlin' chuck a bit to the left
+    rom[0x03E71F+1] = 0xA9
 
     return rom

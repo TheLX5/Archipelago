@@ -13,6 +13,7 @@ def setup_options_from_slot_data(world: "WaffleWorld") -> None:
                 world.teleport_pairs = slot_data["teleport_pairs"]
                 world.transition_pairs = slot_data["transition_pairs"]
                 world.swapped_exits = slot_data["swapped_exits"]
+                world.carryless_exits = slot_data["carryless_exits"]
                 world.options.game_logic_difficulty.value = slot_data["game_logic_difficulty"]
                 world.options.inventory_yoshi_logic.value = slot_data["inventory_yoshi_logic"]
                 world.options.goal.value = slot_data["goal"]
@@ -28,6 +29,8 @@ def setup_options_from_slot_data(world: "WaffleWorld") -> None:
                 #world.options.exclude_special_zone.value = slot_data["exclude_special_zone"]
                 world.options.enemy_shuffle.value = slot_data["enemy_shuffle"]
                 world.options.yoshi_egg_placement.value = slot_data["yoshi_egg_placement"]
+                world.options.starting_location.value = slot_data["starting_location"]
+                world.options.ability_shuffle.value = slot_data["ability_shuffle"]
         else:
             world.using_ut = False
     else:
@@ -36,20 +39,28 @@ def setup_options_from_slot_data(world: "WaffleWorld") -> None:
 # Unused stuff for deferred entrances, might come back later
 def disconnect_entrances(world: "WaffleWorld") -> None:
     world.disconnected_entrances = {}
+    world.found_entrances_datastorage_key = []
     for entrance in world.get_entrances():
-        if entrance.name in ("Transition", "- Tile ->"):
+        if entrance.name.endswith(" - Tile"):
             world.disconnected_entrances[entrance] = entrance.connected_region
             entrance.connected_region = None
-            continue
+            key = entrance.name.split("-> ")[1].split(" - Tile")[0]
+            actual_key = "smw_{team}_{player}_" + key
+            world.found_entrances_datastorage_key.append(actual_key)
+
 
 def reconnect_found_entrance(world: "WaffleWorld", key: str) -> None:
     entrance_connected = False
+    level_name = key.split("_")[3]
     for entrance, region in world.disconnected_entrances.items():
-        if entrance.name in ("Transition", "- Tile ->"):
-            entrance.connect(region)
-            entrance_connected = True
+        if entrance.name.endswith(" - Tile"):
+            level_destination = entrance.name.split("-> ")[1].split(" - Tile")[0]
+            if level_destination == level_name:
+                entrance.connect(region)
+                entrance_connected = True
     if not entrance_connected:
         raise Exception("Entrance not found in reconnect_found_entrance")
+
 
 # for UT poptracker integration map tab switching
 def map_page_index(data: Any) -> int:

@@ -1,6 +1,7 @@
 from worlds.generic.Rules import add_rule
 
 from .Names import LocationName
+from .Levels import possible_starting_entrances
 
 from typing import TYPE_CHECKING, Dict, List
 if TYPE_CHECKING:
@@ -207,12 +208,8 @@ region_mapping: Dict[str, List[str]]  = {
 
 region_excluded_destinations: Dict[str, List[str]] = {
     LocationName.yi_to_ysp: [
-        LocationName.sr_from_foi,
-        LocationName.vob_from_ci,
     ],
     LocationName.yi_to_dp: [
-        LocationName.sr_from_foi,
-        LocationName.vob_from_ci,
     ],
     LocationName.dp_to_vd: [
         ],
@@ -228,10 +225,8 @@ region_excluded_destinations: Dict[str, List[str]] = {
         LocationName.valley_donut_exit_pipe,
     ],
     LocationName.vanilla_dome_top_entrance_pipe: [
-        LocationName.yoshis_house_tile,
     ],
     LocationName.vanilla_dome_bottom_entrance_pipe: [
-        LocationName.yoshis_house_tile,
     ],
     LocationName.chocolate_island_entrance_pipe: [
         LocationName.chocolate_island_exit_pipe,
@@ -246,6 +241,78 @@ region_excluded_destinations: Dict[str, List[str]] = {
     LocationName.special_complete: [
         LocationName.special_star_road,
     ],
+}
+
+region_excluded_destinations_per_starting_location: Dict[int, Dict[str, List[str]]] = {
+    0: {
+        LocationName.yi_to_ysp: [
+            LocationName.sr_from_foi,
+            LocationName.vob_from_ci,
+        ],
+        LocationName.yi_to_dp: [
+            LocationName.sr_from_foi,
+            LocationName.vob_from_ci,
+        ],
+        LocationName.vanilla_dome_top_entrance_pipe: [
+            LocationName.yoshis_house_tile,
+        ],
+        LocationName.vanilla_dome_bottom_entrance_pipe: [
+            LocationName.yoshis_house_tile,
+        ],
+    },
+    1: {
+        LocationName.dp_to_vd: [
+            LocationName.dp_from_yi,
+            LocationName.sr_from_foi,
+            LocationName.vob_from_ci,
+        ],
+        LocationName.donut_plains_star_road: [
+            LocationName.donut_plains_exit_pipe,
+        ],
+    },
+    2: {
+        LocationName.vanilla_dome_top_entrance_pipe: [
+            LocationName.star_road_donut,
+            LocationName.star_road_vanilla,
+            LocationName.star_road_twin_bridges,
+            LocationName.star_road_forest,
+            LocationName.star_road_valley,
+        ],
+        LocationName.vanilla_dome_bottom_entrance_pipe: [
+            LocationName.star_road_donut,
+            LocationName.star_road_vanilla,
+            LocationName.star_road_twin_bridges,
+            LocationName.star_road_forest,
+            LocationName.star_road_valley,
+        ],
+        LocationName.vanilla_dome_star_road: [
+            LocationName.star_road_donut,
+            LocationName.star_road_vanilla,
+            LocationName.star_road_twin_bridges,
+            LocationName.star_road_forest,
+            LocationName.star_road_valley,
+        ],
+    },
+    3: {
+        LocationName.foi_to_ci: [
+            LocationName.foi_from_tw,
+            LocationName.vob_from_ci,
+        ],
+        LocationName.foi_to_sr: [
+            LocationName.foi_from_tw,
+            LocationName.vob_from_ci,
+        ],
+    },
+    4: {
+        LocationName.special_complete: [
+            LocationName.special_star_road,
+            LocationName.star_road_donut,
+            LocationName.star_road_vanilla,
+            LocationName.star_road_twin_bridges,
+            LocationName.star_road_forest,
+            LocationName.star_road_valley,
+        ],
+    },
 }
 
 region_boss_token_additions = {
@@ -281,11 +348,17 @@ def generate_entrance_rando(world: "WaffleWorld"):
     world.teleport_data = {**smw_teleport_data}
     
     local_mapping: Dict[str, str] = {}
-    next_exits = [LocationName.yoshis_house_tile]
+    starting_location = possible_starting_entrances[world.options.starting_location.value]
+    next_exits = [starting_location]
     processed_exits = []
     used_exits = []
     local_region_mapping = {**region_mapping}
+
+    # Exclude destinations
     local_excluded_destinations = {**region_excluded_destinations}
+    exclusions = region_excluded_destinations_per_starting_location[world.options.starting_location.value]
+    local_excluded_destinations.update(exclusions)
+
     prefilled_exits: Dict[str, str] = {}
     boss_token_requirements = {
         LocationName.yi_to_ysp: 11,
@@ -357,14 +430,6 @@ def generate_entrance_rando(world: "WaffleWorld"):
         prefilled_exits[LocationName.foi_to_sr] = LocationName.sr_from_foi
         prefilled_exits[LocationName.ci_to_vob] = LocationName.vob_from_ci
 
-
-    if world.options.map_teleport_shuffle == "off" and world.options.map_transition_shuffle:
-        local_excluded_destinations[LocationName.yi_to_dp].append(LocationName.ysp_from_yi)
-        local_excluded_destinations[LocationName.yi_to_ysp].append(LocationName.sr_from_foi)
-        local_excluded_destinations[LocationName.foi_to_sr].append(LocationName.ysp_from_yi)
-        local_excluded_destinations[LocationName.foi_to_ci].append(LocationName.sr_from_foi)
-        
-
     for entrance, exit in prefilled_exits.items():
         local_mapping[entrance] = exit
 
@@ -382,7 +447,7 @@ def generate_entrance_rando(world: "WaffleWorld"):
                 local_mapping = {}
                 for entrance, exit in prefilled_exits.items():
                     local_mapping[entrance] = exit
-                next_exits = [LocationName.yoshis_house_tile]
+                next_exits = [starting_location]
                 processed_exits = []
                 used_exits = list(prefilled_exits.values())
                 swap_count = 0
@@ -453,7 +518,7 @@ def generate_entrance_rando(world: "WaffleWorld"):
         # Reachabilty check
         if len(processed_exits) == len(local_region_mapping.keys()):
             remaining_exits = list(local_region_mapping.keys())
-            check_next_exits = [(LocationName.yoshis_house_tile, 0)]
+            check_next_exits = [(starting_location, 0)]
             processed_entrances = []
             boss_tokens = 0
 
@@ -485,7 +550,7 @@ def generate_entrance_rando(world: "WaffleWorld"):
                         local_mapping = {}
                         for entrance, exit in prefilled_exits.items():
                             local_mapping[entrance] = exit
-                        next_exits = [LocationName.yoshis_house_tile]
+                        next_exits = [starting_location]
                         processed_exits = []
                         used_exits = list(prefilled_exits.values())
                         break
@@ -512,6 +577,7 @@ def generate_entrance_rando(world: "WaffleWorld"):
             world.transition_pairs[entrance] = exit
         else:
             world.teleport_pairs[entrance] = exit
+
 
     for exit, entrance in local_region_mapping.items():
         world.local_region_mapping[exit] = entrance

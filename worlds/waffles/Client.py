@@ -1,22 +1,15 @@
 import logging
 import time
 import random
-
 from enum import Enum
-
 from NetUtils import ClientStatus, NetworkItem, color
-from worlds.AutoSNIClient import SNIClient
+from worlds.AutoSNIClient import SNIClient, SnesReader, SnesData, Read
 from .Names.TextBox import generate_received_text, generate_received_trap_link_text
 from .Items import trap_value_to_name, trap_name_to_value
 from .Locations import sorted_locations_table
+from .Levels import level_info_dict
 
 snes_logger = logging.getLogger("SNES")
-
-#try:
-#    from worlds.AutoSNIClient import SnesReader, SnesData
-#except ImportError:
-#    from .WillBeMerged import SnesReader, SnesData
-from .WillBeMerged import SnesReader, SnesData, Read
 
 from typing import TYPE_CHECKING, Dict, Any, Set
 
@@ -53,7 +46,6 @@ SMW_ENERGY_LINK_ITEM        = SMW_BWRAM + 0x0CFA
 SMW_ENERGY_LINK_REPLY       = SMW_BWRAM + 0x0CFB
 SMW_ENERGY_LINK_COUNT       = SMW_BWRAM + 0x0CFC
 SMW_TRAP_REPELLENT          = SMW_BWRAM + 0x0383
-
 
 SMW_GOAL_DATA                = ROM_START + 0x01BFA0
 SMW_REQUIRED_BOSSES_DATA     = ROM_START + 0x01BFA1
@@ -111,13 +103,14 @@ TRAPLESS_LEVELS                = [0x00, 0x03, 0x28]
 class SMWMemory(Enum):
     settings = Read(SMW_GOAL_DATA, 0x20)
     recv_count = Read(SMW_RECV_PROGRESS_ADDR, 0x02)
-    state_mirror = Read(SMW_STATE_MIRROR, 0x0A)
+    state_mirror = Read(SMW_STATE_MIRROR, 0x10)
     game_progress = Read(SMW_BWRAM_PROGRESS, 0x0100)
     event_count = Read(SMW_NUM_EVENTS_ADDR, 0x01)
     event_data = Read(SMW_EVENT_ROM_DATA, 0x60)
     path_data = Read(SMW_PATH_DATA, 0x60)
     active_level_data = Read(SMW_ACTIVE_LEVEL_DATA, 0x60)
-    flags_data = Read(SMW_BWRAM, 0x0800)
+    flags_data = Read(SMW_BWRAM, 0x0400)
+    blocksanity_data = Read(SMW_BLOCKSANITY_DATA, SMW_BLOCKSANITY_BLOCK_COUNT)
     current_coins = Read(SMW_COIN_COUNT_ADDR, 0x01)
     current_lives = Read(SRAM_START + 0x18E4, 0x01)
     energy_link_packet = Read(SMW_ENERGY_LINK_TRANSFER, 0x02)
@@ -153,7 +146,6 @@ class WaffleSNIClient(SNIClient):
     trap_reader = SnesReader(TrapMemory)
     locations_checked: Set[int]
     priority_trap: NetworkItem | None
-    using_newer_client: bool
     energy_link_enabled: bool
     current_sublevel_value: int
     inventory_purchase: str
@@ -161,18 +153,18 @@ class WaffleSNIClient(SNIClient):
     inventory_refund: int
     inventory_cost: int
     locations_checked: Set[int]
+    visited_levels: Set[int]
 
     def __init__(self):
         super().__init__()
         self.priority_trap = None
-        self.using_newer_client = False
         self.energy_link_enabled = False
         self.inventory_purchase = ""
         self.inventory_tag = ""
         self.inventory_refund = 0
         self.inventory_cost = 0
         self.current_sublevel_value = 0
-        self.locations_checked = set()
+        self.visited_levels = set()
 
     async def deathlink_kill_player(self, ctx: "SNIContext"):
         from SNIClient import DeathState, snes_buffered_write, snes_flush_writes
@@ -364,6 +356,7 @@ class WaffleSNIClient(SNIClient):
 
         event_data = list(snes_data.get(SMWMemory.event_data))
         flags_data = list(snes_data.get(SMWMemory.flags_data))
+        blocksanity_data = list(snes_data.get(SMWMemory.blocksanity_data))
 
         new_checks = []
         progress_data = list(game_progress[0x02:0x02+0x0F])
@@ -371,7 +364,6 @@ class WaffleSNIClient(SNIClient):
         moon_data = list(game_progress[0xEE:0xEE+0x0C])
         hidden_1up_data = list(game_progress[0x3C:0x3C+0x0C])
         prize_block_data = list(flags_data[0x00:0x00+0x0C])
-        blocksanity_data = list(flags_data[0x400:0x400+SMW_BLOCKSANITY_BLOCK_COUNT])
         blocksanity_flags = list(flags_data[0x10:0x10+0x0C])
         dragon_coins_active = rom_settings_data[0x06]
         moon_active = rom_settings_data[0x08]
@@ -392,7 +384,7 @@ class WaffleSNIClient(SNIClient):
 
             for loc_id in sorted_locations_table[current_level]:
                 # Early discard already checked locations
-                if loc_id in self.locations_checked:
+                if loc_id in ctx.locations_checked:
                     continue
 
                 # Get info from the location ID
@@ -459,8 +451,24 @@ class WaffleSNIClient(SNIClient):
                     new_checks.append(loc_id)
 
             for new_check_id in new_checks:
-                self.locations_checked.add(new_check_id)
+                ctx.locations_checked.add(new_check_id)
                 await ctx.send_msgs([{"cmd": 'LocationChecks', "locations": [new_check_id]}])
+
+        # Store visited OW levels for UT
+        active_level_data = list(snes_data.get(SMWMemory.active_level_data))
+        shuffled_level = state_mirror[0x0A]
+        tile_id = active_level_data[shuffled_level]
+        if game_state == 0x14 and tile_id not in self.visited_levels and tile_id in level_info_dict:
+            self.visited_levels.add(tile_id)
+            level_key = level_info_dict[tile_id].levelName
+            await ctx.send_msgs([{
+                "cmd": "Set", 
+                "key": f"smw_{ctx.team}_{ctx.slot}_{level_key}",
+                "slot": ctx.slot,
+                "default": 0,
+                "operations":
+                    [{"operation": "replace", "value": 1}],
+            }])
 
         # Send Current Room for Tracker
         if game_state != 0x14:
@@ -470,22 +478,14 @@ class WaffleSNIClient(SNIClient):
             self.current_sublevel_value = current_sublevel_value
 
             # Send level id data to tracker
-            await ctx.send_msgs(
-                [
-                    {
-                        "cmd": "Set",
-                        "key": f"smw_curlevelid_{ctx.team}_{ctx.slot}",
-                        "default": 0,
-                        "want_reply": False,
-                        "operations": [
-                            {
-                                "operation": "replace",
-                                "value": self.current_sublevel_value,
-                            }
-                        ],
-                    }
-                ]
-            )
+            await ctx.send_msgs([{
+                "cmd": "Set",
+                "key": f"smw_curlevelid_{ctx.team}_{ctx.slot}",
+                "default": 0,
+                "want_reply": False,
+                "operations":
+                    [{"operation": "replace", "value": self.current_sublevel_value}],
+            }])
         
         if game_state != 0x14:
             # Don't receive items or collect locations outside of in-level mode
@@ -612,10 +612,7 @@ class WaffleSNIClient(SNIClient):
             await snes_flush_writes(ctx)
 
         # Handle Collected Locations
-        from .Levels import level_info_dict
-        
         path_data = list(snes_data.get(SMWMemory.path_data))
-        active_level_data = list(snes_data.get(SMWMemory.active_level_data))
         level_clear_flags = list(flags_data[0x200:0x260])
         
         new_events = 0
@@ -626,9 +623,9 @@ class WaffleSNIClient(SNIClient):
         new_blocksanity = False
         new_midway_point = False
         for loc_id in ctx.checked_locations:
-            if loc_id in self.locations_checked:
+            if loc_id in ctx.locations_checked:
                 continue
-            self.locations_checked.add(loc_id)
+            ctx.locations_checked.add(loc_id)
 
             level_id = loc_id >> 24
             loc_type = (loc_id >> 20 & 0x0F)

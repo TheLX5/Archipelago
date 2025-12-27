@@ -14,6 +14,7 @@ class WaffleRules:
     player: int
     world: "WaffleWorld"
     connection_rules: Dict[str, CollectionRule]
+    carryless_exit_rules: Dict[str, CollectionRule]
     region_rules: Dict[str, CollectionRule]
     location_rules: Dict[str, CollectionRule]
 
@@ -29,6 +30,9 @@ class WaffleRules:
     
     def can_run(self, state: CollectionState) -> bool:
         return state.has(ItemName.mario_run, self.player)
+    
+    def can_wall_run(self, state: CollectionState) -> bool:
+        return state.has(ItemName.mario_run, self.player, 2)
     
     def can_swim(self, state: CollectionState) -> bool:
         return state.has(ItemName.mario_swim, self.player)
@@ -106,14 +110,140 @@ class WaffleRules:
         else:
             return True
         
+    def twin_bridges_castle_special_case(self, state: CollectionState) -> bool:
+        if self.world.using_ut:
+            return self.can_climb(state) or (
+                state.has(ItemName.glitched, self.player) and self.can_wall_run(state)
+            )
+        else:
+            return self.can_climb(state)
+        
+    def forest_ghost_house_special_case(self, state: CollectionState) -> bool:
+        if self.world.using_ut:
+            return self.has_p_switch(state) or (
+                state.has(ItemName.glitched, self.player) and self.can_wall_run(state)
+            )
+        else:
+            return self.has_p_switch(state)
+        
+    def vanilla_dome_1_special_case(self, state: CollectionState) -> bool:
+        if self.world.using_ut:
+            return self.can_run(state) and (
+                self.has_super_star(state) or self.has_mushroom(state)
+            ) or state.has(ItemName.glitched, self.player),
+        else:
+            return self.can_run(state) and (
+                self.has_super_star(state) or self.has_mushroom(state)
+            ),
+
+    def vanilla_dome_4_special_case(self, state: CollectionState) -> bool:
+        if self.world.using_ut:
+            return self.can_carry(state) or (state.has(ItemName.glitched, self.player) and (
+                self.has_feather(state) or self.has_yoshi(state))
+            )
+        else:
+            return True
+
+    def vanilla_secret_1_special_case(self, state: CollectionState) -> bool:
+        if self.world.using_ut:
+            return self.can_climb(state) or (
+                state.has(ItemName.glitched, self.player) and self.can_wall_run(state)
+            )
+        else:
+            return self.can_climb(state)
+        
+    def vanilla_secret_3_special_case(self, state: CollectionState) -> bool:
+        if self.world.using_ut:
+            return self.can_swim(state) or state.has(ItemName.glitched, self.player)
+        else:
+            return self.can_swim(state)
+        
+    def cheese_bridge_special_case(self, state: CollectionState) -> bool:
+        if self.world.using_ut:
+            return self.can_cape_fly(state) or (state.has(ItemName.glitched, self.player) and self.has_yoshi(state))
+        else:
+            return self.can_cape_fly(state)
+    
+    def cookie_mountain_special_case(self, state: CollectionState) -> bool:
+        if self.world.using_ut:
+            return self.can_swim(state) or (
+                state.has(ItemName.glitched, self.player) and self.can_wall_run(state)
+            )
+        else:
+            return self.can_swim(state)
+        
+    def forest_of_illusion_1_special_case(self, state: CollectionState) -> bool:
+        if self.world.using_ut:
+            return self.has_p_balloon(state) or (
+                state.has(ItemName.glitched, self.player) and self.has_yoshi(state)
+            )
+        else:
+            return self.has_p_balloon(state)
+        
     def forest_of_illusion_2_special_case(self, state: CollectionState) -> bool:
         if self.world.using_ut and self.world.options.enemy_shuffle.value:
-            return state.has(ItemName.glitched, self.player)  
+            return state.has(ItemName.super_star_active, self.player, 3) or state.has(ItemName.glitched, self.player)
         elif self.world.options.enemy_shuffle.value:
             return state.has(ItemName.super_star_active, self.player, 3)
         else:
             return True
-    
+        
+    def forest_of_illusion_3_special_case(self, state: CollectionState) -> bool:
+        if self.world.using_ut:
+            return (self.can_carry_or_yoshi_tongue(state) and self.can_break_turn_blocks(state)) or (
+                state.has(ItemName.glitched, self.player) and self.has_yoshi_carry(state)
+            )
+        else:
+            return self.can_carry_or_yoshi_tongue(state) and self.can_break_turn_blocks(state)
+        
+    def forest_secret_special_case(self, state: CollectionState) -> bool:
+        if self.world.using_ut:
+            return self.has_bsp(state) or state.has(ItemName.glitched, self.player)
+        else:
+            return self.has_bsp(state)
+        
+    def chocolate_island_1_special_case(self, state: CollectionState) -> bool:
+        if self.world.using_ut:
+            return self.has_yoshi(state) or (state.has(ItemName.glitched, self.player) and self.can_pass_munchers(state))
+        else:
+            return self.has_yoshi(state)
+        
+    def chocolate_secret_special_case(self, state: CollectionState) -> bool:
+        if self.world.using_ut:
+            return self.can_run(state) or state.has(ItemName.glitched, self.player)
+        else:
+            return self.can_run(state)
+        
+    def valley_of_bowser_3_special_case(self, state: CollectionState) -> bool:
+        if self.world.using_ut:
+            return self.can_carry(state) or (state.has(ItemName.glitched, self.player) and self.has_yoshi(state))
+        else:
+            return self.can_carry(state)
+        
+    def valley_of_bowser_4_special_case(self, state: CollectionState) -> bool:
+        if self.world.using_ut:
+            return self.can_climb(state) or (state.has(ItemName.glitched, self.player) and self.has_yoshi(state))
+        else:
+            return self.can_climb(state)
+        
+    def special_zone_4_special_case(self, state: CollectionState) -> bool:
+        if self.world.using_ut:
+            return state.has(ItemName.glitched, self.player) or (
+                (self.can_carry(state) or self.has_p_switch(state)) and self.has_super_star(state)
+            )
+        else:
+            return (self.can_carry(state) or self.has_p_switch(state)) and self.has_super_star(state)
+        
+    def special_zone_6_special_case(self, state: CollectionState) -> bool:
+        if self.world.using_ut:
+            if self.world.options.enemy_shuffle:
+                return self.can_swim(state) or (state.has(ItemName.glitched, self.player) and state.has(ItemName.super_star_active, self.player, 2))
+            else:
+                return self.can_swim(state) or state.has(ItemName.glitched, self.player)
+        else:
+            return self.can_swim(state)
+
+
     def can_break_turn_blocks(self, state: CollectionState) -> bool:
         return self.has_mushroom(state) and self.can_spin_jump(state)
     
@@ -173,8 +303,15 @@ class WaffleRules:
         multiworld = self.world.multiworld
         game_difficulty = world.options.game_logic_difficulty.value
 
-        # Swap exit rules if needed
+        # Swap exit rules and use carryless rules if needed
         for level_id, level_info in level_info_dict.items():
+            # Process carryless firstD
+            if level_id in world.carryless_exits:
+                level_name = level_info.levelName
+                entrance = f"{level_name} -> {level_name} - Secret Exit"
+                self.connection_rules[entrance] = self.carryless_exit_rules[entrance]
+
+            # Process swapped locations later
             if level_id in world.swapped_exits:
                 level_name = level_info.levelName
                 entrance_1 = f"{level_name} -> {level_name} - Normal Exit"
@@ -221,7 +358,7 @@ class WaffleRules:
         multiworld.completion_condition[self.player] = lambda state: state.has(ItemName.victory, self.player)
 
 
-    def set_glitched_rules(self, game_difficulty: int) -> None:
+    def set_glitched_rules(self) -> None:
         multiworld = self.world.multiworld
 
         # Build entrance rules
@@ -249,23 +386,11 @@ class WaffleRules:
 
                 add_rule(loc, lambda state, r=glitched_rule: r(state) and state.has(ItemName.glitched, self.player), combine="or")
 
-        # Build entrance rules
-        for entrance_name, rule in self.connection_rules.items():
-            entrance = multiworld.get_entrance(entrance_name, self.player)
-            
-            if entrance.parent_region.name in hard_gameplay_levels or entrance.parent_region.name in very_hard_gameplay_levels:
-                glitched_rule = rule
-                if entrance.parent_region.name in hard_gameplay_levels:
-                    glitched_rule = lambda state, r=rule: self.can_beat_hard_level(state, game_difficulty) and r(state)
-                elif entrance.parent_region.name in very_hard_gameplay_levels:
-                    glitched_rule = lambda state, r=rule: self.can_beat_very_hard_level(state, game_difficulty) and r(state)
-
-                add_rule(entrance, lambda state, rule=glitched_rule: rule(state) and state.has(ItemName.glitched, self.player), combine="or")
-
 
 class WaffleBasicRules(WaffleRules):
     def __init__(self, world: "WaffleWorld") -> None:
         super().__init__(world)
+
 
         self.connection_rules = {
             f"{LocationName.yoshis_island_1_region} -> {LocationName.yoshis_island_1_exit_1}": 
@@ -320,9 +445,7 @@ class WaffleBasicRules(WaffleRules):
                 self.true,
 
             f"{LocationName.vanilla_dome_1_region} -> {LocationName.vanilla_dome_1_exit_1}": 
-                lambda state: self.can_run(state) and (
-                    self.has_super_star(state) or self.has_mushroom(state)
-                ),
+                self.vanilla_dome_1_special_case,
             f"{LocationName.vanilla_dome_1_region} -> {LocationName.vanilla_dome_1_exit_2}": 
                 lambda state: self.can_climb(state) and self.can_carry(state) and (
                     self.has_yoshi(state) or self.has_rsp(state)
@@ -340,13 +463,13 @@ class WaffleBasicRules(WaffleRules):
             f"{LocationName.vanilla_dome_4_region} -> {LocationName.vanilla_dome_4_exit_1}": 
                 self.true,
             f"{LocationName.vanilla_secret_1_region} -> {LocationName.vanilla_secret_1_exit_1}": 
-                self.can_climb,
+                self.vanilla_secret_1_special_case,
             f"{LocationName.vanilla_secret_1_region} -> {LocationName.vanilla_secret_1_exit_2}": 
-                lambda state: self.can_climb(state) and self.can_carry(state) and self.has_bsp(state),
+                lambda state: self.vanilla_secret_1_special_case(state) and self.can_carry(state) and self.has_bsp(state),
             f"{LocationName.vanilla_secret_2_region} -> {LocationName.vanilla_secret_2_exit_1}": 
                 self.true,
             f"{LocationName.vanilla_secret_3_region} -> {LocationName.vanilla_secret_3_exit_1}": 
-                self.can_swim,
+                self.vanilla_secret_3_special_case,
             f"{LocationName.vanilla_ghost_house_region} -> {LocationName.vanilla_ghost_house_exit_1}": 
                 self.has_p_switch,
             f"{LocationName.vanilla_fortress_region} -> {LocationName.vanilla_fortress}": 
@@ -361,18 +484,18 @@ class WaffleBasicRules(WaffleRules):
             f"{LocationName.cheese_bridge_region} -> {LocationName.cheese_bridge_exit_1}": 
                 lambda state: self.can_climb(state) or self.has_yoshi(state),
             f"{LocationName.cheese_bridge_region} -> {LocationName.cheese_bridge_exit_2}": 
-                self.can_cape_fly,
+                self.cheese_bridge_special_case,
             f"{LocationName.soda_lake_region} -> {LocationName.soda_lake_exit_1}": 
                 self.can_swim,
             f"{LocationName.cookie_mountain_region} -> {LocationName.cookie_mountain_exit_1}": 
                 self.true,
             f"{LocationName.twin_bridges_castle_region} -> {LocationName.twin_bridges_castle}": 
-                lambda state: self.can_climb(state),
+                self.twin_bridges_castle_special_case,
 
             f"{LocationName.forest_of_illusion_1_region} -> {LocationName.forest_of_illusion_1_exit_1}": 
                 self.true,
             f"{LocationName.forest_of_illusion_1_region} -> {LocationName.forest_of_illusion_1_exit_2}": 
-                lambda state: self.can_carry(state) and self.has_p_balloon(state),
+                lambda state: self.can_carry(state) and self.forest_of_illusion_1_special_case(state),
             f"{LocationName.forest_of_illusion_2_region} -> {LocationName.forest_of_illusion_2_exit_1}": 
                 lambda state: self.can_swim(state) and self.forest_of_illusion_2_special_case(state),
             f"{LocationName.forest_of_illusion_2_region} -> {LocationName.forest_of_illusion_2_exit_2}": 
@@ -380,15 +503,15 @@ class WaffleBasicRules(WaffleRules):
             f"{LocationName.forest_of_illusion_3_region} -> {LocationName.forest_of_illusion_3_exit_1}": 
                 lambda state: self.can_carry_or_yoshi_tongue(state),
             f"{LocationName.forest_of_illusion_3_region} -> {LocationName.forest_of_illusion_3_exit_2}": 
-                lambda state: self.can_carry_or_yoshi_tongue(state) and self.can_break_turn_blocks(state),
+                self.forest_of_illusion_3_special_case,
             f"{LocationName.forest_of_illusion_4_region} -> {LocationName.forest_of_illusion_4_exit_1}": 
                 self.true,
             f"{LocationName.forest_of_illusion_4_region} -> {LocationName.forest_of_illusion_4_exit_2}":
                 lambda state: self.can_run(state) and self.can_carry_or_yoshi_tongue(state),
             f"{LocationName.forest_ghost_house_region} -> {LocationName.forest_ghost_house_exit_1}": 
-                self.has_p_switch,
+                self.forest_ghost_house_special_case,
             f"{LocationName.forest_ghost_house_region} -> {LocationName.forest_ghost_house_exit_2}": 
-                self.has_p_switch,
+                self.forest_ghost_house_special_case,
             f"{LocationName.forest_secret_region} -> {LocationName.forest_secret_exit_1}": 
                 self.true,
             f"{LocationName.forest_fortress_region} -> {LocationName.forest_fortress}": 
@@ -397,13 +520,13 @@ class WaffleBasicRules(WaffleRules):
                 self.true,
 
             f"{LocationName.chocolate_island_1_region} -> {LocationName.chocolate_island_1_exit_1}": 
-                lambda state: self.has_p_switch(state) or self.has_yoshi(state),
+                lambda state: self.has_p_switch(state) or self.chocolate_island_1_special_case(state),
             f"{LocationName.chocolate_island_2_region} -> {LocationName.chocolate_island_2_exit_1}": 
                 self.true,
             f"{LocationName.chocolate_island_2_region} -> {LocationName.chocolate_island_2_exit_2}": 
                 self.can_carry_or_yoshi_tongue,
             f"{LocationName.chocolate_island_3_region} -> {LocationName.chocolate_island_3_exit_1}": 
-                self.can_climb,
+                lambda state: self.can_climb(state) or self.has_yoshi(state),
             f"{LocationName.chocolate_island_3_region} -> {LocationName.chocolate_island_3_exit_2}": 
                 self.can_fly,
             f"{LocationName.chocolate_island_4_region} -> {LocationName.chocolate_island_4_exit_1}": 
@@ -415,7 +538,7 @@ class WaffleBasicRules(WaffleRules):
             f"{LocationName.chocolate_fortress_region} -> {LocationName.chocolate_fortress}": 
                 self.true,
             f"{LocationName.chocolate_secret_region} -> {LocationName.chocolate_secret_exit_1}": 
-                self.can_run,
+                self.chocolate_secret_special_case,
             f"{LocationName.chocolate_castle_region} -> {LocationName.chocolate_castle}": 
                 self.true,
             f"{LocationName.sunken_ghost_ship_region} -> {LocationName.sunken_ghost_ship}": 
@@ -430,9 +553,9 @@ class WaffleBasicRules(WaffleRules):
             f"{LocationName.valley_of_bowser_3_region} -> {LocationName.valley_of_bowser_3_exit_1}": 
                 self.true,
             f"{LocationName.valley_of_bowser_4_region} -> {LocationName.valley_of_bowser_4_exit_1}": 
-                self.can_climb,
+                self.valley_of_bowser_4_special_case,
             f"{LocationName.valley_of_bowser_4_region} -> {LocationName.valley_of_bowser_4_exit_2}": 
-                lambda state: self.has_yoshi_carry(state) and self.can_climb(state),
+                lambda state: self.has_yoshi_carry(state) and self.valley_of_bowser_4_special_case(state),
             f"{LocationName.valley_ghost_house_region} -> {LocationName.valley_ghost_house_exit_1}": 
                 self.has_p_switch,
             f"{LocationName.valley_ghost_house_region} -> {LocationName.valley_ghost_house_exit_2}": 
@@ -483,11 +606,11 @@ class WaffleBasicRules(WaffleRules):
             f"{LocationName.special_zone_3_region} -> {LocationName.special_zone_3_exit_1}": 
                 lambda state: self.can_climb(state) or self.has_yoshi(state),
             f"{LocationName.special_zone_4_region} -> {LocationName.special_zone_4_exit_1}": 
-                lambda state: (self.can_carry(state) or self.has_p_switch(state)) and self.has_super_star(state),
+                self.special_zone_4_special_case,
             f"{LocationName.special_zone_5_region} -> {LocationName.special_zone_5_exit_1}": 
                 self.true,
             f"{LocationName.special_zone_6_region} -> {LocationName.special_zone_6_exit_1}": 
-                self.can_swim,
+                self.special_zone_6_special_case,
             f"{LocationName.special_zone_7_region} -> {LocationName.special_zone_7_exit_1}": 
                 self.true,
             f"{LocationName.special_zone_8_region} -> {LocationName.special_zone_8_exit_1}": 
@@ -495,11 +618,73 @@ class WaffleBasicRules(WaffleRules):
                     self.has_yoshi(state) or self.can_carry(state),
         }
     
+    
+        self.carryless_exit_rules = {
+            f"{LocationName.donut_plains_1_region} -> {LocationName.donut_plains_1_exit_2}": 
+                lambda state: self.has_gsp(state) or self.can_cape_fly(state) or self.has_yoshi_carry(state),
+            f"{LocationName.donut_plains_2_region} -> {LocationName.donut_plains_2_exit_2}": 
+                lambda state: self.has_yoshi_carry(state) or (
+                    self.can_carry(state) and self.can_climb(state) and (
+                        self.can_break_turn_blocks(state) or self.has_yoshi(state)
+                    )
+                ),
+            f"{LocationName.donut_secret_1_region} -> {LocationName.donut_secret_1_exit_2}": 
+                lambda state: self.can_swim(state),
+
+            f"{LocationName.vanilla_dome_1_region} -> {LocationName.vanilla_dome_1_exit_2}": 
+                lambda state: self.can_climb(state) and (
+                    self.has_yoshi(state) or self.has_rsp(state)
+                ),
+            f"{LocationName.vanilla_dome_2_region} -> {LocationName.vanilla_dome_2_exit_2}": 
+                lambda state: self.can_swim(state) and self.has_p_switch(state) and (
+                    self.can_climb(state) or self.has_yoshi(state)
+                ),
+
+            f"{LocationName.forest_of_illusion_1_region} -> {LocationName.forest_of_illusion_1_exit_2}": 
+                self.forest_of_illusion_1_special_case,
+            f"{LocationName.forest_of_illusion_2_region} -> {LocationName.forest_of_illusion_2_exit_2}": 
+                lambda state: self.can_swim(state) and self.forest_of_illusion_2_special_case(state),
+            f"{LocationName.forest_of_illusion_3_region} -> {LocationName.forest_of_illusion_3_exit_2}": 
+                self.can_carry_or_yoshi_tongue,
+            f"{LocationName.forest_of_illusion_4_region} -> {LocationName.forest_of_illusion_4_exit_2}":
+                lambda state: self.can_run(state) or self.has_yoshi(state),
+
+            f"{LocationName.chocolate_island_2_region} -> {LocationName.chocolate_island_2_exit_2}": 
+                self.true,
+
+            f"{LocationName.valley_of_bowser_2_region} -> {LocationName.valley_of_bowser_2_exit_2}": 
+                self.true,
+            f"{LocationName.valley_of_bowser_4_region} -> {LocationName.valley_of_bowser_4_exit_2}": 
+                self.valley_of_bowser_4_special_case,
+            f"{LocationName.valley_ghost_house_region} -> {LocationName.valley_ghost_house_exit_2}": 
+                lambda state: self.has_p_switch(state) and self.can_run(state),
+
+            f"{LocationName.star_road_1_region} -> {LocationName.star_road_1_exit_2}": 
+                self.can_break_turn_blocks,
+            f"{LocationName.star_road_2_region} -> {LocationName.star_road_2_exit_2}": 
+                self.can_swim,
+            f"{LocationName.star_road_3_region} -> {LocationName.star_road_3_exit_2}": 
+                lambda state: self.can_carry(state) or self.has_fire_flower(state),
+            f"{LocationName.star_road_4_region} -> {LocationName.star_road_4_exit_2}": 
+                lambda state: self.can_yoshi_fly(state) or (
+                    self.has_gsp(state) and self.has_rsp(state) and (
+                        self.can_carry(state) or self.has_feather(state)
+                    )
+                ),
+            f"{LocationName.star_road_5_region} -> {LocationName.star_road_5_exit_2}": 
+                lambda state: self.can_yoshi_fly(state) or (
+                    self.can_climb(state) and self.has_p_switch(state) and 
+                    self.has_ysp(state) and self.has_gsp(state) and self.has_rsp(state) and self.has_bsp(state)
+                ) or (
+                    self.can_fly(state) and self.can_spin_jump(state)
+                ),
+        }
+    
         self.location_rules = {
             LocationName.yoshis_island_1_dragon:
                 self.can_break_turn_blocks,
             LocationName.yoshis_island_1_moon:
-                lambda state: self.can_cape_fly(state) or self.has_yoshi(state),
+                lambda state: self.can_cape_fly(state),
             LocationName.yoshis_island_1_midway:
                 self.true,
             LocationName.yoshis_island_1_flying_block_1:
@@ -956,7 +1141,7 @@ class WaffleBasicRules(WaffleRules):
             LocationName.donut_secret_house_room_4:
                 self.has_p_switch,
             LocationName.donut_secret_house_room_5:
-                lambda state: self.has_p_switch(state) and self.can_carry(state) and (
+                lambda state: self.has_p_switch(state) and (
                     self.can_climb(state) or self.can_cape_fly(state)
                 ),
 
@@ -989,13 +1174,9 @@ class WaffleBasicRules(WaffleRules):
                 self.true,
 
             LocationName.vanilla_dome_1_dragon:
-                lambda state: self.can_carry(state) and self.can_run(state) and (
-                    self.has_super_star(state) or self.has_mushroom(state)
-                ),
+                lambda state: self.can_carry(state) and self.vanilla_dome_1_special_case(state),
             LocationName.vanilla_dome_1_midway:
-                lambda state: self.can_run(state) and (
-                    self.has_super_star(state) or self.has_mushroom(state)
-                ),
+                self.vanilla_dome_1_special_case,
             LocationName.vanilla_dome_1_flying_block_1:
                 self.true,
             LocationName.vanilla_dome_1_powerup_block_1:
@@ -1013,13 +1194,9 @@ class WaffleBasicRules(WaffleRules):
             LocationName.vanilla_dome_1_star_block_1:
                 self.true,
             LocationName.vanilla_dome_1_powerup_block_4:
-                lambda state: self.can_run(state) and (
-                    self.has_super_star(state) or self.has_mushroom(state)
-                ),
+                self.vanilla_dome_1_special_case,
             LocationName.vanilla_dome_1_coin_block_2:
-                lambda state: self.can_run(state) and (
-                    self.has_super_star(state) or self.has_mushroom(state)
-                ),
+                self.vanilla_dome_1_special_case,
 
             LocationName.vanilla_dome_2_dragon:
                 lambda state: self.can_swim(state) and self.has_p_switch(state) and (
@@ -1148,10 +1325,10 @@ class WaffleBasicRules(WaffleRules):
             LocationName.vanilla_dome_4_coin_block_7:
                 self.true,
             LocationName.vanilla_dome_4_coin_block_8:
-                self.can_carry,
+                self.vanilla_dome_4_special_case,
 
             LocationName.vanilla_secret_1_dragon:
-                lambda state: self.can_climb(state) and self.can_carry(state),
+                lambda state: self.vanilla_secret_1_special_case(state) and self.can_carry(state),
             LocationName.vanilla_secret_1_coin_block_1:
                 self.true,
             LocationName.vanilla_secret_1_powerup_block_1:
@@ -1161,17 +1338,17 @@ class WaffleBasicRules(WaffleRules):
             LocationName.vanilla_secret_1_vine_block_1:
                 self.true,
             LocationName.vanilla_secret_1_vine_block_2:
-                self.can_climb,
+                self.vanilla_secret_1_special_case,
             LocationName.vanilla_secret_1_coin_block_2:
-                self.can_climb,
+                self.vanilla_secret_1_special_case,
             LocationName.vanilla_secret_1_coin_block_3:
-                self.can_climb,
+                self.vanilla_secret_1_special_case,
             LocationName.vanilla_secret_1_powerup_block_2:
-                self.can_climb,
+                self.vanilla_secret_1_special_case,
             LocationName.vanilla_secret_1_room_2:
-                self.can_climb,
+                self.vanilla_secret_1_special_case,
             LocationName.vanilla_secret_1_room_3:
-                lambda state: self.can_climb(state) and self.can_carry(state) and self.has_bsp(state),
+                lambda state: self.vanilla_secret_1_special_case(state) and self.can_carry(state) and self.has_bsp(state),
 
             LocationName.vanilla_secret_2_dragon:
                 self.can_cape_fly,
@@ -1201,13 +1378,13 @@ class WaffleBasicRules(WaffleRules):
                 self.true,
 
             LocationName.vanilla_secret_3_dragon:
-                self.can_swim,
+                self.vanilla_secret_3_special_case,
             LocationName.vanilla_secret_3_powerup_block_1:
-                self.can_swim,
+                self.vanilla_secret_3_special_case,
             LocationName.vanilla_secret_3_powerup_block_2:
-                self.can_swim,
+                self.vanilla_secret_3_special_case,
             LocationName.vanilla_secret_3_room_2:
-                self.can_swim,
+                self.vanilla_secret_3_special_case,
 
             LocationName.vanilla_ghost_house_dragon:
                 self.can_climb,
@@ -1282,7 +1459,7 @@ class WaffleBasicRules(WaffleRules):
             LocationName.cheese_bridge_dragon:
                 lambda state: self.can_climb(state) or self.has_yoshi(state),
             LocationName.cheese_bridge_moon:
-                self.can_cape_fly,
+                self.cheese_bridge_special_case,
             LocationName.cheese_bridge_powerup_block_1:
                 self.true,
             LocationName.cheese_bridge_powerup_block_2:
@@ -1297,7 +1474,7 @@ class WaffleBasicRules(WaffleRules):
             LocationName.cookie_mountain_dragon:
                 lambda state: self.can_climb(state) or self.has_yoshi(state),
             LocationName.cookie_mountain_hidden_1up:
-                lambda state: self.can_swim(state),
+                self.cookie_mountain_special_case,
             LocationName.cookie_mountain_coin_block_1:
                 self.true,
             LocationName.cookie_mountain_coin_block_2:
@@ -1377,7 +1554,7 @@ class WaffleBasicRules(WaffleRules):
                 self.can_swim,
 
             LocationName.twin_bridges_castle_powerup_block_1:
-                lambda state: self.can_climb(state),
+                self.twin_bridges_castle_special_case,
 
             LocationName.forest_of_illusion_1_powerup_block_1:
                 self.true,
@@ -1386,7 +1563,7 @@ class WaffleBasicRules(WaffleRules):
             LocationName.forest_of_illusion_1_powerup_block_2:
                 self.true,
             LocationName.forest_of_illusion_1_key_block_1:
-                self.has_p_balloon,
+                self.forest_of_illusion_1_special_case,
             LocationName.forest_of_illusion_1_life_block_1:
                 self.true,
 
@@ -1499,9 +1676,9 @@ class WaffleBasicRules(WaffleRules):
                 self.can_run,
 
             LocationName.forest_ghost_house_dragon:
-                self.has_p_switch,
+                self.forest_ghost_house_special_case,
             LocationName.forest_ghost_house_moon:
-                self.has_p_switch,
+                self.forest_ghost_house_special_case,
             LocationName.forest_ghost_house_coin_block_1:
                 self.true,
             LocationName.forest_ghost_house_powerup_block_1:
@@ -1513,9 +1690,9 @@ class WaffleBasicRules(WaffleRules):
             LocationName.forest_ghost_house_life_block_1:
                 self.true,
             LocationName.forest_ghost_house_room_3:
-                self.has_p_switch,
+                self.forest_ghost_house_special_case,
             LocationName.forest_ghost_house_room_4:
-                self.has_p_switch,
+                self.forest_ghost_house_special_case,
 
             LocationName.forest_secret_dragon:
                 self.true,
@@ -1524,7 +1701,7 @@ class WaffleBasicRules(WaffleRules):
             LocationName.forest_secret_powerup_block_2:
                 self.true,
             LocationName.forest_secret_life_block_1:
-                self.has_bsp,
+                self.forest_secret_special_case,
 
             LocationName.forest_fortress_yellow_block_1:
                 self.true,
@@ -1558,24 +1735,24 @@ class WaffleBasicRules(WaffleRules):
                 self.true,
 
             LocationName.chocolate_island_1_dragon:
-                lambda state: self.has_p_switch(state) or self.has_yoshi(state),
+                lambda state: self.has_p_switch(state) or self.chocolate_island_1_special_case(state),
             LocationName.chocolate_island_1_moon:
-                lambda state: self.can_cape_fly(state) or self.has_yoshi(state),
+                lambda state: self.can_cape_fly(state) or self.chocolate_island_1_special_case(state),
             LocationName.chocolate_island_1_flying_block_1:
                 self.true,
             LocationName.chocolate_island_1_flying_block_2:
-                lambda state: self.has_p_switch(state) or self.has_yoshi(state),
+                lambda state: self.has_p_switch(state) or self.chocolate_island_1_special_case(state),
             LocationName.chocolate_island_1_yoshi_block_1:
-                lambda state: self.has_p_switch(state) or self.has_yoshi(state),
+                lambda state: self.has_p_switch(state) or self.chocolate_island_1_special_case(state),
             LocationName.chocolate_island_1_green_block_1:
-                lambda state: self.has_p_switch(state) or self.has_yoshi(state) and (
+                lambda state: self.has_p_switch(state) or self.chocolate_island_1_special_case(state) and (
                     (self.has_gsp(state) and self.has_bsp(state)) or
                     (self.has_ysp(state) and self.has_bsp(state))
                 ),
             LocationName.chocolate_island_1_life_block_1:
-                lambda state: self.has_p_switch(state) or self.has_yoshi(state),
+                lambda state: self.has_p_switch(state) or self.chocolate_island_1_special_case(state),
             LocationName.chocolate_island_1_room_2:
-                lambda state: self.has_p_switch(state) or self.has_yoshi(state),
+                lambda state: self.has_p_switch(state) or self.chocolate_island_1_special_case(state),
                 
             LocationName.chocolate_island_2_dragon:
                 lambda state: self.has_bsp(state) and (
@@ -1672,9 +1849,9 @@ class WaffleBasicRules(WaffleRules):
             LocationName.chocolate_secret_powerup_block_1:
                 self.true,
             LocationName.chocolate_secret_powerup_block_2:
-                self.can_run,
+                self.chocolate_secret_special_case,
             LocationName.chocolate_secret_room_5:
-                self.can_run,
+                self.chocolate_secret_special_case,
                 
             LocationName.chocolate_fortress_powerup_block_1:
                 self.true,
@@ -1750,7 +1927,7 @@ class WaffleBasicRules(WaffleRules):
             LocationName.valley_of_bowser_3_powerup_block_1:
                 self.true,
             LocationName.valley_of_bowser_3_powerup_block_2:
-                self.can_carry,
+                self.valley_of_bowser_3_special_case,
 
             LocationName.valley_of_bowser_4_yellow_block_1:
                 self.true,
@@ -1759,11 +1936,11 @@ class WaffleBasicRules(WaffleRules):
             LocationName.valley_of_bowser_4_vine_block_1:
                 self.true,
             LocationName.valley_of_bowser_4_yoshi_block_1:
-                self.can_climb,
+                self.valley_of_bowser_4_special_case,
             LocationName.valley_of_bowser_4_life_block_1:
-                lambda state: self.can_climb(state) and self.can_break_turn_blocks(state),
+                lambda state: self.valley_of_bowser_4_special_case(state) and self.can_break_turn_blocks(state),
             LocationName.valley_of_bowser_4_powerup_block_2:
-                lambda state: self.has_ysp(state) and self.can_climb(state),
+                lambda state: self.valley_of_bowser_4_special_case(state) and self.has_ysp(state),
 
             LocationName.valley_ghost_house_dragon:
                 self.has_p_switch,
@@ -1774,6 +1951,10 @@ class WaffleBasicRules(WaffleRules):
             LocationName.valley_ghost_house_powerup_block_1:
                 self.true,
             LocationName.valley_ghost_house_directional_coin_block_1:
+                self.has_p_switch,
+            LocationName.valley_ghost_house_room_3:
+                self.has_p_switch,
+            LocationName.valley_ghost_house_room_4:
                 self.has_p_switch,
 
             LocationName.valley_fortress_green_block_1:
@@ -2000,11 +2181,11 @@ class WaffleBasicRules(WaffleRules):
                 self.has_yoshi,
 
             LocationName.special_zone_4_dragon:
-                lambda state: (self.can_carry(state) or self.has_p_switch(state)) and self.has_super_star(state),
+                self.special_zone_4_special_case,
             LocationName.special_zone_4_powerup_block_1:
-                lambda state: (self.can_carry(state) or self.has_p_switch(state)) and self.has_super_star(state),
+                self.special_zone_4_special_case,
             LocationName.special_zone_4_star_block_1:
-                lambda state: (self.can_carry(state) or self.has_p_switch(state)) and self.has_super_star(state),
+                lambda state: self.can_carry(state) or self.has_p_switch(state),
 
             LocationName.special_zone_5_dragon:
                 self.true,
@@ -2012,87 +2193,87 @@ class WaffleBasicRules(WaffleRules):
                 self.true,
 
             LocationName.special_zone_6_dragon:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_powerup_block_1:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_1:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_2:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_yoshi_block_1:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_life_block_1:
                 self.can_swim,
             LocationName.special_zone_6_multi_coin_block_1:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_3:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_4:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_5:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_6:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_7:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_8:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_9:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_10:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_11:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_12:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_13:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_14:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_15:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_16:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_17:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_18:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_19:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_20:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_21:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_22:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_23:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_24:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_25:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_26:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_27:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_28:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_powerup_block_2:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_29:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_30:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_31:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_32:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_coin_block_33:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_room_2:
-                self.can_swim,
+                self.special_zone_6_special_case,
             LocationName.special_zone_6_room_3:
-                self.can_swim,
+                self.special_zone_6_special_case,
 
             LocationName.special_zone_7_dragon:
                 self.true,

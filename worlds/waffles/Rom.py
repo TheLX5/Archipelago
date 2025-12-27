@@ -6,6 +6,7 @@ from .Aesthetics import generate_shuffled_ow_palettes, generate_curated_level_pa
 from .Levels import level_info_dict, full_bowser_rooms, standard_bowser_rooms, submap_boss_rooms, ow_boss_rooms
 from .Names.TextBox import generate_goal_text, title_text_mapping, generate_text_box
 from .Teleports import handle_teleport_shuffle, handle_transition_shuffle, handle_silent_events
+from .SNESGraphics import copy_gfx_tiles, decompress_gfx, copy_sprite_tiles, convert_3bpp, convert_name_to_4bpp
 from BaseClasses import ItemClassification
 
 USHASH = 'cdd3c8c37322978ca8669b34bc89c804'
@@ -102,6 +103,80 @@ trap_rom_data = {
     0xBC008C: [0x4318, 0x1],        # Bullet Time Trap
     0xBC008D: [0x431D, 0x1],        # Invisibility Trap
     0xBC008E: [0x0DC2, 0x00, 0x44], # Empty Item Box Trap
+}
+
+visible_to_invisible_level_tiles = {
+    0x66: 0x6E,
+    0x68: 0x70,
+    0x6A: 0x72,
+    0x6C: 0x74,
+    0x63: 0x7A,
+}
+
+invisible_to_visible_level_tiles = {
+    0x6E: 0x66,
+    0x70: 0x68,
+    0x72: 0x6A,
+    0x74: 0x6C,
+    0x7A: 0x63,
+}
+
+starting_positions_data = {
+    0: [                # Yoshi's house
+        0x01,           # Initial Submap (Mario)
+        0x00,           # Initial Submap (Luigi)
+        0x00,           # Starting level ID
+        0x0002,         # Initial animation??? (Mario)
+        0x0000,         # Initial animation??? (Luigi)
+        0x0068,0x0078,  # Initial X/Y position (Mario)
+        0x0000,0x0000,  # Initial X/Y position (Luigi)
+        0x0006,0x0007,  # Initial X/Y position / 0x10 (Mario)
+        0x0000,0x0000,  # Initial X/Y position / 0x10 (Luigi)
+    ],
+    1: [                # Donut Plains
+        0x00,           # Initial Submap (Mario)
+        0x00,           # Initial Submap (Luigi)
+        0x07,           # Starting level ID
+        0x0002,         # Initial animation??? (Mario)
+        0x0002,         # Initial animation??? (Luigi)
+        0x0058,0x0118,  # Initial X/Y position (Mario)
+        0x0000,0x0000,  # Initial X/Y position (Luigi)
+        0x0005,0x0011,  # Initial X/Y position / 0x10 (Mario)
+        0x0000,0x0000,  # Initial X/Y position / 0x10 (Luigi)
+    ],
+    2: [                # Vanilla Dome
+        0x02,           # Initial Submap (Mario)
+        0x00,           # Initial Submap (Luigi)
+        0x13,           # Starting level ID
+        0x0002,         # Initial animation??? (Mario)
+        0x0000,         # Initial animation??? (Luigi)
+        0x0058,0x0128,  # Initial X/Y position (Mario)
+        0x0000,0x0000,  # Initial X/Y position (Luigi)
+        0x0005,0x0012,  # Initial X/Y position / 0x10 (Mario)
+        0x0000,0x0000,  # Initial X/Y position / 0x10 (Luigi)
+    ],
+    3: [                # Forest of Illusion
+        0x03,           # Initial Submap (Mario)
+        0x00,           # Initial Submap (Luigi)
+        0x26,           # Starting level ID
+        0x0002,         # Initial animation??? (Mario)
+        0x0000,         # Initial animation??? (Luigi)
+        0x0088,0x0178,  # Initial X/Y position (Mario)
+        0x0000,0x0000,  # Initial X/Y position (Luigi)
+        0x0008,0x0017,  # Initial X/Y position / 0x10 (Mario)
+        0x0000,0x0000,  # Initial X/Y position / 0x10 (Luigi)
+    ],
+    4: [                # Special Zone
+        0x05,           # Initial Submap (Mario)
+        0x00,           # Initial Submap (Luigi)
+        0x4F,           # Starting level ID
+        0x0002,         # Initial animation??? (Mario)
+        0x0000,         # Initial animation??? (Luigi)
+        0x0138,0x0138,  # Initial X/Y position (Mario)
+        0x0000,0x0000,  # Initial X/Y position (Luigi)
+        0x0013,0x0013,  # Initial X/Y position / 0x10 (Mario)
+        0x0000,0x0000,  # Initial X/Y position / 0x10 (Luigi)
+    ],
 }
 
 class WafflePatchExtension(APPatchExtension):
@@ -325,11 +400,26 @@ class WafflePatchExtension(APPatchExtension):
         # Get world's settings
         world_type = AutoWorldRegister.world_types[WafflePatchExtension.game]
         world_settings = getattr(settings.get_settings(), world_type.settings_key, None)
-        if not world_settings:
+        options = json.loads(caller.get_file("options.json").decode("UTF-8"))
+
+        if not world_settings or "graphics_pack" in options.keys():
             return rom
 
-        # Check if the setting is properly set and exists in data/sprites/smw
-        graphics_setting = world_settings.graphics_file
+        graphics_setting = ""        
+        if "graphics_pack" in options.keys():
+            # Load local (.apwaffle) graphics pack
+            graphics_setting = options["graphics_pack"]
+        elif vars(Utils.get_adjuster_settings_no_defaults("SMW: Spicy Mycena Waffles")):
+            # Check persistent storage for a global graphics pack
+            persistent_settings = Utils.get_adjuster_settings_no_defaults("SMW: Spicy Mycena Waffles")
+            if hasattr(persistent_settings, "selected_pack"):
+                if len(persistent_settings.selected_pack) != 0:
+                    graphics_setting = persistent_settings.selected_pack
+        if len(graphics_setting) == 0:
+            # Check if the setting is properly set and exists in data/sprites/smw
+            # This is our very last resort
+            graphics_setting = world_settings.graphics_file
+            
         if not os.path.isfile(graphics_setting):
             return rom
         
@@ -352,7 +442,9 @@ class WafflePatchExtension(APPatchExtension):
             rom[0xE6400:0xE6400 + len(player_map_file)] = player_map_file
         if "player_name.bin" in file.namelist():
             player_name_file = file.read('player_name.bin')
-            rom[0xE6C00:0xE6C00 + len(player_name_file)] = player_name_file
+            if len(player_name_file) == 80:
+                player_name_file = convert_name_to_4bpp(player_name_file)
+            rom[0x179C00:0x179C00 + len(player_name_file)] = player_name_file
         if "map.mw3" in file.namelist():
             map_file = file.read('map.mw3')
             rom[0xE6C50:0xE6C50 + len(map_file)] = map_file
@@ -376,14 +468,14 @@ class WafflePatchExtension(APPatchExtension):
         if options["enemy_shuffle"] == 0:
             return rom
 
+        # Handle some special cases
         from .Enemies import SPRITE_POINTERS_ADDR, enemy_list, enemy_list_special_cases, modify_sprite_data, build_enemy_replacements, full_displacement_tags, half_displacement_tags
 
-        # Handle some special cases
         rom = bytearray(rom)
-        rom = modify_sprite_data(rom, options["seed"])
+        rom = modify_sprite_data(rom, options["enemy_shuffle_seed"])
         original_rom = rom.copy()
         
-        random.seed(options["seed"])
+        random.seed(options["enemy_shuffle_seed"])
 
         sprite_pointers = rom[SPRITE_POINTERS_ADDR:SPRITE_POINTERS_ADDR+0x400]
         for level_id in range(0x200):
@@ -460,7 +552,52 @@ class WafflePatchExtension(APPatchExtension):
             rom[pointer+1:(pointer+1+len(data)*3)] = bytearray(new_data)
 
         return bytes(rom)
+    
 
+    def process_level_tiles(caller: APProcedurePatch, rom: bytes) -> bytes:
+        from .Levels import full_level_list
+        level_swap = list(caller.get_file("level_swap.bin"))
+        level_data = list(caller.get_file("level_data.bin"))
+        
+        rom = bytearray(rom)
+        unmodified_rom = rom.copy()
+
+        for idx, level_id in enumerate(level_data):
+            # Remove unswappable levels
+            if level_id >= 0x60 or level_id == 0x00:
+                continue
+            
+            # Get level coords and transform them into the usable index for the ROM table
+            original_index = compute_level_index(full_level_list[idx])
+            shuffled_index = compute_level_index(level_id)
+
+            # Swap level tiles
+            original_level_tile = rom[0x677DF+original_index]
+            shuffled_level_tile = unmodified_rom[0x677DF+shuffled_index]
+            if original_level_tile in visible_to_invisible_level_tiles.keys():
+                new_tile = shuffled_level_tile
+                if new_tile in invisible_to_visible_level_tiles.keys():
+                    new_tile = invisible_to_visible_level_tiles[new_tile]
+                #print (f"{level_id:02X} ({full_level_list[idx]:02X}) | {original_level_tile:02X} | {shuffled_level_tile:02X} | {new_tile:02X} | VISIBLE")
+                rom[0x677DF+original_index] = new_tile
+                
+            elif original_level_tile in invisible_to_visible_level_tiles.keys():
+                new_tile = shuffled_level_tile
+                if new_tile in visible_to_invisible_level_tiles.keys():
+                    new_tile = visible_to_invisible_level_tiles[new_tile]
+                #print (f"{level_id:02X} ({full_level_list[idx]:02X}) | {original_level_tile:02X} | {shuffled_level_tile:02X} | {new_tile:02X} | INVISIBLE")
+                rom[0x677DF+original_index] = new_tile
+
+            # Swap tile to a big level tile/gray house if the exits are swapped
+            # Also re-fetch the original level tile in case it changed
+            original_level_tile = rom[0x677DF+original_index]
+            if level_id in level_swap and original_level_tile in (0x6E, 0x70, 0x72, 0x74, 0x7A, 0x63, 0x68):
+                new_tile = original_level_tile + 1
+                if original_level_tile == 0x63:
+                    new_tile = 0x7C
+                rom[0x677DF+original_index] = new_tile
+
+        return bytes(rom)
 
 class WaffleProcedurePatch(APProcedurePatch, APTokenMixin):
     hash = [USHASH]
@@ -475,6 +612,7 @@ class WaffleProcedurePatch(APProcedurePatch, APTokenMixin):
         ("handle_uncompressed_graphics", []),
         ("replace_graphics", []),
         ("shuffle_enemies", []),
+        ("process_level_tiles", []),
     ]
 
     @classmethod
@@ -486,111 +624,6 @@ class WaffleProcedurePatch(APProcedurePatch, APTokenMixin):
 
     def write_bytes(self, offset, value: typing.Iterable[int]):
         self.write_token(APTokenTypes.WRITE, offset, bytes(value))
-
-
-def decompress_gfx(compressed_graphics: bytearray) -> bytearray:
-    # This code decompresses graphics in LC_LZ2 format in order to be able to swap player and yoshi's graphics with ease.
-    decompressed_gfx = bytearray([])
-    i = 0
-    while True:
-        cmd = compressed_graphics[i]
-        i += 1
-        if cmd == 0xFF:
-            break
-        else:
-            if (cmd >> 5) == 0x07:
-                size = ((cmd & 0x03) << 8) + compressed_graphics[i] + 1
-                cmd = (cmd & 0x1C) >> 2
-                i += 1
-            else:
-                size = (cmd & 0x1F) + 1
-                cmd = cmd >> 5
-            if cmd == 0x00:
-                decompressed_gfx += bytearray([compressed_graphics[i+j] for j in range(size)])
-                i += size
-            elif cmd == 0x01:
-                byte_fill = compressed_graphics[i]
-                i += 1
-                decompressed_gfx += bytearray([byte_fill for j in range(size)])
-            elif cmd == 0x02:
-                byte_fill_1 = compressed_graphics[i]
-                i += 1
-                byte_fill_2 = compressed_graphics[i]
-                i += 1
-                for j in range(size):
-                    if (j & 0x1) == 0x00:
-                        decompressed_gfx += bytearray([byte_fill_1])
-                    else:
-                        decompressed_gfx += bytearray([byte_fill_2])
-            elif cmd == 0x03:
-                byte_read = compressed_graphics[i]
-                i += 1
-                decompressed_gfx += bytearray([(byte_read + j) for j in range(size)])
-            elif cmd == 0x04:
-                position = (compressed_graphics[i] << 8) + compressed_graphics[i+1]
-                i += 2
-                for j in range(size):
-                    copy_byte = decompressed_gfx[position+j]
-                    decompressed_gfx += bytearray([copy_byte])
-    return decompressed_gfx
-
-
-def convert_3bpp(decompressed_gfx: bytearray) -> bytearray:
-    i = 0
-    converted_gfx = bytearray([])
-    while i < len(decompressed_gfx):
-        converted_gfx += bytearray([decompressed_gfx[i+j] for j in range(16)])
-        i += 16
-        for j in range(8):
-            converted_gfx += bytearray([decompressed_gfx[i]])
-            converted_gfx += bytearray([0x00])
-            i += 1
-    return converted_gfx
-
-
-def copy_gfx_tiles(original, order, size):
-    result = bytearray([])
-    for x in range(len(order)):
-        z = order[x] << size[0]
-        result += bytearray([original[z+y] for y in range(size[1])])
-    return result
-
-
-def copy_sprite_tiles(original, order, data_size, px_size = [5, 32]) -> bytearray:
-    result = bytearray([0x00 for _ in range(data_size * 0x400)])
-    offset = 0
-    for x in range(len(order)):
-        if x != 0 and x & 0x7 == 0:
-            offset += 0x0200
-
-        if type(order[x]) is int:
-            z = order[x] << px_size[0]
-            result[offset:offset+0x20] = original[z:z+px_size[1]]
-            offset += 0x20
-            z = order[x]+0x01 << px_size[0]
-            result[offset:offset+0x20] = original[z:z+px_size[1]]
-            offset += 0x1E0
-            z = order[x]+0x10 << px_size[0]
-            result[offset:offset+0x20] = original[z:z+px_size[1]]
-            offset += 0x20
-            z = order[x]+0x11 << px_size[0]
-            result[offset:offset+0x20] = original[z:z+px_size[1]]
-            offset -= 0x1E0
-        else:
-            z = order[x][0] << px_size[0]
-            result[offset:offset+0x20] = original[z:z+px_size[1]]
-            offset += 0x20
-            z = order[x][1] << px_size[0]
-            result[offset:offset+0x20] = original[z:z+px_size[1]]
-            offset += 0x1E0
-            z = order[x][2] << px_size[0]
-            result[offset:offset+0x20] = original[z:z+px_size[1]]
-            offset += 0x20
-            z = order[x][3] << px_size[0]
-            result[offset:offset+0x20] = original[z:z+px_size[1]]
-            offset -= 0x1E0
-
-    return result
 
 def handle_level_effects(patch: WaffleProcedurePatch, world: "WaffleWorld"):
     from .Levels import lockable_tiles
@@ -633,11 +666,45 @@ def handle_level_shuffle(patch: WaffleProcedurePatch, active_level_dict):
         patch.write_byte(0x37F00 + tile_id, level_id)
 
 
+def handle_starting_location(patch: WaffleProcedurePatch, world: "WaffleWorld"):
+    data = starting_positions_data[world.options.starting_location.value].copy()
+
+    # Fix initial map
+    initial_map = data.pop(0)
+    patch.write_byte(0x01EF0, initial_map)
+    patch.write_byte(0x20EFA, initial_map)
+    patch.write_byte(0x01EF1, data.pop(0))
+
+    # Force level name to appear
+    level_offset = data.pop(0)
+    patch.write_byte(0x01BFAE, world.options.starting_location.value)
+    patch.write_byte(0x01BFAF, list(world.active_level_dict.keys())[level_offset])
+
+    # Fix X/Y positions
+    for idx, entry in enumerate(data):
+        patch.write_bytes(0x01EF2 + (idx*2), entry.to_bytes(2, "little"))
+        if idx == 2:
+            entry &= 0xFF
+            patch.write_byte(0x20F01, entry)
+        elif idx == 3:
+            entry &= 0xFF
+            patch.write_byte(0x218F0, entry)
+            patch.write_byte(0x2B15C, entry+0x16)
+            patch.write_byte(0x20F08, entry+0x16)
+
+
 def handle_exit_shuffle(patch: WaffleProcedurePatch, world: "WaffleWorld"):
     exit_shuffle_info = bytearray([0x00 for _ in range(96)])
     for level_id in world.swapped_exits:
         exit_shuffle_info[level_id] = 0x01
     patch.write_bytes(0x88A85, exit_shuffle_info)
+
+
+def handle_keyhole_shuffle(patch: WaffleProcedurePatch, world: "WaffleWorld"):
+    keyhole_shuffle_info = bytearray([0x00 for _ in range(96)])
+    for level_id in world.carryless_exits:
+        keyhole_shuffle_info[level_id] = 0x01
+    patch.write_bytes(0x88B45, keyhole_shuffle_info)
 
 
 def handle_texts(patch: WaffleProcedurePatch, world: "WaffleWorld"):
@@ -868,6 +935,7 @@ def patch_rom(world: "WaffleWorld", patch: WaffleProcedurePatch, player: int, ac
         "music_shuffle": world.options.music_shuffle.value,
         "level_palette_shuffle": 2,
         "enemy_shuffle": world.options.enemy_shuffle.value,
+        "enemy_shuffle_seed": world.random.getrandbits(64),
     }
     patch.write_file("options.json", json.dumps(options_dict).encode("UTF-8"))
 
@@ -896,7 +964,9 @@ def patch_rom(world: "WaffleWorld", patch: WaffleProcedurePatch, player: int, ac
 
     # Handle Level Shuffle
     handle_level_shuffle(patch, active_level_dict)
+    handle_starting_location(patch, world)
     handle_exit_shuffle(patch, world)
+    handle_keyhole_shuffle(patch, world)
     if world.options.level_effects.value:
         handle_level_effects(patch, world)
 
@@ -981,6 +1051,24 @@ def patch_rom(world: "WaffleWorld", patch: WaffleProcedurePatch, player: int, ac
 
     patch.write_file("token_patch.bin", patch.get_token_binary())
 
+    level_data = []
+    for level_id in world.active_level_dict.keys():
+        level_data.append(level_id)
+    patch.write_file("level_data.bin", bytearray(level_data))
+
+    patch.write_file("level_swap.bin", bytearray(world.swapped_exits))
+
+
+def compute_level_index(level_id: int) -> int:
+    level_info = level_info_dict[level_id]
+    x, y = level_info.coords
+
+    index = (x & 0x0F) | ((y & 0x0F) << 4) | ((x & 0x10) << 4) | ((y & 0x10) << 5)
+    if level_id >= 0x25:
+        index |= 0x400
+        index -= 1
+
+    return index
 
 def get_base_rom_bytes(file_name: str = "") -> bytes:
     base_rom_bytes = getattr(get_base_rom_bytes, "base_rom_bytes", None)

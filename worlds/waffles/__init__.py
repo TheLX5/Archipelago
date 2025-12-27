@@ -7,11 +7,12 @@ import pkgutil
 
 from BaseClasses import MultiWorld, Tutorial, ItemClassification, LocationProgressType, Location, CollectionState, Entrance, Region
 from Options import OptionError
+from worlds.LauncherComponents import launch as launch_component, components, Component, Type
 from worlds.AutoWorld import WebWorld, World
 
 from .Client import WaffleSNIClient
 from .Items import WaffleItem, item_table, junk_table, option_name_to_item_unlock
-from .Levels import full_level_list, generate_level_list, generate_swapped_exits, special_zone_tile_regions, switch_palace_locations, castle_locations, ghost_house_locations
+from .Levels import full_level_list, generate_level_list, generate_swapped_exits, generate_carryless_exits, special_zone_tile_regions, switch_palace_locations, castle_locations, ghost_house_locations
 from .Locations import all_locations, location_groups, setup_locations, level_location_table, \
                        egg_location_table, castle_location_table, switch_palace_location_table, ghost_house_location_table
 from .Names import ItemName, LocationName
@@ -21,7 +22,13 @@ from .Regions import create_regions, connect_regions, add_location_to_region
 from .Rom import patch_rom, WaffleProcedurePatch, USHASH
 from .Rules import WaffleBasicRules
 from .Teleports import generate_entrance_rando
-from .Tracker import setup_options_from_slot_data
+from .Tracker import setup_options_from_slot_data, reconnect_found_entrance, disconnect_entrances
+
+def launch_manager(*args):
+    from .Manager import launch
+    launch_component(launch, "Waffles Manager")
+
+components.append(Component(display_name="Waffles Manager", component_type=Type.ADJUSTER, func=launch_manager))
 
 class WaffleSetings(settings.Group):
     class RomFile(settings.SNESRomPath):
@@ -71,7 +78,7 @@ class WaffleWorld(World):
     options: WaffleOptions
 
     topology_present = False
-    required_client_version = (0, 6, 3)
+    required_client_version = (0, 6, 5)
 
     item_name_to_id = {name: data.code for name, data in item_table.items()}
     location_name_to_id = all_locations
@@ -80,8 +87,8 @@ class WaffleWorld(World):
     using_ut: bool
     ut_can_gen_without_yaml = True
     glitches_item_name = ItemName.glitched
-    #disconnected_entrances: dict[Entrance, Region]
-    #found_entrances_datastorage_key: list[str]
+    disconnected_entrances: dict[Entrance, Region]
+    found_entrances_datastorage_key: list[str]
 
     active_level_dict: typing.Dict[int,int]
     active_location_table: typing.Dict[str,int]
@@ -93,27 +100,6 @@ class WaffleWorld(World):
         super().__init__(multiworld, player)
     
     def generate_early(self):
-        # Bonk "minimal" accesibility users if they go full derp with their settings
-        if self.options.accessibility == "minimal" and self.options.percentage_of_yoshi_eggs.value < 90:
-            self.options.percentage_of_yoshi_eggs.value = 90
-            valid_loc_count = int(self.count_locations()/10) 
-            egg_count = min(self.count_egg_locations() + self.options.yoshi_egg_count.value, 255)
-            if valid_loc_count < egg_count:
-                raise OptionError(f"{self.player_name} has a very weird combination of settings that will result in a failed generation.\n"
-                                f"Please set less Yoshi Eggs your YAML file or DON'T use minimal accessibility.")
-            
-        # Enforce disabling DeathLink for now
-        if self.options.death_link:
-            print(f"Enforcing non-DeathLink session for \"{self.player_name}\" (option doesn't work).")
-            self.options.death_link.value = False
-
-        # Enforce disabling RingLink for now
-        if self.options.death_link:
-            print(f"Enforcing non-RingLink session for \"{self.player_name}\" (option requires some design adjustments).")
-            self.options.ring_link.value = False
-
-        if self.options.early_climb:
-            self.multiworld.local_early_items[self.player][ItemName.mario_climb] = 1
         
         self.teleport_data = dict()
         self.teleport_pairs = dict()
@@ -125,6 +111,7 @@ class WaffleWorld(World):
         self.local_mapping = dict()
         self.local_region_mapping = dict()
         self.swapped_exits = list()
+        self.carryless_exits = list()
         self.special_zone_egg_locations = list()
         self.boss_token_requirements = {
             LocationName.yi_to_ysp: 0,
@@ -152,11 +139,45 @@ class WaffleWorld(World):
         # Handle UT support
         setup_options_from_slot_data(self)
 
-        # Only randomize data if not using UT
         if not self.using_ut:
+            # Bonk non level shuffle users trying to do something weird
+            if not self.options.starting_location.value and not self.options.level_shuffle.value:
+                raise OptionError(f"{self.player_name} has a very weird combination of settings that will result in a failed generation.\n"
+                                f"  Please enable level_shuffle if you desire to change the starting location.")
+            if self.options.starting_location.value == 0x04 and self.options.map_teleport_shuffle != "on_both_mix":
+                raise OptionError(f"{self.player_name} has a very weird combination of settings that will result in a failed generation.\n"
+                                f"  Please enable map_teleport_shuffle with the option 'on_both_mix'.")
+            if self.options.starting_location.value == 0x02 and self.options.map_teleport_shuffle != "on_both_mix":
+                raise OptionError(f"{self.player_name} has a very weird combination of settings that will result in a failed generation.\n"
+                                f"  Please enable map_teleport_shuffle with the option 'on_both_mix'.")
+
+            # Bonk "minimal" accesibility users if they go full derp with their settings
+            if self.options.accessibility == "minimal" and self.options.percentage_of_yoshi_eggs.value < 90:
+                self.options.percentage_of_yoshi_eggs.value = 90
+                valid_loc_count = int(self.count_locations()/10) 
+                egg_count = min(self.count_egg_locations() + self.options.yoshi_egg_count.value, 255)
+                if valid_loc_count < egg_count:
+                    raise OptionError(f"{self.player_name} has a very weird combination of settings that will result in a failed generation.\n"
+                                    f"  Please set less Yoshi Eggs your YAML file or DON'T use minimal accessibility.")
+                
+            # Enforce disabling DeathLink for now
+            if self.options.death_link:
+                print(f"Enforcing non-DeathLink session for \"{self.player_name}\" (option doesn't work).")
+                self.options.death_link.value = False
+
+            # Enforce disabling RingLink for now
+            if self.options.death_link:
+                print(f"Enforcing non-RingLink session for \"{self.player_name}\" (option requires some design adjustments).")
+                self.options.ring_link.value = False
+
+            if self.options.early_climb:
+                self.multiworld.local_early_items[self.player][ItemName.mario_climb] = 1
+
+            # Only randomize data if not using UT
             generate_entrance_rando(self)
             generate_swapped_exits(self)
             self.active_level_dict = dict(zip(generate_level_list(self), full_level_list))
+            generate_carryless_exits(self)
 
         self.reverse_teleport_pairs = {y: x for x, y in self.teleport_pairs.items()}
         self.reverse_transition_pairs = {y: x for x, y in self.transition_pairs.items()}
@@ -206,14 +227,15 @@ class WaffleWorld(World):
 
 
     # UT Stuff, will be worked on later lol
-    #def connect_entrances(self):
-    #    if self.using_ut and self.multiworld.enforce_deferred_connections in ("on", "default"):
-    #        Tracker.disconnect_entrances(self)
-    #def reconnect_found_entrances(self, key: str, value: typing.Any) -> None:
-    #    if not value:
-    #        return
-    #    else:
-    #        Tracker.reconnect_found_entrance(self, key)
+    def connect_entrances(self):
+        if self.using_ut and self.multiworld.enforce_deferred_connections in ("on", "default"):
+            disconnect_entrances(self)
+
+    def reconnect_found_entrances(self, key: str, value: typing.Any) -> None:
+        if not value:
+            return
+        else:
+            reconnect_found_entrance(self, key)
 
 
     def set_rules(self):
@@ -223,18 +245,25 @@ class WaffleWorld(World):
         if self.using_ut:
             game_difficulty = self.options.game_logic_difficulty.value
             if game_difficulty != 2:
-                rules.set_glitched_rules(2)
+                rules.set_glitched_rules()
 
         return     
         # Debug
         from Utils import visualize_regions
         state = CollectionState(self.multiworld)
-        state.update_reachable_regions(self.player)
+        #state.update_reachable_regions(self.player)
+        #state.collect(self.create_item(ItemName.mario_run))
+        #state.collect(self.create_item(ItemName.progressive_powerup))
+        #state.collect(self.create_item(ItemName.progressive_powerup))
+        #state.collect(self.create_item(ItemName.progressive_powerup))
         visualize_regions(self.get_region("Menu"), "my_world.puml", show_entrance_names=True,
                         regions_to_highlight=state.reachable_regions[self.player])
 
     
     def create_items(self):
+        if self.using_ut:
+            return
+        
         itempool: typing.List[WaffleItem] = []
 
         total_required_locations = self.count_locations()
@@ -355,13 +384,17 @@ class WaffleWorld(World):
         
         # Create Golden Yoshi Eggs
         processed_levels = set()
+        egg_classsification = ItemClassification.progression_deprioritized_skip_balancing
         placed_eggs = 0
         if "Every Level" in self.options.yoshi_egg_placement.value:
             for loc_name in level_location_table.keys():
                 processed_levels.add(f"{loc_name} (Hidden Egg)")
                 location = self.multiworld.get_location(f"{loc_name} (Hidden Egg)", self.player)
                 if location.progress_type is not LocationProgressType.EXCLUDED:
-                    location.place_locked_item(self.create_item(ItemName.yoshi_egg))
+                    if self.options.ungolden_eggs:
+                        location.place_locked_item(self.create_item(ItemName.yoshi_egg, egg_classsification))
+                    else:
+                        location.place_locked_item(self.create_item(ItemName.yoshi_egg))
                     placed_eggs += 1
         else:
             if "Castles" in self.options.yoshi_egg_placement.value:
@@ -369,21 +402,30 @@ class WaffleWorld(World):
                     processed_levels.add(f"{level} (Hidden Egg)")
                     location = self.multiworld.get_location(f"{level} (Hidden Egg)", self.player)
                     if location.progress_type is not LocationProgressType.EXCLUDED:
-                        location.place_locked_item(self.create_item(ItemName.yoshi_egg))
+                        if self.options.ungolden_eggs:
+                            location.place_locked_item(self.create_item(ItemName.yoshi_egg, egg_classsification))
+                        else:
+                            location.place_locked_item(self.create_item(ItemName.yoshi_egg))
                         placed_eggs += 1
             if "Switch Palaces" in self.options.yoshi_egg_placement.value:
                 for level in switch_palace_locations:
                     processed_levels.add(f"{level} (Hidden Egg)")
                     location = self.multiworld.get_location(f"{level} (Hidden Egg)", self.player)
                     if location.progress_type is not LocationProgressType.EXCLUDED:
-                        location.place_locked_item(self.create_item(ItemName.yoshi_egg))
+                        if self.options.ungolden_eggs:
+                            location.place_locked_item(self.create_item(ItemName.yoshi_egg, egg_classsification))
+                        else:
+                            location.place_locked_item(self.create_item(ItemName.yoshi_egg))
                         placed_eggs += 1
             if "Ghost Houses" in self.options.yoshi_egg_placement.value:
                 for level in ghost_house_locations:
                     processed_levels.add(f"{level} (Hidden Egg)")
                     location = self.multiworld.get_location(f"{level} (Hidden Egg)", self.player)
                     if location.progress_type is not LocationProgressType.EXCLUDED:
-                        location.place_locked_item(self.create_item(ItemName.yoshi_egg))
+                        if self.options.ungolden_eggs:
+                            location.place_locked_item(self.create_item(ItemName.yoshi_egg, egg_classsification))
+                        else:
+                            location.place_locked_item(self.create_item(ItemName.yoshi_egg))
                         placed_eggs += 1
             if "Special Zone" in self.options.yoshi_egg_placement.value:
                 for loc_name in self.special_zone_egg_locations:
@@ -392,13 +434,19 @@ class WaffleWorld(World):
                     processed_levels.add(f"{loc_name}")
                     location = self.multiworld.get_location(loc_name, self.player)
                     if location.progress_type is not LocationProgressType.EXCLUDED:
-                        location.place_locked_item(self.create_item(ItemName.yoshi_egg))
+                        if self.options.ungolden_eggs:
+                            location.place_locked_item(self.create_item(ItemName.yoshi_egg, egg_classsification))
+                        else:
+                            location.place_locked_item(self.create_item(ItemName.yoshi_egg))
                         placed_eggs += 1
 
         raw_egg_count = max(0, min(total_required_locations - self.options.yoshi_egg_count.value + len(processed_levels), 255))
         total_egg_count = min(raw_egg_count, self.options.yoshi_egg_count.value + len(processed_levels), 255)
         if total_egg_count > len(processed_levels):
-            itempool += [self.create_item(ItemName.yoshi_egg) for _ in range(total_egg_count - len(processed_levels))]
+            if self.options.ungolden_eggs:
+                itempool += [self.create_item(ItemName.yoshi_egg, egg_classsification) for _ in range(total_egg_count - len(processed_levels))]
+            else:
+                itempool += [self.create_item(ItemName.yoshi_egg) for _ in range(total_egg_count - len(processed_levels))]
 
         self.actual_egg_count = total_egg_count
         self.required_egg_count = max(math.floor(total_egg_count * (self.options.percentage_of_yoshi_eggs.value / 100.0)), 0)
@@ -595,16 +643,27 @@ class WaffleWorld(World):
             hint_data[self.player] = er_hint_data
 
 
-    def write_spoiler(self, spoiler_handle: typing.TextIO) -> None:
+    def write_spoiler_header(self, spoiler_handle: typing.TextIO) -> None:
+        from .Levels import level_info_dict, possible_starting_entrances, banned_spoiler_levels
+
+        if self.options.level_shuffle.value:
+            spoiler_handle.write(f"\nLevel Shuffle Results:\n")
+            for level_id, tile_id in self.active_level_dict.items():
+                if level_id >= 0x60 or level_id in banned_spoiler_levels:
+                    continue
+                shuffled_level = level_info_dict[level_id]
+                original_level = level_info_dict[tile_id]
+                spoiler_handle.write(f"    {original_level.levelName} -> {shuffled_level.levelName}\n")
+        
+        spoiler_handle.write(f"\nStarting Location: {possible_starting_entrances[self.options.starting_location.value]}\n")
+
         if self.options.map_teleport_shuffle.value != 0:
-            spoiler_handle.write(f"\nSpicy Mycena Waffles map teleport shuffle destinations for {self.multiworld.player_name[self.player]}:\n")
-            
+            spoiler_handle.write(f"\nMap Teleport Shuffle Results:\n")
             for entrance, exit in self.teleport_pairs.items():
                 spoiler_handle.write(f"    {entrance} -> {exit}\n")
 
         if self.options.map_transition_shuffle.value != 0:
-            spoiler_handle.write(f"\nSpicy Mycena Waffles map transition shuffle destinations for {self.multiworld.player_name[self.player]}:\n")
-        
+            spoiler_handle.write(f"\nMap Transition Shuffle Results:\n")
             for entrance, exit in self.transition_pairs.items():
                 spoiler_handle.write(f"    {entrance[13:]} -> {exit[13:]}\n")
 
@@ -630,11 +689,14 @@ class WaffleWorld(World):
             "yoshi_egg_count",
             "enemy_shuffle",
             "yoshi_egg_placement",
+            "starting_location",
+            "ability_shuffle",
         )
         slot_data["active_levels"] = self.active_level_dict
         slot_data["teleport_pairs"] = self.teleport_pairs
         slot_data["transition_pairs"] = self.transition_pairs
         slot_data["swapped_exits"] = self.swapped_exits
+        slot_data["carryless_exits"] = self.carryless_exits
         slot_data["trap_weights"] = self.output_trap_weights()
 
         return slot_data

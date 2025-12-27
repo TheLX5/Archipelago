@@ -1765,12 +1765,23 @@ def create_regions(world: "WaffleWorld", active_locations: typing.Dict[int,int])
         add_location_to_region(world, active_locations, LocationName.special_zone_4_region, LocationName.special_zone_4_star_block_1)
 
 def connect_regions(world: "WaffleWorld", level_to_tile_dict):
-    connect(world, "Menu", LocationName.yoshis_island_region)
+    #connect(world, "Menu", LocationName.yoshis_island_region)
+    possible_starting_regions = [
+        LocationName.yoshis_island_region,
+        LocationName.donut_plains_1_tile,
+        LocationName.vanilla_dome_1_tile,
+        LocationName.forest_of_illusion_1_tile,
+        LocationName.special_zone_1_tile,
+    ]
+    connect(world, "Menu", possible_starting_regions[world.options.starting_location.value])
+
+    # Connect starting locations both ways
+    connect(world, LocationName.yoshis_house_tile, LocationName.yoshis_island_region)
+
     connect(world, LocationName.yoshis_island_region, LocationName.yoshis_house_tile)
     connect(world, LocationName.yoshis_island_region, LocationName.yoshis_island_1_tile)
     connect(world, LocationName.yoshis_island_region, LocationName.yoshis_island_2_tile)
 
-    # Connect regions within levels using rules
     connect(world, LocationName.yoshis_island_1_region, LocationName.yoshis_island_1_exit_1)
     connect(world, LocationName.yoshis_island_2_region, LocationName.yoshis_island_2_exit_1)
     connect(world, LocationName.yoshis_island_3_region, LocationName.yoshis_island_3_exit_1)
@@ -2029,9 +2040,7 @@ def add_event_to_region(world: "WaffleWorld", region_name: str, event_name: str,
     region.locations.append(event)
 
 
-
-def connect(world: "WaffleWorld", source: str, target: str,
-            rule: typing.Optional[typing.Callable] = None):
+def connect(world: "WaffleWorld", source: str, target: str) -> None:
     source_region: Region = world.get_region(source)
     target_region: Region = world.get_region(target)
-    source_region.connect(target_region, rule=rule)
+    source_region.connect(target_region)
