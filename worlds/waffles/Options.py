@@ -631,7 +631,7 @@ class TrapLink(Toggle):
     display_name = "Trap Link"
 
 
-class UngoldenEggs(Toggle):
+class UngoldenEggs(DefaultOnToggle):
     """
     Does exactly what you're thinking of.
     """
