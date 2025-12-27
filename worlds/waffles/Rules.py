@@ -645,7 +645,7 @@ class WaffleBasicRules(WaffleRules):
             f"{LocationName.forest_of_illusion_2_region} -> {LocationName.forest_of_illusion_2_exit_2}": 
                 lambda state: self.can_swim(state) and self.forest_of_illusion_2_special_case(state),
             f"{LocationName.forest_of_illusion_3_region} -> {LocationName.forest_of_illusion_3_exit_2}": 
-                self.can_carry_or_yoshi_tongue,
+                self.forest_of_illusion_3_special_case,
             f"{LocationName.forest_of_illusion_4_region} -> {LocationName.forest_of_illusion_4_exit_2}":
                 lambda state: self.can_run(state) or self.has_yoshi(state),
 
