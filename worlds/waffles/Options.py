@@ -661,6 +661,7 @@ waffle_option_groups = [
         BlockChecks,
     ]),
     OptionGroup("Level Shuffling", [
+        StartingLocation,
         LevelShuffle,
         LevelEffects,
         CarrylessExits,
@@ -699,6 +700,7 @@ waffle_option_groups = [
         MusicShuffle,
         SFXShuffle,
         MarioPalette,
+        UngoldenEggs,
     ]),
 ]
 
