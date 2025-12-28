@@ -457,7 +457,9 @@ class WaffleSNIClient(SNIClient):
         # Store visited OW levels for UT
         active_level_data = list(snes_data.get(SMWMemory.active_level_data))
         shuffled_level = state_mirror[0x0A]
-        tile_id = active_level_data[shuffled_level]
+        tile_id = 0x100
+        if shuffled_level in active_level_data:
+            tile_id = active_level_data[shuffled_level]
         if game_state == 0x14 and tile_id not in self.visited_levels and tile_id in level_info_dict:
             self.visited_levels.add(tile_id)
             level_key = level_info_dict[tile_id].levelName

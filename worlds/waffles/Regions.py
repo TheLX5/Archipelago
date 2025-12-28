@@ -8,10 +8,28 @@ from .Names import LocationName
 from .Options import Goal
 from worlds.generic.Rules import add_rule
 
-
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from . import WaffleWorld
+
+GREEN_YOSHI_LEVELS = [
+    LocationName.yoshis_island_2_region,
+    LocationName.yoshis_island_3_region,
+    LocationName.donut_plains_1_region,
+    LocationName.donut_plains_4_region,
+    LocationName.vanilla_dome_3_region,
+    LocationName.vanilla_secret_2_region,
+    LocationName.butter_bridge_2_region,
+    LocationName.cookie_mountain_region,
+    LocationName.forest_of_illusion_1_region,
+    LocationName.forest_of_illusion_3_region,
+    LocationName.chocolate_island_1_region,
+    LocationName.chocolate_island_2_region,
+    LocationName.valley_of_bowser_4_region,
+    LocationName.special_zone_5_region,
+    LocationName.special_zone_7_region,
+    LocationName.special_zone_8_region,
+]
 
 BLUE_YOSHI_LEVELS = [
     LocationName.cheese_bridge_region,
@@ -1999,11 +2017,39 @@ def connect_regions(world: "WaffleWorld", level_to_tile_dict):
         connect_blue_yoshi_levels(world, f"{LocationName.star_road_4_region} -> {LocationName.star_road_4_exit_2}")
         connect_blue_yoshi_levels(world, f"{LocationName.star_road_5_region} -> {LocationName.star_road_5_exit_1}")
         connect_blue_yoshi_levels(world, f"{LocationName.star_road_5_region} -> {LocationName.star_road_5_exit_2}")
+        connect_blue_yoshi_levels(world, f"{LocationName.chocolate_island_3_region} -> {LocationName.chocolate_island_3_exit_2}")
+
+        connect_green_yoshi_levels(world, f"{LocationName.donut_plains_1_region} -> {LocationName.donut_plains_1_exit_2}")
+        connect_green_yoshi_levels(world, f"{LocationName.donut_plains_2_region} -> {LocationName.donut_plains_2_exit_2}")
+        connect_green_yoshi_levels(world, f"{LocationName.vanilla_dome_1_region} -> {LocationName.vanilla_dome_1_exit_2}")
+        connect_green_yoshi_levels(world, f"{LocationName.vanilla_dome_2_region} -> {LocationName.vanilla_dome_2_exit_1}")
+        connect_green_yoshi_levels(world, f"{LocationName.vanilla_dome_2_region} -> {LocationName.vanilla_dome_2_exit_2}")
+        connect_green_yoshi_levels(world, f"{LocationName.cheese_bridge_region} -> {LocationName.cheese_bridge_exit_1}")
+        connect_green_yoshi_levels(world, f"{LocationName.chocolate_island_3_region} -> {LocationName.chocolate_island_3_exit_1}")
+        connect_green_yoshi_levels(world, f"{LocationName.valley_of_bowser_4_region} -> {LocationName.valley_of_bowser_4_exit_2}")
+        connect_green_yoshi_levels(world, f"{LocationName.star_road_3_region} -> {LocationName.star_road_3_exit_2}")
+        connect_green_yoshi_levels(world, f"{LocationName.special_zone_3_region} -> {LocationName.special_zone_3_exit_1}")
+        connect_green_yoshi_levels(world, f"{LocationName.special_zone_8_region} -> {LocationName.special_zone_8_exit_1}")
 
 
 def connect_blue_yoshi_levels(world: "WaffleWorld", entrance_name: str):
     entrance = world.multiworld.get_entrance(entrance_name, world.player)
     for region_name in BLUE_YOSHI_LEVELS:
+        region = world.multiworld.get_region(region_name, world.player)
+        world.multiworld.register_indirect_condition(region, entrance)
+    for region_name in GREEN_YOSHI_LEVELS:
+        region = world.multiworld.get_region(region_name, world.player)
+        world.multiworld.register_indirect_condition(region, entrance)
+    for region_name in RED_YOSHI_LEVELS:
+        region = world.multiworld.get_region(region_name, world.player)
+        world.multiworld.register_indirect_condition(region, entrance)
+    for region_name in YELLOW_YOSHI_LEVELS:
+        region = world.multiworld.get_region(region_name, world.player)
+        world.multiworld.register_indirect_condition(region, entrance)
+
+def connect_green_yoshi_levels(world: "WaffleWorld", entrance_name: str):
+    entrance = world.multiworld.get_entrance(entrance_name, world.player)
+    for region_name in GREEN_YOSHI_LEVELS:
         region = world.multiworld.get_region(region_name, world.player)
         world.multiworld.register_indirect_condition(region, entrance)
 

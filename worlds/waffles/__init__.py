@@ -141,7 +141,7 @@ class WaffleWorld(World):
 
         if not self.using_ut:
             # Bonk non level shuffle users trying to do something weird
-            if not self.options.starting_location.value and not self.options.level_shuffle.value:
+            if self.options.starting_location.value != 0 and not self.options.level_shuffle.value:
                 raise OptionError(f"{self.player_name} has a very weird combination of settings that will result in a failed generation.\n"
                                 f"  Please enable level_shuffle if you desire to change the starting location.")
             if self.options.starting_location.value == 0x04 and self.options.map_teleport_shuffle != "on_both_mix":

@@ -26,7 +26,7 @@ class WaffleRules:
         return state.has(ItemName.mario_carry, self.player)
 
     def can_carry_or_yoshi_tongue(self, state: CollectionState) -> bool:
-        return state.has_any_count({ItemName.mario_carry: 1, ItemName.yoshi: 2}, self.player)
+        return self.can_carry(state) or self.has_yoshi_carry(state)
     
     def can_run(self, state: CollectionState) -> bool:
         return state.has(ItemName.mario_run, self.player)
@@ -62,10 +62,10 @@ class WaffleRules:
         return state.has(ItemName.p_switch, self.player)
     
     def has_yoshi(self, state: CollectionState) -> bool:
-        return state.has(ItemName.yoshi, self.player)
+        return state.has(ItemName.yoshi, self.player) and self.can_get_green_yoshi(state)
     
     def has_yoshi_carry(self, state: CollectionState) -> bool:
-        return state.has(ItemName.yoshi, self.player, 2)
+        return state.has(ItemName.yoshi, self.player, 2) and self.can_get_green_yoshi(state)
     
     def has_special_world(self, state: CollectionState) -> bool:
         return state.has(ItemName.special_world_clear, self.player)
@@ -243,23 +243,49 @@ class WaffleRules:
         else:
             return self.can_swim(state)
 
-
     def can_break_turn_blocks(self, state: CollectionState) -> bool:
         return self.has_mushroom(state) and self.can_spin_jump(state)
     
     def can_pass_munchers(self, state: CollectionState) -> bool:
         return self.has_mushroom(state) or self.has_yoshi(state)
     
-    def can_get_blue_yoshi(self, state: CollectionState) -> bool:
+    def can_get_green_yoshi(self, state: CollectionState) -> bool:
         if self.world.options.inventory_yoshi_logic.value:
             return True
         else:
             return (
-                state.can_reach_region(LocationName.cheese_bridge_region, self.player) or \
-                state.can_reach_region(LocationName.star_road_2_region, self.player) or \
-                state.can_reach_region(LocationName.special_zone_3_region, self.player) or \
-                state.can_reach_region(LocationName.valley_of_bowser_2_region, self.player)
+                state.can_reach_region(LocationName.yoshis_island_2_region, self.player) or \
+                state.can_reach_region(LocationName.yoshis_island_3_region, self.player) or \
+                state.can_reach_region(LocationName.donut_plains_1_region, self.player) or \
+                state.can_reach_region(LocationName.donut_plains_4_region, self.player) or \
+                state.can_reach_region(LocationName.vanilla_dome_3_region, self.player) or \
+                state.can_reach_region(LocationName.vanilla_secret_2_region, self.player) or \
+                (state.can_reach_region(LocationName.butter_bridge_2_region, self.player) and self.can_carry(state)) or \
+                (state.can_reach_region(LocationName.cookie_mountain_region, self.player) and self.has_rsp(state)) or \
+                state.can_reach_region(LocationName.forest_of_illusion_1_region, self.player) or \
+                state.can_reach_region(LocationName.forest_of_illusion_3_region, self.player) or \
+                state.can_reach_region(LocationName.chocolate_island_1_region, self.player) or \
+                state.can_reach_region(LocationName.chocolate_island_2_region, self.player) or \
+                (state.can_reach_region(LocationName.valley_of_bowser_4_region, self.player) and self.can_climb(state)) or \
+                state.can_reach_region(LocationName.special_zone_5_region, self.player) or \
+                state.can_reach_region(LocationName.special_zone_7_region, self.player) or \
+                state.can_reach_region(LocationName.special_zone_8_region, self.player)
             )
+        
+    def can_get_blue_yoshi(self, state: CollectionState) -> bool:
+        if self.world.options.inventory_yoshi_logic.value:
+            return True
+        else:
+            return ((
+                    self.can_get_green_yoshi(state) or \
+                    self.can_get_red_yoshi(state) or \
+                    self.can_get_yellow_yoshi(state)
+                ) and (
+                    state.can_reach_region(LocationName.cheese_bridge_region, self.player) or \
+                    state.can_reach_region(LocationName.special_zone_3_region, self.player) or \
+                    state.can_reach_region(LocationName.valley_of_bowser_2_region, self.player)
+            )) or state.can_reach_region(LocationName.star_road_2_region, self.player)
+
     
     def can_get_red_yoshi(self, state: CollectionState) -> bool:
         if self.world.options.inventory_yoshi_logic.value:
@@ -268,7 +294,7 @@ class WaffleRules:
             return (
                 state.can_reach_region(LocationName.star_road_1_region, self.player) or \
                 state.can_reach_region(LocationName.star_road_4_region, self.player)
-            )
+            ) and self.can_carry(state)
 
     def can_get_yellow_yoshi(self, state: CollectionState) -> bool:
         if self.world.options.inventory_yoshi_logic.value:
@@ -276,7 +302,7 @@ class WaffleRules:
         else:
             return (
                 state.can_reach_region(LocationName.star_road_3_region, self.player) or \
-                state.can_reach_region(LocationName.star_road_5_region, self.player)
+                (state.can_reach_region(LocationName.star_road_5_region, self.player) and self.can_cape_fly(state) or self.has_p_switch(state))
             )
 
     def can_beat_hard_level(self, state: CollectionState, difficulty: int) -> bool:
@@ -589,7 +615,7 @@ class WaffleBasicRules(WaffleRules):
                     self.can_carry(state) and self.has_gsp(state) and self.has_rsp(state)
                 ),
             f"{LocationName.star_road_5_region} -> {LocationName.star_road_5_exit_1}": 
-                lambda state: self.has_p_switch(state) or self.can_yoshi_fly(state),
+                lambda state: self.has_p_switch(state) or self.can_fly(state),
             f"{LocationName.star_road_5_region} -> {LocationName.star_road_5_exit_2}": 
                 lambda state: self.can_yoshi_fly(state) or (
                     self.can_carry(state) and self.can_climb(state) and self.has_p_switch(state) and 

@@ -316,7 +316,7 @@ def export_pack_from_folder(folder_path):
     gfx_00 = open_pack_file([f"{folder_path}/GFX00.bin"])
     gfx_10 = open_pack_file([f"{folder_path}/GFX10.bin"])
     gfx_28 = open_pack_file([f"{folder_path}/GFX28.bin"])
-    map_pal = open_pack_file([f"{folder_path}/map.pal"])
+    map_pal = open_pack_file([f"{folder_path}/map.pal", f"{folder_path}/Overworld_palette.pal"])
     shared_pal = open_pack_file([f"{folder_path}/shared.pal", f"{folder_path}/Shared_palette.smwpal"])
     sprites = open_pack_file([f"{folder_path}/sprites.bin"])
 
