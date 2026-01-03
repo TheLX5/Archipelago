@@ -697,6 +697,8 @@ class WaffleWorld(World):
         slot_data["transition_pairs"] = self.transition_pairs
         slot_data["swapped_exits"] = self.swapped_exits
         slot_data["carryless_exits"] = self.carryless_exits
+        slot_data["required_egg_count"] = self.required_egg_count
+        slot_data["actual_egg_count"] = self.actual_egg_count
         slot_data["trap_weights"] = self.output_trap_weights()
 
         return slot_data

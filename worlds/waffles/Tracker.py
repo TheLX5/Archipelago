@@ -31,6 +31,8 @@ def setup_options_from_slot_data(world: "WaffleWorld") -> None:
                 world.options.yoshi_egg_placement.value = slot_data["yoshi_egg_placement"]
                 world.options.starting_location.value = slot_data["starting_location"]
                 world.options.ability_shuffle.value = slot_data["ability_shuffle"]
+                world.required_egg_count = slot_data["required_egg_count"]
+                world.actual_egg_count = slot_data["actual_egg_count"]
         else:
             world.using_ut = False
     else:
