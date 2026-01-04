@@ -130,11 +130,11 @@ class WaffleRules:
         if self.world.using_ut:
             return self.can_run(state) and (
                 self.has_super_star(state) or self.has_mushroom(state)
-            ) or state.has(ItemName.glitched, self.player),
+            ) or state.has(ItemName.glitched, self.player)
         else:
             return self.can_run(state) and (
                 self.has_super_star(state) or self.has_mushroom(state)
-            ),
+            )
 
     def vanilla_dome_4_special_case(self, state: CollectionState) -> bool:
         if self.world.using_ut:
