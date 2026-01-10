@@ -805,7 +805,7 @@ class DKCStrictRules(DKCRules):
             LocationName.ice_age_alley_bunch_2:
                 lambda state: ((self.can_climb(state) and self.has_kannons(state)) or self.has_expresso(state)) and self.can_slap(state),
             LocationName.ice_age_alley_bunch_3:
-                lambda state: (self.can_climb(state) and self.has_kannons(state)) or self.has_expresso(state),
+                lambda state: ((self.can_climb(state) and self.has_kannons(state)) or self.has_expresso(state)) and self.can_roll(state),
 
             LocationName.croctopus_chase_clear:
                 self.can_swim,
@@ -940,9 +940,9 @@ class DKCStrictRules(DKCRules):
                 lambda state: self.can_swim(state) and self.has_enguarde(state),
 
             LocationName.mine_cart_madness_clear:
-                lambda state: self.has_minecart(state) and self.has_tires(state),
+                self.has_minecart,
             EventName.mine_cart_madness_clear:
-                lambda state: self.has_minecart(state) and self.has_tires(state),
+                self.has_minecart,
             LocationName.mine_cart_madness_bonus_1:
                 lambda state: self.has_minecart(state) and self.can_climb(state) and self.has_kannons(state),
             LocationName.mine_cart_madness_bonus_2:
@@ -954,7 +954,7 @@ class DKCStrictRules(DKCRules):
             LocationName.mine_cart_madness_token_1:
                 self.has_minecart,
             LocationName.mine_cart_madness_bunch_1:
-                lambda state: self.has_minecart(state) and self.has_tires(state),
+                self.has_minecart,
 
             LocationName.blackout_basement_clear:
                 lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state),
@@ -1795,9 +1795,9 @@ class DKCLooseRules(DKCRules):
                 lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
 
             LocationName.mine_cart_madness_clear:
-                lambda state: self.has_minecart(state) and self.has_tires(state),
+                self.has_minecart,
             EventName.mine_cart_madness_clear:
-                lambda state: self.has_minecart(state) and self.has_tires(state),
+                self.has_minecart,
             LocationName.mine_cart_madness_bonus_1:
                 lambda state: self.has_minecart(state) and self.can_climb(state) and self.has_kannons(state),
             LocationName.mine_cart_madness_bonus_2:
@@ -1805,11 +1805,11 @@ class DKCLooseRules(DKCRules):
             LocationName.mine_cart_madness_bonus_3:
                 lambda state: self.has_minecart(state) and self.has_tires(state) and self.has_kannons(state),
             LocationName.mine_cart_madness_kong:
-                lambda state: self.has_minecart(state) and self.has_tires(state),
+                lambda state: self.has_minecart(state) and (self.has_tires(state) or self.has_donkey(state)),
             LocationName.mine_cart_madness_token_1:
                 self.has_minecart,
             LocationName.mine_cart_madness_bunch_1:
-                lambda state: self.has_minecart(state) and self.has_tires(state),
+                self.has_minecart,
 
             LocationName.blackout_basement_clear:
                 lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state),
