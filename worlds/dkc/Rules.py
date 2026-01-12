@@ -674,9 +674,9 @@ class DKCStrictRules(DKCRules):
                 lambda state: self.can_climb(state) and self.has_tires(state),
 
             LocationName.orang_utan_gang_clear:
-                lambda state: self.can_carry(state) or self.has_expresso(state) or self.can_roll(state) or self.has_both_kongs(state),
+                self.true,
             EventName.orang_utan_gang_clear:
-                lambda state: self.can_carry(state) or self.has_expresso(state) or self.can_roll(state) or self.has_both_kongs(state),
+                self.true,
             LocationName.orang_utan_gang_bonus_1:
                 self.has_expresso,
             LocationName.orang_utan_gang_bonus_2:
@@ -698,13 +698,13 @@ class DKCStrictRules(DKCRules):
             LocationName.orang_utan_gang_bunch_4:
                 self.can_roll,
             LocationName.orang_utan_gang_bunch_5:
-                lambda state: self.can_slap(state) and (self.can_carry(state) or self.has_expresso(state) or self.can_roll(state) or self.has_diddy(state)),
+                self.can_slap,
             LocationName.orang_utan_gang_bunch_6:
                 self.has_expresso,
             LocationName.orang_utan_gang_token_1:
                 lambda state: self.has_tires(state) and self.has_expresso(state),
             LocationName.orang_utan_gang_bunch_7:
-                lambda state: self.can_slap(state) and (self.can_carry(state) or self.has_expresso(state) or self.can_roll(state) or self.has_diddy(state)),
+                self.can_slap,
             LocationName.orang_utan_gang_bunch_8:
                 self.has_expresso,
             LocationName.orang_utan_gang_bunch_9:
@@ -805,7 +805,7 @@ class DKCStrictRules(DKCRules):
             LocationName.ice_age_alley_bunch_2:
                 lambda state: ((self.can_climb(state) and self.has_kannons(state)) or self.has_expresso(state)) and self.can_slap(state),
             LocationName.ice_age_alley_bunch_3:
-                lambda state: (self.can_climb(state) and self.has_kannons(state)) or self.has_expresso(state),
+                lambda state: ((self.can_climb(state) and self.has_kannons(state)) or self.has_expresso(state)) and self.can_roll(state),
 
             LocationName.croctopus_chase_clear:
                 self.can_swim,
@@ -940,9 +940,9 @@ class DKCStrictRules(DKCRules):
                 lambda state: self.can_swim(state) and self.has_enguarde(state),
 
             LocationName.mine_cart_madness_clear:
-                lambda state: self.has_minecart(state) and self.has_tires(state),
+                self.has_minecart,
             EventName.mine_cart_madness_clear:
-                lambda state: self.has_minecart(state) and self.has_tires(state),
+                self.has_minecart,
             LocationName.mine_cart_madness_bonus_1:
                 lambda state: self.has_minecart(state) and self.can_climb(state) and self.has_kannons(state),
             LocationName.mine_cart_madness_bonus_2:
@@ -954,7 +954,7 @@ class DKCStrictRules(DKCRules):
             LocationName.mine_cart_madness_token_1:
                 self.has_minecart,
             LocationName.mine_cart_madness_bunch_1:
-                lambda state: self.has_minecart(state) and self.has_tires(state),
+                self.has_minecart,
 
             LocationName.blackout_basement_clear:
                 lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state),
@@ -996,21 +996,21 @@ class DKCStrictRules(DKCRules):
                 lambda state: self.has_platforms(state) and self.has_tires(state) and self.has_kannons(state),
 
             LocationName.manic_mincers_clear:
-                lambda state: (self.has_both_kongs(state) or self.has_rambi(state)) and self.has_tires(state),
+                self.has_tires,
             EventName.manic_mincers_clear:
-                lambda state: (self.has_both_kongs(state) or self.has_rambi(state)) and self.has_tires(state),
+                self.has_tires,
             LocationName.manic_mincers_bonus_1:
-                lambda state: (self.has_both_kongs(state) and self.can_carry(state)) or self.has_rambi(state),
+                lambda state: self.can_carry(state) or self.has_rambi(state),
             LocationName.manic_mincers_bonus_2:
-                lambda state: (self.has_both_kongs(state) and self.can_carry(state)) or self.has_rambi(state),
+                lambda state: self.can_carry(state) or self.has_rambi(state),
             LocationName.manic_mincers_kong:
-                lambda state: self.has_both_kongs(state) or self.has_rambi(state),
+                self.true,
             LocationName.manic_mincers_bunch_1:
-                lambda state: self.has_both_kongs(state) or self.has_rambi(state),
+                self.true,
             LocationName.manic_mincers_bunch_2:
-                lambda state: self.has_both_kongs(state) or self.has_rambi(state),
+                self.true,
             LocationName.manic_mincers_token_1:
-                lambda state: self.has_both_kongs(state) or self.has_rambi(state),
+                self.can_roll,
 
             LocationName.misty_mine_clear:
                 self.can_climb,
@@ -1547,13 +1547,13 @@ class DKCLooseRules(DKCRules):
             LocationName.orang_utan_gang_bunch_4:
                 self.can_roll,
             LocationName.orang_utan_gang_bunch_5:
-                lambda state: self.can_slap(state) and (self.can_carry(state) or self.has_expresso(state)),
+                self.can_slap,
             LocationName.orang_utan_gang_bunch_6:
                 lambda state: self.has_expresso(state) or (self.has_diddy(state) and self.can_roll(state)),
             LocationName.orang_utan_gang_token_1:
                 lambda state: self.has_tires(state) and self.has_expresso(state),
             LocationName.orang_utan_gang_bunch_7:
-                lambda state: self.can_slap(state) and (self.can_carry(state) or self.has_expresso(state)),
+                self.can_slap,
             LocationName.orang_utan_gang_bunch_8:
                 self.true,
             LocationName.orang_utan_gang_bunch_9:
@@ -1795,9 +1795,9 @@ class DKCLooseRules(DKCRules):
                 lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
 
             LocationName.mine_cart_madness_clear:
-                lambda state: self.has_minecart(state) and self.has_tires(state),
+                self.has_minecart,
             EventName.mine_cart_madness_clear:
-                lambda state: self.has_minecart(state) and self.has_tires(state),
+                self.has_minecart,
             LocationName.mine_cart_madness_bonus_1:
                 lambda state: self.has_minecart(state) and self.can_climb(state) and self.has_kannons(state),
             LocationName.mine_cart_madness_bonus_2:
@@ -1805,11 +1805,11 @@ class DKCLooseRules(DKCRules):
             LocationName.mine_cart_madness_bonus_3:
                 lambda state: self.has_minecart(state) and self.has_tires(state) and self.has_kannons(state),
             LocationName.mine_cart_madness_kong:
-                lambda state: self.has_minecart(state) and self.has_tires(state),
+                lambda state: self.has_minecart(state) and (self.has_tires(state) or self.has_donkey(state)),
             LocationName.mine_cart_madness_token_1:
                 self.has_minecart,
             LocationName.mine_cart_madness_bunch_1:
-                lambda state: self.has_minecart(state) and self.has_tires(state),
+                self.has_minecart,
 
             LocationName.blackout_basement_clear:
                 lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state),
@@ -1855,9 +1855,9 @@ class DKCLooseRules(DKCRules):
             EventName.manic_mincers_clear:
                 self.has_tires,
             LocationName.manic_mincers_bonus_1:
-                lambda state: (self.has_both_kongs(state) and self.can_carry(state)) or self.has_rambi(state),
+                lambda state: self.can_carry(state) or self.has_rambi(state),
             LocationName.manic_mincers_bonus_2:
-                lambda state: (self.has_both_kongs(state) and self.can_carry(state)) or self.has_rambi(state),
+                lambda state: self.can_carry(state) or self.has_rambi(state),
             LocationName.manic_mincers_kong:
                 self.true,
             LocationName.manic_mincers_bunch_1:
