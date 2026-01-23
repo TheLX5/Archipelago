@@ -104,8 +104,6 @@ class DKCWorld(World):
         
         connect_regions(self)
        
-
-    def set_rules(self):
         logic = self.options.logic
         if logic == Logic.option_loose:
             DKCLooseRules(self).set_dkc_rules()
@@ -133,8 +131,6 @@ class DKCWorld(World):
                 state.collect(item)
                 loc_count = self.test_starting_world(state)
                 self.multiworld.push_precollected(item)
-            
-            self.create_item_late()
 
         # Universal Tracker: If we're using UT, scan the rules again to build "glitched logic" during the regen
         else:
@@ -157,10 +153,6 @@ class DKCWorld(World):
     
  
     def create_items(self) -> None:
-        return 
-    
-
-    def create_item_late(self) -> None:
         itempool: List[DKCItem] = []
 
         self.total_required_locations = 106
