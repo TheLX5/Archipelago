@@ -123,7 +123,7 @@ def load_data_from_patch(patch_path, vars_ns):
     options_file = json.loads(file.read("data.json").decode("UTF-8"))
 
     if "death_link" in options_file.keys():
-        vars_ns.death_link.set(options_file["death_link"])
+        vars_ns.death_link_active.set(options_file["death_link"])
     if "energy_link" in options_file.keys():
         vars_ns.energy_link_active.set(options_file["energy_link"])
     if "trap_link" in options_file.keys():
@@ -209,7 +209,7 @@ def create_linked_frame(parent=None):
     trap_label = Label(trap_frame, text="Enable Trap Link")
     trap_label.pack(side=LEFT, fill=X)
 
-    #death_frame.pack(side=TOP, fill=X)
+    death_frame.pack(side=TOP, fill=X)
     energy_frame.pack(side=TOP, fill=X)
     trap_frame.pack(side=TOP, fill=X)
 

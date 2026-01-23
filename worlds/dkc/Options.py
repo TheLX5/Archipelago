@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from .Items import item_groups
 from .Aesthetics import player_palette_set_offsets
 
-from Options import OptionGroup, Choice, Range, Toggle, DefaultOnToggle, OptionSet, OptionDict, PerGameCommonOptions, StartInventoryPool, FreeText
+from Options import OptionGroup, Choice, Range, Toggle, DeathLink, OptionSet, OptionDict, PerGameCommonOptions, StartInventoryPool, FreeText
 from schema import Schema, Optional
 
 class StartingLifeCount(Range):
@@ -532,7 +532,7 @@ dkc_option_groups = [
 @dataclass
 class DKCOptions(PerGameCommonOptions):
     start_inventory_from_pool: StartInventoryPool
-    #death_link: DeathLink
+    death_link: DeathLink
     energy_link: EnergyLink
     trap_link: TrapLink
     starting_life_count: StartingLifeCount

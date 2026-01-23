@@ -141,7 +141,7 @@ class DKCPatchExtension(APPatchExtension):
 
         rom[0x3BF7A8] = json_data["energy_link"]
         rom[0x3BF7A9] = json_data["trap_link"]
-        #rom[0x3BF7AA] = json_data["death_link"]
+        rom[0x3BF7AA] = json_data["death_link"]
 
         return bytes(rom)
 
@@ -207,7 +207,7 @@ def patch_rom(world: "DKCWorld", patch: DKCProcedurePatch):
         "master_necky_snr_hp": world.options.boss_master_necky_snr_hp.value,
         "energy_link": world.options.energy_link.value,
         "trap_link": world.options.trap_link.value,
-        #"death_link": world.options.energy_link.value,
+        "death_link": world.options.death_link.value,
     }
     patch.write_file("data.json", json.dumps(data_dict).encode("UTF-8"))
 

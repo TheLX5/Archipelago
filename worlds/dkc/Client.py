@@ -22,16 +22,16 @@ SRAM_START = 0xE00000
 
 STARTING_ID = 0xBF1000
 
-DKC_SRAM = SRAM_START + 0x600
-DKC_RECV_INDEX = DKC_SRAM + 0x01C
-
-DKC_PLAY_SFX = DKC_SRAM + 0x026
-
 DKC_STAGE_FLAGS = WRAM_START + 0x0583
 DKC_SANITY_FLAGS = WRAM_START + 0x1F800
 
+DKC_SRAM = SRAM_START + 0x600
+DKC_RECV_INDEX = DKC_SRAM + 0x01C
+DKC_PLAY_SFX = DKC_SRAM + 0x026
+DKC_DEATH_LINK_FLAG = DKC_SRAM + 0x064
 DKC_BARRELS = DKC_SRAM + 0x024
 DKC_ENERGY_LINK_TRANSFER = DKC_SRAM + 0x020
+
 DKC_EXCHANGE_RATE = 200000000
 DK_BARREL_BANANA_COST = 20
 
@@ -53,6 +53,8 @@ class RAM(Enum):
     sanity_flags = Read(DKC_SANITY_FLAGS, 0x100)
     backup_barrels = Read(DKC_BARRELS, 0x02)
     energy_link_packet = Read(DKC_ENERGY_LINK_TRANSFER, 0x02)
+    death_flag = Read(WRAM_START + 0x1F780, 0x02)
+    death_link_flag = Read(DKC_SRAM + 0x064, 0x02)
 
 class ValidationRAM(Enum):
     settings = Read(ROM_START + 0x3BF790, 0x40)
@@ -110,6 +112,10 @@ class DKCSNIClient(SNIClient):
             ctx.tags.add("TrapLink")
             update_tags = True
 
+        death_link = settings[0x1A]
+        if death_link:
+            await ctx.update_death_link(True)
+
         if update_tags:
             await ctx.send_msgs([{"cmd": "ConnectUpdate", "tags": ctx.tags}])
 
@@ -129,6 +135,7 @@ class DKCSNIClient(SNIClient):
             self.game_state = False
             return
 
+        # Mark valid game state after we set foot into the map
         nmi_pointer = int.from_bytes(dkc_ram.get(RAM.nmi_pointer), "little")
         if nmi_pointer == 0xE6B1:
             self.game_state = True
@@ -215,6 +222,12 @@ class DKCSNIClient(SNIClient):
 
         if "TrapLink" in ctx.tags:
             await self.handle_trap_link(ctx)
+
+        # Only handle death link during levels, at full brightness and if we're not dead
+        death_flag = int.from_bytes(dkc_ram.get(RAM.death_flag), "little")
+        if "DeathLink" in ctx.tags and ctx.last_death_link + 1 < time.time():
+            currently_dead = death_flag != 0 and nmi_pointer != 0xE6B1 and brightness & 0x0F == 0x0F
+            await ctx.handle_deathlink_state(currently_dead)
             
         # Add a label that shows how many Barrels are left
         await self.handle_barrel_label(ctx, dkc_ram)
@@ -336,6 +349,29 @@ class DKCSNIClient(SNIClient):
 
             if level_data_updated:
                 snes_buffered_write(ctx, DKC_STAGE_FLAGS, bytearray(level_flags))
+
+
+    async def deathlink_kill_player(self, ctx: "SNIContext"):
+        from SNIClient import DeathState, snes_buffered_write, snes_flush_writes
+
+        dkc_ram = await self.memory.read(ctx)
+        if dkc_ram is None:
+            return
+
+        death_link_flag = int.from_bytes(dkc_ram.get(RAM.death_link_flag),"little")
+        nmi_pointer = int.from_bytes(dkc_ram.get(RAM.nmi_pointer), "little")
+        brightness = int.from_bytes(dkc_ram.get(RAM.brightness), "little")
+
+        # skip death link if already dead, in map or without full brightness
+        if death_link_flag or nmi_pointer == 0xE6B1 or brightness & 0x0F != 0x0F:
+            return
+
+        snes_buffered_write(ctx, DKC_DEATH_LINK_FLAG, bytes([0x01]))
+        await snes_flush_writes(ctx)
+
+        ctx.death_state = DeathState.dead
+        ctx.last_death_link = time.time()
+
 
     async def handle_energy_link(self, ctx: "SNIContext", dkc_ram: SnesData[RAM]):
         from SNIClient import snes_buffered_write, snes_flush_writes
