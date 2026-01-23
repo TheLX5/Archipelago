@@ -6,6 +6,8 @@ import pkgutil
 
 from BaseClasses import MultiWorld, Tutorial, ItemClassification, CollectionState
 from worlds.AutoWorld import World, WebWorld
+from worlds.LauncherComponents import launch as launch_component, components, Component, Type
+
 from .Items import DKCItem, item_table, misc_table, item_groups, STARTING_ID, option_name_to_world_name, items_that_open_checks
 from .Locations import setup_locations, all_locations, location_groups
 from .Regions import create_regions, connect_regions
@@ -15,9 +17,14 @@ from .Client import DKCSNIClient
 from .Levels import generate_level_list, level_map, location_id_to_level_id
 from .Rules import DKCStrictRules, DKCLooseRules, DKCExpertRules
 from .Rom import patch_rom, DKCProcedurePatch, HASH_US
-from Options import OptionError
 
-from typing import Dict, Set, List, ClassVar, Any, Deque
+from typing import Dict, Set, List, ClassVar
+
+def launch_manager(*args):
+    from .Manager import launch
+    launch_component(launch, "DKC Manager")
+
+components.append(Component(display_name="DKC Manager", component_type=Type.ADJUSTER, func=launch_manager))
 
 class DKCSettings(settings.Group):
     class RomFile(settings.SNESRomPath):
@@ -67,7 +74,7 @@ class DKCWorld(World):
     options_dataclass = DKCOptions
     options: DKCOptions
     
-    required_client_version = (0, 6, 3)
+    required_client_version = (0, 6, 5)
     
     using_ut: bool
     ut_can_gen_without_yaml = True
@@ -178,14 +185,15 @@ class DKCWorld(World):
             self.multiworld.push_precollected(self.create_item(ItemName.diddy))
 
         # Submit item pool
-        for world_ in item_groups["Worlds"]:
-            if world_ in self.multiworld.precollected_items[self.player]:
+        precollected_items_by_name = [item.name for item in self.multiworld.precollected_items[self.player]]
+        for item in item_groups["Worlds"]:
+            if item in precollected_items_by_name:
                 continue
             else:
-                itempool.append(self.create_item(world_))
+                itempool.append(self.create_item(item))
                 
         for item in item_groups["Abilities"]:
-            if item in self.multiworld.precollected_items[self.player]:
+            if item in precollected_items_by_name:
                 continue
             elif item in self.options.shuffle_abilities.value:
                 classification = False
@@ -196,13 +204,17 @@ class DKCWorld(World):
                 self.multiworld.push_precollected(self.create_item(item))
 
         for item in item_groups["Animals"]:
-            if item in self.options.shuffle_animals.value:
+            if item in precollected_items_by_name:
+                continue
+            elif item in self.options.shuffle_animals.value:
                 itempool += [self.create_item(item)]
             else:
                 self.multiworld.push_precollected(self.create_item(item))
                 
         for item in item_groups["Objects"]:
-            if item in self.options.shuffle_objects.value:
+            if item in precollected_items_by_name:
+                continue
+            elif item in self.options.shuffle_objects.value:
                 itempool += [self.create_item(item)]
             else:
                 self.multiworld.push_precollected(self.create_item(item))

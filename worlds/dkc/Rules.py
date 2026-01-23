@@ -1680,17 +1680,17 @@ class DKCLooseRules(DKCRules):
                 self.can_swim,
 
             LocationName.torchlight_trouble_clear:
-                self.true,
+                self.has_squawks,
             EventName.torchlight_trouble_clear:
-                self.true,
+                self.has_squawks,
             LocationName.torchlight_trouble_bonus_1:
-                self.can_carry,
+                lambda state: self.has_squawks(state) and self.can_carry(state),
             LocationName.torchlight_trouble_bonus_2:
-                self.can_carry,
+                lambda state: self.has_squawks(state) and self.can_carry(state),
             LocationName.torchlight_trouble_kong:
-                lambda state: self.can_carry(state) and self.can_roll(state),
+                lambda state: self.has_squawks(state) and self.can_carry(state) and self.can_roll(state),
             LocationName.torchlight_trouble_bunch_1:
-                self.can_slap,
+                lambda state: self.has_squawks(state) and self.can_slap(state),
 
             LocationName.rope_bridge_rumble_clear:
                 self.has_tires,
@@ -1887,19 +1887,19 @@ class DKCLooseRules(DKCRules):
                 lambda state: self.can_climb(state) and (self.has_expresso(state) or self.can_roll(state)),
 
             LocationName.loopy_lights_clear:
-                self.has_tires,
+                lambda state: self.has_switches(state) and self.has_tires,
             EventName.loopy_lights_clear:
-                self.has_tires,
+                lambda state: self.has_switches(state) and self.has_tires,
             LocationName.loopy_lights_bonus_1:
-                self.has_kannons,
+                lambda state: self.has_switches(state) and self.has_kannons,
             LocationName.loopy_lights_bonus_2:
-                lambda state: self.has_tires(state) and self.can_carry(state),
+                lambda state: self.has_switches(state) and self.has_tires(state) and self.can_carry(state),
             LocationName.loopy_lights_kong:
-                lambda state: self.has_tires(state) and self.has_kannons(state) and self.can_roll(state) and self.can_carry(state),
+                lambda state: self.has_switches(state) and self.has_tires(state) and self.has_kannons(state) and self.can_roll(state) and self.can_carry(state),
             LocationName.loopy_lights_bunch_1:
-                self.has_tires,
+                lambda state: self.has_switches(state) and self.has_tires,
             LocationName.loopy_lights_bunch_2:
-                self.has_tires,
+                lambda state: self.has_switches(state) and self.has_tires,
 
             LocationName.platform_perils_clear:
                 lambda state: self.has_platforms(state) and self.can_carry(state) and (self.has_donkey(state) or self.can_roll(state)) and self.has_tires(state),
