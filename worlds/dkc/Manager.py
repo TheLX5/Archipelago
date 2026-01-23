@@ -23,8 +23,8 @@ import ModuleUpdate
 ModuleUpdate.update()
 
 GAME_NAME = "Donkey Kong Country"
-WINDOW_MIN_HEIGHT = 420
-WINDOW_MIN_WIDTH = 640
+WINDOW_MIN_HEIGHT = 380
+WINDOW_MIN_WIDTH = 660
 
 class ArgumentDefaultsHelpFormatter(argparse.RawTextHelpFormatter):
 
@@ -59,7 +59,7 @@ def manager_gui():
     linked_frame, linked_vars = create_linked_frame(left_frame)
     misc_frame, misc_vars = create_misc_frame(left_frame)
     boss_frame, boss_vars = create_boss_frame(right_frame)
-    file_frame, vars_ns = create_file_frame(left_frame, (linked_vars, misc_vars))
+    file_frame, vars_ns = create_file_frame(left_frame, (linked_vars, misc_vars, boss_vars))
 
     file_frame.pack(side=TOP, padx=8, pady=8, fill=BOTH)
     linked_frame.pack(side=TOP, padx=8, pady=8, fill=BOTH)
@@ -120,14 +120,14 @@ def create_file_frame(parent=None, external_vars=None):
 
 def load_data_from_patch(patch_path, vars_ns):
     file = zipfile.ZipFile(patch_path)
-    options_file = json.loads(file.read("options.json").decode("UTF-8"))
+    options_file = json.loads(file.read("data.json").decode("UTF-8"))
 
     if "death_link" in options_file.keys():
         vars_ns.death_link.set(options_file["death_link"])
     if "energy_link" in options_file.keys():
-        vars_ns.energy_link.set(options_file["energy_link"])
+        vars_ns.energy_link_active.set(options_file["energy_link"])
     if "trap_link" in options_file.keys():
-        vars_ns.trap_link.set(options_file["trap_link"])
+        vars_ns.trap_link_active.set(options_file["trap_link"])
     if "kong_letters" in options_file.keys():
         vars_ns.kong_letters.set(options_file["kong"])
     if "master_necky_hp" in options_file.keys():
@@ -160,7 +160,7 @@ def save_adjusted_data(vars_ns):
     for file_name in file.namelist():
         zip_files[file_name] = file.read(file_name)
 
-    options_file = json.loads(file.read("options.json").decode("UTF-8"))
+    options_file = json.loads(file.read("data.json").decode("UTF-8"))
     options_file["death_link"] = vars_ns.death_link_active.get()
     options_file["energy_link"] = vars_ns.energy_link_active.get()
     options_file["trap_link"] = vars_ns.trap_link_active.get()
@@ -176,7 +176,7 @@ def save_adjusted_data(vars_ns):
     options_file["dumb_drum_enemy_drop"] = vars_ns.dumb_drum_enemy_drop.get()
     options_file["dumb_drum_stun"] = vars_ns.dumb_drum_stun.get()
 
-    zip_files["options.json"] = json.dumps(options_file)
+    zip_files["data.json"] = json.dumps(options_file)
 
     zip_bytes = create_zipfile(zip_files)    
     if patch_path:
