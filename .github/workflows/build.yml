@@ -4,6 +4,8 @@ name: Build
 
 on:
   push:
+    branches-ignore:
+      - experimental
     paths:
       - '.github/workflows/build.yml'
       - 'setup.py'
@@ -11,6 +13,8 @@ on:
       - '*.iss'
       - 'worlds/*/archipelago.json'
   pull_request:
+    branches-ignore:
+      - experimental
     paths:
       - '.github/workflows/build.yml'
       - 'setup.py'

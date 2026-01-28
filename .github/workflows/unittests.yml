@@ -5,6 +5,8 @@ name: unittests
 
 on:
   push:
+    branches-ignore:
+      - experimental
     paths:
       - '**'
       - '!docs/**'
@@ -17,6 +19,8 @@ on:
       - '!.github/workflows/**'
       - '.github/workflows/unittests.yml'
   pull_request:
+    branches-ignore:
+      - experimental
     paths:
       - '**'
       - '!docs/**'

@@ -18,6 +18,8 @@ on:
       - '**.py'
       - '**.js'
       - '.github/workflows/codeql-analysis.yml'
+    branches-ignore:
+      - experimental
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ main ]
@@ -25,6 +27,8 @@ on:
       - '**.py'
       - '**.js'
       - '.github/workflows/codeql-analysis.yml'
+    branches-ignore:
+      - experimental
   schedule:
     - cron: '44 8 * * 1'
 

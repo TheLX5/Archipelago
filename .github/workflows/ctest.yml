@@ -4,6 +4,8 @@ name: ctest
 
 on:
   push:
+    branches-ignore:
+      - experimental
     paths:
       - '**.cc?'
       - '**.cpp'
@@ -14,6 +16,8 @@ on:
       - '**/CMakeLists.txt'
       - '.github/workflows/ctest.yml'
   pull_request:
+    branches-ignore:
+      - experimental
     paths:
       - '**.cc?'
       - '**.cpp'

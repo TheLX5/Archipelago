@@ -2,12 +2,16 @@ name: type check
 
 on:
   pull_request:
+    branches-ignore:
+      - experimental
     paths:
       - "**.py"
       - ".github/pyright-config.json"
       - ".github/workflows/strict-type-check.yml"
       - "**.pyi"
   push:
+    branches-ignore:
+      - experimental
     paths:
       - "**.py"
       - ".github/pyright-config.json"

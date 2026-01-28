@@ -2,6 +2,8 @@ name: Native Code Static Analysis
 
 on:
   push:
+    branches-ignore:
+      - experimental
     paths:
       - '**.c'
       - '**.cc'
@@ -15,6 +17,8 @@ on:
       - 'requirements.txt'
       - '.github/workflows/scan-build.yml'
   pull_request:
+    branches-ignore:
+      - experimental
     paths:
       - '**.c'
       - '**.cc'

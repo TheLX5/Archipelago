@@ -2,9 +2,13 @@ name: Analyze modified files
 
 on:
   pull_request:
+    branches-ignore:
+      - experimental
     paths:
       - "**.py"
   push:
+    branches-ignore:
+      - experimental
     paths:
       - "**.py"
 

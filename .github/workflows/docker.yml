@@ -2,6 +2,8 @@ name: Build and Publish Docker Images
 
 on:
   push:
+    branches-ignore:
+      - experimental
     paths:
       - "**"
       - "!docs/**"
