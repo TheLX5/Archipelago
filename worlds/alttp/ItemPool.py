@@ -487,19 +487,19 @@ def generate_itempool(world):
         # Heart and Arrow costs require all Heart Container/Pieces and Arrow Upgrades to be advancement items for logic
         for item in items:
             if item.name in ("Boss Heart Container", "Sanctuary Heart Container", "Piece of Heart"):
-                item.classification = ItemClassification.progression
+                item.classification = ItemClassification.progression_deprioritized
     else:
         # Otherwise, logic has some branches where having 4 hearts is one possible requirement (of several alternatives)
         # rather than making all hearts/heart pieces progression items (which slows down generation considerably)
         # We mark one random heart container as an advancement item (or 4 heart pieces in expert mode)
         try:
             next(item for item in items if item.name == 'Boss Heart Container').classification \
-                |= ItemClassification.progression
+                |= ItemClassification.progression_deprioritized
         except StopIteration:
             adv_heart_pieces = (item for item in items if item.name == 'Piece of Heart')
             for i in range(4):
                 try:
-                    next(adv_heart_pieces).classification |= ItemClassification.progression
+                    next(adv_heart_pieces).classification |= ItemClassification.progression_deprioritized
                 except StopIteration:
                     break  # logically health tanking is an option, so rules should still resolve to something beatable
 

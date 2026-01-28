@@ -63,18 +63,8 @@ from Cython.Build import cythonize
 
 
 non_apworlds: set[str] = {
-    "A Link to the Past",
-    "Adventure",
     "Archipelago",
-    "Lufia II Ancient Cave",
-    "Meritous",
     "Ocarina of Time",
-    "Overcooked! 2",
-    "Raft",
-    "Sudoku",
-    "Super Mario 64",
-    "VVVVVV",
-    "Wargroove",
 }
 
 
@@ -657,7 +647,19 @@ cx_Freeze.setup(
     ext_modules=cythonize("_speedups.pyx"),
     options={
         "build_exe": {
-            "packages": ["worlds", "kivy", "cymem", "websockets", "kivymd"],
+            "packages": ["worlds", 
+                         "kivy", 
+                         "cymem", 
+                         "websockets", 
+                         "kivymd", 
+                         "pymem", 
+                         "orjson",
+                         "gclib",
+                         "dolphin_memory_engine",
+                         "pyxdelta",
+                         "aiohttp",
+                         "psutil",
+                         "PIL",],
             "includes": [],
             "excludes": ["numpy", "Cython", "PySide2", "PIL",
                          "pandas"],

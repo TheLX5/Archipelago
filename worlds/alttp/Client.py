@@ -4,15 +4,18 @@ import logging
 import asyncio
 import shutil
 import time
+import random
 
 import Utils
 
-from NetUtils import ClientStatus, color
+from NetUtils import ClientStatus, NetworkItem, color
 from worlds.AutoSNIClient import SNIClient
 
 from . import Shops, Regions
 from .Rom import ROM_PLAYER_LIMIT
+from .Items import trap_value_to_name, trap_name_to_value
 
+logger = logging.getLogger("Client")
 snes_logger = logging.getLogger("SNES")
 
 GAME_ALTTP = "A Link to the Past"
@@ -46,6 +49,8 @@ SHOP_ADDR = SAVEDATA_START + 0x302                  # 2 bytes
 SHOP_LEN = (len(Shops.shop_table) * 3) + 5
 
 DEATH_LINK_ACTIVE_ADDR = ROMNAME_START + 0x15       # 1 byte
+
+ALTTP_EXCHANGE_RATE = 750000000
 
 location_shop_ids = set([info[0] for name, info in Shops.shop_table.items()])
 
@@ -324,6 +329,23 @@ location_table_misc = {'Bottle Merchant': (0x3c9, 0x2),
                        'Hobo': (0x3c9, 0x1)}
 location_table_misc_id = {Regions.lookup_name_to_id[name]: data for name, data in location_table_misc.items()}
 
+energy_link_data = {
+    "1 rupee": (1, 0x34),
+    "5 rupees": (5, 0x35),
+    "20 rupees": (20, 0x36),
+    "50 rupees": (50, 0x41),
+    "100 rupees": (100, 0x40),
+    "300 rupees": (300, 0x46),
+    "small heart": (10, 0x42),
+    "apples": (30, 0xB4),
+    "faerie": (150, 0xB1),
+    "magic jar": (60, 0xB3),
+    "1 bomb": (5, 0x27),
+    "3 bombs": (15, 0x28),
+    "10 bombs": (50, 0x31),
+    "1 arrow": (3, 0x43),
+    "10 arrows": (30, 0x44),
+}
 
 def should_collect(ctx, location_id: int) -> bool:
     return ctx.allow_collect and location_id not in collect_ignore_locations and location_id in ctx.checked_locations \
@@ -471,7 +493,15 @@ async def track_locations(ctx, roomid, roomdata) -> bool:
 
 class ALTTPSNIClient(SNIClient):
     game = "A Link to the Past"
-    patch_suffix = [".aplttp", ".apz3"]
+    patch_suffix = [".aplttp", ".apz3"]    
+    slot_data: dict
+
+    def __init__(self):
+        super().__init__()
+        self.received_trap_link = None
+        self.deposit_rupees = None
+        self.transmute_request = None
+        self.received_trap_link = []
 
     async def deathlink_kill_player(self, ctx):
         from SNIClient import DeathState, snes_read, snes_buffered_write, snes_flush_writes
@@ -500,6 +530,12 @@ class ALTTPSNIClient(SNIClient):
 
         rom_name = await snes_read(ctx, ROMNAME_START, ROMNAME_SIZE)
         if rom_name is None or all(byte == b"\x00" for byte in rom_name) or rom_name[:2] != b"AP":
+            if "deposit" in ctx.command_processor.commands:
+                ctx.command_processor.commands.pop("deposit")
+            if "withdraw" in ctx.command_processor.commands:
+                ctx.command_processor.commands.pop("withdraw")
+            if "transmute" in ctx.command_processor.commands:
+                ctx.command_processor.commands.pop("transmute")
             return False
 
         ctx.game = self.game
@@ -509,12 +545,188 @@ class ALTTPSNIClient(SNIClient):
 
         death_link = await snes_read(ctx, DEATH_LINK_ACTIVE_ADDR, 1)
 
-        if death_link:
+        if death_link[0] & 0x07:
             ctx.allow_collect = bool(death_link[0] & 0b100)
             ctx.death_link_allow_survive = bool(death_link[0] & 0b10)
             await ctx.update_death_link(bool(death_link[0] & 0b1))
 
+        update_tags = False
+        if death_link[0] & 0x40 and "EnergyLink" not in ctx.tags:
+            ctx.tags.add("EnergyLink")
+            update_tags = True
+            if "deposit" not in ctx.command_processor.commands:
+                ctx.command_processor.commands["deposit"] = cmd_deposit
+            if "withdraw" not in ctx.command_processor.commands:
+                ctx.command_processor.commands["withdraw"] = cmd_withdraw
+            if "transmute" not in ctx.command_processor.commands:
+                ctx.command_processor.commands["transmute"] = cmd_transmute
+            
+        if death_link[0] & 0x80 and "TrapLink" not in ctx.tags:
+            ctx.tags.add("TrapLink")
+            update_tags = True
+            
+        if update_tags:
+            await ctx.send_msgs([{"cmd": "ConnectUpdate", "tags": ctx.tags}])
+
         return True
+
+    def on_package(self, ctx, cmd: str, args: dict):
+        super().on_package(ctx, cmd, args)
+        if cmd == "Connected":
+            self.slot_data = args.get("slot_data", None)
+            if self.slot_data["energy_link"]:
+                ctx.set_notify(f"EnergyLink{ctx.team}")
+                if ctx.ui:
+                    ctx.ui.enable_energy_link()
+                    ctx.ui.energy_link_label.text = "Rupees: Standby"
+                    snes_logger.info(f"Initialized EnergyLink{ctx.team}")
+
+        elif cmd == "SetReply" and args["key"].startswith("EnergyLink"):
+            value = args["value"]
+            if self.transmute_request:
+                process = self.transmute_request[0]
+                item = self.transmute_request[1]
+                cost = energy_link_data[item][0] * ALTTP_EXCHANGE_RATE
+                if process == "pending" and "tag" in args:
+                    if args["tag"] == self.transmute_tag:
+                        self.transmute_tag = ""
+                        if args["original_value"] < cost:
+                            # send back the original value
+                            self.transmute_request = ["not_enough_funds", args["original_value"]]
+                        else: 
+                            value = args["value"]
+                            self.transmute_request = ["successful", item]
+                else: 
+                    value = args["value"]
+                
+            if ctx.ui:
+                pool = (value or 0) /   ALTTP_EXCHANGE_RATE
+                ctx.ui.energy_link_label.text = f"Rupees: {float(pool):.2f}"
+
+        elif cmd == "Retrieved":
+            if f"EnergyLink{ctx.team}" in args["keys"] and args["keys"][f"EnergyLink{ctx.team}"] and ctx.ui:
+                pool = (args["keys"][f"EnergyLink{ctx.team}"] or 0) / ALTTP_EXCHANGE_RATE
+                ctx.ui.energy_link_label.text = f"Rupees: {int(pool)}"
+
+        elif cmd == "Bounced":
+            if "tags" not in args:
+                return
+            
+            if not hasattr(self, "instance_id"):
+                self.instance_id = time.time()
+
+            source_name = args["data"]["source"]
+            if "TrapLink" in ctx.tags and "TrapLink" in args["tags"] and source_name != ctx.slot_info[ctx.slot].name:
+                trap_name: str = args["data"]["trap_name"]
+                if trap_name not in trap_name_to_value:
+                    return
+                
+                trap_id: int = trap_name_to_value[trap_name]
+
+                if "trap_weights" not in self.slot_data:
+                    return
+
+                if f"{trap_id}" not in self.slot_data["trap_weights"]:
+                    return
+
+                if self.slot_data["trap_weights"][f"{trap_id}"] == 0:
+                    # The player disabled this trap type
+                    return
+
+                self.received_trap_link = getattr(self, "received_trap_link", [])
+                self.received_trap_link.append(NetworkItem(trap_name_to_value[trap_name], None, None))
+
+    async def handle_trap_link(self, ctx):
+        from SNIClient import snes_buffered_write, snes_flush_writes, snes_read
+        
+        held_item = await snes_read(ctx, RECV_ITEM_ADDR, 0x01)
+        if not held_item:
+            return
+        if held_item[0] != 0:
+            return
+        
+        if not hasattr(self, "received_trap_link") or len(self.received_trap_link) == 0:
+            return
+
+        next_trap = self.received_trap_link.pop(0)
+        
+        snes_buffered_write(ctx, RECV_ITEM_ADDR, bytes([next_trap.item]))
+        await snes_flush_writes(ctx)
+            
+    async def handle_energy_link(self, ctx):
+        from SNIClient import snes_buffered_write, snes_flush_writes, snes_read
+
+        rupees = await snes_read(ctx, WRAM_START + 0xF360, 2)
+        if rupees is None:
+            return
+        rupees = int.from_bytes(rupees, "little")
+        
+        if self.deposit_rupees:
+            if rupees < self.deposit_rupees:
+                logger.info(f"Can't deposit {self.deposit_rupees} rupees. You only have {rupees} rupees at the moment.")
+                self.deposit_rupees = None
+                return 
+            snes_buffered_write(ctx, WRAM_START + 0xF360, bytes([rupees - self.deposit_rupees]))
+            amount = int(self.deposit_rupees-(self.deposit_rupees/100*20))
+            energy_packet = amount * ALTTP_EXCHANGE_RATE
+            await ctx.send_msgs([{
+                "cmd": "Set", 
+                "key": f"EnergyLink{ctx.team}", 
+                "slot": ctx.slot,
+                "default": 0,
+                "operations":
+                    [{"operation": "add", "value": energy_packet}],
+            }])
+            self.deposit_rupees = None
+            logger.info(f"Successfully deposited {amount} rupees, thanks for using EnergyLink!")
+
+        elif self.transmute_request:
+            process = self.transmute_request[0]
+            item = self.transmute_request[1]
+            if process == "place_request":
+                self.transmute_tag = f"alttp-transmute-{ctx.team}-{ctx.slot}-{random.randint(0, 0xFFFFFFFF)}"
+                value = energy_link_data[item][0] * ALTTP_EXCHANGE_RATE
+                await ctx.send_msgs([{ 
+                    "cmd": "Set", 
+                    "key": f"EnergyLink{ctx.team}", 
+                    "slot": ctx.slot,
+                    "tag": self.transmute_tag,
+                    "default": 0,
+                    "want_reply": True,
+                    "operations":
+                        [{"operation": "add", "value": -value},
+                        {"operation": "max", "value": 0}],
+                }])
+                self.transmute_request = ["pending", item]
+
+            elif process == "successful":
+                held_item = await snes_read(ctx, RECV_ITEM_ADDR, 0x01)
+                if not held_item:
+                    return
+                if held_item[0] != 0:
+                    return
+                
+                item_id = energy_link_data[item][1]
+                snes_buffered_write(ctx, RECV_ITEM_ADDR, bytes([item_id]))
+                self.transmute_request = None
+
+            elif process == "not_enough_funds":
+                await ctx.send_msgs([{
+                    "cmd": "Set", 
+                    "key": f"EnergyLink{ctx.team}", 
+                    "slot": ctx.slot,
+                    "default": 0,
+                    "operations":
+                        [{"operation": "add", "value": item}],
+                }])
+                self.transmute_request = None
+                logger.info(f"Not enough rupees to transmute them into your desired item! You need at least {item} rupees.")
+
+        else:
+            return
+
+        await snes_flush_writes(ctx)
+
 
     async def game_watcher(self, ctx):
         from SNIClient import snes_read, snes_buffered_write, snes_flush_writes
@@ -542,6 +754,11 @@ class ALTTPSNIClient(SNIClient):
         if data is None:
             return
 
+        if "TrapLink" in ctx.tags:
+            await self.handle_trap_link(ctx)
+        if "EnergyLink" in ctx.tags:
+            await self.handle_energy_link(ctx)
+
         recv_index = data[0] | (data[1] << 8)
         recv_item = data[2]
         roomid = data[4] | (data[5] << 8)
@@ -561,7 +778,10 @@ class ALTTPSNIClient(SNIClient):
             snes_buffered_write(ctx, RECV_ITEM_ADDR,
                                 bytes([item.item]))
             snes_buffered_write(ctx, RECV_ITEM_PLAYER_ADDR,
-                                bytes([min(ROM_PLAYER_LIMIT, item.player) if item.player != ctx.slot else 0]))
+                                bytes([min(ROM_PLAYER_LIMIT, item.player) if item.player != ctx.slot else 0]))                
+            if "TrapLink" in ctx.tags and item.item in trap_value_to_name:
+                    await self.send_trap_link(ctx, trap_value_to_name[item.item])
+
         if scout_location > 0 and scout_location in ctx.locations_info:
             snes_buffered_write(ctx, SCOUTREPLY_LOCATION_ADDR,
                                 bytes([scout_location]))
@@ -579,6 +799,20 @@ class ALTTPSNIClient(SNIClient):
         if not same_rom:
             return
 
+
+    async def send_trap_link(self, ctx: SNIClient, trap_name: str):
+        if "TrapLink" not in ctx.tags or ctx.slot == None:
+            return
+
+        await ctx.send_msgs([{
+            "cmd": "Bounce", "tags": ["TrapLink"],
+            "data": {
+                "time": time.time(),
+                "source": ctx.player_names[ctx.slot],
+                "trap_name": trap_name
+            }
+        }])
+        snes_logger.info(f"Sent linked {trap_name}")
 
 def get_alttp_settings(romfile: str):
     import LttPAdjuster
@@ -681,18 +915,18 @@ def get_alttp_settings(romfile: str):
             choice = 'yes'
 
         if 'yes' in choice:
-            import LttPAdjuster
+            from . import Adjuster
             from .Rom import get_base_rom_path
             last_settings.rom = romfile
             last_settings.baserom = get_base_rom_path()
             last_settings.world = None
 
             if last_settings.sprite_pool:
-                from LttPAdjuster import AdjusterWorld
+                from .Adjuster import AdjusterWorld
                 last_settings.world = AdjusterWorld(getattr(last_settings, "sprite_pool"))
 
             adjusted = True
-            _, adjustedromfile = LttPAdjuster.adjust(last_settings)
+            _, adjustedromfile = Adjuster.adjust(last_settings)
 
             if hasattr(last_settings, "world"):
                 delattr(last_settings, "world")
@@ -707,3 +941,77 @@ def get_alttp_settings(romfile: str):
     else:
         adjusted = False
     return adjustedromfile, adjusted
+
+def cmd_deposit(self, amount: str = ""):
+    """
+    Deposits rupees into the EnergyLink pool. This feature has a 20% deposit tax and a minimum of 100 deposited rupees.
+    """
+    if self.ctx.game != "A Link to the Past":
+        logger.warning("This command can only be used while playing A Link to the Past")
+    if (not self.ctx.server) or self.ctx.server.socket.closed:
+        logger.info(f"Must be connected to server and in game.")
+    else:
+        try: 
+            amount = int(amount)
+        except ValueError:
+            logger.info(f"The value isn't a number.")
+            return
+        if self.ctx.client_handler.deposit_rupees is not None:
+            logger.info(f"You already have a deposit request pending, please wait.")
+            return
+        if amount < 100:
+            logger.info(f"Please enter a bigger deposit value. Minimum deposit: 100 rupees.")
+            return 
+        elif amount:
+            self.ctx.client_handler.deposit_rupees = amount
+            logger.info(f"Placed deposit request")
+        else:
+            logger.info(f"You need to specify how much rupees you will deposit.")
+
+def cmd_withdraw(self, item: str = ""):
+    """
+    Places a request to withdraw rupees from the pool
+    Possible transactions: 1, 5, 20, 50, 100 and 300 rupees
+    """
+    if self.ctx.game != "A Link to the Past":
+        logger.warning("This command can only be used while playing A Link to the Past")
+    if (not self.ctx.server) or self.ctx.server.socket.closed:
+        logger.info(f"Must be connected to server and in game.")
+    else:
+        try: 
+            amount = int(amount)
+        except ValueError:
+            logger.info(f"The value isn't a number.")
+            return
+        item = f"{amount} rupees"
+        if item not in energy_link_data.keys():
+            logger.info(f"Invalid value, please try again!")
+            return
+        self.ctx.client_handler.transmute_request = ["place_request", item]
+        logger.info(f"Placing a request for {item}...")
+
+def cmd_transmute(self, item: str = ""):
+    """
+    Places a request to transmute energy from the pool into a useful item
+    Possible transactions (write them inside quotes):
+        - Small Heart (10 Rupees)
+        - Apples (30 Rupees)
+        - Faerie (150 Rupees)
+        - Magic Jar (60 Rupees)
+        - 1 Bomb (5 Rupees)
+        - 3 Bombs (15 Rupees)
+        - 10 Bombs (50 Rupees)
+        - 1 Arrow (3 Rupees)
+        - 10 Arrows (30 Rupees)
+    """
+    if self.ctx.game != "A Link to the Past":
+        logger.warning("This command can only be used while playing A Link to the Past")
+    if (not self.ctx.server) or self.ctx.server.socket.closed:
+        logger.info(f"Must be connected to server and in game.")
+    else:
+        item = item.lower()
+        if item not in energy_link_data.keys():
+            logger.info(f"Invalid item, please try again!")
+            return
+        self.ctx.client_handler.transmute_request = ["place_request", item]
+        logger.info(f"Placing a request for {item}...")

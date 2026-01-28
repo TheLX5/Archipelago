@@ -34,13 +34,24 @@ from websockets.exceptions import WebSocketException, ConnectionClosed
 snes_logger = logging.getLogger("SNES")
 
 
+tracker_loaded = False
+try:
+    from worlds.tracker.TrackerClient import (TrackerGameContext as SuperContext,
+                                                TrackerCommandProcessor as SuperCommandProcessor,
+                                                UT_VERSION)
+    tracker_loaded = True
+except ModuleNotFoundError:
+    from CommonClient import CommonContext as SuperContext
+    from CommonClient import ClientCommandProcessor as SuperCommandProcessor
+
+
 class DeathState(enum.IntEnum):
     killing_player = 1
     alive = 2
     dead = 3
 
 
-class SNIClientCommandProcessor(ClientCommandProcessor):
+class SNIClientCommandProcessor(SuperCommandProcessor):
     ctx: SNIContext
 
     def _cmd_slow_mode(self, toggle: str = "") -> None:
@@ -114,8 +125,11 @@ class SNIClientCommandProcessor(ClientCommandProcessor):
     #     return True
 
 
-class SNIContext(CommonContext):
-    command_processor: typing.Type[SNIClientCommandProcessor] = SNIClientCommandProcessor
+class MixedCommandProcessor(SNIClientCommandProcessor, SuperCommandProcessor):
+    pass
+
+class SNIContext(SuperContext):
+    command_processor: typing.Type[MixedCommandProcessor] = MixedCommandProcessor
     game: typing.Optional[str] = None  # set in validate_rom
     items_handling: typing.Optional[int] = None  # set in game_watcher
     snes_connect_task: "typing.Optional[asyncio.Task[None]]" = None
@@ -165,6 +179,21 @@ class SNIContext(CommonContext):
         self.awaiting_rom = False
         self.rom = None
         self.prev_rom = None
+
+        # Universal
+        self.tracker_enabled = tracker_loaded
+
+    def make_gui(self):
+        ui = super().make_gui()
+        ui.base_title = "Archipelago SNI Client"
+        ui.logging_pairs = [
+            ("Client", "Archipelago"),
+            ("SNES", "SNES"),
+        ]
+        if self.tracker_enabled:
+            ui.base_title += f" + Universal Tracker {UT_VERSION} | Archipelago"
+        return ui
+
 
     async def connection_closed(self) -> None:
         await super(SNIContext, self).connection_closed()
@@ -234,6 +263,8 @@ class SNIContext(CommonContext):
                 self.snes_connect_task.cancel()
 
     def on_package(self, cmd: str, args: typing.Dict[str, typing.Any]) -> None:
+        super().on_package(cmd, args)
+
         if cmd in {"Connected", "RoomUpdate"}:
             if "checked_locations" in args and args["checked_locations"]:
                 new_locations = set(args["checked_locations"])
@@ -716,6 +747,10 @@ async def main() -> None:
     ctx = SNIContext(args.snes, args.connect, args.password)
     if ctx.server_task is None:
         ctx.server_task = asyncio.create_task(server_loop(ctx), name="ServerLoop")
+
+    if tracker_loaded:
+        ctx.run_generator()
+        ctx.tags.remove("Tracker")
 
     if gui_enabled:
         ctx.run_gui()
