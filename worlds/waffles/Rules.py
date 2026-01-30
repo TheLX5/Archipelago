@@ -196,6 +196,12 @@ class WaffleRules:
         else:
             return self.can_carry_or_yoshi_tongue(state) and self.can_break_turn_blocks(state)
         
+    def forest_of_illusion_3_can_pass_big_pipe(self, state: CollectionState) -> bool:
+        if self.world.using_ut:
+            return self.can_carry(state) or self.has_yoshi(state) or state.has(ItemName.glitched, self.player)
+        else:
+            return self.can_carry(state) or self.has_yoshi(state)
+        
     def forest_secret_special_case(self, state: CollectionState) -> bool:
         if self.world.using_ut:
             return self.has_bsp(state) or state.has(ItemName.glitched, self.player)
@@ -527,9 +533,9 @@ class WaffleBasicRules(WaffleRules):
             f"{LocationName.forest_of_illusion_2_region} -> {LocationName.forest_of_illusion_2_exit_2}": 
                 lambda state: self.can_carry_or_yoshi_tongue(state) and self.can_swim(state) and self.forest_of_illusion_2_special_case(state),
             f"{LocationName.forest_of_illusion_3_region} -> {LocationName.forest_of_illusion_3_exit_1}": 
-                lambda state: self.can_carry_or_yoshi_tongue(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             f"{LocationName.forest_of_illusion_3_region} -> {LocationName.forest_of_illusion_3_exit_2}": 
-                self.forest_of_illusion_3_special_case,
+                lambda state: self.forest_of_illusion_3_can_pass_big_pipe(state) and self.forest_of_illusion_3_special_case(state),
             f"{LocationName.forest_of_illusion_4_region} -> {LocationName.forest_of_illusion_4_exit_1}": 
                 self.true,
             f"{LocationName.forest_of_illusion_4_region} -> {LocationName.forest_of_illusion_4_exit_2}":
@@ -638,7 +644,7 @@ class WaffleBasicRules(WaffleRules):
             f"{LocationName.special_zone_6_region} -> {LocationName.special_zone_6_exit_1}": 
                 self.special_zone_6_special_case,
             f"{LocationName.special_zone_7_region} -> {LocationName.special_zone_7_exit_1}": 
-                self.true,
+                self.can_carry_or_yoshi_tongue,
             f"{LocationName.special_zone_8_region} -> {LocationName.special_zone_8_exit_1}": 
                 lambda state: self.can_break_turn_blocks(state) or self.has_feather(state) or
                     self.has_yoshi(state) or self.can_carry(state),
@@ -661,17 +667,13 @@ class WaffleBasicRules(WaffleRules):
                 lambda state: self.can_climb(state) and (
                     self.has_yoshi(state) or self.has_rsp(state)
                 ),
-            f"{LocationName.vanilla_dome_2_region} -> {LocationName.vanilla_dome_2_exit_2}": 
-                lambda state: self.can_swim(state) and self.has_p_switch(state) and (
-                    self.can_climb(state) or self.has_yoshi(state)
-                ),
 
             f"{LocationName.forest_of_illusion_1_region} -> {LocationName.forest_of_illusion_1_exit_2}": 
                 self.forest_of_illusion_1_special_case,
             f"{LocationName.forest_of_illusion_2_region} -> {LocationName.forest_of_illusion_2_exit_2}": 
                 lambda state: self.can_swim(state) and self.forest_of_illusion_2_special_case(state),
             f"{LocationName.forest_of_illusion_3_region} -> {LocationName.forest_of_illusion_3_exit_2}": 
-                self.forest_of_illusion_3_special_case,
+                lambda state: self.forest_of_illusion_3_can_pass_big_pipe(state) and self.forest_of_illusion_3_special_case(state),
             f"{LocationName.forest_of_illusion_4_region} -> {LocationName.forest_of_illusion_4_exit_2}":
                 lambda state: self.can_run(state) or self.has_yoshi(state),
 
@@ -1225,7 +1227,7 @@ class WaffleBasicRules(WaffleRules):
                 self.vanilla_dome_1_special_case,
 
             LocationName.vanilla_dome_2_dragon:
-                lambda state: self.can_swim(state) and self.has_p_switch(state) and (
+                lambda state: self.can_swim(state) and self.has_p_switch(state) and self.can_carry(state) and (
                     self.can_climb(state) or self.has_yoshi(state)
                 ),
             LocationName.vanilla_dome_2_midway:
@@ -1611,9 +1613,9 @@ class WaffleBasicRules(WaffleRules):
                 lambda state: self.can_swim(state) and self.forest_of_illusion_2_special_case(state),
 
             LocationName.forest_of_illusion_3_dragon:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_hidden_1up:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_yoshi_block_1:
                 self.true,
             LocationName.forest_of_illusion_3_coin_block_1:
@@ -1621,53 +1623,53 @@ class WaffleBasicRules(WaffleRules):
             LocationName.forest_of_illusion_3_multi_coin_block_1:
                 self.true,
             LocationName.forest_of_illusion_3_coin_block_2:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_multi_coin_block_2:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_3:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_4:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_5:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_6:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_7:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_8:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_9:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_10:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_11:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_12:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_13:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_14:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_15:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_16:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_17:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_18:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_19:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_20:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_21:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_22:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_23:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_24:
-                lambda state: self.can_carry(state) or self.has_yoshi(state),
+                self.forest_of_illusion_3_can_pass_big_pipe,
 
             LocationName.forest_of_illusion_4_dragon:
                 lambda state: self.has_yoshi(state) or self.can_carry(state) or 
@@ -2302,17 +2304,17 @@ class WaffleBasicRules(WaffleRules):
                 self.special_zone_6_special_case,
 
             LocationName.special_zone_7_dragon:
-                self.true,
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.special_zone_7_powerup_block_1:
                 self.true,
             LocationName.special_zone_7_yoshi_block_1:
-                self.true,
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.special_zone_7_coin_block_1:
-                self.true,
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.special_zone_7_powerup_block_2:
-                self.true,
+                self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.special_zone_7_coin_block_2:
-                self.true,
+                self.forest_of_illusion_3_can_pass_big_pipe,
 
             LocationName.special_zone_8_dragon:
                 lambda state: self.can_break_turn_blocks(state) or self.has_feather(state) or

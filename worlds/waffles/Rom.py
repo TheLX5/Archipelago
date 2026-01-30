@@ -398,12 +398,10 @@ class WafflePatchExtension(APPatchExtension):
     @staticmethod
     def replace_graphics(caller: APProcedurePatch, rom: bytes) -> bytes:
         # Get world's settings
-        world_type = AutoWorldRegister.world_types[WafflePatchExtension.game]
-        world_settings = getattr(settings.get_settings(), world_type.settings_key, None)
         options = json.loads(caller.get_file("options.json").decode("UTF-8"))
 
-        if not world_settings or "graphics_pack" in options.keys():
-            return rom
+        #if not world_settings or "graphics_pack" in options.keys():
+        #    return rom
 
         graphics_setting = ""        
         if "graphics_pack" in options.keys():
@@ -418,6 +416,10 @@ class WafflePatchExtension(APPatchExtension):
         if len(graphics_setting) == 0:
             # Check if the setting is properly set and exists in data/sprites/smw
             # This is our very last resort
+            world_type = AutoWorldRegister.world_types[WafflePatchExtension.game]
+            world_settings = getattr(settings.get_settings(), world_type.settings_key, None)
+            if not world_settings:
+                return rom
             graphics_setting = world_settings.graphics_file
             
         if not os.path.isfile(graphics_setting):

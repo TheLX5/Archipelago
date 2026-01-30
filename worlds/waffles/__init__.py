@@ -100,7 +100,7 @@ class WaffleWorld(World):
         super().__init__(multiworld, player)
     
     def generate_early(self):
-        
+        self.ordered_double_exits = list()
         self.teleport_data = dict()
         self.teleport_pairs = dict()
         self.reverse_teleport_pairs = dict()
@@ -175,8 +175,8 @@ class WaffleWorld(World):
 
             # Only randomize data if not using UT
             generate_entrance_rando(self)
-            generate_swapped_exits(self)
             self.active_level_dict = dict(zip(generate_level_list(self), full_level_list))
+            generate_swapped_exits(self)
             generate_carryless_exits(self)
 
         self.reverse_teleport_pairs = {y: x for x, y in self.teleport_pairs.items()}
