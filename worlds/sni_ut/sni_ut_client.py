@@ -42,11 +42,14 @@ def my_launch(*launch_args) -> None:
                     SuperContext.on_package(self, cmd, args)
 
             def make_gui(self):
-                ui = super().make_gui()
+                ui = super(SNIContext, self).make_gui()
+                ui.logging_pairs.append(("SNES", "SNES"))
                 if self.tracker_enabled:
-                    ui.base_title += f" (with Tracker {UT_VERSION}) for AP version"
+                    ui.base_title = f"Archipelago SNI Client (with Tracker {UT_VERSION}) for AP version"
                 return ui
 
+            def run_gui(self):
+                super(SNIContext, self).run_gui()
 
         if args.diff_file:
             import Patch
