@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from Options import Choice, Range, Toggle, DeathLink, DefaultOnToggle, OptionSet, OptionGroup, PerGameCommonOptions, Visibility
+from Options import Choice, Range, Toggle, DeathLink, DefaultOnToggle, OptionSet, OptionGroup, PerGameCommonOptions, Visibility, StartInventoryPool
 
 
 class Goal(Choice):
@@ -707,6 +707,7 @@ waffle_option_groups = [
 
 @dataclass
 class WaffleOptions(PerGameCommonOptions):
+    start_inventory_from_pool: StartInventoryPool
     death_link: DeathLink
     ring_link: RingLink
     trap_link: TrapLink
