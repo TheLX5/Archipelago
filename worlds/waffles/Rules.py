@@ -667,6 +667,10 @@ class WaffleBasicRules(WaffleRules):
                 lambda state: self.can_climb(state) and (
                     self.has_yoshi(state) or self.has_rsp(state)
                 ),
+            f"{LocationName.vanilla_dome_2_region} -> {LocationName.vanilla_dome_2_exit_2}": 
+                lambda state: self.can_swim(state) and self.can_carry(state) and self.has_p_switch(state) and (
+                    self.can_climb(state) or self.has_yoshi(state)
+                ),
 
             f"{LocationName.forest_of_illusion_1_region} -> {LocationName.forest_of_illusion_1_exit_2}": 
                 self.forest_of_illusion_1_special_case,

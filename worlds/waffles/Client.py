@@ -163,7 +163,6 @@ class WaffleSNIClient(SNIClient):
         self.inventory_tag = ""
         self.inventory_refund = 0
         self.inventory_cost = 0
-        self.current_sublevel_value = 0
         self.visited_levels = set()
 
     async def deathlink_kill_player(self, ctx: "SNIContext"):
@@ -239,7 +238,8 @@ class WaffleSNIClient(SNIClient):
             await ctx.send_msgs([{"cmd": "ConnectUpdate", "tags": ctx.tags}])
 
         if ctx.rom != rom_name:
-            self.current_sublevel_value = 0
+            ctx.current_sublevel_value = 0
+            ctx.visited_levels = []
 
         ctx.rom = rom_name
 
@@ -318,7 +318,8 @@ class WaffleSNIClient(SNIClient):
             return
         elif game_state < 0x0B:
             # We haven't loaded a save file
-            self.current_sublevel_value = 0
+            ctx.current_sublevel_value = 0
+            ctx.visited_levels = []
             return
         elif mario_state in SMW_INVALID_MARIO_STATES:
             # Mario can't come to the phone right now
@@ -476,8 +477,8 @@ class WaffleSNIClient(SNIClient):
         if game_state != 0x14:
             current_sublevel_value = 0
 
-        if self.current_sublevel_value != current_sublevel_value:
-            self.current_sublevel_value = current_sublevel_value
+        if ctx.current_sublevel_value != current_sublevel_value:
+            ctx.current_sublevel_value = current_sublevel_value
 
             # Send level id data to tracker
             await ctx.send_msgs([{
@@ -486,8 +487,18 @@ class WaffleSNIClient(SNIClient):
                 "default": 0,
                 "want_reply": False,
                 "operations":
-                    [{"operation": "replace", "value": self.current_sublevel_value}],
+                    [{"operation": "replace", "value": ctx.current_sublevel_value}],
             }])
+            if ctx.current_sublevel_value not in ctx.visited_levels:
+                ctx.visited_levels.append(ctx.current_sublevel_value)
+                await ctx.send_msgs([{
+                    "cmd": "Set",
+                    "key": f"smw_visitedlevels_{ctx.team}_{ctx.slot}",
+                    "default": [],
+                    "want_reply": False,
+                    "operations":
+                        [{"operation": "update", "value": ctx.visited_levels}],
+                }])
         
         if game_state != 0x14:
             # Don't receive items or collect locations outside of in-level mode

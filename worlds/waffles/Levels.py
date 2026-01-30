@@ -755,7 +755,10 @@ def generate_level_list(world: "WaffleWorld"):
 
 def generate_swapped_exits(world: "WaffleWorld"):
     if world.options.swap_exit_count.value:
-        level_list = world.ordered_double_exits.copy()
+        if len(world.ordered_double_exits) == 0:
+            level_list = easy_double_levels + hard_double_levels
+        else:
+            level_list = world.ordered_double_exits.copy()
         level_list.remove(0x5A)
         level_list.remove(0x13)
         level_list.reverse()
@@ -777,7 +780,10 @@ def generate_swapped_exits(world: "WaffleWorld"):
 
 def generate_carryless_exits(world: "WaffleWorld"):
     if world.options.carryless_exits.value:
-        level_list = world.ordered_double_exits.copy()
+        if len(world.ordered_double_exits) == 0:
+            level_list = easy_double_levels + hard_double_levels
+        else:
+            level_list = world.ordered_double_exits.copy()
         level_list.remove(0x04)
         level_list.remove(0x13)
         level_list.remove(0x2D)
