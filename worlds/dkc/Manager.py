@@ -14,8 +14,6 @@ from tkinter import Tk, Frame, Label, StringVar, IntVar, Entry, filedialog, mess
 from tkinter.ttk import Separator
 from tkinter.constants import DISABLED, NORMAL
 from Utils import persistent_store, get_adjuster_settings_no_defaults, tkinter_center_window, open_filename
-from PIL import Image, ImageTk
-from typing import List
 
 from .SNESGraphics import copy_gfx_tiles, convert_rgb_to_snes
 
