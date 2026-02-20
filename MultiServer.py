@@ -577,6 +577,37 @@ class Context:
         # sorted access spheres
         self.spheres = decoded_obj.get("spheres", [])
 
+        location_data = {}
+        sphere_data = {}
+
+        for slot, locations in self.locations.items():
+            player_name = self.player_names[(0, slot)]
+            if player_name not in location_data:
+                location_data[player_name] = {}
+            for location in locations:
+                item_id, target_player, flags = self.locations[slot][location]
+                loc_name = self.location_names[self.slot_info[slot].game][location]
+
+                item_name = self.item_names[self.slot_info[target_player].game][item_id]
+                    
+                location_data[player_name][loc_name] = [item_name, flags]
+
+        for sphere_num, sphere_contents in enumerate(self.spheres):
+            for slot, locs in sphere_contents.items():
+                player_name = self.player_names[(0, slot)]
+                if player_name not in sphere_data:
+                    sphere_data[player_name] = {}
+                for loc in locs:
+                    loc_name = self.location_names[self.slot_info[slot].game][loc]
+                    sphere_data[player_name][loc_name] = sphere_num+1
+                    
+        import json
+
+        with open("loc_data.json", "w", encoding="utf-8") as f:
+            json.dump(location_data, f, ensure_ascii=False, sort_keys=True, indent=4)
+        with open("spheres.json", "w", encoding="utf-8") as f:
+            json.dump(sphere_data, f, ensure_ascii=False, sort_keys=True, indent=4)
+
     # saving
 
     def save(self, now=False) -> bool:

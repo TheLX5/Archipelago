@@ -397,12 +397,10 @@ def read_apignore(filename: str | pathlib.Path) -> PathSpec | None:
 
 
 def get_default_adjuster_settings(game_name: str) -> Namespace:
-    import LttPAdjuster
+    from worlds.alttp import Adjuster
     adjuster_settings = Namespace()
-    if game_name == LttPAdjuster.GAME_ALTTP:
-        return LttPAdjuster.get_argparser().parse_known_args(args=[])[0]
-
-    return adjuster_settings
+    if game_name == Adjuster.GAME_ALTTP:
+        return Adjuster.get_argparser().parse_known_args(args=[])[0]
 
 
 def get_adjuster_settings_no_defaults(game_name: str) -> Namespace:

@@ -229,6 +229,13 @@ class TrapPercent(Range):
     range_end = 100
     default = 10
 
+class TrapLink(Toggle):
+    """
+    Whether your received traps are linked to other players
+    """
+    display_name = "Trap Link"
+
+
 # class EnableScrets(Range):
     # """This sets the amount of lives Yoshi will have upon loading the game."""
     # display_name = "Starting Life Count"
@@ -294,3 +301,4 @@ class YoshisIslandOptions(PerGameCommonOptions):
     traps_enabled: TrapsEnabled
     trap_percent: TrapPercent
     death_link: DeathLink
+    trap_link: TrapLink

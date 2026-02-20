@@ -1345,6 +1345,7 @@ class KivyJSONtoTextParser(JSONtoTextParser):
         cyan: str = StringProperty("00EEEE")
         slateblue: str = StringProperty("6D8BE8")
         plum: str = StringProperty("AF99EF")
+        golden: str = StringProperty("FFD700")
         salmon: str = StringProperty("FA8072")
         orange: str = StringProperty("FF7700")
         # KivyMD parameters

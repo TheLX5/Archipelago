@@ -1,6 +1,7 @@
 import importlib
 import importlib.abc
 import importlib.machinery
+import importlib.util
 import logging
 import os
 import sys
@@ -56,7 +57,18 @@ class WorldSource:
     def load(self) -> bool:
         try:
             start = time.perf_counter()
-            importlib.import_module(f".{Path(self.path).stem}", "worlds")
+            if "custom_worlds" in str(Path(self.path)) and not self.is_zip:
+                basename = os.path.basename(self.path)
+                spec = importlib.util.spec_from_file_location('worlds.' + basename, os.path.join(self.resolved_path, "__init__.py"))
+                mod = importlib.util.module_from_spec(spec)
+                sys.modules[mod.__name__] = mod
+
+                importer = mod.__loader__
+                if hasattr(importer, "exec_module"):
+                    importer.exec_module(mod)
+
+            else:
+                importlib.import_module(f".{Path(self.path).stem}", "worlds")
             self.time_taken = time.perf_counter()-start
             return True
 

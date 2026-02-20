@@ -237,6 +237,7 @@ class JSONtoTextParser(metaclass=HandlerMeta):
         "salmon": "FA8072",
         "white": "FFFFFF",
         "orange": "FF7700",
+        "golden": "FFD700",
     }
 
     def __init__(self, ctx):
@@ -273,6 +274,10 @@ class JSONtoTextParser(metaclass=HandlerMeta):
         flags = node.get("flags", 0)
         if flags == 0:
             node["color"] = 'cyan'
+        elif flags & 0b10000 == 0b10000:
+            node["color"] = 'orange'
+        elif flags & 0b011 == 0b011:
+            node["color"] = 'golden'
         elif flags & 0b001:  # advancement
             node["color"] = 'plum'
         elif flags & 0b010:  # useful

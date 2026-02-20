@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from SNIClient import SNIClientCommandProcessor, SNIContext
 
+logger = logging.getLogger("Client")
 snes_logger = logging.getLogger("SNES")
 
 # FXPAK Pro protocol memory mapping used by SNI
@@ -68,6 +69,9 @@ KDL3_CONSUMABLES = SRAM_1_START + 0xA000
 KDL3_STARS = SRAM_1_START + 0xB000
 KDL3_ITEM_QUEUE = SRAM_1_START + 0xC000
 
+KDL3_EXCHANGE_RATE = 500000000
+KDL3_TOMATO_COST = 30
+
 deathlink_messages = defaultdict(lambda: " was defeated.", {
     0x0200: " was bonked by apples from Whispy Woods.",
     0x0201: " was out-maneuvered by Acro.",
@@ -109,6 +113,10 @@ class KDL3SNIClient(SNIClient):
     motherbox_key: str = ""
     client_random: random.Random = random.Random()
 
+    def __init__(self):
+        super().__init__()
+        self.tomato_request = ""
+
     async def deathlink_kill_player(self, ctx: "SNIContext") -> None:
         from SNIClient import DeathState, snes_buffered_write, snes_flush_writes, snes_read
         game_state = await snes_read(ctx, KDL3_GAME_STATE, 1)
@@ -137,6 +145,8 @@ class KDL3SNIClient(SNIClient):
         if rom_name is None or rom_name == bytes([0] * 0x15) or rom_name[:4] != b"KDL3":
             if "gift" in ctx.command_processor.commands:
                 ctx.command_processor.commands.pop("gift")
+            if "request" in ctx.command_processor.commands:
+                ctx.command_processor.commands.pop("request")
             return False
 
         ctx.game = self.game
@@ -145,11 +155,21 @@ class KDL3SNIClient(SNIClient):
         ctx.allow_collect = True
         if "gift" not in ctx.command_processor.commands:
             ctx.command_processor.commands["gift"] = cmd_gift
+            
+        update_tags = False
+        ctx.tags.add("EnergyLink")
+        update_tags = True
+        if "request" not in ctx.command_processor.commands:
+            ctx.command_processor.commands["request"] = cmd_request
 
         death_link = await snes_read(ctx, KDL3_DEATH_LINK_ADDR, 1)
         if death_link:
             await ctx.update_death_link(bool(death_link[0] & 0b1))
             ctx.items_handling |= (death_link[0] & 0b10)  # set local items if enabled
+
+        if update_tags:
+            await ctx.send_msgs([{"cmd": "ConnectUpdate", "tags": ctx.tags}])
+
         return True
 
     async def pop_item(self, ctx: "SNIContext", in_stage: bool) -> None:
@@ -328,6 +348,9 @@ class KDL3SNIClient(SNIClient):
                 message = deathlink_messages[self.levels[current_world][current_level]]
                 await ctx.handle_deathlink_state(currently_dead, f"{ctx.player_names[ctx.slot]}{message}")
 
+            if "EnergyLink" in ctx.tags:
+                await self.handle_energy_link(ctx)
+
             recv_count = await snes_read(ctx, KDL3_RECV_COUNT, 2)
             recv_amount = unpack("H", recv_count)[0]
             if recv_amount < len(ctx.items_received):
@@ -434,3 +457,92 @@ class KDL3SNIClient(SNIClient):
                 ctx.command_processor.commands.pop("gift")
             ctx.rom = None
             ctx.game = None
+
+
+    async def handle_energy_link(self, ctx):
+        if self.tomato_request == "place_request":
+            self.tomato_request_tag = f"kdl3-item-{ctx.team}-{ctx.slot}-{random.randint(0, 0xFFFFFFFF)}"
+            value = KDL3_TOMATO_COST * KDL3_EXCHANGE_RATE
+            await ctx.send_msgs([{ 
+                "cmd": "Set", 
+                "key": f"EnergyLink{ctx.team}", 
+                "slot": ctx.slot,
+                "tag": self.tomato_request_tag,
+                "default": 0,
+                "want_reply": True,
+                "operations":
+                    [{"operation": "add", "value": -value},
+                    {"operation": "max", "value": 0}],
+            }])
+            self.tomato_request = "pending"
+
+        elif self.tomato_request == "successful":
+            self.item_queue.append(0x42)
+            self.tomato_request = ""
+            logger.info(f"Granted Maxim Tomato!")
+        
+        elif self.tomato_request == "not_enough_funds":
+            await ctx.send_msgs([{
+                "cmd": "Set", 
+                "key": f"EnergyLink{ctx.team}", 
+                "slot": ctx.slot,
+                "default": 0,
+                "operations":
+                    [{"operation": "add", "value": self.tomato_request_refund}],
+            }])
+            self.tomato_request_refund = 0
+            self.tomato_request = ""
+            logger.info(f"Not enough stars to summon a Maxim Tomato! You need at least {KDL3_TOMATO_COST} stars.")
+
+
+    def on_package(self, ctx, cmd: str, args: dict):
+        super().on_package(ctx, cmd, args)
+
+        if cmd == "Connected":
+            self.tomato_request = ""
+            ctx.set_notify(f"EnergyLink{ctx.team}")
+            if ctx.ui:
+                ctx.ui.enable_energy_link()
+                ctx.ui.energy_link_label.text = "Stars: Standby"
+                snes_logger.info(f"Initialized EnergyLink{ctx.team}")
+
+        elif cmd == "Retrieved":
+            if f"EnergyLink{ctx.team}" in args["keys"] and args["keys"][f"EnergyLink{ctx.team}"] and ctx.ui:
+                pool = (args["keys"][f"EnergyLink{ctx.team}"] or 0) / KDL3_EXCHANGE_RATE
+                ctx.ui.energy_link_label.text = f"Stars: {float(pool):.2f}"
+
+        elif cmd == "SetReply" and args["key"].startswith("EnergyLink"):
+            if self.tomato_request == "pending" and "tag" in args:
+                if args["tag"] == self.tomato_request_tag:
+                    self.tomato_request_tag = ""
+                    tomato_cost = KDL3_EXCHANGE_RATE * KDL3_TOMATO_COST
+                    if args["original_value"] < tomato_cost:
+                        # send back the original value
+                        value = args["original_value"]
+                        self.tomato_request = "not_enough_funds"
+                        self.tomato_request_refund = value
+                    else: 
+                        value = args["value"]
+                        self.tomato_request = "successful"
+            else: 
+                value = args["value"]
+                    
+            if ctx.ui:
+                pool = (value or 0) /  KDL3_EXCHANGE_RATE
+                ctx.ui.energy_link_label.text = f"Stars: {float(pool):.2f}"
+
+def cmd_request(self):
+    """
+    Request a Maxim Tomato from the star pool (EnergyLink).
+    """
+    if self.ctx.game != "Kirby's Dream Land 3":
+        logger.warning("This command can only be used while playing Kirby's Dream Land 3")
+    if (not self.ctx.server) or self.ctx.server.socket.closed:
+        logger.info(f"Must be connected to server and in game.")
+    else:
+        if self.ctx.client_handler.tomato_request != "":
+            logger.info(f"You already have a Tomato in queue.")
+            return
+        else:
+            self.ctx.client_handler.tomato_request = "place_request"
+            logger.info(f"Placing a Maxim Tomato request...")

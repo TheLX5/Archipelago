@@ -1864,7 +1864,8 @@ def apply_oof_sfx(rom, oof: str):
 
 def apply_rom_settings(rom, beep, color, quickswap, menuspeed, music: bool, sprite: str, oof: str, palettes_options,
                        world=None, player=1, allow_random_on_event=False, reduceflashing=False,
-                       triforcehud: str = None, deathlink: bool = False, allowcollect: bool = False):
+                       triforcehud: str = None, deathlink: bool = False, allowcollect: bool = False,
+                       traplink: bool = False, energylink: bool = False):
     local_random = random if not world else world.worlds[player].random
     disable_music: bool = not music
     # enable instant item menu
@@ -2000,7 +2001,10 @@ def apply_rom_settings(rom, beep, color, quickswap, menuspeed, music: bool, spri
 
     rom.write_byte(0x18008D, (0b00000001 if deathlink else 0) |
                    #          0b00000010 is already used for death_link_allow_survive in super metroid.
-                             (0b00000100 if allowcollect else 0))
+                             (0b00000100 if allowcollect else 0) |
+                             (0b10000000 if traplink else 0) |
+                             (0b01000000 if energylink else 0)
+    )
 
     apply_random_sprite_on_event(rom, sprite, local_random, allow_random_on_event,
                                  world.sprite_pool[player] if world else [])

@@ -91,14 +91,10 @@ class KDL3World(World):
             self.options.max_heart_stars.value = self.options.total_heart_stars.value
 
     def create_item(self, name: str, force_non_progression: bool = False) -> KDL3Item:
-        item = item_table[name]
-        classification = ItemClassification.filler
-        if item.progression and not force_non_progression:
-            classification = ItemClassification.progression_skip_balancing \
-                if item.skip_balancing else ItemClassification.progression
-        elif item.trap:
-            classification = ItemClassification.trap
-        return KDL3Item(name, classification, item.code, self.player)
+        classification = item_table[name].type
+        if force_non_progression:
+            classification = ItemClassification.filler
+        return KDL3Item(name, classification, item_table[name].code, self.player)
 
     def get_filler_item_name(self, include_stars: bool = True) -> str:
         if include_stars:
@@ -266,8 +262,8 @@ class KDL3World(World):
         self.required_heart_stars = required_heart_stars
         # handle boss requirements here
         requirements = [required_heart_stars]
-        quotient = required_heart_stars // 5  # since we set the last manually, we can afford imperfect rounding
         if self.options.boss_requirement_random:
+            quotient = required_heart_stars // 5  # since we set the last manually, we can afford imperfect rounding
             for i in range(1, 5):
                 if self.options.strict_bosses:
                     max_stars = quotient * i
@@ -280,8 +276,9 @@ class KDL3World(World):
             else:
                 self.random.shuffle(requirements)
         else:
+            quotient = required_heart_stars / 5
             for i in range(1, 5):
-                requirements.insert(i - 1, quotient * i)
+                requirements.insert(i - 1, math.floor(quotient * i))
         self.boss_requirements = requirements
         itempool.extend([self.create_item("Heart Star") for _ in range(required_heart_stars)])
         itempool.extend([self.create_item(self.get_filler_item_name(bool(self.options.starsanity.value)))
@@ -303,6 +300,9 @@ class KDL3World(World):
 
     def generate_basic(self) -> None:
         self.stage_shuffle_enabled = self.options.stage_shuffle > 0
+        goal = self.options.goal.value
+        goal_location = self.multiworld.get_location(location_name.goals[goal], self.player)
+        goal_location.place_locked_item(KDL3Item("Love-Love Rod", ItemClassification.progression, None, self.player))
         for level in range(1, 6):
             self.multiworld.get_location(f"Level {level} Boss - Defeated", self.player) \
                 .place_locked_item(
@@ -310,6 +310,7 @@ class KDL3World(World):
             self.multiworld.get_location(f"Level {level} Boss - Purified", self.player) \
                 .place_locked_item(
                 KDL3Item(f"Level {level} Boss Purified", ItemClassification.progression, None, self.player))
+        self.multiworld.completion_condition[self.player] = lambda state: state.has("Love-Love Rod", self.player)
         # this can technically be done at any point before generate_output
         if self.options.allow_bb:
             if self.options.allow_bb == self.options.allow_bb.option_enforced:

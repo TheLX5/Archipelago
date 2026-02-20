@@ -7,6 +7,7 @@ import typing
 import settings
 from BaseClasses import Item, CollectionState, Tutorial, MultiWorld
 from worlds.AutoWorld import World, WebWorld, LogicMixin
+from worlds.LauncherComponents import launch as launch_component, components, Component, Type
 from .Client import ALTTPSNIClient
 from .Dungeons import create_dungeons, Dungeon
 from .EntranceShuffle import link_entrances, link_inverted_entrances, plando_connect
@@ -26,6 +27,13 @@ from .SubClasses import ALttPItem, LTTPRegionType
 lttp_logger = logging.getLogger("A Link to the Past")
 
 extras_list = sum(difficulties['normal'].extras[0:5], [])
+
+def launch_adjuster(*args):
+    from .Adjuster import launch
+    launch_component(launch, "LttPAdjuster", args=args)
+
+
+components.append(Component(display_name="LttP Adjuster", component_type=Type.ADJUSTER, func=launch_adjuster))
 
 
 class ALTTPSettings(settings.Group):
@@ -613,7 +621,9 @@ class ALTTPWorld(World):
                                reduceflashing=self.options.reduceflashing or multiworld.is_race,
                                triforcehud=self.options.triforcehud.current_key,
                                deathlink=self.options.death_link,
-                               allowcollect=self.options.allow_collect)
+                               allowcollect=self.options.allow_collect,
+                               traplink=self.options.trap_link.value,
+                               energylink=self.options.energy_link.value)
 
             rompath = os.path.join(output_directory, f"{self.multiworld.get_out_file_name_base(self.player)}.sfc")
             rom.write_to_file(rompath)
@@ -858,7 +868,18 @@ class ALTTPWorld(World):
                 'tr_medalion': self.required_medallions[1],
                 }
             )
+        slot_data["trap_weights"] = self.output_trap_weights()
+
         return slot_data
+
+    def output_trap_weights(self) -> typing.Dict[int, int]:
+        trap_data = {}
+
+        trap_data[0xB0] = self.options.bee_trap_weight.value
+        trap_data[0xB5] = self.options.bomb_trap_weight.value
+        #trap_data[0x100] = self.options.bunny_trap_weight.value
+
+        return trap_data
 
 
 def get_same_seed(world, seed_def: tuple) -> str:
