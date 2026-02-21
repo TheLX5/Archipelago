@@ -634,7 +634,7 @@ def generate_level_list(world: "WaffleWorld"):
     special_zone_levels_copy = special_zone_levels.copy()
 
     # Move levels to another list depending on certain settings
-    if world.options.game_logic_difficulty == "easy":
+    if world.options.game_logic_difficulty != "hard":
         # Move Butter Bridge 2 to hard levels on easy logic
         swap_level(0x0D, easy_single_levels_copy, hard_single_levels_copy)
     

@@ -142,23 +142,14 @@ class WaffleWorld(World):
         if not self.using_ut:
             # Bonk non level shuffle users trying to do something weird
             if self.options.starting_location.value != 0 and not self.options.level_shuffle.value:
-                raise OptionError(f"{self.player_name} has a very weird combination of settings that will result in a failed generation.\n"
+                raise OptionError(f"{self.player_name} has a very weird combination of settings that are very likely to result in a failed generation.\n"
                                 f"  Please enable level_shuffle if you desire to change the starting location.")
-            if self.options.starting_location.value == 0x04 and self.options.map_teleport_shuffle != "on_both_mix":
-                raise OptionError(f"{self.player_name} has a very weird combination of settings that will result in a failed generation.\n"
-                                f"  Please enable map_teleport_shuffle with the option 'on_both_mix'.")
-            if self.options.starting_location.value == 0x02 and self.options.map_teleport_shuffle != "on_both_mix":
-                raise OptionError(f"{self.player_name} has a very weird combination of settings that will result in a failed generation.\n"
-                                f"  Please enable map_teleport_shuffle with the option 'on_both_mix'.")
-
-            # Bonk "minimal" accesibility users if they go full derp with their settings
-            if self.options.accessibility == "minimal" and self.options.percentage_of_yoshi_eggs.value < 90:
-                self.options.percentage_of_yoshi_eggs.value = 90
-                valid_loc_count = int(self.count_locations()/10) 
-                egg_count = min(self.count_egg_locations() + self.options.yoshi_egg_count.value, 255)
-                if valid_loc_count < egg_count:
-                    raise OptionError(f"{self.player_name} has a very weird combination of settings that will result in a failed generation.\n"
-                                    f"  Please set less Yoshi Eggs your YAML file or DON'T use minimal accessibility.")
+            #if self.options.starting_location.value == 0x04 and self.options.map_teleport_shuffle != "on_both_mix":
+            #    raise OptionError(f"{self.player_name} has a very weird combination of settings that are very likely to result in a failed generation.\n"
+            #                    f"  Please enable map_teleport_shuffle with the option 'on_both_mix'.")
+            #if self.options.starting_location.value == 0x02 and self.options.map_teleport_shuffle != "on_both_mix":
+            #    raise OptionError(f"{self.player_name} has a very weird combination of settings that are very likely to result in a failed generation.\n"
+            #                    f"  Please enable map_teleport_shuffle with the option 'on_both_mix'.")
                 
             # Enforce disabling DeathLink for now
             if self.options.death_link:
@@ -181,6 +172,30 @@ class WaffleWorld(World):
 
         self.reverse_teleport_pairs = {y: x for x, y in self.teleport_pairs.items()}
         self.reverse_transition_pairs = {y: x for x, y in self.transition_pairs.items()}
+
+
+        from .Levels import level_info_dict, possible_starting_entrances, banned_spoiler_levels
+
+        if self.options.level_shuffle.value:
+            print(f"\nLevel Shuffle Results:")
+            for level_id, tile_id in self.active_level_dict.items():
+                if level_id >= 0x60 or level_id in banned_spoiler_levels:
+                    continue
+                shuffled_level = level_info_dict[level_id]
+                original_level = level_info_dict[tile_id]
+                print(f"    {original_level.levelName} -> {shuffled_level.levelName}")
+        
+        print(f"\nStarting Location: {possible_starting_entrances[self.options.starting_location.value]}")
+
+        if self.options.map_teleport_shuffle.value != 0:
+            print(f"\nMap Teleport Shuffle Results:")
+            for entrance, exit in self.teleport_pairs.items():
+                print(f"    {entrance} -> {exit}")
+
+        if self.options.map_transition_shuffle.value != 0:
+            print(f"\nMap Transition Shuffle Results:")
+            for entrance, exit in self.transition_pairs.items():
+                print(f"    {entrance[13:]} -> {exit[13:]}")
 
     
     def create_regions(self):
@@ -226,7 +241,7 @@ class WaffleWorld(World):
                             self.special_zone_egg_locations.append(egg_loc_name)
 
 
-    # UT Stuff, will be worked on later lol
+    # UT Stuff
     def connect_entrances(self):
         if self.using_ut and self.multiworld.enforce_deferred_connections in ("on", "default"):
             disconnect_entrances(self)
@@ -250,7 +265,7 @@ class WaffleWorld(World):
         return     
         # Debug
         from Utils import visualize_regions
-        state = CollectionState(self.multiworld)
+        state = CollectionState(self.multiworld, allow_partial_entrances=True)
         state.update_reachable_regions(self.player)
         visualize_regions(self.get_region("Menu"), "my_world.puml", show_entrance_names=True,
                         regions_to_highlight=state.reachable_regions[self.player])
@@ -738,6 +753,7 @@ class WaffleWorld(World):
 
         return trap_data
     
+
     @staticmethod
     def interpret_slot_data(slot_data):
         # Thesse are meant to be a Dict[int, int], not Dict[str, int]
@@ -747,3 +763,43 @@ class WaffleWorld(World):
         slot_data["active_levels"] = local_active_levels
 
         return slot_data
+
+    @classmethod
+    def stage_fill_hook(cls,
+                        multiworld: MultiWorld,
+                        progitempool: list[WaffleItem],
+                        usefulitempool: list[WaffleItem],
+                        filleritempool: list[WaffleItem],
+                        fill_locations: list[Location],
+                        ) -> None:
+        game_players = multiworld.get_game_players(cls.game)
+        # Get all player IDs that have progression classification minikits.
+        egg_player_ids = {player for player in game_players if multiworld.worlds[player].options.yoshi_egg_count.value > 0}
+        # Get the player IDs of those that are using minimal accessibility.
+        egg_minimal_player_ids = {player for player in game_players
+                                      if multiworld.worlds[player].options.accessibility == "minimal"}
+
+        def sort_func(item: WaffleItem):
+            if item.player in egg_player_ids and item.name == ItemName.yoshi_egg:
+                if item.player in egg_minimal_player_ids:
+                    # For minimal players, place goal macguffins first. This helps prevent fill from dumping logically
+                    # relevant items into unreachable locations and reducing the number of reachable locations to fewer
+                    # than the number of items remaining to be placed.
+                    #
+                    # Placing only the non-required goal macguffins first or slightly more than the number of
+                    # non-required goal macguffins first was also tried, but placing all goal macguffins first seems to
+                    # give fill the best chance of succeeding.
+                    #
+                    # All sizes of minikit bundles, are given the *deprioritized* classification for minimal players,
+                    # which avoids them being placed on priority locations, which would otherwise occur due to them
+                    # being sorted to be placed first.
+                    return 1
+                else:
+                    # For non-minimal players, place goal macguffins last. The helps prevent fill from filling most/all
+                    # reachable locations with the goal macguffins that are only required for the goal.
+                    return -1
+            else:
+                # Python sorting is stable, so this will leave everything else in its original order.
+                return 0
+
+        progitempool.sort(key=sort_func)
