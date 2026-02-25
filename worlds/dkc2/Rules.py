@@ -1122,7 +1122,7 @@ class DKC2StrictRules(DKC2Rules):
                 lambda state: self.can_swim(state) and self.has_glimmer(state),
 
             LocationName.krockhead_klamber_red_balloon_1:
-                lambda state: self.has_both_kongs(state) and self.can_carry(state),
+                lambda state: self.can_team_attack(state) and self.can_carry(state),
             LocationName.krockhead_klamber_banana_coin_1:
                 lambda state: self.can_team_attack(state) and self.can_cartwheel(state),
             LocationName.krockhead_klamber_banana_coin_2:
@@ -1877,9 +1877,9 @@ class DKC2LooseRules(DKC2Rules):
                 self.can_swim,
 
             LocationName.krockhead_klamber_clear:
-                self.can_climb,
+                lambda state: self.can_climb(state) and self.has_kannons(state),
             LocationName.krockhead_klamber_kong:
-                self.can_climb,
+                lambda state: self.can_climb(state) and self.has_kannons(state),
             LocationName.krockhead_klamber_dk_coin:
                 lambda state: self.can_team_attack(state) and self.can_carry(state) and self.can_cartwheel(state),
             LocationName.krockhead_klamber_bonus_1:
@@ -2558,7 +2558,7 @@ class DKC2LooseRules(DKC2Rules):
                 self.can_swim,
 
             LocationName.krockhead_klamber_red_balloon_1:
-                lambda state: self.has_both_kongs(state) and self.can_carry(state),
+                lambda state: self.can_team_attack(state) and self.can_carry(state),
             LocationName.krockhead_klamber_banana_coin_1:
                 lambda state: self.can_team_attack(state) and self.can_cartwheel(state),
             LocationName.krockhead_klamber_banana_coin_2:

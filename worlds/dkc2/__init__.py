@@ -6,6 +6,8 @@ import pkgutil
 
 from BaseClasses import Item, MultiWorld, Tutorial, ItemClassification, Region
 from worlds.AutoWorld import World, WebWorld
+from worlds.LauncherComponents import launch as launch_component, components, Component, Type
+
 from .Items import DKC2Item, item_table, misc_table, item_groups, STARTING_ID
 from .Locations import setup_locations, all_locations, location_groups
 from .Regions import create_regions, connect_regions
@@ -14,10 +16,16 @@ from .Options import DKC2Options, Logic, StartingKong, Goal, LostWorldRockPlacem
 from .Client import DKC2SNIClient
 from .Levels import generate_level_list, level_map, location_id_to_level_id, lost_world_levels
 from .Rules import DKC2StrictRules, DKC2LooseRules, DKC2ExpertRules
-from .Rom import patch_rom, DKC2ProcedurePatch, generate_game_trivia, HASH_US_REV_1
+from .Rom import patch_rom, DKC2ProcedurePatch, HASH_US_REV_1
 from . import Tracker
 
 from typing import Dict, Set, List, ClassVar, Any, Union
+
+def launch_manager(*args):
+    from .Manager import launch
+    launch_component(launch, "DKC2 Manager")
+
+components.append(Component(display_name="DKC2 Manager", component_type=Type.ADJUSTER, func=launch_manager))
 
 class DKC2Settings(settings.Group):
     class RomFile(settings.SNESRomPath):
@@ -397,8 +405,6 @@ class DKC2World(World):
         self.rom_connections: Dict[str, List[str, int]] = dict()
         self.lost_world_levels: Set[str] = set()
         generate_level_list(self)
-
-        self.games_in_session: Set[str] = generate_game_trivia(self)
 
         # Handle Universal Tracker support, doesn't do anything during regular generation
         if hasattr(self.multiworld, "re_gen_passthrough"):
