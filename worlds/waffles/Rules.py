@@ -70,10 +70,10 @@ class WaffleRules:
         return state.has(ItemName.p_switch, self.player)
     
     def has_yoshi(self, state: CollectionState) -> bool:
-        return state.has_any([ItemName.yoshi, ItemName.progressive_yoshi], self.player) and self.can_get_green_yoshi(state)
+        return state.has_any([ItemName.yoshi, ItemName.progressive_yoshi], self.player) and self.can_get_any_yoshi(state)
     
     def has_yoshi_carry(self, state: CollectionState) -> bool:
-        return state.has_any_count({ItemName.progressive_yoshi: 2, ItemName.yoshi: 1}, self.player) and self.can_get_green_yoshi(state)
+        return state.has_any_count({ItemName.progressive_yoshi: 2, ItemName.yoshi: 1}, self.player) and self.can_get_any_yoshi_carry(state)
     
     def has_special_world(self, state: CollectionState) -> bool:
         return state.has(ItemName.special_world_clear, self.player)
@@ -262,7 +262,22 @@ class WaffleRules:
     
     def can_pass_munchers(self, state: CollectionState) -> bool:
         return self.has_mushroom(state) or self.has_yoshi(state)
-    
+
+    def can_get_any_yoshi(self, state: CollectionState) -> bool:
+        return (
+            self.can_get_green_yoshi(state) or \
+            self.can_get_red_yoshi(state) or \
+            self.can_get_blue_yoshi(state) or \
+            self.can_get_yellow_yoshi(state)
+        )
+
+    def can_get_any_yoshi_carry(self, state: CollectionState) -> bool:
+        return (
+            self.can_get_green_yoshi(state) or \
+            self.can_get_blue_yoshi(state) or \
+            self.can_get_yellow_yoshi(state)
+        )
+
     def can_get_green_yoshi(self, state: CollectionState) -> bool:
         if self.inventory_yoshi_logic:
             return True
@@ -307,7 +322,7 @@ class WaffleRules:
             return True
         else:
             return (
-                state.can_reach_region(LocationName.star_road_1_region, self.player) or \
+                (state.can_reach_region(LocationName.star_road_1_region, self.player) and self.can_break_turn_blocks(state)) or \
                 state.can_reach_region(LocationName.star_road_4_region, self.player)
             ) and self.can_carry(state)
 

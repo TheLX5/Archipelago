@@ -142,8 +142,10 @@ class WaffleWorld(World):
         if not self.using_ut:
             # Bonk non level shuffle users trying to do something weird
             if self.options.starting_location.value != 0 and not self.options.level_shuffle.value:
-                raise OptionError(f"{self.player_name} has a very weird combination of settings that are very likely to result in a failed generation.\n"
-                                f"  Please enable level_shuffle if you desire to change the starting location.")
+                print (f"Enforcing Yoshi's Island as a starting world for \"{self.player_name}\" as they don't have Level Shuffle enabled.")
+                self.options.starting_location.value = 0
+                #raise OptionError(f"{self.player_name} has a very weird combination of settings that are very likely to result in a failed generation.\n"
+                #                f"  Please enable level_shuffle if you desire to change the starting location.")
             #if self.options.starting_location.value == 0x04 and self.options.map_teleport_shuffle != "on_both_mix":
             #    raise OptionError(f"{self.player_name} has a very weird combination of settings that are very likely to result in a failed generation.\n"
             #                    f"  Please enable map_teleport_shuffle with the option 'on_both_mix'.")
@@ -172,30 +174,6 @@ class WaffleWorld(World):
 
         self.reverse_teleport_pairs = {y: x for x, y in self.teleport_pairs.items()}
         self.reverse_transition_pairs = {y: x for x, y in self.transition_pairs.items()}
-
-
-        from .Levels import level_info_dict, possible_starting_entrances, banned_spoiler_levels
-
-        if self.options.level_shuffle.value:
-            print(f"\nLevel Shuffle Results:")
-            for level_id, tile_id in self.active_level_dict.items():
-                if level_id >= 0x60 or level_id in banned_spoiler_levels:
-                    continue
-                shuffled_level = level_info_dict[level_id]
-                original_level = level_info_dict[tile_id]
-                print(f"    {original_level.levelName} -> {shuffled_level.levelName}")
-        
-        print(f"\nStarting Location: {possible_starting_entrances[self.options.starting_location.value]}")
-
-        if self.options.map_teleport_shuffle.value != 0:
-            print(f"\nMap Teleport Shuffle Results:")
-            for entrance, exit in self.teleport_pairs.items():
-                print(f"    {entrance} -> {exit}")
-
-        if self.options.map_transition_shuffle.value != 0:
-            print(f"\nMap Transition Shuffle Results:")
-            for entrance, exit in self.transition_pairs.items():
-                print(f"    {entrance[13:]} -> {exit[13:]}")
 
     
     def create_regions(self):
@@ -764,6 +742,7 @@ class WaffleWorld(World):
 
         return slot_data
 
+    # Borrowed from Mysteryem's Lego Star Wars world
     @classmethod
     def stage_fill_hook(cls,
                         multiworld: MultiWorld,
