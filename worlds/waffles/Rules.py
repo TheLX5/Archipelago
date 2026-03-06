@@ -332,7 +332,7 @@ class WaffleRules:
         else:
             return (
                 state.can_reach_region(LocationName.star_road_3_region, self.player) or \
-                (state.can_reach_region(LocationName.star_road_5_region, self.player) and self.can_cape_fly(state) or self.has_p_switch(state))
+                (state.can_reach_region(LocationName.star_road_5_region, self.player) and (self.can_cape_fly(state) or self.has_p_switch(state)))
             )
 
     def can_beat_hard_level(self, state: CollectionState, difficulty: int) -> bool:
@@ -1698,6 +1698,8 @@ class WaffleBasicRules(WaffleRules):
                 self.forest_of_illusion_3_can_pass_big_pipe,
             LocationName.forest_of_illusion_3_coin_block_24:
                 self.forest_of_illusion_3_can_pass_big_pipe,
+            LocationName.forest_of_illusion_3_midway:
+                self.forest_of_illusion_3_can_pass_big_pipe,
 
             LocationName.forest_of_illusion_4_dragon:
                 lambda state: self.has_yoshi(state) or self.can_carry(state) or 
@@ -1801,7 +1803,7 @@ class WaffleBasicRules(WaffleRules):
             LocationName.chocolate_island_1_yoshi_block_1:
                 lambda state: self.has_p_switch(state) or self.chocolate_island_1_special_case(state),
             LocationName.chocolate_island_1_green_block_1:
-                lambda state: self.has_p_switch(state) or self.chocolate_island_1_special_case(state) and (
+                lambda state: (self.has_p_switch(state) or self.chocolate_island_1_special_case(state)) and (
                     (self.has_gsp(state) and self.has_bsp(state)) or
                     (self.has_ysp(state) and self.has_bsp(state))
                 ),
@@ -1997,6 +1999,8 @@ class WaffleBasicRules(WaffleRules):
                 lambda state: self.valley_of_bowser_4_special_case(state) and self.can_break_turn_blocks(state),
             LocationName.valley_of_bowser_4_powerup_block_2:
                 lambda state: self.valley_of_bowser_4_special_case(state) and self.has_ysp(state),
+            LocationName.valley_of_bowser_4_midway:
+                self.valley_of_bowser_4_special_case,
 
             LocationName.valley_ghost_house_dragon:
                 self.has_p_switch,
