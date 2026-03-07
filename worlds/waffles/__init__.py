@@ -22,7 +22,7 @@ from .Regions import create_regions, connect_regions, add_location_to_region
 from .Rom import patch_rom, WaffleProcedurePatch, USHASH
 from .Rules import WaffleBasicRules
 from .Teleports import generate_entrance_rando
-from .Tracker import setup_options_from_slot_data, reconnect_found_entrance, disconnect_entrances
+from .Tracker import setup_options_from_slot_data, reconnect_found_entrance, disconnect_entrances, tracker_world
 
 def launch_manager(*args):
     from .Manager import launch
@@ -42,6 +42,13 @@ class WaffleSetings(settings.Group):
         File name of the graphics pack to be used.
         Preferably point it to a .zip file in /data/sprites/smw/
         """
+
+    class UTPoptrackerPath(settings.FilePath):
+        """Path to the user's Donkey Kong Country 2 Poptracker Pack."""
+        description = "Donkey Kong Country 2 Poptracker Pack zip file"
+        required = False
+
+    ut_poptracker_path: typing.Union[UTPoptrackerPath, str] = UTPoptrackerPath()
 
     rom_file: RomFile = RomFile(RomFile.copy_to)
     graphics_file: GraphicsPath = "data/sprites/smw/"
@@ -89,6 +96,7 @@ class WaffleWorld(World):
     glitches_item_name = ItemName.glitched
     disconnected_entrances: dict[Entrance, Region]
     found_entrances_datastorage_key: list[str]
+    tracker_world = tracker_world
 
     active_level_dict: typing.Dict[int,int]
     active_location_table: typing.Dict[str,int]
