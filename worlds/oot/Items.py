@@ -42,9 +42,13 @@ class OOTItem(Item):
         elif name == "Ice Trap":
             classification = ItemClassification.trap
         elif name in {'Gold Skulltula Token', 'Triforce Piece'}:
-            classification = ItemClassification.progression_skip_balancing
+            classification = ItemClassification.progression_deprioritized_skip_balancing
         elif advancement:
             classification = ItemClassification.progression
+            if name in golden_advancement:
+                classification |= ItemClassification.useful
+            if name in deprioritized_advancement:
+                classification |= ItemClassification.deprioritized
         else:
             classification = ItemClassification.filler
         super(OOTItem, self).__init__(name, classification, oot_data_to_ap_id(data, event), player)
@@ -431,3 +435,99 @@ item_table = {
                                                 'object_id':  0x00BA,
                                             }),
 }
+
+golden_advancement = [
+    'Kokiri Sword',
+    'Ocarina',
+    'Magic Meter',
+    'Light Arrows',
+    'Progressive Hookshot',
+    'Progressive Strength Upgrade',
+    'Progressive Wallet',
+    'Rutos Letter',
+    'Zeldas Letter',
+    'Gerudo Membership Card',
+    'Boss Key',
+    'Boss Key (Forest Temple)',
+    'Boss Key (Fire Temple)',
+    'Boss Key (Water Temple)',
+    'Boss Key (Spirit Temple)',
+    'Boss Key (Shadow Temple)',
+    'Boss Key (Ganons Castle)',
+    'Small Key Ring (Forest Temple)',
+    'Small Key Ring (Fire Temple)',
+    'Small Key Ring (Water Temple)',
+    'Small Key Ring (Spirit Temple)',
+    'Small Key Ring (Shadow Temple)',
+    'Small Key Ring (Bottom of the Well)',
+    'Small Key Ring (Gerudo Training Ground)',
+    'Small Key Ring (Thieves Hideout)',
+    'Small Key Ring (Ganons Castle)',
+
+    #'Minuet of Forest',
+    #'Bolero of Fire',
+    #'Serenade of Water',
+    #'Requiem of Spirit',
+    #'Nocturne of Shadow',
+    #'Prelude of Light',
+    'Zeldas Lullaby',
+    #'Eponas Song',
+    #'Sarias Song',
+    'Suns Song',
+    'Song of Time',
+    'Song of Storms',
+]
+
+deprioritized_advancement = [
+    'Lens of Truth',
+    'Bombchus',
+    'Bombchus (5)',
+    'Bombchus (10)',
+    'Bombchus (20)',
+    'Bottle',
+    'Bottle with Milk',
+    'Bottle with Red Potion',
+    'Bottle with Green Potion',
+    'Bottle with Blue Potion',
+    'Bottle with Fairy',
+    'Bottle with Fish',
+    'Bottle with Blue Fire',
+    'Bottle with Bugs',
+    'Bottle with Big Poe',
+    'Bottle with Poe',
+    'Magic Bean',
+    'Skull Mask',
+    'Mask of Truth',
+    'Pocket Egg',
+    'Pocket Cucco',
+    'Odd Mushroom',
+    'Odd Potion',
+    'Poachers Saw',
+    'Broken Sword',
+    'Prescription',
+    'Eyeball Frog',
+    'Eyedrops',
+    'Claim Check',
+    'Giants Knife',
+    'Stone of Agony',
+    'Heart Container',
+    'Piece of Heart',
+    'Piece of Heart (Treasure Chest Game)',
+    'Small Key',
+    'Small Key (Forest Temple)',
+    'Small Key (Fire Temple)',
+    'Small Key (Water Temple)',
+    'Small Key (Spirit Temple)',
+    'Small Key (Shadow Temple)',
+    'Small Key (Bottom of the Well)',
+    'Small Key (Gerudo Training Ground)',
+    'Small Key (Thieves Hideout)',
+    'Small Key (Ganons Castle)',
+    
+    'Weird Egg',
+    'Nayrus Love',
+    'Farores Wind',
+    'Buy Magic Bean',
+    'Triforce Piece',
+    'Eponas Song',
+]
