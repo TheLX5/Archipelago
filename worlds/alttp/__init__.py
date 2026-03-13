@@ -859,6 +859,7 @@ class ALTTPWorld(World):
                             "entrance_shuffle", "dark_room_logic", "goal", "mode",
                             "triforce_pieces_mode", "triforce_pieces_percentage", "triforce_pieces_required",
                             "triforce_pieces_available", "triforce_pieces_extra",
+                            "energy_link",
             ]
 
             slot_data = {option_name: getattr(self.options, option_name).value for option_name in slot_options}

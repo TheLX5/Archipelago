@@ -815,8 +815,6 @@ class ALTTPSNIClient(SNIClient):
         snes_logger.info(f"Sent linked {trap_name}")
 
 def get_alttp_settings(romfile: str):
-    import LttPAdjuster
-
     adjustedromfile = ''
     if vars(Utils.get_adjuster_settings_no_defaults(GAME_ALTTP)):
         last_settings = Utils.get_adjuster_settings(GAME_ALTTP)
