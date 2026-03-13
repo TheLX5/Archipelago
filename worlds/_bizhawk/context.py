@@ -9,6 +9,8 @@ import enum
 import subprocess
 from typing import Any
 
+from CommonClient import logger
+
 import settings
 from CommonClient import CommonContext, ClientCommandProcessor, get_base_parser, server_loop, logger, gui_enabled
 import Patch
@@ -17,6 +19,16 @@ import Utils
 from . import BizHawkContext, ConnectionStatus, NotConnectedError, RequestFailedError, connect, disconnect, get_hash, \
     get_script_version, get_system, ping, display_message
 from .client import BizHawkClient, AutoBizHawkClientRegister
+
+tracker_loaded = False
+try:
+    from worlds.tracker.TrackerClient import (TrackerGameContext as SuperContext,
+                                                TrackerCommandProcessor as SuperCommandProcessor,
+                                                UT_VERSION)
+    tracker_loaded = True
+except ModuleNotFoundError:
+    from CommonClient import CommonContext as SuperContext
+    from CommonClient import ClientCommandProcessor as SuperCommandProcessor
 
 
 EXPECTED_SCRIPT_VERSION = 1
@@ -39,7 +51,7 @@ class TextCategory(str, enum.Enum):
     SERVER = "server"
 
 
-class BizHawkClientCommandProcessor(ClientCommandProcessor):
+class BizHawkClientCommandProcessor(SuperCommandProcessor):
     def _cmd_bh(self):
         """Shows the current status of the client's connection to BizHawk"""
         assert isinstance(self.ctx, BizHawkClientContext)
@@ -117,8 +129,11 @@ class BizHawkClientCommandProcessor(ClientCommandProcessor):
         logger.info(f"Currently Showing Categories: {', '.join(self.ctx.text_passthrough_categories)}")
 
 
-class BizHawkClientContext(CommonContext):
-    command_processor = BizHawkClientCommandProcessor
+class MixedCommandProcessor(BizHawkClientCommandProcessor, SuperCommandProcessor):
+    pass
+
+class BizHawkClientContext(SuperContext):
+    command_processor = MixedCommandProcessor
     text_passthrough_categories: set[str]
     server_seed_name: str | None = None
     auth_status: AuthStatus
@@ -139,6 +154,7 @@ class BizHawkClientContext(CommonContext):
         self.client_handler = None
         self.bizhawk_ctx = BizHawkContext()
         self.watcher_timeout = 0.5
+        self.tracker_enabled = tracker_loaded
 
     def _categorize_text(self, args: dict) -> TextCategory:
         if "type" not in args or args["type"] in {"Hint", "Join", "Part", "TagsChanged", "Goal", "Release", "Collect",
@@ -162,10 +178,14 @@ class BizHawkClientContext(CommonContext):
 
     def make_gui(self):
         ui = super().make_gui()
-        ui.base_title = "Archipelago BizHawk Client"
+        ui.base_title = "Archipelago Bizhawk Client"
+        if self.tracker_enabled:
+            ui.base_title += f" + Universal Tracker {UT_VERSION} | Archipelago"
         return ui
 
     def on_package(self, cmd, args):
+        super().on_package(cmd, args)
+
         if cmd == "Connected":
             self.slot_data = args.get("slot_data", None)
             self.auth_status = AuthStatus.AUTHENTICATED
@@ -359,6 +379,10 @@ def launch(*launch_args: str) -> None:
 
         ctx = BizHawkClientContext(args.connect, args.password)
         ctx.server_task = asyncio.create_task(server_loop(ctx), name="ServerLoop")
+
+        if tracker_loaded:
+            ctx.run_generator()
+            ctx.tags.remove("Tracker")
 
         if gui_enabled:
             ctx.run_gui()
