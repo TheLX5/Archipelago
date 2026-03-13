@@ -299,11 +299,14 @@ if not is_frozen():
             local_ignores = read_apignore(pathlib.Path(world_directory, ".apignore"))
             apignores = global_apignores + local_ignores if local_ignores else global_apignores
 
-            with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
-                for file in apignores.match_tree_files(world_directory, negate=True):
-                    zf.write(pathlib.Path(world_directory, file), pathlib.Path(file_name, file))
+            try:
+                with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
+                    for file in apignores.match_tree_files(world_directory, negate=True):
+                            zf.write(pathlib.Path(world_directory, file), pathlib.Path(file_name, file))
 
-                zf.writestr(apworld.manifest_path, json.dumps(manifest))
+                    zf.writestr(apworld.manifest_path, json.dumps(manifest))
+            except FileNotFoundError: 
+                pass
         open_folder(apworlds_folder)
 
     components.append(Component("Build APWorlds", func=_build_apworlds, cli=True,
