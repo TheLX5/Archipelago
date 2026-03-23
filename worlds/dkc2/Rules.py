@@ -997,7 +997,7 @@ class DKC2StrictRules(DKC2Rules):
             LocationName.ghostly_grove_clear:
                 CanClimb,
             LocationName.ghostly_grove_kong:
-                CanClimb & CanTeamAttack & CanCarry,
+                CanClimb & CanCarry,
             LocationName.ghostly_grove_dk_coin:
                 CanClimb & CanUseKannons & (
                     CanCartwheel | CanHover
@@ -2403,7 +2403,7 @@ class DKC2LooseRules(DKC2Rules):
             LocationName.ghostly_grove_clear:
                 CanClimb,
             LocationName.ghostly_grove_kong:
-                CanClimb & CanTeamAttack & CanCarry,
+                CanClimb & CanCarry,
             LocationName.ghostly_grove_dk_coin:
                 CanClimb & CanUseKannons & (
                     CanCartwheel | CanHover
