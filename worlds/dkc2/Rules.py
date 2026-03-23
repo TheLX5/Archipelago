@@ -1456,25 +1456,25 @@ class DKC2StrictRules(DKC2Rules):
 
 
             LocationName.black_ice_battle_clear:
-                CanCarry,
+                True_(),
             LocationName.black_ice_battle_kong:
                 CanCarry,
             LocationName.black_ice_battle_dk_coin:
-                CanCarry & CanTeamAttack,
+                CanCarry,
             LocationName.black_ice_battle_banana_bunch_1:
-                CanCarry & CanCartwheel,
+                CanHover & CanCartwheel,
             LocationName.black_ice_battle_red_balloon_1:
-                CanCarry,
+                True_(),
             LocationName.black_ice_battle_red_balloon_2:
-                CanCarry,
+                True_(),
             LocationName.black_ice_battle_red_balloon_3:
                 CanCarry,
             LocationName.black_ice_battle_banana_bunch_2:
-                CanCarry,
+                True_(),
             LocationName.black_ice_battle_banana_coin_1:
-                CanCarry,
+                True_(),
             LocationName.black_ice_battle_banana_bunch_3:
-                CanCarry & CanTeamAttack,
+                CanCarry,
 
 
             LocationName.klobber_karnage_clear:
@@ -2911,7 +2911,8 @@ class DKC2LooseRules(DKC2Rules):
             LocationName.jungle_jinx_banana_coin_5:
                 CanCartwheel & CanUseKannons,
 
-
+            LocationName.black_ice_battle_clear:
+                True_(),
             LocationName.black_ice_battle_kong:
                 CanCarry,
             LocationName.black_ice_battle_dk_coin:
@@ -4562,7 +4563,8 @@ class DKC2ExpertRules(DKC2Rules):
             LocationName.jungle_jinx_banana_coin_5:
                 CanHover | CanUseKannons,
 
-
+            LocationName.black_ice_battle_clear:
+                True_(),
             LocationName.black_ice_battle_kong:
                 CanCarry | HasBothKongs,
             LocationName.black_ice_battle_dk_coin:
