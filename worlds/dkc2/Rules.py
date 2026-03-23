@@ -1301,18 +1301,18 @@ class DKC2StrictRules(DKC2Rules):
 
             LocationName.chain_link_chamber_clear:
                 CanClimb & CanCling & CanUseKannons & 
-                    CanUseControllableBarrels & CanBeInvincible,
+                    CanUseControllableBarrels,
             LocationName.chain_link_chamber_kong:
                 CanClimb & CanCling & CanUseKannons & 
-                    CanUseControllableBarrels & CanBeInvincible,
+                    CanUseControllableBarrels,
             LocationName.chain_link_chamber_dk_coin:
                 CanClimb & CanCling & CanUseKannons & 
-                    CanUseControllableBarrels & CanBeInvincible,
+                    CanUseControllableBarrels,
             LocationName.chain_link_chamber_bonus_1:
                 CanClimb & CanCling & CanCarry,
             LocationName.chain_link_chamber_bonus_2:
                 CanClimb & CanCling & CanUseKannons & 
-                    CanUseControllableBarrels & CanBeInvincible & CanCartwheel,
+                    CanUseControllableBarrels & CanCartwheel,
             LocationName.chain_link_chamber_banana_coin_1:
                 CanClimb,
             LocationName.chain_link_chamber_banana_bunch_1:
@@ -1323,16 +1323,16 @@ class DKC2StrictRules(DKC2Rules):
                 CanClimb & CanCarry,
             LocationName.chain_link_chamber_banana_coin_2:
                 CanClimb & CanCling & CanUseKannons & 
-                    CanUseControllableBarrels & CanBeInvincible,
+                    CanUseControllableBarrels,
             LocationName.chain_link_chamber_banana_bunch_4:
                 CanClimb & CanCling & CanUseKannons & 
-                    CanUseControllableBarrels & CanBeInvincible,
+                    CanUseControllableBarrels,
             LocationName.chain_link_chamber_banana_coin_3:
                 CanClimb & CanCling & CanUseKannons & 
-                    CanUseControllableBarrels & CanBeInvincible,
+                    CanUseControllableBarrels,
             LocationName.chain_link_chamber_banana_coin_4:
                 CanClimb & CanCling & CanUseKannons & 
-                    CanUseControllableBarrels & CanBeInvincible,
+                    CanUseControllableBarrels,
 
 
             LocationName.toxic_tower_clear:
