@@ -1,18 +1,45 @@
-from typing import Dict, TYPE_CHECKING
+
+
+from typing import TYPE_CHECKING, override
 if TYPE_CHECKING:
     from . import DKCWorld
 
+from rule_builder.rules import Has, HasAll, Rule, True_, CanReachRegion
 from .Names import LocationName, ItemName, RegionName, EventName
 
-from worlds.generic.Rules import CollectionRule, add_rule
-from BaseClasses import CollectionState
-  
+HasDonkey: Rule = Has(ItemName.donkey)
+HasDiddy: Rule = Has(ItemName.diddy)
+HasBothKongs: Rule = HasAll(ItemName.diddy, ItemName.donkey)
+CanCarry: Rule = Has(ItemName.carry)
+CanClimb: Rule = Has(ItemName.climb)
+CanRoll: Rule = Has(ItemName.roll)
+CanSwim: Rule = Has(ItemName.swim)
+CanSlap: Rule = HasAll(ItemName.donkey, ItemName.slap)
+HasRambi: Rule = Has(ItemName.rambi)
+HasSquawks: Rule = Has(ItemName.squawks)
+HasEnguarde: Rule = Has(ItemName.enguarde)
+HasWinky: Rule = Has(ItemName.winky)
+HasExpresso: Rule = Has(ItemName.expresso)
+HasKannons: Rule = Has(ItemName.kannons)
+HasSwitches: Rule = Has(ItemName.switches)
+HasMinecart: Rule = Has(ItemName.minecart)
+HasTires: Rule = Has(ItemName.tires)
+HasPlatforms: Rule = Has(ItemName.platforms)
+
+CanAccessJungle: Rule = Has(ItemName.kongo_jungle)
+CanAccessMines: Rule = Has(ItemName.monkey_mines)
+CanAccessValley: Rule = Has(ItemName.vine_valley)
+CanAccessGlacier: Rule = Has(ItemName.gorilla_glacier)
+CanAccessIndustries: Rule = Has(ItemName.kremkroc_industries)
+CanAccessCaverns: Rule = Has(ItemName.chimp_caverns)
+
+
 class DKCRules:
     player: int
     world: "DKCWorld"
-    connection_rules: Dict[str, CollectionRule]
-    region_rules: Dict[str, CollectionRule]
-    location_rules: Dict[str, CollectionRule]
+    connection_rules: dict[str, Rule]
+    region_rules: dict[str, Rule]
+    location_rules: dict[str, Rule]
 
     def __init__(self, world: "DKCWorld") -> None:
         self.player = world.player
@@ -20,202 +47,93 @@ class DKCRules:
 
         self.connection_rules = {
             f"{RegionName.dk_isle} -> {RegionName.kongo_jungle}":
-                self.can_access_jungle,
+                CanAccessJungle,
             f"{RegionName.dk_isle} -> {RegionName.monkey_mines}":
-                self.can_access_mines,
+                CanAccessMines,
             f"{RegionName.dk_isle} -> {RegionName.vine_valley}":
-                self.can_access_valley,
+                CanAccessValley,
             f"{RegionName.dk_isle} -> {RegionName.gorilla_glacier}":
-                self.can_access_glacier,
+                CanAccessGlacier,
             f"{RegionName.dk_isle} -> {RegionName.kremkroc_industries}":
-                self.can_access_industries,
+                CanAccessIndustries,
             f"{RegionName.dk_isle} -> {RegionName.chimp_caverns}":
-                self.can_access_caverns,
+                CanAccessCaverns,
             f"{RegionName.dk_isle} -> {RegionName.gangplank_galleon}":
-                self.can_access_ship,
+                Has(ItemName.boss_token, self.world.options.gangplank_tokens.value),
             f"{RegionName.kongo_jungle} -> {RegionName.very_gnawty_lair_map}":
-                self.can_access_very_gnawty,
+                Has(EventName.jungle_level, self.world.options.required_jungle_levels.value),
             f"{RegionName.monkey_mines} -> {RegionName.necky_nuts_map}":
-                self.can_access_master_necky,
+                Has(EventName.mines_level, self.world.options.required_mines_levels.value),
             f"{RegionName.vine_valley} -> {RegionName.bumble_b_rumble_map}":
-                self.can_access_queen_b,
+                Has(EventName.valley_level, self.world.options.required_valley_levels.value),
             f"{RegionName.gorilla_glacier} -> {RegionName.really_gnawty_rampage_map}":
-                self.can_access_really_gnawty,
+                Has(EventName.glacier_level, self.world.options.required_glacier_levels.value),
             f"{RegionName.kremkroc_industries} -> {RegionName.boss_dumb_drum_map}":
-                self.can_access_dumb_drum,
+                Has(EventName.industries_level, self.world.options.required_industries_levels.value),
             f"{RegionName.chimp_caverns} -> {RegionName.necky_revenge_map}":
-                self.can_access_master_necky_snr,
+                Has(EventName.caverns_level, self.world.options.required_caverns_levels.value),
         }
 
-    def can_access_jungle(self, state: CollectionState) -> bool:
-        return state.has(ItemName.kongo_jungle, self.player)
-        
-    def can_access_mines(self, state: CollectionState) -> bool:
-        return state.has(ItemName.monkey_mines, self.player)
-
-    def can_access_valley(self, state: CollectionState) -> bool:
-        return state.has(ItemName.vine_valley, self.player)
-
-    def can_access_glacier(self, state: CollectionState) -> bool:
-        return state.has(ItemName.gorilla_glacier, self.player)
-
-    def can_access_industries(self, state: CollectionState) -> bool:
-        return state.has(ItemName.kremkroc_industries, self.player)
-
-    def can_access_caverns(self, state: CollectionState) -> bool:
-        return state.has(ItemName.chimp_caverns, self.player)
-        
-    def can_access_ship(self, state: CollectionState) -> bool:
-        return state.has(ItemName.boss_token, self.player, self.world.options.gangplank_tokens.value)
-    
-
-    def can_access_jungle_glitched(self, state: CollectionState) -> bool:
-        return self.can_access_jungle(state) or (
-                self.can_access_valley_glitched(state) and self.has_both_kongs(state) and self.can_carry(state) and (
-                self.has_expresso(state) or self.can_roll(state))
-            )
-    
-    def can_access_mines_glitched(self, state: CollectionState) -> bool:
-        return self.can_access_mines(state) or (
-                self.has_both_kongs(state) and self.can_carry(state) and (
-                self.can_access_caverns_glitched(state) or (self.can_access_valley_glitched(state) and self.has_expresso(state)))
-            )
-    
-    def can_access_valley_glitched(self, state: CollectionState) -> bool:
-        return self.can_access_valley(state) or self.can_access_jungle(state)
-
-    def can_access_glacier_glitched(self, state: CollectionState) -> bool:
-        return self.can_access_glacier(state) or (
-                self.can_carry(state) and ((
-                    self.can_access_jungle_glitched(state) and self.has_donkey(state)) or (
-                    self.can_access_caverns_glitched(state) and self.has_both_kongs(state)) or (
-                    self.can_access_valley_glitched(state) and self.has_both_kongs(state) and self.has_expresso(state))
-                )
-            )
-    
-    def can_access_industries_glitched(self, state: CollectionState) -> bool:
-        return self.can_access_industries(state) or (
-                self.can_access_valley_glitched(state) and self.has_both_kongs(state) and self.can_carry(state) and self.has_expresso(state)
-            )
-
-    def can_access_caverns_glitched(self, state: CollectionState) -> bool:
-        return self.can_access_caverns(state) or (
-                self.can_access_valley_glitched(state) and self.has_both_kongs(state) and self.can_carry(state) and self.has_expresso(state)
-            )
-
-    def can_access_very_gnawty(self, state: CollectionState) -> bool:
-        return state.has(EventName.jungle_level, self.player, self.world.options.required_jungle_levels.value)
-    
-    def can_access_master_necky(self, state: CollectionState) -> bool:
-        return state.has(EventName.mines_level, self.player, self.world.options.required_mines_levels.value)
-    
-    def can_access_queen_b(self, state: CollectionState) -> bool:
-        return state.has(EventName.valley_level, self.player, self.world.options.required_valley_levels.value)
-    
-    def can_access_really_gnawty(self, state: CollectionState) -> bool:
-        return state.has(EventName.glacier_level, self.player, self.world.options.required_glacier_levels.value)
-    
-    def can_access_dumb_drum(self, state: CollectionState) -> bool:
-        return state.has(EventName.industries_level, self.player, self.world.options.required_industries_levels.value)
-    
-    def can_access_master_necky_snr(self, state: CollectionState) -> bool:
-        return state.has(EventName.caverns_level, self.player, self.world.options.required_caverns_levels.value)
-
-    def has_donkey(self, state: CollectionState) -> bool:
-        return state.has(ItemName.donkey, self.player)
-
-    def has_diddy(self, state: CollectionState) -> bool:
-        return state.has(ItemName.diddy, self.player)
-    
-    def has_both_kongs(self, state: CollectionState) -> bool:
-        return state.has_all({ItemName.donkey, ItemName.diddy}, self.player)
-    
-    def can_carry(self, state: CollectionState) -> bool:
-        return state.has(ItemName.carry, self.player)
-    
-    def can_swim(self, state: CollectionState) -> bool:
-        return state.has(ItemName.swim, self.player)
-    
-    def can_roll(self, state: CollectionState) -> bool:
-        return state.has(ItemName.roll, self.player)
-    
-    def can_climb(self, state: CollectionState) -> bool:
-        return state.has(ItemName.climb, self.player)
-    
-    def can_slap(self, state: CollectionState) -> bool:
-        return state.has_all({ItemName.donkey, ItemName.slap}, self.player)
-    
-    def has_kannons(self, state: CollectionState) -> bool:
-        return state.has(ItemName.kannons, self.player)
-    
-    def has_switches(self, state: CollectionState) -> bool:
-        return state.has(ItemName.switches, self.player)
-    
-    def has_minecart(self, state: CollectionState) -> bool:
-        return state.has(ItemName.minecart, self.player)
-    
-    def has_winky(self, state: CollectionState) -> bool:
-        return state.has(ItemName.winky, self.player)
-    
-    def has_expresso(self, state: CollectionState) -> bool:
-        return state.has(ItemName.expresso, self.player)
-    
-    def has_rambi(self, state: CollectionState) -> bool:
-        return state.has(ItemName.rambi, self.player)
-    
-    def has_enguarde(self, state: CollectionState) -> bool:
-        return state.has(ItemName.enguarde, self.player)
-    
-    def has_squawks(self, state: CollectionState) -> bool:
-        return state.has(ItemName.squawks, self.player)
-    
-    def has_tires(self, state: CollectionState) -> bool:
-        return state.has(ItemName.tires, self.player)
-    
-    def has_platforms(self, state: CollectionState) -> bool:
-        return state.has(ItemName.platforms, self.player)
-    
-    def true(self, state: CollectionState) -> bool:
-        return True
-    
     def set_dkc_rules(self) -> None:
         multiworld = self.world.multiworld
 
-        if self.world.options.glitched_world_access:
+        print ("lolololol", self.world.options.glitched_world_access.value)
+        if self.world.options.glitched_world_access.value:
             self.connection_rules.update(
                 {
                     f"{RegionName.dk_isle} -> {RegionName.kongo_jungle}":
-                        self.can_access_jungle_glitched,
+                        CanAccessJungle | (
+                            CanReachRegion(RegionName.vine_valley) & HasBothKongs & CanCarry & (
+                                HasExpresso | CanRoll
+                            )
+                        ),
                     f"{RegionName.dk_isle} -> {RegionName.monkey_mines}":
-                        self.can_access_mines_glitched,
+                        CanAccessMines | (
+                            HasBothKongs & CanCarry & (
+                                CanReachRegion(RegionName.chimp_caverns) | (
+                                    CanReachRegion(RegionName.vine_valley) & HasExpresso
+                                )
+                            )
+                        ),
                     f"{RegionName.dk_isle} -> {RegionName.vine_valley}":
-                        self.can_access_valley_glitched,
+                        CanAccessValley | CanAccessJungle,
                     f"{RegionName.dk_isle} -> {RegionName.gorilla_glacier}":
-                        self.can_access_glacier_glitched,
+                        CanAccessGlacier | (
+                            CanCarry & (
+                                (CanReachRegion(RegionName.kongo_jungle) & HasDonkey) | 
+                                (CanReachRegion(RegionName.chimp_caverns) & HasBothKongs) | 
+                                (CanReachRegion(RegionName.vine_valley) & HasBothKongs & HasExpresso)
+                            )                
+                        ),
                     f"{RegionName.dk_isle} -> {RegionName.kremkroc_industries}":
-                        self.can_access_industries_glitched,
+                        CanAccessIndustries | (
+                            CanReachRegion(RegionName.vine_valley) & HasBothKongs & CanCarry & HasExpresso
+                        ),
                     f"{RegionName.dk_isle} -> {RegionName.chimp_caverns}":
-                        self.can_access_caverns_glitched,
+                        CanAccessCaverns | (
+                            CanReachRegion(RegionName.vine_valley) & HasBothKongs & CanCarry & HasExpresso
+                        ),
                 }
             )
 
         for entrance_name, rule in self.connection_rules.items():
             entrance = multiworld.get_entrance(entrance_name, self.player)
-            entrance.access_rule = rule
+            self.world.set_rule(entrance, rule)
         for loc in multiworld.get_locations(self.player):
             if loc.name in self.location_rules:
-                loc.access_rule = self.location_rules[loc.name]
+                rule = self.location_rules[loc.name]
+                self.world.set_rule(self.world.get_location(loc.name), rule)
             
-        multiworld.completion_condition[self.player] = lambda state: state.has(EventName.k_rool, self.player)
+        self.world.set_completion_rule(Has(EventName.k_rool))
         
     # Universal Tracker: Append the next logic level rule that has UT's glitched item to the actual logic rule
-    def set_dkc_glitched_rules(self) -> None:
+    def set_dkc_glitched_rules(self, non_glitched_rules: dict[str, Rule]) -> None:
         multiworld = self.world.multiworld
 
         for loc in multiworld.get_locations(self.player):
             if loc.name in self.location_rules:
-                glitched_rule = lambda state, rule=self.location_rules[loc.name]: state.has(ItemName.glitched, self.player) and rule(state)
-                add_rule(loc, glitched_rule, combine="or")
+                glitched_rule = non_glitched_rules[loc.name] | (self.location_rules[loc.name] & Has(ItemName.glitched))
+                self.world.set_rule(self.world.get_location(loc.name), glitched_rule)
  
 
 class DKCStrictRules(DKCRules):
@@ -224,847 +142,847 @@ class DKCStrictRules(DKCRules):
 
         self.location_rules = {
             LocationName.jungle_hijinxs_clear:
-                self.true,
+                True_(),
             EventName.jungle_hijinxs_clear:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_bonus_1:
-                lambda state: self.has_rambi(state) or self.can_carry(state),
+                HasRambi | CanCarry,
             LocationName.jungle_hijinxs_bonus_2:
-                lambda state: self.has_rambi(state) or self.can_carry(state),
+                HasRambi | CanCarry,
             LocationName.jungle_hijinxs_kong:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_balloon_1:
-                self.has_tires,
+                HasTires,
             LocationName.jungle_hijinxs_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_2:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_3:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_4:
-                self.can_roll,
+                CanRoll,
             LocationName.jungle_hijinxs_bunch_5:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_6:
-                lambda state: self.can_slap(state) and self.can_roll(state),
+                CanSlap & CanRoll,
             LocationName.jungle_hijinxs_balloon_2:
-                self.can_roll,
+                CanRoll,
             LocationName.jungle_hijinxs_bunch_7:
-                lambda state: self.can_slap(state) and self.can_roll(state),
+                CanSlap & CanRoll,
             LocationName.jungle_hijinxs_bunch_8:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_9:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_10:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_11:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_12:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_balloon_3:
-                lambda state: self.can_roll(state) and self.has_diddy(state),
+                CanRoll & HasDiddy,
             LocationName.jungle_hijinxs_bunch_13:
-                lambda state: self.can_roll(state) and self.can_slap(state) and self.has_diddy(state),
+                CanRoll & CanSlap & HasDiddy,
             LocationName.jungle_hijinxs_balloon_4:
-                lambda state: self.can_roll(state) and self.has_diddy(state),
+                CanRoll & HasDiddy,
             LocationName.jungle_hijinxs_token_1:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_bunch_14:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_15:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_16:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_bunch_17:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_18:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_19:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_balloon_5:
-                lambda state: self.has_rambi(state) and self.has_tires(state) and self.has_kannons(state),
+                HasRambi & HasTires & HasKannons,
             LocationName.jungle_hijinxs_balloon_6:
-                lambda state: self.has_rambi(state) and self.has_tires(state) and self.has_kannons(state),
+                HasRambi & HasTires & HasKannons,
 
             LocationName.ropey_rampage_clear:
-                self.can_climb,
+                CanClimb,
             EventName.ropey_rampage_clear:
-                self.can_climb,
+                CanClimb,
             LocationName.ropey_rampage_bonus_1:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.ropey_rampage_bonus_2:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.ropey_rampage_kong:
-                lambda state: self.can_climb(state),
+                CanClimb,
             LocationName.ropey_rampage_bunch_1:
-                self.can_roll,
+                CanRoll,
             LocationName.ropey_rampage_bunch_2:
-                self.can_roll,
+                CanRoll,
             LocationName.ropey_rampage_bunch_3:
-                self.can_roll,
+                CanRoll,
             LocationName.ropey_rampage_bunch_4:
-                self.can_slap,
+                CanSlap,
             LocationName.ropey_rampage_bunch_5:
-                self.can_slap,
+                CanSlap,
             LocationName.ropey_rampage_bunch_6:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_7:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_8:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_9:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_token_1:
-                self.can_climb,
+                CanClimb,
             LocationName.ropey_rampage_bunch_10:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_11:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_12:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_13:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_14:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_15:
-                lambda state: self.can_slap(state) and self.can_climb(state) and self.can_roll(state),
+                CanSlap & CanClimb & CanRoll,
             LocationName.ropey_rampage_token_2:
-                lambda state: self.has_tires(state) and self.can_climb(state),
+                HasTires & CanClimb,
             LocationName.ropey_rampage_bunch_16:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_17:
-                lambda state: self.can_climb(state) and self.can_roll(state),
+                CanClimb & CanRoll,
             LocationName.ropey_rampage_bunch_18:
-                lambda state: self.can_climb(state) and self.can_roll(state),
+                CanClimb & CanRoll,
             LocationName.ropey_rampage_bunch_19:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
 
             LocationName.reptile_rumble_clear:
-                self.has_tires,
+                HasTires,
             EventName.reptile_rumble_clear:
-                self.has_tires,
+                HasTires,
             LocationName.reptile_rumble_bonus_1:
-                self.can_carry,
+                CanCarry,
             LocationName.reptile_rumble_bonus_2:
-                lambda state: self.has_kannons(state) and self.has_tires(state),
+                HasKannons & HasTires,
             LocationName.reptile_rumble_bonus_3:
-                lambda state: self.can_carry(state) and self.has_tires(state),
+                CanCarry & HasTires,
             LocationName.reptile_rumble_kong:
-                self.has_tires,
+                HasTires,
             LocationName.reptile_rumble_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.reptile_rumble_bunch_2:
-                self.can_slap,
+                CanSlap,
             LocationName.reptile_rumble_bunch_3:
-                self.can_slap,
+                CanSlap,
             LocationName.reptile_rumble_bunch_4:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.reptile_rumble_bunch_5:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.reptile_rumble_bunch_6:
-                self.has_tires,
+                HasTires,
             LocationName.reptile_rumble_bunch_7:
-                self.has_tires,
+                HasTires,
             LocationName.reptile_rumble_bunch_8:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.reptile_rumble_bunch_9:
-                lambda state: self.has_tires(state) and self.can_slap(state) and self.can_carry(state),
+                HasTires & CanSlap & CanCarry,
             LocationName.reptile_rumble_bunch_10:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.reptile_rumble_token_1:
-                self.has_tires,
+                HasTires,
             LocationName.reptile_rumble_bunch_11:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.reptile_rumble_bunch_12:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.reptile_rumble_bunch_13:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.reptile_rumble_bunch_14:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
 
             LocationName.coral_capers_clear:
-                self.can_swim,
+                CanSwim,
             EventName.coral_capers_clear:
-                self.can_swim,
+                CanSwim,
             LocationName.coral_capers_kong:
-                self.can_swim,
+                CanSwim,
             LocationName.coral_capers_bunch_1:
-                self.can_swim,
+                CanSwim,
             LocationName.coral_capers_balloon_1:
-                self.can_swim,
+                CanSwim,
             LocationName.coral_capers_bunch_2:
-                self.can_swim,
+                CanSwim,
             LocationName.coral_capers_token_1:
-                self.can_swim,
+                CanSwim,
 
             LocationName.barrel_cannon_canyon_clear:
-                self.has_kannons,
+                HasKannons,
             EventName.barrel_cannon_canyon_clear:
-                self.has_kannons,
+                HasKannons,
             LocationName.barrel_cannon_canyon_bonus_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.barrel_cannon_canyon_bonus_2:
-                lambda state: self.can_carry(state) and self.has_kannons(state),
+                CanCarry & HasKannons,
             LocationName.barrel_cannon_canyon_kong:
-                self.has_kannons,
+                HasKannons,
             LocationName.barrel_cannon_canyon_token_1:
-                lambda state: self.has_diddy(state) and self.can_roll(state) and self.has_kannons(state),
+                HasDiddy & CanRoll & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_1:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_2:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_3:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_4:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_token_2:
-                self.has_kannons,
+                HasKannons,
             LocationName.barrel_cannon_canyon_bunch_5:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_6:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_7:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_8:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_9:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_10:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_11:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_12:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
 
             LocationName.very_gnawty_lair_clear:
-                self.has_both_kongs,
+                HasBothKongs,
             LocationName.defeated_gnawty_1:
-                self.has_both_kongs,
+                HasBothKongs,
 
             LocationName.winky_walkway_clear:
-                self.true,
+                True_(),
             EventName.winky_walkway_clear:
-                self.true,
+                True_(),
             LocationName.winky_walkway_bonus_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.winky_walkway_kong:
-                lambda state: self.has_kannons(state) and self.has_winky(state),
+                HasKannons & HasWinky,
             LocationName.winky_walkway_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.winky_walkway_bunch_2:
-                self.can_slap,
+                CanSlap,
             LocationName.winky_walkway_bunch_3:
-                self.can_slap,
+                CanSlap,
             LocationName.winky_walkway_bunch_4:
-                self.can_slap,
+                CanSlap,
             LocationName.winky_walkway_token_1:
-                self.has_winky,
+                HasWinky,
             LocationName.winky_walkway_bunch_5:
-                self.can_slap,
+                CanSlap,
 
             LocationName.mine_cart_carnage_clear:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
             EventName.mine_cart_carnage_clear:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
             LocationName.mine_cart_carnage_kong:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
             LocationName.mine_cart_carnage_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.mine_cart_carnage_bunch_2:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
             LocationName.mine_cart_carnage_token_1:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
             LocationName.mine_cart_carnage_bunch_3:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
             LocationName.mine_cart_carnage_balloon_1:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
 
             LocationName.bouncy_bonanza_clear:
-                self.has_tires,
+                HasTires,
             EventName.bouncy_bonanza_clear:
-                self.has_tires,
+                HasTires,
             LocationName.bouncy_bonanza_bonus_1:
-                self.can_carry,
+                CanCarry,
             LocationName.bouncy_bonanza_bonus_2:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             LocationName.bouncy_bonanza_kong:
-                self.has_tires,
+                HasTires,
             LocationName.bouncy_bonanza_token_1:
-                self.has_tires,
+                HasTires,
             LocationName.bouncy_bonanza_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.bouncy_bonanza_bunch_2:
-                self.can_slap,
+                CanSlap,
             LocationName.bouncy_bonanza_bunch_3:
-                self.can_slap,
+                CanSlap,
             LocationName.bouncy_bonanza_bunch_4:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.bouncy_bonanza_bunch_5:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.bouncy_bonanza_bunch_6:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.bouncy_bonanza_bunch_7:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.bouncy_bonanza_bunch_8:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.bouncy_bonanza_bunch_9:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.bouncy_bonanza_bunch_10:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
 
             LocationName.stop_go_station_clear:
-                lambda state: self.has_switches(state) and self.has_tires(state),
+                HasSwitches & HasTires,
             EventName.stop_go_station_clear:
-                lambda state: self.has_switches(state) and self.has_tires(state),
+                HasSwitches & HasTires,
             LocationName.stop_go_station_bonus_1:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.can_carry(state),
+                HasSwitches & HasTires & CanCarry,
             LocationName.stop_go_station_bonus_2:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.has_kannons(state),
+                HasSwitches & HasTires & HasKannons,
             LocationName.stop_go_station_kong:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.can_roll(state),
+                HasSwitches & HasTires & CanRoll,
             LocationName.stop_go_station_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.stop_go_station_bunch_2:
-                lambda state: self.has_switches(state) and self.can_slap(state),
+                HasSwitches & CanSlap,
             LocationName.stop_go_station_bunch_3:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.can_slap(state),
+                HasSwitches & HasTires & CanSlap,
             LocationName.stop_go_station_token_1:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.can_roll(state),
+                HasSwitches & HasTires & CanRoll,
             LocationName.stop_go_station_bunch_4:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.can_slap(state),
+                HasSwitches & HasTires & CanSlap,
             LocationName.stop_go_station_bunch_5:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.can_slap(state),
+                HasSwitches & HasTires & CanSlap,
             LocationName.stop_go_station_bunch_6:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.can_slap(state),
+                HasSwitches & HasTires & CanSlap,
             LocationName.stop_go_station_bunch_7:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.can_slap(state),
+                HasSwitches & HasTires & CanSlap,
 
             LocationName.millstone_mayhem_clear:
-                lambda state: self.has_tires(state) and (self.can_roll(state) or self.has_winky(state)),
+                HasTires & (CanRoll | HasWinky),
             EventName.millstone_mayhem_clear:
-                lambda state: self.has_tires(state) and (self.can_roll(state) or self.has_winky(state)),
+                HasTires & (CanRoll | HasWinky),
             LocationName.millstone_mayhem_bonus_1:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             LocationName.millstone_mayhem_bonus_2:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             LocationName.millstone_mayhem_bonus_3:
-                lambda state: self.has_tires(state) and self.can_carry(state),
+                HasTires & CanCarry,
             LocationName.millstone_mayhem_kong:
-                lambda state: self.has_tires(state) and self.has_kannons(state) and (self.can_roll(state) or self.has_winky(state)),
+                HasTires & HasKannons & (CanRoll | HasWinky),
             LocationName.millstone_mayhem_bunch_1:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.millstone_mayhem_bunch_2:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.millstone_mayhem_bunch_3:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.millstone_mayhem_bunch_4:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.millstone_mayhem_bunch_5:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.millstone_mayhem_bunch_6:
-                lambda state: self.has_tires(state) and self.can_slap(state) and (self.can_roll(state) or self.has_winky(state)),
+                HasTires & CanSlap & (CanRoll | HasWinky),
             LocationName.millstone_mayhem_bunch_7:
-                lambda state: self.has_tires(state) and self.can_slap(state) and (self.can_roll(state) or self.has_winky(state)),
+                HasTires & CanSlap & (CanRoll | HasWinky),
             LocationName.millstone_mayhem_bunch_8:
-                lambda state: self.has_tires(state) and self.can_slap(state) and (self.can_roll(state) or self.has_winky(state)),
+                HasTires & CanSlap & (CanRoll | HasWinky),
             LocationName.millstone_mayhem_bunch_9:
-                lambda state: self.has_tires(state) and self.can_slap(state) and (self.can_roll(state) or self.has_winky(state)),
+                HasTires & CanSlap & (CanRoll | HasWinky),
 
             LocationName.necky_nuts_clear:
-                lambda state: self.has_both_kongs(state) and self.has_tires(state),
+                HasBothKongs & HasTires,
             LocationName.defeated_necky_1:
-                lambda state: self.has_both_kongs(state) and self.has_tires(state),
+                HasBothKongs & HasTires,
 
             LocationName.vulture_culture_clear:
-                self.has_kannons,
+                HasKannons,
             EventName.vulture_culture_clear:
-                self.has_kannons,
+                HasKannons,
             LocationName.vulture_culture_bonus_1:
-                lambda state: self.has_kannons(state) and self.has_tires(state),
+                HasKannons & HasTires,
             LocationName.vulture_culture_bonus_2:
-                lambda state: self.has_kannons(state) and self.can_carry(state),
+                HasKannons & CanCarry,
             LocationName.vulture_culture_bonus_3:
-                lambda state: self.has_kannons(state) and self.can_carry(state),
+                HasKannons & CanCarry,
             LocationName.vulture_culture_kong:
-                lambda state: self.has_kannons(state) and self.has_tires(state) and self.can_carry(state),
+                HasKannons & HasTires & CanCarry,
             LocationName.vulture_culture_bunch_1:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.vulture_culture_bunch_2:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.vulture_culture_bunch_3:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.vulture_culture_bunch_4:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.vulture_culture_bunch_5:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.vulture_culture_bunch_6:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
 
             LocationName.tree_top_town_clear:
-                lambda state: self.has_kannons(state) and self.has_tires(state),
+                HasKannons & HasTires,
             EventName.tree_top_town_clear:
-                lambda state: self.has_kannons(state) and self.has_tires(state),
+                HasKannons & HasTires,
             LocationName.tree_top_town_bonus_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.tree_top_town_bonus_2:
-                self.has_kannons,
+                HasKannons,
             LocationName.tree_top_town_kong:
-                self.has_kannons,
+                HasKannons,
             LocationName.tree_top_town_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.tree_top_town_bunch_2:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.tree_top_town_bunch_3:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.tree_top_town_bunch_4:
-                lambda state: self.has_kannons(state) and self.can_slap(state) and self.has_tires(state),
+                HasKannons & CanSlap & HasTires,
             LocationName.tree_top_town_token_1:
-                lambda state: self.has_kannons(state) and self.can_roll(state) and self.has_tires(state),
+                HasKannons & CanRoll & HasTires,
 
             LocationName.forest_frenzy_clear:
-                self.can_climb,
+                CanClimb,
             EventName.forest_frenzy_clear:
-                self.can_climb,
+                CanClimb,
             LocationName.forest_frenzy_bonus_1:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.forest_frenzy_bonus_2:
-                lambda state: self.can_climb(state) and self.can_carry(state),
+                CanClimb & CanCarry,
             LocationName.forest_frenzy_kong:
-                lambda state: self.can_climb(state) and self.can_roll(state),
+                CanClimb & CanRoll,
             LocationName.forest_frenzy_bunch_1:
-                lambda state: self.can_climb(state) and self.can_slap(state),
+                CanClimb & CanSlap,
             LocationName.forest_frenzy_bunch_2:
-                lambda state: self.can_climb(state) and self.can_slap(state),
+                CanClimb & CanSlap,
             LocationName.forest_frenzy_bunch_3:
-                lambda state: self.can_climb(state) and self.can_slap(state),
+                CanClimb & CanSlap,
             LocationName.forest_frenzy_bunch_4:
-                lambda state: self.can_climb(state) and self.can_slap(state),
+                CanClimb & CanSlap,
             LocationName.forest_frenzy_bunch_5:
-                lambda state: self.can_climb(state) and self.can_slap(state),
+                CanClimb & CanSlap,
             LocationName.forest_frenzy_balloon_1:
-                self.can_climb,
+                CanClimb,
 
             LocationName.temple_tempest_clear:
-                lambda state: self.can_climb(state) and self.has_tires(state),
+                CanClimb & HasTires,
             EventName.temple_tempest_clear:
-                lambda state: self.can_climb(state) and self.has_tires(state),
+                CanClimb & HasTires,
             LocationName.temple_tempest_bonus_1:
-                lambda state: self.can_climb(state) and self.can_carry(state),
+                CanClimb & CanCarry,
             LocationName.temple_tempest_bonus_2:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.temple_tempest_kong:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.has_kannons(state),
+                CanClimb & HasTires & HasKannons,
             LocationName.temple_tempest_token_1:
-                self.has_diddy,
+                HasDiddy,
             LocationName.temple_tempest_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.temple_tempest_bunch_2:
-                lambda state: self.can_climb(state) and self.can_slap(state),
+                CanClimb & CanSlap,
             LocationName.temple_tempest_bunch_3:
-                lambda state: self.can_climb(state) and self.can_slap(state),
+                CanClimb & CanSlap,
             LocationName.temple_tempest_bunch_4:
-                lambda state: self.can_climb(state) and self.can_slap(state),
+                CanClimb & CanSlap,
             LocationName.temple_tempest_bunch_5:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.can_slap(state),
+                CanClimb & HasTires & CanSlap,
             LocationName.temple_tempest_bunch_6:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.can_slap(state),
+                CanClimb & HasTires & CanSlap,
             LocationName.temple_tempest_bunch_7:
-                lambda state: self.can_climb(state) and self.has_tires(state),
+                CanClimb & HasTires,
             LocationName.temple_tempest_bunch_8:
-                lambda state: self.can_climb(state) and self.has_tires(state),
+                CanClimb & HasTires,
 
             LocationName.orang_utan_gang_clear:
-                self.true,
+                True_(),
             EventName.orang_utan_gang_clear:
-                self.true,
+                True_(),
             LocationName.orang_utan_gang_bonus_1:
-                self.has_expresso,
+                HasExpresso,
             LocationName.orang_utan_gang_bonus_2:
-                lambda state: self.can_carry(state) and self.has_expresso(state),
+                CanCarry & HasExpresso,
             LocationName.orang_utan_gang_bonus_3:
-                self.can_carry,
+                CanCarry,
             LocationName.orang_utan_gang_bonus_4:
-                self.can_carry,
+                CanCarry,
             LocationName.orang_utan_gang_bonus_5:
-                self.can_carry,
+                CanCarry,
             LocationName.orang_utan_gang_kong:
-                lambda state: self.can_carry(state) and self.can_roll(state) and self.has_tires(state),
+                CanCarry & CanRoll & HasTires,
             LocationName.orang_utan_gang_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.orang_utan_gang_bunch_2:
-                self.can_slap,
+                CanSlap,
             LocationName.orang_utan_gang_bunch_3:
-                self.can_slap,
+                CanSlap,
             LocationName.orang_utan_gang_bunch_4:
-                self.can_roll,
+                CanRoll,
             LocationName.orang_utan_gang_bunch_5:
-                self.can_slap,
+                CanSlap,
             LocationName.orang_utan_gang_bunch_6:
-                self.has_expresso,
+                HasExpresso,
             LocationName.orang_utan_gang_token_1:
-                lambda state: self.has_tires(state) and self.has_expresso(state),
+                HasTires & HasExpresso,
             LocationName.orang_utan_gang_bunch_7:
-                self.can_slap,
+                CanSlap,
             LocationName.orang_utan_gang_bunch_8:
-                self.has_expresso,
+                HasExpresso,
             LocationName.orang_utan_gang_bunch_9:
-                self.has_expresso,
+                HasExpresso,
 
             LocationName.clam_city_clear:
-                lambda state: self.can_swim(state) and self.has_enguarde(state),
+                CanSwim & HasEnguarde,
             EventName.clam_city_clear:
-                lambda state: self.can_swim(state) and self.has_enguarde(state),
+                CanSwim & HasEnguarde,
             LocationName.clam_city_kong:
-                lambda state: self.can_swim(state) and self.has_enguarde(state),
+                CanSwim & HasEnguarde,
             LocationName.clam_city_bunch_1:
-                self.can_swim,
+                CanSwim,
             LocationName.clam_city_bunch_2:
-                lambda state: self.can_swim(state) and self.has_enguarde(state),
+                CanSwim & HasEnguarde,
             LocationName.clam_city_token_1:
-                lambda state: self.can_swim(state) and self.has_enguarde(state),
+                CanSwim & HasEnguarde,
 
             LocationName.bumble_b_rumble_clear:
-                lambda state: self.has_both_kongs(state) and self.can_carry(state),
+                HasBothKongs & CanCarry,
             LocationName.defeated_bumble_b:
-                lambda state: self.has_both_kongs(state) and self.can_carry(state),
+                HasBothKongs & CanCarry,
 
             LocationName.snow_barrel_blast_clear:
-                self.has_kannons,
+                HasKannons,
             EventName.snow_barrel_blast_clear:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bonus_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bonus_2:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bonus_3:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_kong:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.snow_barrel_blast_balloon_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bunch_2:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.snow_barrel_blast_bunch_3:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.snow_barrel_blast_token_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_balloon_2:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bunch_4:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bunch_5:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
 
             LocationName.slipslide_ride_clear:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             EventName.slipslide_ride_clear:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_bonus_1:
-                lambda state: self.can_climb(state) and self.can_carry(state),
+                CanClimb & CanCarry,
             LocationName.slipslide_ride_bonus_2:
-                lambda state: self.can_climb(state) and self.can_carry(state),
+                CanClimb & CanCarry,
             LocationName.slipslide_ride_bonus_3:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_kong:
-                lambda state: self.can_climb(state) and self.has_kannons(state) and self.can_carry(state),
+                CanClimb & HasKannons & CanCarry,
             LocationName.slipslide_ride_bunch_1:
-                self.can_climb,
+                CanClimb,
             LocationName.slipslide_ride_bunch_2:
-                lambda state: self.can_climb(state) and self.can_slap(state),
+                CanClimb & CanSlap,
             LocationName.slipslide_ride_bunch_3:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_bunch_4:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_bunch_5:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_bunch_6:
-                lambda state: self.can_climb(state) and self.has_kannons(state) and self.can_carry(state),
+                CanClimb & HasKannons & CanCarry,
             LocationName.slipslide_ride_bunch_7:
-                lambda state: self.can_climb(state) and self.has_kannons(state) and self.can_carry(state),
+                CanClimb & HasKannons & CanCarry,
             LocationName.slipslide_ride_bunch_8:
-                lambda state: self.can_climb(state) and self.has_kannons(state) and self.can_slap(state),
+                CanClimb & HasKannons & CanSlap,
             LocationName.slipslide_ride_bunch_9:
-                lambda state: self.can_climb(state) and self.has_kannons(state) and self.can_slap(state),
+                CanClimb & HasKannons & CanSlap,
             LocationName.slipslide_ride_token_1:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
 
             LocationName.ice_age_alley_clear:
-                lambda state: (self.can_climb(state) and self.has_kannons(state)) or self.has_expresso(state),
+                (CanClimb & HasKannons) | HasExpresso,
             EventName.ice_age_alley_clear:
-                lambda state: (self.can_climb(state) and self.has_kannons(state)) or self.has_expresso(state),
+                (CanClimb & HasKannons) | HasExpresso,
             LocationName.ice_age_alley_bonus_1:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.ice_age_alley_bonus_2:
-                lambda state: self.has_expresso(state) and self.has_kannons(state),
+                HasExpresso & HasKannons,
             LocationName.ice_age_alley_kong:
-                lambda state: self.can_roll(state) and self.has_expresso(state),
+                CanRoll & HasExpresso,
             LocationName.ice_age_alley_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.ice_age_alley_bunch_2:
-                lambda state: ((self.can_climb(state) and self.has_kannons(state)) or self.has_expresso(state)) and self.can_slap(state),
+                ((CanClimb & HasKannons) | HasExpresso) & CanSlap,
             LocationName.ice_age_alley_bunch_3:
-                lambda state: ((self.can_climb(state) and self.has_kannons(state)) or self.has_expresso(state)) and self.can_roll(state),
+                ((CanClimb & HasKannons) | HasExpresso) & CanRoll,
 
             LocationName.croctopus_chase_clear:
-                self.can_swim,
+                CanSwim,
             EventName.croctopus_chase_clear:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_kong:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_bunch_1:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_token_1:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_token_2:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_bunch_2:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_bunch_3:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_bunch_4:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_bunch_5:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_balloon_1:
-                self.can_swim,
+                CanSwim,
 
             LocationName.torchlight_trouble_clear:
-                lambda state: self.has_donkey(state) and self.has_squawks(state),
+                HasDonkey & HasSquawks,
             EventName.torchlight_trouble_clear:
-                lambda state: self.has_donkey(state) and self.has_squawks(state),
+                HasDonkey & HasSquawks,
             LocationName.torchlight_trouble_bonus_1:
-                lambda state: self.has_donkey(state) and self.has_squawks(state) and self.can_carry(state),
+                HasDonkey & HasSquawks & CanCarry,
             LocationName.torchlight_trouble_bonus_2:
-                lambda state: self.has_donkey(state) and self.has_squawks(state) and self.can_carry(state),
+                HasDonkey & HasSquawks & CanCarry,
             LocationName.torchlight_trouble_kong:
-                lambda state: self.has_donkey(state) and self.has_squawks(state) and self.can_carry(state) and self.can_roll(state) and self.has_tires(state),
+                HasDonkey & HasSquawks & CanCarry & CanRoll & HasTires,
             LocationName.torchlight_trouble_bunch_1:
-                lambda state: self.has_donkey(state) and self.has_squawks(state) and self.can_slap(state),
+                HasDonkey & HasSquawks & CanSlap,
 
             LocationName.rope_bridge_rumble_clear:
-                self.has_tires,
+                HasTires,
             EventName.rope_bridge_rumble_clear:
-                self.has_tires,
+                HasTires,
             LocationName.rope_bridge_rumble_bonus_1:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             LocationName.rope_bridge_rumble_bonus_2:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             LocationName.rope_bridge_rumble_kong:
-                lambda state: self.has_tires(state) and self.can_roll(state),
+                HasTires & CanRoll,
             LocationName.rope_bridge_rumble_bunch_1:
-                lambda state: self.has_tires(state) and self.can_roll(state),
+                HasTires & CanRoll,
 
             LocationName.really_gnawty_rampage_clear:
-                self.has_both_kongs,
+                HasBothKongs,
             LocationName.defeated_gnawty_2:
-                self.has_both_kongs,
+                HasBothKongs,
 
             LocationName.oil_drum_alley_clear:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             EventName.oil_drum_alley_clear:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             LocationName.oil_drum_alley_bonus_1:
-                lambda state: self.can_climb(state) and self.can_carry(state) and self.has_kannons(state),
+                CanClimb & CanCarry & HasKannons,
             LocationName.oil_drum_alley_bonus_2:
-                lambda state: self.has_tires(state) and self.can_carry(state),
+                HasTires & CanCarry,
             LocationName.oil_drum_alley_bonus_3:
-                lambda state: self.has_tires(state) and self.can_carry(state),
+                HasTires & CanCarry,
             LocationName.oil_drum_alley_bonus_4:
-                lambda state: self.has_tires(state) and (self.can_carry(state) or self.has_rambi(state)) and self.has_kannons(state),
+                HasTires & (CanCarry | HasRambi) & HasKannons,
             LocationName.oil_drum_alley_kong:
-                lambda state: self.has_tires(state) and self.can_roll(state) and self.has_kannons(state) and (self.can_carry(state) and self.has_rambi(state)),
+                HasTires & CanRoll & HasKannons & (CanCarry & HasRambi),
             LocationName.oil_drum_alley_bunch_1:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             LocationName.oil_drum_alley_bunch_2:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
 
             LocationName.trick_track_trek_clear:
-                lambda state: self.has_platforms(state) and (self.has_donkey(state) or (self.has_diddy(state) and self.can_roll(state))),
+                HasPlatforms & (HasDonkey | (HasDiddy & CanRoll)),
             EventName.trick_track_trek_clear:
-                lambda state: self.has_platforms(state) and (self.has_donkey(state) or (self.has_diddy(state) and self.can_roll(state))),
+                HasPlatforms & (HasDonkey | (HasDiddy & CanRoll)),
             LocationName.trick_track_trek_bonus_1:
-                lambda state: self.has_platforms(state) and self.has_kannons(state) and self.can_roll(state),
+                HasPlatforms & HasKannons & CanRoll,
             LocationName.trick_track_trek_bonus_2:
-                lambda state: self.has_platforms(state) and self.has_kannons(state),
+                HasPlatforms & HasKannons,
             LocationName.trick_track_trek_bonus_3:
-                lambda state: self.has_platforms(state) and self.has_kannons(state) and (self.has_donkey(state) or (self.has_diddy(state) and self.can_roll(state))),
+                HasPlatforms & HasKannons & (HasDonkey | (HasDiddy & CanRoll)),
             LocationName.trick_track_trek_kong:
-                lambda state: self.has_platforms(state) and (self.has_donkey(state) or (self.has_diddy(state) and self.can_roll(state))),
+                HasPlatforms & (HasDonkey | (HasDiddy & CanRoll)),
             LocationName.trick_track_trek_bunch_1:
-                self.has_platforms,
+                HasPlatforms,
             LocationName.trick_track_trek_token_1:
-                lambda state: self.has_platforms(state) and (self.has_donkey(state) or (self.has_diddy(state) and self.can_roll(state))),
+                HasPlatforms & (HasDonkey | (HasDiddy & CanRoll)),
 
             LocationName.elevator_antics_clear:
-                lambda state: self.can_climb(state) and self.has_tires(state),
+                CanClimb & HasTires,
             EventName.elevator_antics_clear:
-                lambda state: self.can_climb(state) and self.has_tires(state),
+                CanClimb & HasTires,
             LocationName.elevator_antics_bonus_1:
-                lambda state: self.can_climb(state) and self.can_roll(state),
+                CanClimb & CanRoll,
             LocationName.elevator_antics_bonus_2:
-                self.can_climb,
+                CanClimb,
             LocationName.elevator_antics_bonus_3:
-                lambda state: self.can_climb(state) and self.has_tires(state),
+                CanClimb & HasTires,
             LocationName.elevator_antics_kong:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.elevator_antics_bunch_1:
-                self.true,
+                True_(),
             LocationName.elevator_antics_bunch_2:
-                self.can_climb,
+                CanClimb,
             LocationName.elevator_antics_bunch_3:
-                self.can_climb,
+                CanClimb,
 
             LocationName.poison_pond_clear:
-                lambda state: self.can_swim(state) and self.has_enguarde(state),
+                CanSwim & HasEnguarde,
             EventName.poison_pond_clear:
-                lambda state: self.can_swim(state) and self.has_enguarde(state),
+                CanSwim & HasEnguarde,
             LocationName.poison_pond_kong:
-                lambda state: self.can_swim(state) and self.has_enguarde(state),
+                CanSwim & HasEnguarde,
             LocationName.poison_pond_bunch_1:
-                lambda state: self.can_swim(state) and self.has_enguarde(state),
+                CanSwim & HasEnguarde,
             LocationName.poison_pond_bunch_2:
-                lambda state: self.can_swim(state) and self.has_enguarde(state),
+                CanSwim & HasEnguarde,
             LocationName.poison_pond_bunch_3:
-                lambda state: self.can_swim(state) and self.has_enguarde(state),
+                CanSwim & HasEnguarde,
             LocationName.poison_pond_bunch_4:
-                lambda state: self.can_swim(state) and self.has_enguarde(state),
+                CanSwim & HasEnguarde,
             LocationName.poison_pond_bunch_5:
-                lambda state: self.can_swim(state) and self.has_enguarde(state),
+                CanSwim & HasEnguarde,
             LocationName.poison_pond_token_1:
-                lambda state: self.can_swim(state) and self.has_enguarde(state),
+                CanSwim & HasEnguarde,
             LocationName.poison_pond_token_2:
-                lambda state: self.can_swim(state) and self.has_enguarde(state),
+                CanSwim & HasEnguarde,
             LocationName.poison_pond_bunch_6:
-                lambda state: self.can_swim(state) and self.has_enguarde(state),
+                CanSwim & HasEnguarde,
 
             LocationName.mine_cart_madness_clear:
-                self.has_minecart,
+                HasMinecart,
             EventName.mine_cart_madness_clear:
-                self.has_minecart,
+                HasMinecart,
             LocationName.mine_cart_madness_bonus_1:
-                lambda state: self.has_minecart(state) and self.can_climb(state) and self.has_kannons(state),
+                HasMinecart & CanClimb & HasKannons,
             LocationName.mine_cart_madness_bonus_2:
-                lambda state: self.has_minecart(state) and self.has_tires(state) and self.has_kannons(state),
+                HasMinecart & HasTires & HasKannons,
             LocationName.mine_cart_madness_bonus_3:
-                lambda state: self.has_minecart(state) and self.has_tires(state) and self.has_kannons(state),
+                HasMinecart & HasTires & HasKannons,
             LocationName.mine_cart_madness_kong:
-                lambda state: self.has_minecart(state) and self.has_tires(state),
+                HasMinecart & HasTires,
             LocationName.mine_cart_madness_token_1:
-                self.has_minecart,
+                HasMinecart,
             LocationName.mine_cart_madness_bunch_1:
-                self.has_minecart,
+                HasMinecart,
 
             LocationName.blackout_basement_clear:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state),
+                CanClimb & HasTires & HasPlatforms,
             EventName.blackout_basement_clear:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state),
+                CanClimb & HasTires & HasPlatforms,
             LocationName.blackout_basement_bonus_1:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state) and self.has_kannons(state),
+                CanClimb & HasTires & HasPlatforms & HasKannons,
             LocationName.blackout_basement_bonus_2:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state) and self.can_carry(state) and self.has_kannons(state),
+                CanClimb & HasTires & HasPlatforms & CanCarry & HasKannons,
             LocationName.blackout_basement_kong:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state) and self.has_kannons(state),
+                CanClimb & HasTires & HasPlatforms & HasKannons,
             LocationName.blackout_basement_token_1:
-                self.can_roll,
+                CanRoll,
             LocationName.blackout_basement_bunch_1:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state),
+                CanClimb & HasTires & HasPlatforms,
 
             LocationName.boss_dumb_drum_clear:
-                self.has_both_kongs,
+                HasBothKongs,
             LocationName.defeated_boss_dumb_drum:
-                self.has_both_kongs,
+                HasBothKongs,
 
             LocationName.tanked_up_trouble_clear:
-                lambda state: self.has_platforms(state) and self.has_tires(state) and self.has_kannons(state),
+                HasPlatforms & HasTires & HasKannons,
             EventName.tanked_up_trouble_clear:
-                lambda state: self.has_platforms(state) and self.has_tires(state) and self.has_kannons(state),
+                HasPlatforms & HasTires & HasKannons,
             LocationName.tanked_up_trouble_bonus_1:
-                lambda state: self.has_platforms(state) and self.has_kannons(state),
+                HasPlatforms & HasKannons,
             LocationName.tanked_up_trouble_kong:
-                lambda state: self.has_platforms(state) and self.has_tires(state) and self.has_kannons(state),
+                HasPlatforms & HasTires & HasKannons,
             LocationName.tanked_up_trouble_bunch_1:
-                self.has_platforms,
+                HasPlatforms,
             LocationName.tanked_up_trouble_bunch_2:
-                self.has_platforms,
+                HasPlatforms,
             LocationName.tanked_up_trouble_token_1:
-                lambda state: self.has_platforms(state) and self.has_kannons(state),
+                HasPlatforms & HasKannons,
             LocationName.tanked_up_trouble_bunch_3:
-                lambda state: self.has_platforms(state) and self.has_tires(state) and self.has_kannons(state),
+                HasPlatforms & HasTires & HasKannons,
             LocationName.tanked_up_trouble_bunch_4:
-                lambda state: self.has_platforms(state) and self.has_tires(state) and self.has_kannons(state),
+                HasPlatforms & HasTires & HasKannons,
 
             LocationName.manic_mincers_clear:
-                self.has_tires,
+                HasTires,
             EventName.manic_mincers_clear:
-                self.has_tires,
+                HasTires,
             LocationName.manic_mincers_bonus_1:
-                lambda state: self.can_carry(state) or self.has_rambi(state),
+                CanCarry | HasRambi,
             LocationName.manic_mincers_bonus_2:
-                lambda state: self.can_carry(state) or self.has_rambi(state),
+                CanCarry | HasRambi,
             LocationName.manic_mincers_kong:
-                self.true,
+                True_(),
             LocationName.manic_mincers_bunch_1:
-                self.true,
+                True_(),
             LocationName.manic_mincers_bunch_2:
-                self.true,
+                True_(),
             LocationName.manic_mincers_token_1:
-                self.can_roll,
+                CanRoll,
 
             LocationName.misty_mine_clear:
-                self.can_climb,
+                CanClimb,
             EventName.misty_mine_clear:
-                self.can_climb,
+                CanClimb,
             LocationName.misty_mine_bonus_1:
-                self.can_climb,
+                CanClimb,
             LocationName.misty_mine_bonus_2:
-                lambda state: self.can_climb(state) and self.can_carry(state),
+                CanClimb & CanCarry,
             LocationName.misty_mine_kong:
-                self.can_climb,
+                CanClimb,
             LocationName.misty_mine_token_1:
-                lambda state: self.can_climb(state) and self.can_carry(state),
+                CanClimb & CanCarry,
             LocationName.misty_mine_bunch_1:
-                self.can_carry,
+                CanCarry,
             LocationName.misty_mine_bunch_2:
-                self.can_climb,
+                CanClimb,
             LocationName.misty_mine_token_2:
-                lambda state: self.can_climb(state) and self.has_expresso(state),
+                CanClimb & HasExpresso,
 
             LocationName.loopy_lights_clear:
-                lambda state: self.has_switches(state) and self.has_tires(state),
+                HasSwitches & HasTires,
             EventName.loopy_lights_clear:
-                lambda state: self.has_switches(state) and self.has_tires(state),
+                HasSwitches & HasTires,
             LocationName.loopy_lights_bonus_1:
-                lambda state: self.has_switches(state) and self.has_kannons(state),
+                HasSwitches & HasKannons,
             LocationName.loopy_lights_bonus_2:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.can_carry(state),
+                HasSwitches & HasTires & CanCarry,
             LocationName.loopy_lights_kong:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.has_kannons(state) and self.can_roll(state) and self.can_carry(state),
+                HasSwitches & HasTires & HasKannons & CanRoll & CanCarry,
             LocationName.loopy_lights_bunch_1:
-                lambda state: self.has_switches(state) and self.has_tires(state),
+                HasSwitches & HasTires,
             LocationName.loopy_lights_bunch_2:
-                lambda state: self.has_switches(state) and self.has_tires(state),
+                HasSwitches & HasTires,
 
             LocationName.platform_perils_clear:
-                lambda state: self.has_platforms(state) and self.can_carry(state) and (self.has_donkey(state) or self.can_roll(state)) and self.has_tires(state),
+                HasPlatforms & CanCarry & (HasDonkey | CanRoll) & HasTires,
             EventName.platform_perils_clear:
-                lambda state: self.has_platforms(state) and self.can_carry(state) and (self.has_donkey(state) or self.can_roll(state)) and self.has_tires(state),
+                HasPlatforms & CanCarry & (HasDonkey | CanRoll) & HasTires,
             LocationName.platform_perils_bonus_1:
-                lambda state: self.has_platforms(state) and self.can_carry(state) and self.has_kannons(state),
+                HasPlatforms & CanCarry & HasKannons,
             LocationName.platform_perils_bonus_2:
-                lambda state: self.has_platforms(state) and self.can_carry(state) and (self.has_donkey(state) or self.can_roll(state)) and self.has_tires(state) and self.has_kannons(state),
+                HasPlatforms & CanCarry & (HasDonkey | CanRoll) & HasTires & HasKannons,
             LocationName.platform_perils_kong:
-                lambda state: self.has_platforms(state) and self.can_carry(state) and (self.has_donkey(state) or self.can_roll(state)) and self.has_tires(state),
+                HasPlatforms & CanCarry & (HasDonkey | CanRoll) & HasTires,
             LocationName.platform_perils_token_1:
-                lambda state: self.has_platforms(state) and self.can_carry(state) and (self.has_donkey(state) or self.can_roll(state)),
+                HasPlatforms & CanCarry & (HasDonkey | CanRoll),
             LocationName.platform_perils_bunch_1:
-                lambda state: self.has_platforms(state) and self.can_carry(state) and self.has_tires(state),
+                HasPlatforms & CanCarry & HasTires,
 
             LocationName.necky_revenge_clear:
-                lambda state: self.has_both_kongs(state) and self.has_tires(state),
+                HasBothKongs & HasTires,
             LocationName.defeated_necky_2:
-                lambda state: self.has_both_kongs(state) and self.has_tires(state),
+                HasBothKongs & HasTires,
         }
 
 class DKCLooseRules(DKCRules):
@@ -1073,853 +991,853 @@ class DKCLooseRules(DKCRules):
 
         self.location_rules = {
             LocationName.jungle_hijinxs_clear:
-                self.true,
+                True_(),
             EventName.jungle_hijinxs_clear:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_bonus_1:
-                lambda state: self.has_rambi(state) or self.can_carry(state),
+                HasRambi | CanCarry,
             LocationName.jungle_hijinxs_bonus_2:
-                lambda state: self.has_rambi(state) or self.can_carry(state),
+                HasRambi | CanCarry,
             LocationName.jungle_hijinxs_kong:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_balloon_1:
-                self.has_tires,
+                HasTires,
             LocationName.jungle_hijinxs_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_2:
-                lambda state: self.has_rambi(state) or self.can_slap(state),
+                HasRambi | CanSlap,
             LocationName.jungle_hijinxs_bunch_3:
-                lambda state: self.has_rambi(state) or self.can_slap(state),
+                HasRambi | CanSlap,
             LocationName.jungle_hijinxs_bunch_4:
-                lambda state: self.has_rambi(state) or self.can_roll(state),
+                HasRambi | CanRoll,
             LocationName.jungle_hijinxs_bunch_5:
-                lambda state: self.has_rambi(state) or self.can_slap(state),
+                HasRambi | CanSlap,
             LocationName.jungle_hijinxs_bunch_6:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_balloon_2:
-                self.can_roll,
+                CanRoll,
             LocationName.jungle_hijinxs_bunch_7:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_8:
-                lambda state: self.has_rambi(state) or self.can_slap(state),
+                HasRambi | CanSlap,
             LocationName.jungle_hijinxs_bunch_9:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_10:
-                lambda state: self.has_rambi(state) or self.can_slap(state),
+                HasRambi | CanSlap,
             LocationName.jungle_hijinxs_bunch_11:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_12:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_balloon_3:
-                lambda state: self.can_roll(state) and self.has_diddy(state),
+                CanRoll & HasDiddy,
             LocationName.jungle_hijinxs_bunch_13:
-                lambda state: self.can_roll(state) and self.can_slap(state),
+                CanRoll & CanSlap,
             LocationName.jungle_hijinxs_balloon_4:
-                lambda state: self.can_roll(state) and self.has_diddy(state),
+                CanRoll & HasDiddy,
             LocationName.jungle_hijinxs_token_1:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_bunch_14:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_15:
-                lambda state: self.has_rambi(state) or self.can_slap(state),
+                HasRambi | CanSlap,
             LocationName.jungle_hijinxs_bunch_16:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_bunch_17:
-                lambda state: self.has_rambi(state) or self.can_slap(state),
+                HasRambi | CanSlap,
             LocationName.jungle_hijinxs_bunch_18:
-                lambda state: self.has_rambi(state) or self.can_slap(state),
+                HasRambi | CanSlap,
             LocationName.jungle_hijinxs_bunch_19:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_balloon_5:
-                lambda state: self.has_rambi(state) and self.has_tires(state),
+                HasRambi & HasTires,
             LocationName.jungle_hijinxs_balloon_6:
-                lambda state: self.has_rambi(state) and self.has_tires(state),
+                HasRambi & HasTires,
 
             LocationName.ropey_rampage_clear:
-                self.can_climb,
+                CanClimb,
             EventName.ropey_rampage_clear:
-                self.can_climb,
+                CanClimb,
             LocationName.ropey_rampage_bonus_1:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.ropey_rampage_bonus_2:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.ropey_rampage_kong:
-                lambda state: self.can_climb(state),
+                CanClimb,
             LocationName.ropey_rampage_bunch_1:
-                self.true,
+                True_(),
             LocationName.ropey_rampage_bunch_2:
-                self.true,
+                True_(),
             LocationName.ropey_rampage_bunch_3:
-                self.true,
+                True_(),
             LocationName.ropey_rampage_bunch_4:
-                self.can_slap,
+                CanSlap,
             LocationName.ropey_rampage_bunch_5:
-                self.can_slap,
+                CanSlap,
             LocationName.ropey_rampage_bunch_6:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_7:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_8:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_9:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_token_1:
-                self.can_climb,
+                CanClimb,
             LocationName.ropey_rampage_bunch_10:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_11:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_12:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_13:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_14:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_15:
-                lambda state: self.can_slap(state) and self.can_climb(state) and (self.can_roll(state) or self.has_diddy(state)),
+                CanSlap & CanClimb & (CanRoll | HasDiddy),
             LocationName.ropey_rampage_token_2:
-                lambda state: self.has_tires(state) and self.can_climb(state),
+                HasTires & CanClimb,
             LocationName.ropey_rampage_bunch_16:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_17:
-                lambda state: self.can_climb(state) and self.can_roll(state),
+                CanClimb & CanRoll,
             LocationName.ropey_rampage_bunch_18:
-                lambda state: self.can_climb(state) and self.can_roll(state),
+                CanClimb & CanRoll,
             LocationName.ropey_rampage_bunch_19:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
 
             LocationName.reptile_rumble_clear:
-                lambda state: self.has_tires(state) or self.has_diddy(state),
+                HasTires | HasDiddy,
             EventName.reptile_rumble_clear:
-                lambda state: self.has_tires(state) or self.has_diddy(state),
+                HasTires | HasDiddy,
             LocationName.reptile_rumble_bonus_1:
-                self.can_carry,
+                CanCarry,
             LocationName.reptile_rumble_bonus_2:
-                lambda state: self.has_kannons(state) and (self.has_tires(state) or self.has_diddy(state)),
+                HasKannons & (HasTires | HasDiddy),
             LocationName.reptile_rumble_bonus_3:
-                lambda state: self.can_carry(state) and self.has_tires(state),
+                CanCarry & HasTires,
             LocationName.reptile_rumble_kong:
-                lambda state: self.has_tires(state) or self.has_diddy(state),
+                HasTires | HasDiddy,
             LocationName.reptile_rumble_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.reptile_rumble_bunch_2:
-                self.can_slap,
+                CanSlap,
             LocationName.reptile_rumble_bunch_3:
-                self.can_slap,
+                CanSlap,
             LocationName.reptile_rumble_bunch_4:
-                lambda state: (self.has_tires(state) or self.has_diddy(state)) and self.can_slap(state),
+                (HasTires | HasDiddy) & CanSlap,
             LocationName.reptile_rumble_bunch_5:
-                lambda state: (self.has_tires(state) or self.has_diddy(state)) and self.can_slap(state),
+                (HasTires | HasDiddy) & CanSlap,
             LocationName.reptile_rumble_bunch_6:
-                self.has_tires,
+                HasTires,
             LocationName.reptile_rumble_bunch_7:
-                self.has_tires,
+                HasTires,
             LocationName.reptile_rumble_bunch_8:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.reptile_rumble_bunch_9:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.reptile_rumble_bunch_10:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.reptile_rumble_token_1:
-                self.has_tires,
+                HasTires,
             LocationName.reptile_rumble_bunch_11:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.reptile_rumble_bunch_12:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.reptile_rumble_bunch_13:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.reptile_rumble_bunch_14:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
 
             LocationName.coral_capers_clear:
-                self.can_swim,
+                CanSwim,
             EventName.coral_capers_clear:
-                self.can_swim,
+                CanSwim,
             LocationName.coral_capers_kong:
-                self.can_swim,
+                CanSwim,
             LocationName.coral_capers_bunch_1:
-                self.can_swim,
+                CanSwim,
             LocationName.coral_capers_balloon_1:
-                self.can_swim,
+                CanSwim,
             LocationName.coral_capers_bunch_2:
-                self.can_swim,
+                CanSwim,
             LocationName.coral_capers_token_1:
-                self.can_swim,
+                CanSwim,
 
             LocationName.barrel_cannon_canyon_clear:
-                self.has_kannons,
+                HasKannons,
             EventName.barrel_cannon_canyon_clear:
-                self.has_kannons,
+                HasKannons,
             LocationName.barrel_cannon_canyon_bonus_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.barrel_cannon_canyon_bonus_2:
-                lambda state: self.can_carry(state) and self.has_kannons(state),
+                CanCarry & HasKannons,
             LocationName.barrel_cannon_canyon_kong:
-                self.has_kannons,
+                HasKannons,
             LocationName.barrel_cannon_canyon_token_1:
-                lambda state: self.can_roll(state) and (self.has_diddy(state) or (self.has_kannons(state) and self.has_donkey(state))),
+                CanRoll & (HasDiddy | (HasKannons & HasDonkey)),
             LocationName.barrel_cannon_canyon_bunch_1:
-                lambda state: self.can_slap(state) and (self.has_kannons(state) or self.has_diddy(state)),
+                CanSlap & (HasKannons | HasDiddy),
             LocationName.barrel_cannon_canyon_bunch_2:
-                lambda state: self.can_slap(state) and (self.has_kannons(state) or (self.has_diddy(state) and self.can_roll(state))),
+                CanSlap & (HasKannons | (HasDiddy & CanRoll)),
             LocationName.barrel_cannon_canyon_bunch_3:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_4:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_token_2:
-                self.has_kannons,
+                HasKannons,
             LocationName.barrel_cannon_canyon_bunch_5:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_6:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_7:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_8:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_9:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_10:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_11:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_12:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
 
             LocationName.very_gnawty_lair_clear:
-                self.true,
+                True_(),
             LocationName.defeated_gnawty_1:
-                self.true,
+                True_(),
 
             LocationName.winky_walkway_clear:
-                self.true,
+                True_(),
             EventName.winky_walkway_clear:
-                self.true,
+                True_(),
             LocationName.winky_walkway_bonus_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.winky_walkway_kong:
-                self.has_kannons,
+                HasKannons,
             LocationName.winky_walkway_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.winky_walkway_bunch_2:
-                self.can_slap,
+                CanSlap,
             LocationName.winky_walkway_bunch_3:
-                self.can_slap,
+                CanSlap,
             LocationName.winky_walkway_bunch_4:
-                self.can_slap,
+                CanSlap,
             LocationName.winky_walkway_token_1:
-                self.has_winky,
+                HasWinky,
             LocationName.winky_walkway_bunch_5:
-                self.can_slap,
+                CanSlap,
 
             LocationName.mine_cart_carnage_clear:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
             EventName.mine_cart_carnage_clear:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
             LocationName.mine_cart_carnage_kong:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
             LocationName.mine_cart_carnage_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.mine_cart_carnage_bunch_2:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
             LocationName.mine_cart_carnage_token_1:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
             LocationName.mine_cart_carnage_bunch_3:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
             LocationName.mine_cart_carnage_balloon_1:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
 
             LocationName.bouncy_bonanza_clear:
-                self.has_tires,
+                HasTires,
             EventName.bouncy_bonanza_clear:
-                self.has_tires,
+                HasTires,
             LocationName.bouncy_bonanza_bonus_1:
-                self.can_carry,
+                CanCarry,
             LocationName.bouncy_bonanza_bonus_2:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             LocationName.bouncy_bonanza_kong:
-                self.has_tires,
+                HasTires,
             LocationName.bouncy_bonanza_token_1:
-                self.has_tires,
+                HasTires,
             LocationName.bouncy_bonanza_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.bouncy_bonanza_bunch_2:
-                self.can_slap,
+                CanSlap,
             LocationName.bouncy_bonanza_bunch_3:
-                self.can_slap,
+                CanSlap,
             LocationName.bouncy_bonanza_bunch_4:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.bouncy_bonanza_bunch_5:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.bouncy_bonanza_bunch_6:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.bouncy_bonanza_bunch_7:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.bouncy_bonanza_bunch_8:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.bouncy_bonanza_bunch_9:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.bouncy_bonanza_bunch_10:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
 
             LocationName.stop_go_station_clear:
-                lambda state: self.has_switches(state) and self.has_tires(state),
+                HasSwitches & HasTires,
             EventName.stop_go_station_clear:
-                lambda state: self.has_switches(state) and self.has_tires(state),
+                HasSwitches & HasTires,
             LocationName.stop_go_station_bonus_1:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.can_carry(state),
+                HasSwitches & HasTires & CanCarry,
             LocationName.stop_go_station_bonus_2:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.has_kannons(state),
+                HasSwitches & HasTires & HasKannons,
             LocationName.stop_go_station_kong:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.can_roll(state),
+                HasSwitches & HasTires & CanRoll,
             LocationName.stop_go_station_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.stop_go_station_bunch_2:
-                lambda state: self.has_switches(state) and self.can_slap(state),
+                HasSwitches & CanSlap,
             LocationName.stop_go_station_bunch_3:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.can_slap(state),
+                HasSwitches & HasTires & CanSlap,
             LocationName.stop_go_station_token_1:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.can_roll(state),
+                HasSwitches & HasTires & CanRoll,
             LocationName.stop_go_station_bunch_4:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.can_slap(state),
+                HasSwitches & HasTires & CanSlap,
             LocationName.stop_go_station_bunch_5:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.can_slap(state),
+                HasSwitches & HasTires & CanSlap,
             LocationName.stop_go_station_bunch_6:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.can_slap(state),
+                HasSwitches & HasTires & CanSlap,
             LocationName.stop_go_station_bunch_7:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.can_slap(state),
+                HasSwitches & HasTires & CanSlap,
 
             LocationName.millstone_mayhem_clear:
-                self.has_tires,
+                HasTires,
             EventName.millstone_mayhem_clear:
-                self.has_tires,
+                HasTires,
             LocationName.millstone_mayhem_bonus_1:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             LocationName.millstone_mayhem_bonus_2:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             LocationName.millstone_mayhem_bonus_3:
-                lambda state: self.has_tires(state) and self.can_carry(state),
+                HasTires & CanCarry,
             LocationName.millstone_mayhem_kong:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             LocationName.millstone_mayhem_bunch_1:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.millstone_mayhem_bunch_2:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.millstone_mayhem_bunch_3:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.millstone_mayhem_bunch_4:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.millstone_mayhem_bunch_5:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.millstone_mayhem_bunch_6:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.millstone_mayhem_bunch_7:
-                lambda state: self.has_tires(state) and (self.can_roll(state) or self.has_winky(state)),
+                HasTires & (CanRoll | HasWinky),
             LocationName.millstone_mayhem_bunch_8:
-                lambda state: self.has_tires(state) and (self.can_roll(state) or self.has_winky(state)),
+                HasTires & (CanRoll | HasWinky),
             LocationName.millstone_mayhem_bunch_9:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
 
             LocationName.necky_nuts_clear:
-                self.has_tires,
+                HasTires,
             LocationName.defeated_necky_1:
-                self.has_tires,
+                HasTires,
 
             LocationName.vulture_culture_clear:
-                self.has_kannons,
+                HasKannons,
             EventName.vulture_culture_clear:
-                self.has_kannons,
+                HasKannons,
             LocationName.vulture_culture_bonus_1:
-                lambda state: self.has_kannons(state) and self.has_tires(state),
+                HasKannons & HasTires,
             LocationName.vulture_culture_bonus_2:
-                lambda state: self.has_kannons(state) and self.can_carry(state),
+                HasKannons & CanCarry,
             LocationName.vulture_culture_bonus_3:
-                lambda state: self.has_kannons(state) and self.can_carry(state),
+                HasKannons & CanCarry,
             LocationName.vulture_culture_kong:
-                lambda state: self.has_kannons(state) and self.has_tires(state) and self.can_carry(state),
+                HasKannons & HasTires & CanCarry,
             LocationName.vulture_culture_bunch_1:
-                lambda state: (self.has_kannons(state) or self.has_diddy(state)) and self.can_slap(state),
+                (HasKannons | HasDiddy) & CanSlap,
             LocationName.vulture_culture_bunch_2:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.vulture_culture_bunch_3:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.vulture_culture_bunch_4:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.vulture_culture_bunch_5:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.vulture_culture_bunch_6:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
 
             LocationName.tree_top_town_clear:
-                lambda state: self.has_kannons(state) and self.has_diddy(state),
+                HasKannons & HasDiddy,
             EventName.tree_top_town_clear:
-                lambda state: self.has_kannons(state) and self.has_diddy(state),
+                HasKannons & HasDiddy,
             LocationName.tree_top_town_bonus_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.tree_top_town_bonus_2:
-                self.has_kannons,
+                HasKannons,
             LocationName.tree_top_town_kong:
-                self.has_kannons,
+                HasKannons,
             LocationName.tree_top_town_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.tree_top_town_bunch_2:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.tree_top_town_bunch_3:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.tree_top_town_bunch_4:
-                lambda state: self.has_kannons(state) and self.can_slap(state) and self.has_tires(state),
+                HasKannons & CanSlap & HasTires,
             LocationName.tree_top_town_token_1:
-                lambda state: self.has_kannons(state) and self.can_roll(state) and self.has_tires(state),
+                HasKannons & CanRoll & HasTires,
 
             LocationName.forest_frenzy_clear:
-                self.can_climb,
+                CanClimb,
             EventName.forest_frenzy_clear:
-                self.can_climb,
+                CanClimb,
             LocationName.forest_frenzy_bonus_1:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.forest_frenzy_bonus_2:
-                lambda state: self.can_climb(state) and self.can_carry(state),
+                CanClimb & CanCarry,
             LocationName.forest_frenzy_kong:
-                lambda state: self.can_climb(state) and self.can_roll(state),
+                CanClimb & CanRoll,
             LocationName.forest_frenzy_bunch_1:
-                lambda state: (self.can_climb(state) or (self.has_diddy(state) and self.can_roll(state))) and self.can_slap(state),
+                (CanClimb | (HasDiddy & CanRoll)) & CanSlap,
             LocationName.forest_frenzy_bunch_2:
-                lambda state: self.can_climb(state) and self.can_slap(state),
+                CanClimb & CanSlap,
             LocationName.forest_frenzy_bunch_3:
-                lambda state: self.can_climb(state) and self.can_slap(state),
+                CanClimb & CanSlap,
             LocationName.forest_frenzy_bunch_4:
-                lambda state: self.can_climb(state) and self.can_slap(state),
+                CanClimb & CanSlap,
             LocationName.forest_frenzy_bunch_5:
-                lambda state: self.can_climb(state) and self.can_slap(state),
+                CanClimb & CanSlap,
             LocationName.forest_frenzy_balloon_1:
-                self.can_climb,
+                CanClimb,
 
             LocationName.temple_tempest_clear:
-                lambda state: self.can_climb(state) and self.has_tires(state),
+                CanClimb & HasTires,
             EventName.temple_tempest_clear:
-                lambda state: self.can_climb(state) and self.has_tires(state),
+                CanClimb & HasTires,
             LocationName.temple_tempest_bonus_1:
-                lambda state: (self.can_climb(state) or (self.has_diddy(state) and self.can_roll(state))) and self.can_carry(state),
+                (CanClimb | (HasDiddy & CanRoll)) & CanCarry,
             LocationName.temple_tempest_bonus_2:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.temple_tempest_kong:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.has_kannons(state),
+                CanClimb & HasTires & HasKannons,
             LocationName.temple_tempest_token_1:
-                self.true,
+                True_(),
             LocationName.temple_tempest_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.temple_tempest_bunch_2:
-                lambda state: self.can_climb(state) and self.can_slap(state),
+                CanClimb & CanSlap,
             LocationName.temple_tempest_bunch_3:
-                lambda state: self.can_climb(state) and self.can_slap(state),
+                CanClimb & CanSlap,
             LocationName.temple_tempest_bunch_4:
-                lambda state: self.can_climb(state) and self.can_slap(state),
+                CanClimb & CanSlap,
             LocationName.temple_tempest_bunch_5:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.can_slap(state),
+                CanClimb & HasTires & CanSlap,
             LocationName.temple_tempest_bunch_6:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.can_slap(state),
+                CanClimb & HasTires & CanSlap,
             LocationName.temple_tempest_bunch_7:
-                lambda state: self.can_climb(state) and self.has_tires(state),
+                CanClimb & HasTires,
             LocationName.temple_tempest_bunch_8:
-                lambda state: self.can_climb(state) and self.has_tires(state),
+                CanClimb & HasTires,
 
             LocationName.orang_utan_gang_clear:
-                self.true,
+                True_(),
             EventName.orang_utan_gang_clear:
-                self.true,
+                True_(),
             LocationName.orang_utan_gang_bonus_1:
-                self.has_expresso,
+                HasExpresso,
             LocationName.orang_utan_gang_bonus_2:
-                lambda state: self.can_carry(state) and (self.has_expresso(state) or (self.has_diddy(state) and self.can_roll(state))),
+                CanCarry & (HasExpresso | (HasDiddy & CanRoll)),
             LocationName.orang_utan_gang_bonus_3:
-                self.can_carry,
+                CanCarry,
             LocationName.orang_utan_gang_bonus_4:
-                self.can_carry,
+                CanCarry,
             LocationName.orang_utan_gang_bonus_5:
-                self.true,
+                True_(),
             LocationName.orang_utan_gang_kong:
-                lambda state: self.can_carry(state) and self.can_roll(state) and self.has_tires(state),
+                CanCarry & CanRoll & HasTires,
             LocationName.orang_utan_gang_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.orang_utan_gang_bunch_2:
-                lambda state: self.can_carry(state) or self.can_slap(state),
+                CanCarry | CanSlap,
             LocationName.orang_utan_gang_bunch_3:
-                self.can_slap,
+                CanSlap,
             LocationName.orang_utan_gang_bunch_4:
-                self.can_roll,
+                CanRoll,
             LocationName.orang_utan_gang_bunch_5:
-                self.can_slap,
+                CanSlap,
             LocationName.orang_utan_gang_bunch_6:
-                lambda state: self.has_expresso(state) or (self.has_diddy(state) and self.can_roll(state)),
+                HasExpresso | (HasDiddy & CanRoll),
             LocationName.orang_utan_gang_token_1:
-                lambda state: self.has_tires(state) and self.has_expresso(state),
+                HasTires & HasExpresso,
             LocationName.orang_utan_gang_bunch_7:
-                self.can_slap,
+                CanSlap,
             LocationName.orang_utan_gang_bunch_8:
-                self.true,
+                True_(),
             LocationName.orang_utan_gang_bunch_9:
-                self.true,
+                True_(),
 
             LocationName.clam_city_clear:
-                self.can_swim,
+                CanSwim,
             EventName.clam_city_clear:
-                self.can_swim,
+                CanSwim,
             LocationName.clam_city_kong:
-                self.can_swim,
+                CanSwim,
             LocationName.clam_city_bunch_1:
-                self.can_swim,
+                CanSwim,
             LocationName.clam_city_bunch_2:
-                self.can_swim,
+                CanSwim,
             LocationName.clam_city_token_1:
-                self.can_swim,
+                CanSwim,
 
             LocationName.bumble_b_rumble_clear:
-                self.can_carry,
+                CanCarry,
             LocationName.defeated_bumble_b:
-                self.can_carry,
+                CanCarry,
 
             LocationName.snow_barrel_blast_clear:
-                self.has_kannons,
+                HasKannons,
             EventName.snow_barrel_blast_clear:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bonus_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bonus_2:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bonus_3:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_kong:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bunch_1:
-                lambda state: self.has_kannons(state) or self.can_slap(state),
+                HasKannons | CanSlap,
             LocationName.snow_barrel_blast_balloon_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bunch_2:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.snow_barrel_blast_bunch_3:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.snow_barrel_blast_token_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_balloon_2:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bunch_4:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bunch_5:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
 
             LocationName.slipslide_ride_clear:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             EventName.slipslide_ride_clear:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_bonus_1:
-                lambda state: self.can_climb(state) and self.can_carry(state),
+                CanClimb & CanCarry,
             LocationName.slipslide_ride_bonus_2:
-                lambda state: self.can_climb(state) and self.can_carry(state),
+                CanClimb & CanCarry,
             LocationName.slipslide_ride_bonus_3:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_kong:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_bunch_1:
-                self.can_climb,
+                CanClimb,
             LocationName.slipslide_ride_bunch_2:
-                lambda state: self.can_climb(state) and self.can_slap(state),
+                CanClimb & CanSlap,
             LocationName.slipslide_ride_bunch_3:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_bunch_4:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_bunch_5:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_bunch_6:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_bunch_7:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_bunch_8:
-                lambda state: self.can_climb(state) and self.has_kannons(state) and self.can_slap(state),
+                CanClimb & HasKannons & CanSlap,
             LocationName.slipslide_ride_bunch_9:
-                lambda state: self.can_climb(state) and self.has_kannons(state) and self.can_slap(state),
+                CanClimb & HasKannons & CanSlap,
             LocationName.slipslide_ride_token_1:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
 
             LocationName.ice_age_alley_clear:
-                lambda state: (self.can_climb(state) and self.has_kannons(state)) or self.has_expresso(state),
+                (CanClimb & HasKannons) | HasExpresso,
             EventName.ice_age_alley_clear:
-                lambda state: (self.can_climb(state) and self.has_kannons(state)) or self.has_expresso(state),
+                (CanClimb & HasKannons) | HasExpresso,
             LocationName.ice_age_alley_bonus_1:
-                lambda state: (self.can_climb(state) or self.has_expresso(state)) and self.has_kannons(state),
+                (CanClimb | HasExpresso) & HasKannons,
             LocationName.ice_age_alley_bonus_2:
-                lambda state: self.has_expresso(state) and self.has_kannons(state),
+                HasExpresso & HasKannons,
             LocationName.ice_age_alley_kong:
-                lambda state: self.can_roll(state) and self.has_expresso(state),
+                CanRoll & HasExpresso,
             LocationName.ice_age_alley_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.ice_age_alley_bunch_2:
-                lambda state: ((self.can_climb(state) and self.has_kannons(state)) or self.has_expresso(state)) and self.can_slap(state),
+                ((CanClimb & HasKannons) | HasExpresso) & CanSlap,
             LocationName.ice_age_alley_bunch_3:
-                lambda state: (self.can_climb(state) and self.has_kannons(state)) or self.has_expresso(state),
+                (CanClimb & HasKannons) | HasExpresso,
 
             LocationName.croctopus_chase_clear:
-                self.can_swim,
+                CanSwim,
             EventName.croctopus_chase_clear:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_kong:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_bunch_1:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_token_1:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_token_2:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_bunch_2:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_bunch_3:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_bunch_4:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_bunch_5:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_balloon_1:
-                self.can_swim,
+                CanSwim,
 
             LocationName.torchlight_trouble_clear:
-                self.has_squawks,
+                HasSquawks,
             EventName.torchlight_trouble_clear:
-                self.has_squawks,
+                HasSquawks,
             LocationName.torchlight_trouble_bonus_1:
-                lambda state: self.has_squawks(state) and self.can_carry(state),
+                HasSquawks & CanCarry,
             LocationName.torchlight_trouble_bonus_2:
-                lambda state: self.has_squawks(state) and self.can_carry(state),
+                HasSquawks & CanCarry,
             LocationName.torchlight_trouble_kong:
-                lambda state: self.has_squawks(state) and self.can_carry(state) and self.can_roll(state),
+                HasSquawks & CanCarry & CanRoll,
             LocationName.torchlight_trouble_bunch_1:
-                lambda state: self.has_squawks(state) and self.can_slap(state),
+                HasSquawks & CanSlap,
 
             LocationName.rope_bridge_rumble_clear:
-                self.has_tires,
+                HasTires,
             EventName.rope_bridge_rumble_clear:
-                self.has_tires,
+                HasTires,
             LocationName.rope_bridge_rumble_bonus_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.rope_bridge_rumble_bonus_2:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             LocationName.rope_bridge_rumble_kong:
-                lambda state: self.has_tires(state) and self.can_roll(state),
+                HasTires & CanRoll,
             LocationName.rope_bridge_rumble_bunch_1:
-                lambda state: self.has_tires(state) and self.can_roll(state),
+                HasTires & CanRoll,
 
             LocationName.really_gnawty_rampage_clear:
-                self.true,
+                True_(),
             LocationName.defeated_gnawty_2:
-                self.true,
+                True_(),
 
             LocationName.oil_drum_alley_clear:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             EventName.oil_drum_alley_clear:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             LocationName.oil_drum_alley_bonus_1:
-                lambda state: self.can_climb(state) and self.can_carry(state) and self.has_kannons(state),
+                CanClimb & CanCarry & HasKannons,
             LocationName.oil_drum_alley_bonus_2:
-                lambda state: self.has_tires(state) and self.can_carry(state),
+                HasTires & CanCarry,
             LocationName.oil_drum_alley_bonus_3:
-                lambda state: self.has_tires(state) and self.can_carry(state),
+                HasTires & CanCarry,
             LocationName.oil_drum_alley_bonus_4:
-                lambda state: (
-                              (
-                              (self.has_tires(state) and self.has_rambi(state)) or
-                              (self.has_tires(state) and self.can_carry(state)) or
-                              (self.can_roll(state) and self.can_carry(state))
-                              )
-                              and self.has_kannons(state)),
+                (
+                    (
+                    (HasTires & HasRambi) |
+                    (HasTires & CanCarry) |
+                    (CanRoll & CanCarry)
+                    )
+                & HasKannons),
             LocationName.oil_drum_alley_kong:
-                lambda state: self.has_tires(state) and self.can_roll(state) and self.has_kannons(state) and (self.can_carry(state) or self.has_rambi(state)),
+                HasTires & CanRoll & HasKannons & (CanCarry | HasRambi),
             LocationName.oil_drum_alley_bunch_1:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             LocationName.oil_drum_alley_bunch_2:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
 
             LocationName.trick_track_trek_clear:
-                lambda state: self.has_platforms(state) and (self.has_donkey(state) or (self.has_diddy(state) and self.can_roll(state))),
+                HasPlatforms & (HasDonkey | (HasDiddy & CanRoll)),
             EventName.trick_track_trek_clear:
-                lambda state: self.has_platforms(state) and (self.has_donkey(state) or (self.has_diddy(state) and self.can_roll(state))),
+                HasPlatforms & (HasDonkey | (HasDiddy & CanRoll)),
             LocationName.trick_track_trek_bonus_1:
-                lambda state: self.has_platforms(state) and self.has_kannons(state) and self.can_roll(state),
+                HasPlatforms & HasKannons & CanRoll,
             LocationName.trick_track_trek_bonus_2:
-                lambda state: self.has_platforms(state) and self.has_kannons(state),
+                HasPlatforms & HasKannons,
             LocationName.trick_track_trek_bonus_3:
-                lambda state: self.has_platforms(state) and self.has_kannons(state) and (self.has_donkey(state) or (self.has_diddy(state) and self.can_roll(state))),
+                HasPlatforms & HasKannons & (HasDonkey | (HasDiddy & CanRoll)),
             LocationName.trick_track_trek_kong:
-                lambda state: self.has_platforms(state) and (self.has_donkey(state) or (self.has_diddy(state) and self.can_roll(state))),
+                HasPlatforms & (HasDonkey | (HasDiddy & CanRoll)),
             LocationName.trick_track_trek_bunch_1:
-                self.has_platforms,
+                HasPlatforms,
             LocationName.trick_track_trek_token_1:
-                lambda state: self.has_platforms(state) and (self.has_donkey(state) or (self.has_diddy(state) and self.can_roll(state))),
+                HasPlatforms & (HasDonkey | (HasDiddy & CanRoll)),
 
             LocationName.elevator_antics_clear:
-                lambda state: self.can_climb(state) and self.has_tires(state),
+                CanClimb & HasTires,
             EventName.elevator_antics_clear:
-                lambda state: self.can_climb(state) and self.has_tires(state),
+                CanClimb & HasTires,
             LocationName.elevator_antics_bonus_1:
-                lambda state: self.can_climb(state) and self.can_roll(state),
+                CanClimb & CanRoll,
             LocationName.elevator_antics_bonus_2:
-                self.can_climb,
+                CanClimb,
             LocationName.elevator_antics_bonus_3:
-                lambda state: self.can_climb(state) and self.has_tires(state),
+                CanClimb & HasTires,
             LocationName.elevator_antics_kong:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.elevator_antics_bunch_1:
-                self.true,
+                True_(),
             LocationName.elevator_antics_bunch_2:
-                self.can_climb,
+                CanClimb,
             LocationName.elevator_antics_bunch_3:
-                self.can_climb,
+                CanClimb,
 
             LocationName.poison_pond_clear:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
             EventName.poison_pond_clear:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
             LocationName.poison_pond_kong:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
             LocationName.poison_pond_bunch_1:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
             LocationName.poison_pond_bunch_2:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
             LocationName.poison_pond_bunch_3:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
             LocationName.poison_pond_bunch_4:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
             LocationName.poison_pond_bunch_5:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
             LocationName.poison_pond_token_1:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
             LocationName.poison_pond_token_2:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
             LocationName.poison_pond_bunch_6:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
 
             LocationName.mine_cart_madness_clear:
-                self.has_minecart,
+                HasMinecart,
             EventName.mine_cart_madness_clear:
-                self.has_minecart,
+                HasMinecart,
             LocationName.mine_cart_madness_bonus_1:
-                lambda state: self.has_minecart(state) and self.can_climb(state) and self.has_kannons(state),
+                HasMinecart & CanClimb & HasKannons,
             LocationName.mine_cart_madness_bonus_2:
-                lambda state: self.has_minecart(state) and self.has_tires(state) and self.has_kannons(state),
+                HasMinecart & HasTires & HasKannons,
             LocationName.mine_cart_madness_bonus_3:
-                lambda state: self.has_minecart(state) and self.has_tires(state) and self.has_kannons(state),
+                HasMinecart & HasTires & HasKannons,
             LocationName.mine_cart_madness_kong:
-                lambda state: self.has_minecart(state) and (self.has_tires(state) or self.has_donkey(state)),
+                HasMinecart & (HasTires | HasDonkey),
             LocationName.mine_cart_madness_token_1:
-                self.has_minecart,
+                HasMinecart,
             LocationName.mine_cart_madness_bunch_1:
-                self.has_minecart,
+                HasMinecart,
 
             LocationName.blackout_basement_clear:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state),
+                CanClimb & HasTires & HasPlatforms,
             EventName.blackout_basement_clear:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state),
+                CanClimb & HasTires & HasPlatforms,
             LocationName.blackout_basement_bonus_1:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state) and self.has_kannons(state),
+                CanClimb & HasTires & HasPlatforms & HasKannons,
             LocationName.blackout_basement_bonus_2:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state) and self.can_carry(state) and self.has_kannons(state),
+                CanClimb & HasTires & HasPlatforms & CanCarry & HasKannons,
             LocationName.blackout_basement_kong:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state) and self.has_kannons(state),
+                CanClimb & HasTires & HasPlatforms & HasKannons,
             LocationName.blackout_basement_token_1:
-                self.can_roll,
+                CanRoll,
             LocationName.blackout_basement_bunch_1:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state),
+                CanClimb & HasTires & HasPlatforms,
 
             LocationName.boss_dumb_drum_clear:
-                lambda state: (self.has_diddy(state) and self.can_roll(state)) or self.has_donkey(state),
+                (HasDiddy & CanRoll) | HasDonkey,
             LocationName.defeated_boss_dumb_drum:
-                lambda state: (self.has_diddy(state) and self.can_roll(state)) or self.has_donkey(state),
+                (HasDiddy & CanRoll) | HasDonkey,
 
             LocationName.tanked_up_trouble_clear:
-                lambda state: self.has_platforms(state) and self.has_tires(state) and self.has_kannons(state),
+                HasPlatforms & HasTires & HasKannons,
             EventName.tanked_up_trouble_clear:
-                lambda state: self.has_platforms(state) and self.has_tires(state) and self.has_kannons(state),
+                HasPlatforms & HasTires & HasKannons,
             LocationName.tanked_up_trouble_bonus_1:
-                lambda state: self.has_platforms(state) and self.has_kannons(state),
+                HasPlatforms & HasKannons,
             LocationName.tanked_up_trouble_kong:
-                lambda state: self.has_platforms(state) and self.has_tires(state) and self.has_kannons(state),
+                HasPlatforms & HasTires & HasKannons,
             LocationName.tanked_up_trouble_bunch_1:
-                self.has_platforms,
+                HasPlatforms,
             LocationName.tanked_up_trouble_bunch_2:
-                self.has_platforms,
+                HasPlatforms,
             LocationName.tanked_up_trouble_token_1:
-                lambda state: self.has_platforms(state) and self.has_kannons(state),
+                HasPlatforms & HasKannons,
             LocationName.tanked_up_trouble_bunch_3:
-                lambda state: self.has_platforms(state) and self.has_tires(state) and self.has_kannons(state),
+                HasPlatforms & HasTires & HasKannons,
             LocationName.tanked_up_trouble_bunch_4:
-                lambda state: self.has_platforms(state) and self.has_tires(state) and self.has_kannons(state),
+                HasPlatforms & HasTires & HasKannons,
 
             LocationName.manic_mincers_clear:
-                self.has_tires,
+                HasTires,
             EventName.manic_mincers_clear:
-                self.has_tires,
+                HasTires,
             LocationName.manic_mincers_bonus_1:
-                lambda state: self.can_carry(state) or self.has_rambi(state),
+                CanCarry | HasRambi,
             LocationName.manic_mincers_bonus_2:
-                lambda state: self.can_carry(state) or self.has_rambi(state),
+                CanCarry | HasRambi,
             LocationName.manic_mincers_kong:
-                self.true,
+                True_(),
             LocationName.manic_mincers_bunch_1:
-                self.true,
+                True_(),
             LocationName.manic_mincers_bunch_2:
-                self.true,
+                True_(),
             LocationName.manic_mincers_token_1:
-                self.true,
+                True_(),
 
             LocationName.misty_mine_clear:
-                self.can_climb,
+                CanClimb,
             EventName.misty_mine_clear:
-                self.can_climb,
+                CanClimb,
             LocationName.misty_mine_bonus_1:
-                self.can_climb,
+                CanClimb,
             LocationName.misty_mine_bonus_2:
-                lambda state: self.can_climb(state) and self.can_carry(state),
+                CanClimb & CanCarry,
             LocationName.misty_mine_kong:
-                self.can_climb,
+                CanClimb,
             LocationName.misty_mine_token_1:
-                self.can_carry,
+                CanCarry,
             LocationName.misty_mine_bunch_1:
-                self.can_carry,
+                CanCarry,
             LocationName.misty_mine_bunch_2:
-                self.can_climb,
+                CanClimb,
             LocationName.misty_mine_token_2:
-                lambda state: self.can_climb(state) and (self.has_expresso(state) or self.can_roll(state)),
+                CanClimb & (HasExpresso | CanRoll),
 
             LocationName.loopy_lights_clear:
-                lambda state: self.has_switches(state) and self.has_tires,
+                HasSwitches & HasTires,
             EventName.loopy_lights_clear:
-                lambda state: self.has_switches(state) and self.has_tires,
+                HasSwitches & HasTires,
             LocationName.loopy_lights_bonus_1:
-                lambda state: self.has_switches(state) and self.has_kannons,
+                HasSwitches & HasKannons,
             LocationName.loopy_lights_bonus_2:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.can_carry(state),
+                HasSwitches & HasTires & CanCarry,
             LocationName.loopy_lights_kong:
-                lambda state: self.has_switches(state) and self.has_tires(state) and self.has_kannons(state) and self.can_roll(state) and self.can_carry(state),
+                HasSwitches & HasTires & HasKannons & CanRoll & CanCarry,
             LocationName.loopy_lights_bunch_1:
-                lambda state: self.has_switches(state) and self.has_tires,
+                HasSwitches & HasTires,
             LocationName.loopy_lights_bunch_2:
-                lambda state: self.has_switches(state) and self.has_tires,
+                HasSwitches & HasTires,
 
             LocationName.platform_perils_clear:
-                lambda state: self.has_platforms(state) and self.can_carry(state) and (self.has_donkey(state) or self.can_roll(state)) and self.has_tires(state),
+                HasPlatforms & CanCarry & (HasDonkey | CanRoll) & HasTires,
             EventName.platform_perils_clear:
-                lambda state: self.has_platforms(state) and self.can_carry(state) and (self.has_donkey(state) or self.can_roll(state)) and self.has_tires(state),
+                HasPlatforms & CanCarry & (HasDonkey | CanRoll) & HasTires,
             LocationName.platform_perils_bonus_1:
-                lambda state: self.has_platforms(state) and self.can_carry(state) and self.has_kannons(state),
+                HasPlatforms & CanCarry & HasKannons,
             LocationName.platform_perils_bonus_2:
-                lambda state: self.has_platforms(state) and self.can_carry(state) and (self.has_donkey(state) or self.can_roll(state)) and self.has_tires(state) and self.has_kannons(state),
+                HasPlatforms & CanCarry & (HasDonkey | CanRoll) & HasTires & HasKannons,
             LocationName.platform_perils_kong:
-                lambda state: self.has_platforms(state) and self.can_carry(state) and (self.has_donkey(state) or self.can_roll(state)) and self.has_tires(state),
+                HasPlatforms & CanCarry & (HasDonkey | CanRoll) & HasTires,
             LocationName.platform_perils_token_1:
-                lambda state: self.has_platforms(state) and self.can_carry(state) and (self.has_donkey(state) or self.can_roll(state)),
+                HasPlatforms & CanCarry & (HasDonkey | CanRoll),
             LocationName.platform_perils_bunch_1:
-                lambda state: self.has_platforms(state) and self.can_carry(state) and self.has_tires(state),
+                HasPlatforms & CanCarry & HasTires,
 
             LocationName.necky_revenge_clear:
-                self.has_tires,
+                HasTires,
             LocationName.defeated_necky_2:
-                self.has_tires,
+                HasTires,
         }
 
     def set_dkc_rules(self) -> None:
@@ -1933,888 +1851,886 @@ class DKCExpertRules(DKCRules):
       
         self.location_rules = {
             LocationName.jungle_hijinxs_clear:
-                self.true,
+                True_(),
             EventName.jungle_hijinxs_clear:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_bonus_1:
-                lambda state: self.has_rambi(state) or self.can_carry(state),
+                HasRambi | CanCarry,
             LocationName.jungle_hijinxs_bonus_2:
-                lambda state: self.has_rambi(state) or self.can_carry(state),
+                HasRambi | CanCarry,
             LocationName.jungle_hijinxs_kong:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_balloon_1:
-                self.has_tires,
+                HasTires,
             LocationName.jungle_hijinxs_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_2:
-                lambda state: self.has_rambi(state) or self.can_slap(state) or self.has_diddy(state),
+                HasRambi | CanSlap | HasDiddy,
             LocationName.jungle_hijinxs_bunch_3:
-                lambda state: self.has_rambi(state) or self.can_slap(state) or self.has_diddy(state),
+                HasRambi | CanSlap | HasDiddy,
             LocationName.jungle_hijinxs_bunch_4:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_bunch_5:
-                lambda state: self.has_rambi(state) or self.can_slap(state) or self.has_diddy(state),
+                HasRambi | CanSlap | HasDiddy,
             LocationName.jungle_hijinxs_bunch_6:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_balloon_2:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_bunch_7:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_8:
-                lambda state: self.has_rambi(state) or self.can_slap(state) or self.has_diddy(state),
+                HasRambi | CanSlap | HasDiddy,
             LocationName.jungle_hijinxs_bunch_9:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_10:
-                lambda state: self.has_rambi(state) or self.can_slap(state) or self.has_diddy(state),
+                HasRambi | CanSlap | HasDiddy,
             LocationName.jungle_hijinxs_bunch_11:
-                self.can_slap,
+                CanSlap,
             LocationName.jungle_hijinxs_bunch_12:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_balloon_3:
-                lambda state: (self.can_roll(state) and self.has_diddy(state)) or self.has_rambi(state),
+                (CanRoll & HasDiddy) | HasRambi,
             LocationName.jungle_hijinxs_bunch_13:
-                lambda state: self.can_roll(state) and self.can_slap(state),
+                CanRoll & CanSlap,
             LocationName.jungle_hijinxs_balloon_4:
-                lambda state: (self.can_roll(state) and self.has_diddy(state)) or self.has_rambi(state),
+                (CanRoll & HasDiddy) | HasRambi,
             LocationName.jungle_hijinxs_token_1:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_bunch_14:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.jungle_hijinxs_bunch_15:
-                lambda state: self.has_rambi(state) or self.can_slap(state),
+                HasRambi | CanSlap,
             LocationName.jungle_hijinxs_bunch_16:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_bunch_17:
-                lambda state: self.has_rambi(state) or self.can_slap(state) or self.has_diddy(state),
+                HasRambi | CanSlap | HasDiddy,
             LocationName.jungle_hijinxs_bunch_18:
-                lambda state: self.has_rambi(state) or self.can_slap(state) or self.has_diddy(state),
+                HasRambi | CanSlap | HasDiddy,
             LocationName.jungle_hijinxs_bunch_19:
-                self.true,
+                True_(),
             LocationName.jungle_hijinxs_balloon_5:
-                lambda state: self.has_rambi(state) and self.has_tires(state),
+                HasRambi & HasTires,
             LocationName.jungle_hijinxs_balloon_6:
-                lambda state: self.has_rambi(state) and self.has_tires(state),
+                HasRambi & HasTires,
 
             LocationName.ropey_rampage_clear:
-                self.can_climb,
+                CanClimb,
             EventName.ropey_rampage_clear:
-                self.can_climb,
+                CanClimb,
             LocationName.ropey_rampage_bonus_1:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.ropey_rampage_bonus_2:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.ropey_rampage_kong:
-                lambda state: self.can_climb(state),
+                CanClimb,
             LocationName.ropey_rampage_bunch_1:
-                self.true,
+                True_(),
             LocationName.ropey_rampage_bunch_2:
-                self.true,
+                True_(),
             LocationName.ropey_rampage_bunch_3:
-                self.true,
+                True_(),
             LocationName.ropey_rampage_bunch_4:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.ropey_rampage_bunch_5:
-                self.can_slap,
+                CanSlap,
             LocationName.ropey_rampage_bunch_6:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_7:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_8:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_9:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_token_1:
-                lambda state: (self.can_climb(state) or self.has_both_kongs(state)) or (self.has_diddy(state) and self.can_roll(state)),
+                (CanClimb | HasBothKongs) | (HasDiddy & CanRoll),
             LocationName.ropey_rampage_bunch_10:
-                lambda state: (self.can_slap(state) and self.can_climb(state)) or self.has_both_kongs(state),
+                (CanSlap & CanClimb) | HasBothKongs,
             LocationName.ropey_rampage_bunch_11:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_12:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_13:
-                lambda state: self.can_climb(state) and (self.can_slap(state) or self.has_diddy(state)),
+                CanClimb & (CanSlap | HasDiddy),
             LocationName.ropey_rampage_bunch_14:
-                lambda state: self.can_climb(state) and (self.can_slap(state) or self.has_diddy(state)),
+                CanClimb & (CanSlap | HasDiddy),
             LocationName.ropey_rampage_bunch_15:
-                lambda state: self.can_slap(state) and self.can_climb(state) and (self.can_roll(state) or self.has_diddy(state)),
+                CanSlap & CanClimb & (CanRoll | HasDiddy),
             LocationName.ropey_rampage_token_2:
-                self.can_climb,
+                CanClimb,
             LocationName.ropey_rampage_bunch_16:
-                lambda state: self.can_slap(state) and self.can_climb(state),
+                CanSlap & CanClimb,
             LocationName.ropey_rampage_bunch_17:
-                lambda state: self.can_climb(state) and self.can_roll(state),
+                CanClimb & CanRoll,
             LocationName.ropey_rampage_bunch_18:
-                lambda state: self.can_climb(state) and self.can_roll(state),
+                CanClimb & CanRoll,
             LocationName.ropey_rampage_bunch_19:
-                lambda state: self.can_climb(state) and (self.can_slap(state) or self.has_diddy(state)),
+                CanClimb & (CanSlap | HasDiddy),
 
             LocationName.reptile_rumble_clear:
-                lambda state: self.has_tires(state) or self.has_diddy(state),
+                HasTires | HasDiddy,
             EventName.reptile_rumble_clear:
-                lambda state: self.has_tires(state) or self.has_diddy(state),
+                HasTires | HasDiddy,
             LocationName.reptile_rumble_bonus_1:
-                self.can_carry,
+                CanCarry,
             LocationName.reptile_rumble_bonus_2:
-                self.has_kannons,
+                HasKannons,
             LocationName.reptile_rumble_bonus_3:
-                lambda state: self.can_carry(state) and self.has_tires(state),
+                CanCarry & HasTires,
             LocationName.reptile_rumble_kong:
-                lambda state: self.has_tires(state) or self.has_diddy(state),
+                HasTires | HasDiddy,
             LocationName.reptile_rumble_bunch_1:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.reptile_rumble_bunch_2:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.reptile_rumble_bunch_3:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.reptile_rumble_bunch_4:
-                self.can_slap,
+                CanSlap,
             LocationName.reptile_rumble_bunch_5:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.reptile_rumble_bunch_6:
-                self.true,
+                True_(),
             LocationName.reptile_rumble_bunch_7:
-                self.true,
+                True_(),
             LocationName.reptile_rumble_bunch_8:
-                lambda state: (self.has_tires(state) or self.has_diddy(state)) and self.can_slap(state),
+                (HasTires | HasDiddy) & CanSlap,
             LocationName.reptile_rumble_bunch_9:
-                lambda state: self.can_slap(state) or (self.has_diddy(state) and self.can_roll(state)),
+                CanSlap | (HasDiddy & CanRoll),
             LocationName.reptile_rumble_bunch_10:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.reptile_rumble_token_1:
-                lambda state: self.has_tires(state) or self.has_diddy(state),
+                HasTires | HasDiddy,
             LocationName.reptile_rumble_bunch_11:
-                lambda state: (self.has_tires(state) and self.can_slap(state)) or self.has_diddy(state),
+                (HasTires & CanSlap) | HasDiddy,
             LocationName.reptile_rumble_bunch_12:
-                lambda state: (self.has_tires(state) and self.can_slap(state)) or self.has_diddy(state),
+                (HasTires & CanSlap) | HasDiddy,
             LocationName.reptile_rumble_bunch_13:
-                lambda state: (self.has_tires(state) and self.can_slap(state)) or self.has_diddy(state),
+                (HasTires & CanSlap) | HasDiddy,
             LocationName.reptile_rumble_bunch_14:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
 
             LocationName.coral_capers_clear:
-                self.can_swim,
+                CanSwim,
             EventName.coral_capers_clear:
-                self.can_swim,
+                CanSwim,
             LocationName.coral_capers_kong:
-                self.can_swim,
+                CanSwim,
             LocationName.coral_capers_bunch_1:
-                self.can_swim,
+                CanSwim,
             LocationName.coral_capers_balloon_1:
-                self.can_swim,
+                CanSwim,
             LocationName.coral_capers_bunch_2:
-                self.can_swim,
+                CanSwim,
             LocationName.coral_capers_token_1:
-                self.can_swim,
+                CanSwim,
 
             LocationName.barrel_cannon_canyon_clear:
-                self.has_kannons,
+                HasKannons,
             EventName.barrel_cannon_canyon_clear:
-                self.has_kannons,
+                HasKannons,
             LocationName.barrel_cannon_canyon_bonus_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.barrel_cannon_canyon_bonus_2:
-                lambda state: self.can_carry(state) and self.has_kannons(state),
+                CanCarry & HasKannons,
             LocationName.barrel_cannon_canyon_kong:
-                self.has_kannons,
+                HasKannons,
             LocationName.barrel_cannon_canyon_token_1:
-                self.can_roll,
+                CanRoll,
             LocationName.barrel_cannon_canyon_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.barrel_cannon_canyon_bunch_2:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.barrel_cannon_canyon_bunch_3:
-                lambda state: self.has_kannons(state) and (self.can_slap(state) or self.has_diddy(state)),
+                HasKannons & (CanSlap | HasDiddy),
             LocationName.barrel_cannon_canyon_bunch_4:
-                lambda state: self.has_kannons(state) and (self.can_slap(state) or self.has_diddy(state)),
+                HasKannons & (CanSlap | HasDiddy),
             LocationName.barrel_cannon_canyon_token_2:
-                self.has_kannons,
+                HasKannons,
             LocationName.barrel_cannon_canyon_bunch_5:
-                lambda state: self.has_kannons(state) and (self.can_slap(state) or self.has_diddy(state)),
+                HasKannons & (CanSlap | HasDiddy),
             LocationName.barrel_cannon_canyon_bunch_6:
-                lambda state: self.has_kannons(state) and (self.can_slap(state) or self.has_diddy(state)),
+                HasKannons & (CanSlap | HasDiddy),
             LocationName.barrel_cannon_canyon_bunch_7:
-                lambda state: self.has_kannons(state) and (self.can_slap(state) or self.has_diddy(state)),
+                HasKannons & (CanSlap | HasDiddy),
             LocationName.barrel_cannon_canyon_bunch_8:
-                lambda state: self.has_kannons(state) and (self.can_slap(state) or self.has_diddy(state)),
+                HasKannons & (CanSlap | HasDiddy),
             LocationName.barrel_cannon_canyon_bunch_9:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_10:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_11:
-                lambda state: self.can_slap(state) and self.has_kannons(state),
+                CanSlap & HasKannons,
             LocationName.barrel_cannon_canyon_bunch_12:
-                lambda state: self.has_kannons(state) and (self.can_slap(state) or self.has_diddy(state)),
+                HasKannons & (CanSlap | HasDiddy),
 
             LocationName.very_gnawty_lair_clear:
-                self.true,
+                True_(),
             LocationName.defeated_gnawty_1:
-                self.true,
+                True_(),
 
             LocationName.winky_walkway_clear:
-                self.true,
+                True_(),
             EventName.winky_walkway_clear:
-                self.true,
+                True_(),
             LocationName.winky_walkway_bonus_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.winky_walkway_kong:
-                self.has_kannons,
+                HasKannons,
             LocationName.winky_walkway_bunch_1:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.winky_walkway_bunch_2:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.winky_walkway_bunch_3:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.winky_walkway_bunch_4:
-                lambda state: self.can_slap(state) or (self.has_diddy(state) and self.has_winky(state)),
+                CanSlap | (HasDiddy & HasWinky),
             LocationName.winky_walkway_token_1:
-                lambda state: self.has_winky(state) or self.has_donkey(state) or self.has_both_kongs(state),
+                HasWinky | HasDonkey | HasBothKongs,
             LocationName.winky_walkway_bunch_5:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
 
             LocationName.mine_cart_carnage_clear:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
             EventName.mine_cart_carnage_clear:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
             LocationName.mine_cart_carnage_kong:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
             LocationName.mine_cart_carnage_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.mine_cart_carnage_bunch_2:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
             LocationName.mine_cart_carnage_token_1:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
             LocationName.mine_cart_carnage_bunch_3:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
             LocationName.mine_cart_carnage_balloon_1:
-                lambda state: self.has_kannons(state) and self.has_minecart(state),
+                HasKannons & HasMinecart,
 
             LocationName.bouncy_bonanza_clear:
-                self.has_tires,
+                HasTires,
             EventName.bouncy_bonanza_clear:
-                self.has_tires,
+                HasTires,
             LocationName.bouncy_bonanza_bonus_1:
-                self.can_carry,
+                CanCarry,
             LocationName.bouncy_bonanza_bonus_2:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             LocationName.bouncy_bonanza_kong:
-                self.has_tires,
+                HasTires,
             LocationName.bouncy_bonanza_token_1:
-                self.has_tires,
+                HasTires,
             LocationName.bouncy_bonanza_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.bouncy_bonanza_bunch_2:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.bouncy_bonanza_bunch_3:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.bouncy_bonanza_bunch_4:
-                lambda state: (self.can_slap(state) and (
-                    self.has_tires(state) or self.can_carry(state))) or (
-                        self.has_diddy(state) and self.can_roll(state)
+                (CanSlap & (
+                    HasTires | CanCarry)) | (
+                        HasDiddy & CanRoll
                     ) ,
             LocationName.bouncy_bonanza_bunch_5:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.bouncy_bonanza_bunch_6:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.bouncy_bonanza_bunch_7:
-                lambda state: self.has_tires(state) and self.can_slap(state),
+                HasTires & CanSlap,
             LocationName.bouncy_bonanza_bunch_8:
-                lambda state: self.has_tires(state) and (self.can_slap(state) or self.has_diddy(state)),
+                HasTires & (CanSlap | HasDiddy),
             LocationName.bouncy_bonanza_bunch_9:
-                lambda state: self.has_tires(state) and (self.can_slap(state) or self.has_diddy(state)),
+                HasTires & (CanSlap | HasDiddy),
             LocationName.bouncy_bonanza_bunch_10:
-                lambda state: self.has_tires(state) and (self.can_slap(state) or self.has_diddy(state)),
+                HasTires & (CanSlap | HasDiddy),
 
             LocationName.stop_go_station_clear:
-                self.true,
+                True_(),
             EventName.stop_go_station_clear:
-                self.true,
+                True_(),
             LocationName.stop_go_station_bonus_1:
-                self.can_carry,
+                CanCarry,
             LocationName.stop_go_station_bonus_2:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             LocationName.stop_go_station_kong:
-                self.can_roll,
+                CanRoll,
             LocationName.stop_go_station_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.stop_go_station_bunch_2:
-                self.can_slap,
+                CanSlap,
             LocationName.stop_go_station_bunch_3:
-                lambda state: self.can_slap(state) and (self.has_switches(state) or self.has_both_kongs(state)),
+                CanSlap & (HasSwitches | HasBothKongs),
             LocationName.stop_go_station_token_1:
-                self.true,
+                True_(),
             LocationName.stop_go_station_bunch_4:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.stop_go_station_bunch_5:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.stop_go_station_bunch_6:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.stop_go_station_bunch_7:
-                lambda state: self.can_slap(state),
+                CanSlap,
 
             LocationName.millstone_mayhem_clear:
-                lambda state: self.has_donkey(state) or self.has_tires(state),
+                HasDonkey | HasTires,
             EventName.millstone_mayhem_clear:
-                lambda state: self.has_donkey(state) or self.has_tires(state),
+                HasDonkey | HasTires,
             LocationName.millstone_mayhem_bonus_1:
-                lambda state: self.has_kannons(state) and (self.has_tires(state) or self.has_donkey(state)),
+                HasKannons & (HasTires | HasDonkey),
             LocationName.millstone_mayhem_bonus_2:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             LocationName.millstone_mayhem_bonus_3:
-                lambda state: self.can_carry(state) and (self.has_tires(state) or self.has_donkey(state)),
+                CanCarry & (HasTires | HasDonkey),
             LocationName.millstone_mayhem_kong:
-                lambda state: self.has_kannons(state) and (self.has_tires(state) or self.has_donkey(state)),
+                HasKannons & (HasTires | HasDonkey),
             LocationName.millstone_mayhem_bunch_1:
-                lambda state: self.can_slap(state) or (
-                    self.has_tires(state) and self.has_diddy(state) and self.has_kannons(state)),
+                CanSlap | (
+                    HasTires & HasDiddy & HasKannons),
             LocationName.millstone_mayhem_bunch_2:
-                lambda state: self.can_slap(state) or (self.has_tires(state) and self.has_diddy(state)),
+                CanSlap | (HasTires & HasDiddy),
             LocationName.millstone_mayhem_bunch_3:
-                lambda state: self.can_slap(state) or (self.has_tires(state) and self.has_diddy(state)),
+                CanSlap | (HasTires & HasDiddy),
             LocationName.millstone_mayhem_bunch_4:
-                lambda state: self.can_slap(state) or (
-                    self.has_tires(state) and self.has_diddy(state) and self.has_winky(state)),
+                CanSlap | (
+                    HasTires & HasDiddy & HasWinky),
             LocationName.millstone_mayhem_bunch_5:
-                lambda state: self.can_slap(state) or (
-                    self.has_tires(state) and self.has_diddy(state) and self.has_winky(state)),
+                CanSlap | (
+                    HasTires & HasDiddy & HasWinky),
             LocationName.millstone_mayhem_bunch_6:
-                lambda state: self.can_slap(state) or (
-                    self.has_tires(state) and self.has_diddy(state) and self.has_winky(state)),
+                CanSlap | (
+                    HasTires & HasDiddy & HasWinky),
             LocationName.millstone_mayhem_bunch_7:
-                lambda state: self.has_donkey(state) or self.has_tires(state),
+                HasDonkey | HasTires,
             LocationName.millstone_mayhem_bunch_8:
-                lambda state: self.has_donkey(state) or self.has_tires(state),
+                HasDonkey | HasTires,
             LocationName.millstone_mayhem_bunch_9:
-                lambda state: self.can_slap(state) or (
-                    self.has_tires(state) and self.has_diddy(state) and self.has_winky(state)),
+                CanSlap | (
+                    HasTires & HasDiddy & HasWinky),
 
             LocationName.necky_nuts_clear:
-                self.true,
+                True_(),
             LocationName.defeated_necky_1:
-                self.true,
+                True_(),
 
             LocationName.vulture_culture_clear:
-                self.has_kannons,
+                HasKannons,
             EventName.vulture_culture_clear:
-                self.has_kannons,
+                HasKannons,
             LocationName.vulture_culture_bonus_1:
-                lambda state: self.has_kannons(state) and self.has_tires(state),
+                HasKannons & HasTires,
             LocationName.vulture_culture_bonus_2:
-                lambda state: self.has_kannons(state) and self.can_carry(state),
+                HasKannons & CanCarry,
             LocationName.vulture_culture_bonus_3:
-                lambda state: self.has_kannons(state) and self.can_carry(state),
+                HasKannons & CanCarry,
             LocationName.vulture_culture_kong:
-                lambda state: self.has_kannons(state) and self.can_carry(state),
+                HasKannons & CanCarry,
             LocationName.vulture_culture_bunch_1:
-                self.can_slap,
+                CanSlap,
             LocationName.vulture_culture_bunch_2:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.vulture_culture_bunch_3:
-                lambda state: self.has_kannons(state) and (self.can_slap(state) or self.has_both_kongs(state)),
+                HasKannons & (CanSlap | HasBothKongs),
             LocationName.vulture_culture_bunch_4:
-                lambda state: self.has_kannons(state) and (self.can_slap(state) or self.has_diddy(state)),
+                HasKannons & (CanSlap | HasDiddy),
             LocationName.vulture_culture_bunch_5:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.vulture_culture_bunch_6:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
 
             LocationName.tree_top_town_clear:
-                self.has_kannons,
+                HasKannons,
             EventName.tree_top_town_clear:
-                self.has_kannons,
+                HasKannons,
             LocationName.tree_top_town_bonus_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.tree_top_town_bonus_2:
-                self.has_kannons,
+                HasKannons,
             LocationName.tree_top_town_kong:
-                self.has_kannons,
+                HasKannons,
             LocationName.tree_top_town_bunch_1:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.tree_top_town_bunch_2:
-                lambda state: self.has_kannons(state) and self.can_slap(state),
+                HasKannons & CanSlap,
             LocationName.tree_top_town_bunch_3:
-                lambda state: self.has_kannons(state) and (self.can_slap(state) or self.has_diddy(state)),
+                HasKannons & (CanSlap | HasDiddy),
             LocationName.tree_top_town_bunch_4:
-                lambda state: self.has_kannons(state) and (self.can_slap(state) or self.has_diddy(state)),
+                HasKannons & (CanSlap | HasDiddy),
             LocationName.tree_top_town_token_1:
-                self.has_kannons,
+                HasKannons,
 
             LocationName.forest_frenzy_clear:
-                self.can_climb,
+                CanClimb,
             EventName.forest_frenzy_clear:
-                self.can_climb,
+                CanClimb,
             LocationName.forest_frenzy_bonus_1:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.forest_frenzy_bonus_2:
-                lambda state: self.can_climb(state) and self.can_carry(state),
+                CanClimb & CanCarry,
             LocationName.forest_frenzy_kong:
-                lambda state: self.can_climb(state) and self.can_roll(state),
+                CanClimb & CanRoll,
             LocationName.forest_frenzy_bunch_1:
-                lambda state: (self.can_slap(state) and self.can_climb(state)) or 
-                    (self.has_diddy(state) and (self.can_climb(state) or self.can_roll(state))),
+                (CanSlap & CanClimb) | 
+                    (HasDiddy & (CanClimb | CanRoll)),
             LocationName.forest_frenzy_bunch_2:
-                lambda state: self.can_climb(state) and (self.can_slap(state) or self.has_diddy(state)),
+                CanClimb & (CanSlap | HasDiddy),
             LocationName.forest_frenzy_bunch_3:
-                lambda state: self.can_climb(state) and (self.can_slap(state) or self.has_diddy(state)),
+                CanClimb & (CanSlap | HasDiddy),
             LocationName.forest_frenzy_bunch_4:
-                lambda state: self.can_climb(state) and (self.can_slap(state) or self.has_diddy(state)),
+                CanClimb & (CanSlap | HasDiddy),
             LocationName.forest_frenzy_bunch_5:
-                lambda state: self.can_climb(state) and self.can_slap(state),
+                CanClimb & CanSlap,
             LocationName.forest_frenzy_balloon_1:
-                self.can_climb,
+                CanClimb,
 
             LocationName.temple_tempest_clear:
-                lambda state: (self.can_climb(state) or (self.has_diddy(state) and self.can_roll(state))) and 
-                    (self.has_tires(state) or (self.can_carry(state) and self.has_expresso(state))),
+                (CanClimb | (HasDiddy & CanRoll)) & 
+                    (HasTires | (CanCarry & HasExpresso)),
             EventName.temple_tempest_clear:
-                lambda state: (self.can_climb(state) or (self.has_diddy(state) and self.can_roll(state))) and 
-                    (self.has_tires(state) or (self.can_carry(state) and self.has_expresso(state))),
+                (CanClimb | (HasDiddy & CanRoll)) & 
+                    (HasTires | (CanCarry & HasExpresso)),
             LocationName.temple_tempest_bonus_1:
-                lambda state: (self.can_climb(state) or (self.has_diddy(state) and self.can_roll(state))) and self.can_carry(state),
+                (CanClimb | (HasDiddy & CanRoll)) & CanCarry,
             LocationName.temple_tempest_bonus_2:
-                lambda state: self.has_kannons(state) and (self.can_climb(state) or 
-                    (self.can_carry(state) and self.has_expresso(state) and self.has_diddy(state))),
+                HasKannons & (CanClimb | 
+                    (CanCarry & HasExpresso & HasDiddy)),
             LocationName.temple_tempest_kong:
-                lambda state: (self.can_climb(state) and self.has_tires(state)) or 
-                    (self.can_carry(state) and self.has_expresso(state) and self.has_diddy(state)),
+                (CanClimb & HasTires) | 
+                    (CanCarry & HasExpresso & HasDiddy),
             LocationName.temple_tempest_token_1:
-                self.true,
+                True_(),
             LocationName.temple_tempest_bunch_1:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.temple_tempest_bunch_2:
-                lambda state: (self.can_slap(state) and self.can_climb(state)) or 
-                    (self.has_diddy(state) and self.can_roll(state) and self.has_expresso(state)),
+                (CanSlap & CanClimb) | 
+                    (HasDiddy & CanRoll & HasExpresso),
             LocationName.temple_tempest_bunch_3:
-                lambda state: self.can_slap(state) and (self.can_climb(state) or 
-                    (self.has_diddy(state) and self.can_roll(state) and self.has_expresso(state))),
+                CanSlap & (CanClimb | 
+                    (HasDiddy & CanRoll & HasExpresso)),
             LocationName.temple_tempest_bunch_4:
-                lambda state: (self.can_slap(state) and self.can_climb(state)) or 
-                    (self.has_diddy(state) and self.can_roll(state) and self.has_expresso(state)),
+                (CanSlap & CanClimb) | 
+                    (HasDiddy & CanRoll & HasExpresso),
             LocationName.temple_tempest_bunch_5:
-                lambda state: (self.can_slap(state) and self.can_climb(state)) or 
-                    (self.has_diddy(state) and self.can_roll(state) and self.has_expresso(state)),
+                (CanSlap & CanClimb) | 
+                    (HasDiddy & CanRoll & HasExpresso),
             LocationName.temple_tempest_bunch_6:
-                lambda state: self.has_tires(state) and self.can_slap(state) and (self.can_climb(state) or 
-                    (self.has_diddy(state) and self.can_roll(state) and self.has_expresso(state))),
+                HasTires & CanSlap & (CanClimb | 
+                    (HasDiddy & CanRoll & HasExpresso)),
             LocationName.temple_tempest_bunch_7:
-                lambda state: (self.can_climb(state) and self.has_tires(state)) or 
-                    (self.has_diddy(state) and self.can_roll(state) and self.has_expresso(state)),
+                (CanClimb & HasTires) | 
+                    (HasDiddy & CanRoll & HasExpresso),
             LocationName.temple_tempest_bunch_8:
-                lambda state: (self.can_climb(state) and self.has_tires(state)) or 
-                    (self.has_diddy(state) and self.can_roll(state) and self.has_expresso(state)),
+                (CanClimb & HasTires) | 
+                    (HasDiddy & CanRoll & HasExpresso),
 
             LocationName.orang_utan_gang_clear:
-                self.true,
+                True_(),
             EventName.orang_utan_gang_clear:
-                self.true,
+                True_(),
             LocationName.orang_utan_gang_bonus_1:
-                self.has_expresso,
+                HasExpresso,
             LocationName.orang_utan_gang_bonus_2:
-                lambda state: self.can_carry(state) and (self.has_expresso(state) or (self.has_diddy(state) and self.can_roll(state))),
+                CanCarry & (HasExpresso | (HasDiddy & CanRoll)),
             LocationName.orang_utan_gang_bonus_3:
-                lambda state: self.can_carry or self.has_expresso(state),
+                CanCarry | HasExpresso,
             LocationName.orang_utan_gang_bonus_4:
-                lambda state: self.can_carry or self.has_expresso(state),
+                CanCarry | HasExpresso,
             LocationName.orang_utan_gang_bonus_5:
-                self.true,
+                True_(),
             LocationName.orang_utan_gang_kong:
-                lambda state: self.can_carry(state) and self.has_tires(state) and 
-                    (self.can_roll(state) or self.has_expresso(state)) ,
+                CanCarry & HasTires & 
+                    (CanRoll | HasExpresso) ,
             LocationName.orang_utan_gang_bunch_1:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.orang_utan_gang_bunch_2:
-                lambda state: self.can_carry(state) or self.can_slap(state) or self.has_diddy(state),
+                CanCarry | CanSlap | HasDiddy,
             LocationName.orang_utan_gang_bunch_3:
-                self.can_slap,
+                CanSlap,
             LocationName.orang_utan_gang_bunch_4:
-                lambda state: self.can_roll(state) or self.has_expresso(state),
+                CanRoll | HasExpresso,
             LocationName.orang_utan_gang_bunch_5:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.orang_utan_gang_bunch_6:
-                lambda state: self.has_expresso(state) or (self.has_diddy(state) and self.can_roll(state)),
+                HasExpresso | (HasDiddy & CanRoll),
             LocationName.orang_utan_gang_token_1:
-                self.has_expresso,
+                HasExpresso,
             LocationName.orang_utan_gang_bunch_7:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
             LocationName.orang_utan_gang_bunch_8:
-                self.true,
+                True_(),
             LocationName.orang_utan_gang_bunch_9:
-                self.true,
+                True_(),
 
             LocationName.clam_city_clear:
-                self.can_swim,
+                CanSwim,
             EventName.clam_city_clear:
-                self.can_swim,
+                CanSwim,
             LocationName.clam_city_kong:
-                self.can_swim,
+                CanSwim,
             LocationName.clam_city_bunch_1:
-                self.true,
+                True_(),
             LocationName.clam_city_bunch_2:
-                self.can_swim,
+                CanSwim,
             LocationName.clam_city_token_1:
-                self.can_swim,
+                CanSwim,
 
             LocationName.bumble_b_rumble_clear:
-                self.can_carry,
+                CanCarry,
             LocationName.defeated_bumble_b:
-                self.can_carry,
+                CanCarry,
 
             LocationName.snow_barrel_blast_clear:
-                self.has_kannons,
+                HasKannons,
             EventName.snow_barrel_blast_clear:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bonus_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bonus_2:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bonus_3:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_kong:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bunch_1:
-                lambda state: self.has_kannons(state) or self.can_slap(state) or self.has_diddy(state),
+                HasKannons | CanSlap | HasDiddy,
             LocationName.snow_barrel_blast_balloon_1:
-                lambda state: self.has_kannons(state) or self.has_diddy(state),
+                HasKannons | HasDiddy,
             LocationName.snow_barrel_blast_bunch_2:
-                lambda state: (self.has_kannons(state) and 
-                    (self.can_slap(state) or self.has_diddy(state))) or self.has_both_kongs(state),
+                (HasKannons & 
+                    (CanSlap | HasDiddy)) | HasBothKongs,
             LocationName.snow_barrel_blast_bunch_3:
-                lambda state: self.has_kannons(state) and (self.can_slap(state) or self.has_diddy(state)),
+                HasKannons & (CanSlap | HasDiddy),
             LocationName.snow_barrel_blast_token_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_balloon_2:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bunch_4:
-                self.has_kannons,
+                HasKannons,
             LocationName.snow_barrel_blast_bunch_5:
-                lambda state: self.has_kannons(state) and (self.can_slap(state) or self.has_diddy(state)),
+                HasKannons & (CanSlap | HasDiddy),
 
             LocationName.slipslide_ride_clear:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             EventName.slipslide_ride_clear:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_bonus_1:
-                lambda state: self.can_climb(state) and self.can_carry(state),
+                CanClimb & CanCarry,
             LocationName.slipslide_ride_bonus_2:
-                lambda state: self.can_climb(state) and self.can_carry(state),
+                CanClimb & CanCarry,
             LocationName.slipslide_ride_bonus_3:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_kong:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_bunch_1:
-                self.can_climb,
+                CanClimb,
             LocationName.slipslide_ride_bunch_2:
-                lambda state: self.can_climb(state) and (self.can_slap(state) or self.has_diddy(state)),
+                CanClimb & (CanSlap | HasDiddy),
             LocationName.slipslide_ride_bunch_3:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_bunch_4:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_bunch_5:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_bunch_6:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_bunch_7:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.slipslide_ride_bunch_8:
-                lambda state: self.can_climb(state) and self.has_kannons(state) and 
-                    (self.can_slap(state) or self.has_diddy(state)),
+                CanClimb & HasKannons & 
+                    (CanSlap | HasDiddy),
             LocationName.slipslide_ride_bunch_9:
-                lambda state: self.can_climb(state) and self.has_kannons(state) and 
-                    (self.can_slap(state) or self.has_diddy(state)),
+                CanClimb & HasKannons & 
+                    (CanSlap | HasDiddy),
             LocationName.slipslide_ride_token_1:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
 
             LocationName.ice_age_alley_clear:
-                lambda state: (self.can_climb(state) and self.has_kannons(state)) or self.has_expresso(state),
+                (CanClimb & HasKannons) | HasExpresso,
             EventName.ice_age_alley_clear:
-                lambda state: (self.can_climb(state) and self.has_kannons(state)) or self.has_expresso(state),
+                (CanClimb & HasKannons) | HasExpresso,
             LocationName.ice_age_alley_bonus_1:
-                lambda state: (self.can_climb(state) or self.has_expresso(state)) and self.has_kannons(state),
+                (CanClimb | HasExpresso) & HasKannons,
             LocationName.ice_age_alley_bonus_2:
-                lambda state: self.has_expresso(state) and self.has_kannons(state),
+                HasExpresso & HasKannons,
             LocationName.ice_age_alley_kong:
-                self.has_expresso,
+                HasExpresso,
             LocationName.ice_age_alley_bunch_1:
-                lambda state: self.can_slap(state) or (self.has_expresso(state) and self.has_diddy(state)),
+                CanSlap | (HasExpresso & HasDiddy),
             LocationName.ice_age_alley_bunch_2:
-                lambda state: ((self.can_climb(state) and self.has_kannons(state)) or 
-                    self.has_expresso(state)) and (self.can_slap(state) or self.has_diddy(state)),
+                ((CanClimb & HasKannons) | 
+                    HasExpresso) & (CanSlap | HasDiddy),
             LocationName.ice_age_alley_bunch_3:
-                lambda state: (self.can_climb(state) and self.has_kannons(state)) or self.has_expresso(state),
+                (CanClimb & HasKannons) | HasExpresso,
 
             LocationName.croctopus_chase_clear:
-                self.can_swim,
+                CanSwim,
             EventName.croctopus_chase_clear:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_kong:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_bunch_1:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_token_1:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_token_2:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_bunch_2:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_bunch_3:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_bunch_4:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_bunch_5:
-                self.can_swim,
+                CanSwim,
             LocationName.croctopus_chase_balloon_1:
-                self.can_swim,
+                CanSwim,
 
             LocationName.torchlight_trouble_clear:
-                self.true,
+                True_(),
             EventName.torchlight_trouble_clear:
-                self.true,
+                True_(),
             LocationName.torchlight_trouble_bonus_1:
-                self.can_carry,
+                CanCarry,
             LocationName.torchlight_trouble_bonus_2:
-                self.can_carry,
+                CanCarry,
             LocationName.torchlight_trouble_kong:
-                lambda state: self.can_carry(state) and self.can_roll(state),
+                CanCarry & CanRoll,
             LocationName.torchlight_trouble_bunch_1:
-                lambda state: self.can_slap(state) or self.has_diddy(state),
+                CanSlap | HasDiddy,
 
             LocationName.rope_bridge_rumble_clear:
-                self.has_tires,
+                HasTires,
             EventName.rope_bridge_rumble_clear:
-                self.has_tires,
+                HasTires,
             LocationName.rope_bridge_rumble_bonus_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.rope_bridge_rumble_bonus_2:
-                lambda state: self.has_tires(state) and self.has_kannons(state),
+                HasTires & HasKannons,
             LocationName.rope_bridge_rumble_kong:
-                lambda state: self.has_tires(state) and self.can_roll(state),
+                HasTires & CanRoll,
             LocationName.rope_bridge_rumble_bunch_1:
-                lambda state: self.has_tires(state) and self.can_roll(state),
+                HasTires & CanRoll,
 
             LocationName.really_gnawty_rampage_clear:
-                self.true,
+                True_(),
             LocationName.defeated_gnawty_2:
-                self.true,
+                True_(),
 
             LocationName.oil_drum_alley_clear:
-                lambda state: self.has_kannons(state) and 
-                    (self.has_tires(state) or (self.has_diddy(state) and 
-                         (self.has_rambi(state) or self.can_roll(state)))),
+                HasKannons & 
+                    (HasTires | (HasDiddy & 
+                         (HasRambi | CanRoll))),
             EventName.oil_drum_alley_clear:
-                lambda state: self.has_kannons(state) and 
-                    (self.has_tires(state) or (self.has_diddy(state) and 
-                         (self.has_rambi(state) or self.can_roll(state)))),
+                HasKannons & 
+                    (HasTires | (HasDiddy & 
+                         (HasRambi | CanRoll))),
             LocationName.oil_drum_alley_bonus_1:
-                lambda state: self.can_carry(state) and self.has_kannons(state),
+                CanCarry & HasKannons,
             LocationName.oil_drum_alley_bonus_2:
-                self.can_carry,
+                CanCarry,
             LocationName.oil_drum_alley_bonus_3:
-                self.can_carry,
+                CanCarry,
             LocationName.oil_drum_alley_bonus_4:
-                self.has_kannons,
+                HasKannons,
             LocationName.oil_drum_alley_kong:
-                lambda state: self.has_kannons(state) and 
-                    (self.has_tires(state) or (self.has_diddy(state) and 
-                         (self.has_rambi(state) or self.can_roll(state)))),
+                HasKannons & 
+                    (HasTires | (HasDiddy & 
+                         (HasRambi | CanRoll))),
             LocationName.oil_drum_alley_bunch_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.oil_drum_alley_bunch_2:
-                self.has_kannons,
+                HasKannons,
 
             LocationName.trick_track_trek_clear:
-                lambda state: self.has_platforms(state) or (self.can_roll(state) and self.has_kannons(state)),
+                HasPlatforms | (CanRoll & HasKannons),
             EventName.trick_track_trek_clear:
-                lambda state: self.has_platforms(state) or (self.can_roll(state) and self.has_kannons(state)),
+                HasPlatforms | (CanRoll & HasKannons),
             LocationName.trick_track_trek_bonus_1:
-                lambda state: self.has_platforms(state) and self.has_kannons(state) and self.can_roll(state),
+                HasPlatforms & HasKannons & CanRoll,
             LocationName.trick_track_trek_bonus_2:
-                lambda state: self.has_platforms(state) and self.has_kannons(state),
+                HasPlatforms & HasKannons,
             LocationName.trick_track_trek_bonus_3:
-                lambda state: self.has_platforms(state) or (self.can_roll(state) and self.has_kannons(state)),
+                HasPlatforms | (CanRoll & HasKannons),
             LocationName.trick_track_trek_kong:
-                self.has_platforms,
+                HasPlatforms,
             LocationName.trick_track_trek_bunch_1:
-                self.has_platforms,
+                HasPlatforms,
             LocationName.trick_track_trek_token_1:
-                lambda state: self.has_platforms(state) or (self.can_roll(state) and self.has_kannons(state)),
+                HasPlatforms | (CanRoll & HasKannons),
 
             LocationName.elevator_antics_clear:
-                self.can_climb,
+                CanClimb,
             EventName.elevator_antics_clear:
-                self.can_climb,
+                CanClimb,
             LocationName.elevator_antics_bonus_1:
-                lambda state: self.can_climb(state) and (self.can_roll(state) or self.has_diddy(state)),
+                CanClimb & (CanRoll | HasDiddy),
             LocationName.elevator_antics_bonus_2:
-                self.can_climb,
+                CanClimb,
             LocationName.elevator_antics_bonus_3:
-                self.can_climb,
+                CanClimb,
             LocationName.elevator_antics_kong:
-                lambda state: self.can_climb(state) and self.has_kannons(state),
+                CanClimb & HasKannons,
             LocationName.elevator_antics_bunch_1:
-                self.true,
+                True_(),
             LocationName.elevator_antics_bunch_2:
-                self.can_climb,
+                CanClimb,
             LocationName.elevator_antics_bunch_3:
-                self.can_climb,
+                CanClimb,
 
             LocationName.poison_pond_clear:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
             EventName.poison_pond_clear:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
             LocationName.poison_pond_kong:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
             LocationName.poison_pond_bunch_1:
-                self.true,
+                True_(),
             LocationName.poison_pond_bunch_2:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
             LocationName.poison_pond_bunch_3:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
             LocationName.poison_pond_bunch_4:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
             LocationName.poison_pond_bunch_5:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
             LocationName.poison_pond_token_1:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
             LocationName.poison_pond_token_2:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
             LocationName.poison_pond_bunch_6:
-                lambda state: self.can_swim(state) and (self.has_enguarde(state) or self.has_both_kongs(state)),
+                CanSwim & (HasEnguarde | HasBothKongs),
 
             LocationName.mine_cart_madness_clear:
-                self.has_minecart,
+                HasMinecart,
             EventName.mine_cart_madness_clear:
-                self.has_minecart,
+                HasMinecart,
             LocationName.mine_cart_madness_bonus_1:
-                lambda state: self.has_minecart(state) and self.can_climb(state) and self.has_kannons(state),
+                HasMinecart & CanClimb & HasKannons,
             LocationName.mine_cart_madness_bonus_2:
-                lambda state: self.has_minecart(state) and self.has_tires(state) and self.has_kannons(state),
+                HasMinecart & HasTires & HasKannons,
             LocationName.mine_cart_madness_bonus_3:
-                lambda state: self.has_minecart(state) and self.has_tires(state) and self.has_kannons(state),
+                HasMinecart & HasTires & HasKannons,
             LocationName.mine_cart_madness_kong:
-                lambda state: self.has_minecart(state) and (self.has_tires(state) or self.has_donkey(state)),
+                HasMinecart & (HasTires | HasDonkey),
             LocationName.mine_cart_madness_token_1:
-                self.has_minecart,
+                HasMinecart,
             LocationName.mine_cart_madness_bunch_1:
-                self.has_minecart,
+                HasMinecart,
 
             LocationName.blackout_basement_clear:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state),
+                CanClimb & HasTires & HasPlatforms,
             EventName.blackout_basement_clear:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state),
+                CanClimb & HasTires & HasPlatforms,
             LocationName.blackout_basement_bonus_1:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state) and self.has_kannons(state),
+                CanClimb & HasTires & HasPlatforms & HasKannons,
             LocationName.blackout_basement_bonus_2:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state) and self.can_carry(state) and self.has_kannons(state),
+                CanClimb & HasTires & HasPlatforms & CanCarry & HasKannons,
             LocationName.blackout_basement_kong:
-                lambda state: self.can_climb(state) and self.has_tires(state) and self.has_platforms(state) and self.has_kannons(state),
+                CanClimb & HasTires & HasPlatforms & HasKannons,
             LocationName.blackout_basement_token_1:
-                self.true,
+                True_(),
             LocationName.blackout_basement_bunch_1:
-                lambda state: self.can_climb(state) and self.has_tires(state),
+                CanClimb & HasTires,
 
             LocationName.boss_dumb_drum_clear:
-                lambda state: (self.has_diddy(state) and self.can_roll(state)) or self.has_donkey(state),
+                (HasDiddy & CanRoll) | HasDonkey,
             LocationName.defeated_boss_dumb_drum:
-                lambda state: (self.has_diddy(state) and self.can_roll(state)) or self.has_donkey(state),
+                (HasDiddy & CanRoll) | HasDonkey,
 
             LocationName.tanked_up_trouble_clear:
-                lambda state: self.has_platforms(state) and self.has_tires(state),
+                HasPlatforms & HasTires,
             EventName.tanked_up_trouble_clear:
-                lambda state: self.has_platforms(state) and self.has_tires(state),
+                HasPlatforms & HasTires,
             LocationName.tanked_up_trouble_bonus_1:
-                lambda state: self.has_platforms(state) and self.has_kannons(state),
+                HasPlatforms & HasKannons,
             LocationName.tanked_up_trouble_kong:
-                lambda state: self.has_platforms(state) and self.has_tires(state),
+                HasPlatforms & HasTires,
             LocationName.tanked_up_trouble_bunch_1:
-                self.has_platforms,
+                HasPlatforms,
             LocationName.tanked_up_trouble_bunch_2:
-                self.has_platforms,
+                HasPlatforms,
             LocationName.tanked_up_trouble_token_1:
-                self.has_platforms,
+                HasPlatforms,
             LocationName.tanked_up_trouble_bunch_3:
-                lambda state: self.has_platforms(state) and self.has_tires(state),
+                HasPlatforms & HasTires,
             LocationName.tanked_up_trouble_bunch_4:
-                lambda state: self.has_platforms(state) and self.has_tires(state),
+                HasPlatforms & HasTires,
 
             LocationName.manic_mincers_clear:
-                lambda state: self.has_tires(state) or self.can_carry(state) or 
-                    self.has_rambi(state) or self.has_both_kongs(state),
+                HasTires | CanCarry | 
+                    HasRambi | HasBothKongs,
             EventName.manic_mincers_clear:
-                lambda state: self.has_tires(state) or self.can_carry(state) or 
-                    self.has_rambi(state) or self.has_both_kongs(state),
+                HasTires | CanCarry | 
+                    HasRambi | HasBothKongs,
             LocationName.manic_mincers_bonus_1:
-                lambda state: self.can_carry(state) or self.has_rambi(state),
+                CanCarry | HasRambi,
             LocationName.manic_mincers_bonus_2:
-                lambda state: self.can_carry(state) or self.has_rambi(state),
+                CanCarry | HasRambi,
             LocationName.manic_mincers_kong:
-                self.true,
+                True_(),
             LocationName.manic_mincers_bunch_1:
-                self.true,
+                True_(),
             LocationName.manic_mincers_bunch_2:
-                self.true,
+                True_(),
             LocationName.manic_mincers_token_1:
-                self.true,
+                True_(),
 
             LocationName.misty_mine_clear:
-                self.can_climb,
+                CanClimb,
             EventName.misty_mine_clear:
-                self.can_climb,
+                CanClimb,
             LocationName.misty_mine_bonus_1:
-                self.can_climb,
+                CanClimb,
             LocationName.misty_mine_bonus_2:
-                lambda state: self.can_climb(state) and (self.can_carry(state) or self.has_expresso(state)),
+                CanClimb & (CanCarry | HasExpresso),
             LocationName.misty_mine_kong:
-                self.can_climb,
+                CanClimb,
             LocationName.misty_mine_token_1:
-                self.can_carry,
+                CanCarry,
             LocationName.misty_mine_bunch_1:
-                self.can_carry,
+                CanCarry,
             LocationName.misty_mine_bunch_2:
-                self.true,
+                True_(),
             LocationName.misty_mine_token_2:
-                lambda state: self.can_climb(state) and (self.has_expresso(state) or self.can_roll(state)),
+                CanClimb & (HasExpresso | CanRoll),
 
             LocationName.loopy_lights_clear:
-                self.has_tires,
+                HasTires,
             EventName.loopy_lights_clear:
-                self.has_tires,
+                HasTires,
             LocationName.loopy_lights_bonus_1:
-                self.has_kannons,
+                HasKannons,
             LocationName.loopy_lights_bonus_2:
-                lambda state: self.can_carry(state) and (self.has_tires(state) or self.can_roll(state)),
+                CanCarry & (HasTires | CanRoll),
             LocationName.loopy_lights_kong:
-                lambda state: self.has_tires(state) and self.has_kannons(state) and self.can_roll(state) and self.can_carry(state),
+                HasTires & HasKannons & CanRoll & CanCarry,
             LocationName.loopy_lights_bunch_1:
-                lambda state: self.has_tires(state) or self.can_roll(state),
+                HasTires | CanRoll,
             LocationName.loopy_lights_bunch_2:
-                self.has_tires,
+                HasTires,
 
             LocationName.platform_perils_clear:
-                lambda state: self.has_platforms(state) and self.has_tires(state) and 
-                    (self.has_both_kongs(state) or self.can_roll(state) or self.can_carry(state)),
+                HasPlatforms & HasTires & 
+                    (HasBothKongs | CanRoll | CanCarry),
             EventName.platform_perils_clear:
-                lambda state: self.has_platforms(state) and self.has_tires(state) and 
-                    (self.has_both_kongs(state) or self.can_roll(state) or self.can_carry(state)),
+                HasPlatforms & HasTires & 
+                    (HasBothKongs | CanRoll | CanCarry),
             LocationName.platform_perils_bonus_1:
-                lambda state: self.has_platforms(state) and self.has_kannons(state),
+                HasPlatforms & HasKannons,
             LocationName.platform_perils_bonus_2:
-                lambda state: self.has_platforms(state) and 
-                    self.has_tires(state) and self.has_kannons(state) and 
-                    (self.has_both_kongs(state) or self.can_roll(state) or self.can_carry(state)),
+                HasPlatforms & 
+                    HasTires & HasKannons & 
+                    (HasBothKongs | CanRoll | CanCarry),
             LocationName.platform_perils_kong:
-                lambda state: self.has_platforms(state) and self.has_tires(state) and 
-                    (self.has_both_kongs(state) or self.can_roll(state) or self.can_carry(state)),
+                HasPlatforms & HasTires & 
+                    (HasBothKongs | CanRoll | CanCarry),
             LocationName.platform_perils_token_1:
-                self.has_platforms,
+                HasPlatforms,
             LocationName.platform_perils_bunch_1:
-                lambda state: self.has_platforms(state) and self.can_carry(state),
+                HasPlatforms & CanCarry,
 
             LocationName.necky_revenge_clear:
-                self.true,
+                True_(),
             LocationName.defeated_necky_2:
-                self.true,
+                True_(),
         }
-
-
 
     def set_dkc_rules(self) -> None:
         super().set_dkc_rules()

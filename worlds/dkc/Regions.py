@@ -12,8 +12,6 @@ def create_regions(world: "DKCWorld", active_locations):
     multiworld = world.multiworld
     player = world.player
 
-    menu = Region('Menu', player, multiworld)
-
     # Worlds
     dk_isle = Region(RegionName.dk_isle, player, multiworld)
     kongo_jungle = Region(RegionName.kongo_jungle, player, multiworld)
@@ -105,7 +103,6 @@ def create_regions(world: "DKCWorld", active_locations):
     necky_revenge_level = Region(RegionName.necky_revenge_level, player, multiworld)
 
     multiworld.regions += [
-        menu,
         dk_isle,
         kongo_jungle,
         monkey_mines,
@@ -616,8 +613,6 @@ def create_regions(world: "DKCWorld", active_locations):
         add_location_to_region(multiworld, player, active_locations, RegionName.platform_perils_level, LocationName.platform_perils_bunch_1)
 
 def connect_regions(world: "DKCWorld"):
-    connect(world, "Menu", RegionName.dk_isle)
-
     connect(world, RegionName.dk_isle, RegionName.kongo_jungle)
     connect(world, RegionName.dk_isle, RegionName.monkey_mines)
     connect(world, RegionName.dk_isle, RegionName.vine_valley)

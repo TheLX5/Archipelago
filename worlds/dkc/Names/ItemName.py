@@ -46,4 +46,4 @@ extractinator = "Banana Extractinator"
 radar = "Cache Detector"
 
 # Tracker
-glitched = "UT's Glitched Item"
+glitched = "Skill"

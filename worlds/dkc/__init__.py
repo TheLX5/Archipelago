@@ -11,12 +11,13 @@ from worlds.LauncherComponents import launch as launch_component, components, Co
 from .Items import DKCItem, item_table, misc_table, item_groups, STARTING_ID, option_name_to_world_name, items_that_open_checks
 from .Locations import setup_locations, all_locations, location_groups
 from .Regions import create_regions, connect_regions
-from .Names import ItemName, LocationName
+from .Names import ItemName, LocationName, RegionName
 from .Options import DKCOptions, Logic, StartingKong, dkc_option_groups
 from .Client import DKCSNIClient
 from .Levels import generate_level_list, level_map, location_id_to_level_id
 from .Rules import DKCStrictRules, DKCLooseRules, DKCExpertRules
 from .Rom import patch_rom, DKCProcedurePatch, HASH_US
+from . import Tracker
 
 from typing import Dict, Set, List, ClassVar
 
@@ -62,7 +63,7 @@ class DKCWeb(WebWorld):
     option_groups = dkc_option_groups
 
 
-class DKCWorld(World):
+class DKCWorld(Tracker.UTMxin, World):
     """
     monke
     """
@@ -74,16 +75,13 @@ class DKCWorld(World):
     options_dataclass = DKCOptions
     options: DKCOptions
     
-    required_client_version = (0, 6, 5)
-    
-    using_ut: bool
-    ut_can_gen_without_yaml = True
-    glitches_item_name = ItemName.glitched
+    required_client_version = (0, 6, 7)
 
     item_name_to_id = {name: data.code for name, data in item_table.items()}
     location_name_to_id = all_locations
     item_name_groups = item_groups
     location_name_groups = location_groups
+    origin_region_name = RegionName.dk_isle
     hint_blacklist = {
         LocationName.defeated_gnawty_1,
         LocationName.defeated_necky_1,
@@ -115,7 +113,7 @@ class DKCWorld(World):
             raise ValueError(f"Somehow you have a logic option that's currently invalid."
                              f" {logic} for {self.multiworld.get_player_name(self.player)}")
         
-        if not self.using_ut:
+        if not self.is_ut:
             # Test if sphere 1 has at least 2 reachable locations
             state = CollectionState(self.multiworld, allow_partial_entrances=True)
             initial_world = option_name_to_world_name[self.options.starting_world.current_option_name]
@@ -135,9 +133,9 @@ class DKCWorld(World):
         # Universal Tracker: If we're using UT, scan the rules again to build "glitched logic" during the regen
         else:
             if logic == Logic.option_strict:
-                DKCLooseRules(self).set_dkc_glitched_rules()
+                DKCLooseRules(self).set_dkc_glitched_rules(DKCStrictRules(self).location_rules)
             elif logic == Logic.option_loose:
-                DKCExpertRules(self).set_dkc_glitched_rules()
+                DKCExpertRules(self).set_dkc_glitched_rules(DKCLooseRules(self).location_rules)
 
 
     def test_starting_world(self, state: CollectionState):
@@ -327,32 +325,7 @@ class DKCWorld(World):
         self.lost_world_levels: Set[str] = set()
         generate_level_list(self)
 
-        # Handle Universal Tracker support, doesn't do anything during regular generation
-        if hasattr(self.multiworld, "re_gen_passthrough"):
-            if "Donkey Kong Country" in self.multiworld.re_gen_passthrough:
-                self.using_ut = True
-                passthrough = self.multiworld.re_gen_passthrough["Donkey Kong Country"]
-                self.level_connections = passthrough["level_connections"]
-                self.boss_connections = passthrough["boss_connections"]
-                self.options.logic.value = passthrough["logic"]
-                self.options.glitched_world_access.value = passthrough["glitched_world_access"]
-                self.options.starting_kong.value = passthrough["starting_kong"]
-                self.options.gangplank_tokens.value = passthrough["gangplank_tokens"]
-                self.options.starting_world.value = passthrough["starting_world"]
-                self.options.kong_checks.value = passthrough["kong_checks"]
-                self.options.token_checks.value = passthrough["token_checks"]
-                self.options.balloon_checks.value = passthrough["balloon_checks"]
-                self.options.banana_checks.value = passthrough["banana_checks"]
-                self.options.required_jungle_levels.value = passthrough["required_jungle_levels"]
-                self.options.required_mines_levels.value = passthrough["required_mines_levels"]
-                self.options.required_valley_levels.value = passthrough["required_valley_levels"]
-                self.options.required_glacier_levels.value = passthrough["required_glacier_levels"]
-                self.options.required_industries_levels.value = passthrough["required_industries_levels"]
-                self.options.required_caverns_levels.value = passthrough["required_caverns_levels"]
-            else:
-                self.using_ut = False
-        else:
-            self.using_ut = False
+        super().generate_early()
 
 
     def extend_hint_information(self, hint_data: Dict[int, Dict[int, str]]):
