@@ -2994,16 +2994,13 @@ class DKC2LooseRules(DKC2Rules):
             LocationName.fiery_furnace_banana_bunch_3:
                 CanTeamAttack,
             LocationName.fiery_furnace_banana_bunch_4:
-                CanUseControllableBarrels & CanTeamAttack,
+                CanUseControllableBarrels,
             LocationName.fiery_furnace_banana_coin_1:
-                CanUseControllableBarrels & CanTeamAttack & 
-                    CanCartwheel,
+                CanUseControllableBarrels & CanCartwheel,
             LocationName.fiery_furnace_banana_coin_2:
-                CanUseControllableBarrels & CanTeamAttack & 
-                    CanCartwheel,
+                CanUseControllableBarrels & CanCartwheel,
             LocationName.fiery_furnace_banana_bunch_5:
-                CanUseControllableBarrels & CanTeamAttack & 
-                    CanCartwheel,
+                CanUseControllableBarrels & CanCartwheel,
 
 
             LocationName.animal_antics_clear:
