@@ -2918,7 +2918,7 @@ class DKC2LooseRules(DKC2Rules):
             LocationName.black_ice_battle_dk_coin:
                 CanCarry,
             LocationName.black_ice_battle_banana_bunch_1:
-                CanCarry & CanCartwheel,
+                CanCartwheel,
             LocationName.black_ice_battle_red_balloon_1:
                 True_(),
             LocationName.black_ice_battle_red_balloon_2:
