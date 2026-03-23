@@ -11,18 +11,18 @@ from tkinter import Tk, Frame, Label, StringVar, IntVar, Entry, filedialog, mess
     Checkbutton, E, W, BOTTOM, RIGHT, font as font, BooleanVar, Canvas, INSERT, Spinbox, VERTICAL, OptionMenu
 from tkinter.ttk import Separator, Scrollbar
 from tkinter.constants import DISABLED, NORMAL
-from Utils import persistent_store, get_adjuster_settings_no_defaults, tkinter_center_window, open_filename
+from Utils import persistent_store, persistent_load, get_adjuster_settings_no_defaults, tkinter_center_window, open_filename
 
 import ModuleUpdate
 ModuleUpdate.update()
 
 GAME_NAME = "Donkey Kong Country 2"
-WINDOW_MIN_HEIGHT = 380
-WINDOW_MIN_WIDTH = 660
+WINDOW_MIN_HEIGHT = 360
+WINDOW_MIN_WIDTH = 760
 
-from worlds._dkc2_trivia.games import aliases
-from worlds._dkc2_trivia.trivia import parse_topics
-trivia_topics = parse_topics(is_dkc2=True)
+from worlds.dkc2_trivia.games import aliases
+from worlds.dkc2_trivia.trivia import retrieve_topics
+trivia_topics = retrieve_topics(is_dkc2=True)
 trivia_topics = dict(sorted(trivia_topics.items()))
 
 class ArgumentDefaultsHelpFormatter(argparse.RawTextHelpFormatter):
@@ -55,11 +55,13 @@ def manager_gui():
     right_frame = Frame(manager_window)
 
     linked_frame, linked_vars = create_linked_frame(left_frame)
+    global_frame, global_vars = create_global_frame(left_frame)
     trivia_frame, trivia_vars, trivia_canvas_frame = create_trivia_frame(right_frame)
     file_frame, vars_ns = create_file_frame(left_frame, [linked_vars, trivia_vars], trivia_canvas_frame)
 
     file_frame.pack(side=TOP, padx=8, pady=8, fill=BOTH)
     linked_frame.pack(side=TOP, padx=8, pady=8, fill=BOTH)
+    global_frame.pack(side=TOP, padx=8, pady=8, fill=BOTH)
     trivia_frame.pack(side=TOP, padx=8, pady=8, fill=BOTH)
 
     left_frame.pack(side=LEFT, fill=BOTH, expand=True)
@@ -133,6 +135,8 @@ def load_data_from_patch(patch_path, vars_ns, canvas_frame: Frame):
         games_in_session: set = set(games_in_session)
 
         for game in games_in_session:
+            if game not in vars_ns.valid_topics.keys():
+                continue 
             if vars_ns.valid_topics[game].get() == "Session":
                 vars_ns.valid_topics[game].set("Included")
 
@@ -185,7 +189,7 @@ def save_adjusted_data(vars_ns):
 
 def create_linked_frame(parent=None):
     vars = Namespace()
-    frame = LabelFrame(parent, text="Linked Options", padx=8, pady=8)
+    frame = LabelFrame(parent, text="Linked Options (applied to the current patch)", padx=8, pady=8)
 
     vars.death_link_active = BooleanVar()
     death_frame = Frame(frame)
@@ -215,30 +219,78 @@ def create_linked_frame(parent=None):
     return frame, vars
 
 
+def create_global_frame(parent=None):
+    vars_ns = Namespace()
+    frame = LabelFrame(parent, text="Global Options (applies to all sessions)", padx=8, pady=8)
+
+    def save_callback():
+        nonlocal vars_ns
+        save_vars = Namespace()
+        save_vars.guaranteed_rewards = vars_ns.guaranteed_rewards.get()
+        save_vars.random_rewards = vars_ns.random_rewards.get()
+        persistent_store("global_settings", GAME_NAME, save_vars)
+
+    vars_ns.guaranteed_rewards = BooleanVar()
+    guaranteed_rewards_frame = Frame(frame)
+    guaranteed_rewards_check = Checkbutton(guaranteed_rewards_frame, variable=vars_ns.guaranteed_rewards, command=save_callback)
+    guaranteed_rewards_check.pack(side=LEFT, fill=X)
+    guaranteed_rewards_label = Label(guaranteed_rewards_frame, text="Guaranteed DK Coins and G letters in goals")
+    guaranteed_rewards_label.pack(side=LEFT, fill=X)
+
+    vars_ns.random_rewards = BooleanVar()
+    random_rewards_frame = Frame(frame)
+    random_rewards_check = Checkbutton(random_rewards_frame, variable=vars_ns.random_rewards, command=save_callback)
+    random_rewards_check.pack(side=LEFT, fill=X)
+    random_rewards_label = Label(random_rewards_frame, text="Random rewards in goals")
+    random_rewards_label.pack(side=LEFT, fill=X)
+    
+    persistent_settings = persistent_load().get("global_settings", {}).get(GAME_NAME, Namespace())
+    if hasattr(persistent_settings, "guaranteed_rewards"):
+            vars_ns.guaranteed_rewards.set(persistent_settings.guaranteed_rewards)
+    else:
+        vars_ns.guaranteed_rewards.set(False)
+    if hasattr(persistent_settings, "random_rewards"):
+            vars_ns.random_rewards.set(persistent_settings.random_rewards)
+    else:
+        vars_ns.random_rewards.set(False)
+
+    guaranteed_rewards_frame.pack(side=TOP, fill=X)
+    random_rewards_frame.pack(side=TOP, fill=X)
+
+    return frame, vars_ns
+
+
 def create_trivia_frame(parent=None):
     vars = Namespace()
-    frame = LabelFrame(parent, text="Trivia Options", padx=8, pady=8, name="trivia_options")
+    frame = LabelFrame(parent, text="Trivia Options (applies to all sessions)", padx=8, pady=8, name="trivia_options")
     vars.question_count = IntVar()
     vars.question_total_count = StringVar()
     vars.valid_topics = {}
 
     states = ["Session", "Forced", "Excluded"]
 
-    from Utils import persistent_load
     persistent_settings = persistent_load().get("trivia_settings", {}).get(GAME_NAME, Namespace())
+    
+    if hasattr(persistent_settings, "question_count"):
+        if persistent_settings.question_count == 0:
+            vars.question_count.set(1)
+        else:
+            vars.question_count.set(persistent_settings.question_count)
+    else:
+        vars.question_count.set(1)
 
     def on_spin_update():
         nonlocal vars
 
-        string: str = vars.question_total_count.get()
-        easy_count = int(string.split("|")[0].split(":")[1].strip())
-        medium_count = int(string.split("|")[1].split("|")[0].split(":")[1].strip())
-        hard_count = int(string.split("|")[2].split(":")[1].strip())
+        #string: str = vars.question_total_count.get()
+        #easy_count = int(string.split("|")[0].split(":")[1].strip())
+        #medium_count = int(string.split("|")[1].split("|")[0].split(":")[1].strip())
+        #hard_count = int(string.split("|")[2].split(":")[1].strip())
 
-        min_count = min(easy_count, medium_count, hard_count)
-        current_count = vars.question_count.get() * 6
-        if current_count >= min_count:
-            vars.question_count.set(min_count // 6)
+        #min_count = min(easy_count, medium_count, hard_count)
+        #current_count = vars.question_count.get() * 6
+        #if current_count >= min_count:
+        #    vars.question_count.set(min_count // 6)
 
         save_vars = Namespace()
         save_vars.valid_topics = {}
@@ -256,11 +308,6 @@ def create_trivia_frame(parent=None):
     question_count_label = Label(question_count_frame, text="Question count: ")
     question_total_label = Label(question_count_frame, text="")
     question_total_count_label = Label(question_count_frame, textvariable=vars.question_total_count)
-
-    if hasattr(persistent_settings, "question_count"):
-        vars.question_count.set(persistent_settings.question_count)
-    else:
-        vars.question_count.set(1)
 
     question_count_label.pack(side=LEFT, fill=X)
     question_count_spin.pack(side=LEFT, fill=X)
@@ -298,10 +345,10 @@ def create_trivia_frame(parent=None):
         
         vars.question_total_count.set(f"Easy: {easy_count} | Medium: {medium_count} | Hard: {hard_count}")
         
-        min_count = min(easy_count, medium_count, hard_count)
-        current_count = vars.question_count.get() * 6
-        if current_count >= min_count:
-            vars.question_count.set(min_count // 6)
+        #min_count = min(easy_count, medium_count, hard_count)
+        #current_count = vars.question_count.get() * 6
+        #if current_count >= min_count:
+        #    vars.question_count.set(min_count // 6)
 
         persistent_store("trivia_settings", GAME_NAME, save_vars)
 
@@ -337,11 +384,11 @@ def create_trivia_frame(parent=None):
                     easy_count, medium_count, hard_count = add_trivia_count(topic_name, easy_count, medium_count, hard_count)
 
     vars.question_total_count.set(f"Easy: {easy_count} | Medium: {medium_count} | Hard: {hard_count}")
-    
-    min_count = min(easy_count, medium_count, hard_count)
-    current_count = vars.question_count.get() * 6
-    if current_count >= min_count:
-        vars.question_count.set(min_count // 6)
+
+    #min_count = min(easy_count, medium_count, hard_count)
+    #current_count = vars.question_count.get() * 6
+    #if current_count >= min_count:
+    #    vars.question_count.set(min_count // 6)
 
     question_count_frame.pack(side=TOP, fill=X)
     separator_count.pack(fill=X, expand=True, pady=10)
