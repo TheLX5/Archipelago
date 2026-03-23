@@ -4,14 +4,14 @@ import settings
 import threading
 import pkgutil
 
-from BaseClasses import Item, MultiWorld, Tutorial, ItemClassification, Region
+from BaseClasses import MultiWorld, Tutorial, ItemClassification
 from worlds.AutoWorld import World, WebWorld
 from worlds.LauncherComponents import launch as launch_component, components, Component, Type
 
-from .Items import DKC2Item, item_table, misc_table, item_groups, STARTING_ID
+from .Items import DKC2Item, item_table, item_groups, STARTING_ID
 from .Locations import setup_locations, all_locations, location_groups
 from .Regions import create_regions, connect_regions
-from .Names import ItemName, LocationName
+from .Names import ItemName, LocationName, RegionName
 from .Options import DKC2Options, Logic, StartingKong, Goal, LostWorldRockPlacement, dkc2_option_groups
 from .Client import DKC2SNIClient
 from .Levels import generate_level_list, level_map, location_id_to_level_id, lost_world_levels
@@ -78,7 +78,7 @@ class DKC2Web(WebWorld):
     option_groups = dkc2_option_groups
 
 
-class DKC2World(World):
+class DKC2World(Tracker.UTMxin, World):
     """
     Donkey Kong Country 2 is an action platforming game. 
     Play as Diddy Kong and his girlfriend Dixie as they go to Crocodile Isle 
@@ -93,24 +93,13 @@ class DKC2World(World):
     options_dataclass = DKC2Options
     options: DKC2Options
     
-    required_client_version = (0, 6, 0)
-    
-    using_ut: bool = False
-    ut_can_gen_without_yaml = True
-    glitches_item_name = ItemName.glitched
-    #tracker_world = {  # map tracker data for UT
-    #    "map_page_maps": ["maps/maps.json"],
-    #    "map_page_locations": Tracker.map_locations,
-    #    "map_page_setting_key": r"dkc2_current_map_{team}_{player}",
-    #    "map_page_index": Tracker.map_page_index,
-    #    "external_pack_key": "ut_poptracker_path",
-    #    "poptracker_name_mapping": Tracker.poptracker_data,
-    #}
+    required_client_version = (0, 6, 7)
 
     item_name_to_id = {name: data.code for name, data in item_table.items()}
     location_name_to_id = all_locations
     item_name_groups = item_groups
     location_name_groups = location_groups
+    origin_region_name = RegionName.crocodile_isle
     hint_blacklist = {
         LocationName.krow_defeated,
         LocationName.kleever_defeated,
@@ -142,12 +131,13 @@ class DKC2World(World):
             raise ValueError(f"Somehow you have a logic option that's currently invalid."
                              f" {logic} for {self.multiworld.get_player_name(self.player)}")
 
+
         # Universal Tracker: If we're using UT, scan the rules again to build "glitched logic" during the regen
-        if self.using_ut:
+        if self.is_ut:
             if logic == Logic.option_strict:
-                DKC2LooseRules(self).set_dkc2_glitched_rules()
+                DKC2LooseRules(self).set_dkc2_glitched_rules(DKC2StrictRules(self).location_rules)
             elif logic == Logic.option_loose:
-                DKC2ExpertRules(self).set_dkc2_glitched_rules()
+                DKC2ExpertRules(self).set_dkc2_glitched_rules(DKC2LooseRules(self).location_rules)
 
  
     def create_items(self) -> None:
@@ -406,38 +396,7 @@ class DKC2World(World):
         self.lost_world_levels: Set[str] = set()
         generate_level_list(self)
 
-        # Handle Universal Tracker support, doesn't do anything during regular generation
-        if hasattr(self.multiworld, "re_gen_passthrough"):
-            if "Donkey Kong Country 2" in self.multiworld.re_gen_passthrough:
-                self.using_ut = True
-                passthrough = self.multiworld.re_gen_passthrough["Donkey Kong Country 2"]
-                self.level_connections = passthrough["level_connections"]
-                self.boss_connections = passthrough["boss_connections"]
-                self.options.goal.value = passthrough["goal"]
-                self.options.required_galleon_levels.value = passthrough["required_galleon_levels"]
-                self.options.required_cauldron_levels.value = passthrough["required_cauldron_levels"]
-                self.options.required_quay_levels.value = passthrough["required_quay_levels"]
-                self.options.required_kremland_levels.value = passthrough["required_kremland_levels"]
-                self.options.required_gulch_levels.value = passthrough["required_gulch_levels"]
-                self.options.required_keep_levels.value = passthrough["required_keep_levels"]
-                self.options.required_krock_levels.value = passthrough["required_krock_levels"]
-                self.options.logic.value = passthrough["logic"]
-                self.options.starting_kong.value = passthrough["starting_kong"]
-                self.options.lost_world_rocks.value = passthrough["lost_world_rocks"]
-                self.options.krock_boss_tokens.value = passthrough["krock_boss_tokens"]
-                self.options.shuffle_abilities.value = passthrough["shuffled_abilities"]
-                self.options.shuffle_animals.value = passthrough["shuffled_animals"]
-                self.options.shuffle_barrels.value = passthrough["shuffled_barrels"]
-                self.options.kong_checks.value = passthrough["kong_checks"]
-                self.options.dk_coin_checks.value = passthrough["dk_coin_checks"]
-                self.options.swanky_checks.value = passthrough["swanky_checks"]
-                self.options.balloonsanity.value = passthrough["balloonsanity"]
-                self.options.coinsanity.value = passthrough["coinsanity"]
-                self.options.bananasanity.value = passthrough["bananasanity"]
-            else:
-                self.using_ut = False
-        else:
-            self.using_ut = False
+        super().generate_early()
 
 
     def extend_hint_information(self, hint_data: Dict[int, Dict[int, str]]):
