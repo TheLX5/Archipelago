@@ -103,6 +103,7 @@ class DKC2Memory(Enum):
     death_link_flag = Read(DKC2_DEATH_LINK_FLAG, 0x01)
     current_level = Read(DKC2_CURRENT_LEVEL, 0x01)
     loaded_level = Read(DKC2_LOADED_LEVEL, 0x01)
+    current_map_level = Read(WRAM_START + 0x066E, 0x01)
     current_map = Read(DKC2_CURRENT_MAP, 0x01)
     brightness = Read(DKC2_BRIGHTNESS, 0x01)
     tracked_levels = Read(DKC2_TRACKED_LEVELS, 0x20)
@@ -141,6 +142,7 @@ class DKC2SNIClient(SNIClient):
         self.energy_link_enabled = False
         self.received_trap_link = False
         self.barrel_request = ""
+        self.barrel_count = ""
         self.current_map = 0
         self.barrel_label = None
         self.message_queue = []
@@ -226,18 +228,15 @@ class DKC2SNIClient(SNIClient):
             self.current_map = 0
             return
         
-        player_state = memory_data.get(DKC2Memory.player_state)
-        if player_state is None:
-            return
+        player_state = int.from_bytes(memory_data.get(DKC2Memory.player_state), "little")
         
         if "DeathLink" in ctx.tags and ctx.last_death_link + 1 < time.time():
-            death_link_flag = memory_data.get(DKC2Memory.death_link_flag)
-            if death_link_flag is not None:
-                is_death_link_active = death_link_flag[0]
-                is_player_dead = player_state[0] & 0x20
-                is_map = nmi_pointer == 0x8CE9 or nmi_pointer == 0x8CF1
-                currently_dead = is_player_dead and not is_death_link_active and not is_map
-                await ctx.handle_deathlink_state(currently_dead)
+            current_map_level = int.from_bytes(memory_data.get(DKC2Memory.current_map_level))
+            is_death_link_active = int.from_bytes(memory_data.get(DKC2Memory.death_link_flag))
+            is_player_dead = player_state & 0x20
+            is_map = nmi_pointer == 0x8CE9 or nmi_pointer == 0x8CF1
+            currently_dead = bool(is_player_dead) and not is_death_link_active and not is_map and current_map_level
+            await ctx.handle_deathlink_state(currently_dead)
 
         if "EnergyLink" in ctx.tags:
             await self.handle_energy_link(ctx, memory_data)
@@ -593,7 +592,7 @@ class DKC2SNIClient(SNIClient):
         
         if self.barrel_request == "place_request":
             self.barrel_request_tag = f"dkc2-dkbarrel-{ctx.team}-{ctx.slot}-{random.randint(0, 0xFFFFFFFF)}"
-            value = DK_BARREL_BANANA_COST * DKC2_EXCHANGE_RATE
+            value = DK_BARREL_BANANA_COST * DKC2_EXCHANGE_RATE * self.barrel_count
             await ctx.send_msgs([{ 
                 "cmd": "Set", 
                 "key": f"EnergyLink{ctx.team}", 
@@ -608,10 +607,11 @@ class DKC2SNIClient(SNIClient):
             self.barrel_request = "pending"
 
         elif self.barrel_request == "successful":
-            barrels += 1
-            barrels &= 0x00FF
+            barrels += self.barrel_count
+            barrels &= 0x0FFF
             snes_buffered_write(ctx, DKC2_SRAM + 0x48, bytes([barrels]))
             self.barrel_request = ""
+            self.barrel_count = 0
             logger.info(f"Delivered DK Barrel! You have {barrels} barrels pending to be actually delivered in game.")
         
         elif self.barrel_request == "not_enough_funds":
@@ -625,7 +625,8 @@ class DKC2SNIClient(SNIClient):
             }])
             self.barrel_request_refund = 0
             self.barrel_request = ""
-            logger.info(f"Not enough bananas to summon a barrel! You need at least {DK_BARREL_BANANA_COST} bananas.")
+            logger.info(f"Not enough bananas to summon a barrel! You need at least {DK_BARREL_BANANA_COST * self.barrel_count} bananas.")
+            self.barrel_count = 0
 
         await snes_flush_writes(ctx)
 
@@ -744,28 +745,31 @@ class DKC2SNIClient(SNIClient):
         in_map = nmi_pointer == 0x8CE9 or nmi_pointer == 0x8CF1
 
         # Early return for non tracker messages
-        if not self.last_message[0]:
-            classification = self.last_message[3]
-            is_received = self.last_message[4]
-            if is_received:
-                if not self.slot_data["display_messages"] & 0x02:
-                    return
-                current_filter = self.slot_data["received_message_filter"]
-            else:
-                if not self.slot_data["display_messages"] & 0x01:
-                    return
-                current_filter = self.slot_data["sent_message_filter"]
+        try:
+            if not self.last_message[0]:
+                classification = self.last_message[3]
+                is_received = self.last_message[4]
+                if is_received:
+                    if not self.slot_data["display_messages"] & 0x02:
+                        return
+                    current_filter = self.slot_data["received_message_filter"]
+                else:
+                    if not self.slot_data["display_messages"] & 0x01:
+                        return
+                    current_filter = self.slot_data["sent_message_filter"]
 
-            if classification & 0x01 and "Progression" in current_filter:
-                pass
-            elif classification & 0x02 and "Useful" in current_filter:
-                pass
-            elif classification & 0x04 and "Trap" in current_filter:
-                pass
-            elif classification == 0x00 and "Filler" in current_filter:
-                pass
-            else:
-                return
+                if classification & 0x01 and "Progression" in current_filter:
+                    pass
+                elif classification & 0x02 and "Useful" in current_filter:
+                    pass
+                elif classification & 0x04 and "Trap" in current_filter:
+                    pass
+                elif classification == 0x00 and "Filler" in current_filter:
+                    pass
+                else:
+                    return
+        except IndexError:
+            return
         
         message_buffer = message_received_to_bytes(ctx, self.last_message, in_map)
         message_colors = self.parse_client_colors(ctx)
@@ -805,21 +809,30 @@ class DKC2SNIClient(SNIClient):
 
 
     async def deathlink_kill_player(self, ctx: "SNIContext"):
-        from SNIClient import DeathState, snes_buffered_write, snes_flush_writes, snes_read
+        from SNIClient import DeathState, snes_buffered_write, snes_flush_writes
 
-        # Discard killing from death link
-        death_link_flag = await snes_read(ctx, DKC2_DEATH_LINK_FLAG, 0x01)
-        if death_link_flag is None:
+        memory_data = await self.memory_reader.read(ctx)
+        if memory_data is None:
             return
-        if death_link_flag[0]:
+        
+        # Discard killing from death link
+        death_link_flag = int.from_bytes(memory_data.get(DKC2Memory.death_link_flag))
+        if death_link_flag:
             return
         
         # Discard killing from the map
-        nmi_pointer = await snes_read(ctx, WRAM_START + 0x0020, 0x2)
-        if nmi_pointer is None:
-            return
-        nmi_pointer = int.from_bytes(nmi_pointer, "little")
+        nmi_pointer = int.from_bytes(memory_data.get(DKC2Memory.nmi_pointer), "little")
         if nmi_pointer == 0x8CE9 or nmi_pointer == 0x8CF1:
+            return
+        
+        # Discard killing if already dead
+        player_state = int.from_bytes(memory_data.get(DKC2Memory.player_state))
+        if player_state & 0x20:
+            return
+
+        # Discard killing if on a shop level
+        current_map_level = int.from_bytes(memory_data.get(DKC2Memory.current_map_level))
+        if not current_map_level:
             return
             
         snes_buffered_write(ctx, DKC2_DEATH_LINK_FORCE, bytes([0x01]))
@@ -862,7 +875,7 @@ class DKC2SNIClient(SNIClient):
             if self.barrel_request == "pending" and "tag" in args:
                 if args["tag"] == self.barrel_request_tag:
                     self.barrel_request_tag = ""
-                    dk_barrel_cost = DKC2_EXCHANGE_RATE * DK_BARREL_BANANA_COST
+                    dk_barrel_cost = DKC2_EXCHANGE_RATE * DK_BARREL_BANANA_COST * self.barrel_count
                     if args["original_value"] < dk_barrel_cost:
                         # send back the original value
                         value = args["original_value"]
@@ -913,9 +926,9 @@ class DKC2SNIClient(SNIClient):
                 if item.player != ctx.slot and item.location in self.current_session_locations and item.location not in self.processed_locations:
                     self.processed_locations.add(item.location)
                     self.message_queue.append([False, ctx.player_names[item.player], ctx.item_names.lookup_in_slot(item.item, item.player), item.flags, False])
+        
 
-
-def cmd_request(self):
+def cmd_request(self, amount: str = ""):
     """
     Request a DK Barrel from the banana pool (EnergyLink).
     """
@@ -924,9 +937,21 @@ def cmd_request(self):
     if (not self.ctx.server) or self.ctx.server.socket.closed or not self.ctx.client_handler.game_state:
         logger.info(f"Must be connected to server and in game.")
     else:
-        if self.ctx.client_handler.barrel_request != "":
-            logger.info(f"You already have a DK Barrel in queue.")
-            return
+        if amount:
+            try:
+                amount = int(amount)
+            except ValueError:
+                logger.info(f"Please specify a valid number.")
+                return
+            if amount <= 0:
+                logger.info(f"Please specify a number higher than 0.")
+                return
+            if self.ctx.client_handler.barrel_request != "":
+                logger.info(f"You already have a DK Barrel in queue.")
+                return
+            else:
+                self.ctx.client_handler.barrel_request = "place_request"
+                self.ctx.client_handler.barrel_count = amount
+                logger.info(f"Placing a DK barrel request...")
         else:
-            self.ctx.client_handler.barrel_request = "place_request"
-            logger.info(f"Placing a DK barrel request...")
+            logger.info(f"You need to specify how many Barrels you will request.")

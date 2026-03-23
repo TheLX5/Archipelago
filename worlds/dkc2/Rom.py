@@ -97,10 +97,10 @@ unlock_data = {
 currency_data = {
     STARTING_ID + 0x002F: [0x8024, 0x56],
     STARTING_ID + 0x0008: [0x802F, 0x36], # Lost World Rock
-    STARTING_ID + 0x0009: [0x08CE, 0x56], # DK Coin
-    STARTING_ID + 0x000A: [0x08CC, 0x36], # Kremkoin
-    STARTING_ID + 0x0030: [0x08CA, 0x2D], # Banana Coin
-    STARTING_ID + 0x0031: [0x08BE, 0x2C], # 1-Up
+    STARTING_ID + 0x0009: [0x80A2, 0x00], # DK Coin
+    STARTING_ID + 0x000A: [0x80A4, 0x00], # Kremkoin
+    STARTING_ID + 0x0030: [0x80A6, 0x00], # Banana Coin
+    STARTING_ID + 0x0031: [0x80A0, 0x00], # 1-Up
 }
 
 trap_data = {
@@ -115,7 +115,32 @@ trap_data = {
     STARTING_ID + 0x0033: [0x4C, 0x2D], # Banana Extractinator (not a trap, but this system works better lol)
 }
 
-        
+reward_list = [
+    0x00,   # Banana bunch
+    0x05,   # DK Barrel
+    0x06,   # TNT Barrel
+    0x07,   # Invincibility barrel
+    0x08,   # Red balloon
+    0x09,   # Green balloon
+    0x0A,   # Blue balloon
+    0x0C,   # Banana coin
+    0x12,   # Cannonball
+    0x19,   # Single banana
+]
+
+reward_list_weights = [
+    20,  # Banana bunch
+    5,   # DK Barrel
+    5,   # TNT Barrel
+    5,   # Invincibility barrel
+    10,  # Red balloon
+    10,  # Green balloon
+    10,  # Blue balloon
+    25,  # Banana coin
+    5,   # Cannonball
+    5,   # Single banana
+]
+
 trivia_addrs = {
     "easy": [
         0x34F800,
@@ -254,19 +279,12 @@ class DKC2PatchExtension(APPatchExtension):
         rom = bytearray(rom)
 
         import random
-        from worlds._dkc2_trivia.trivia import parse_topics
-        from worlds._dkc2_trivia.games import aliases
-        from worlds._dkc2_trivia.types import TriviaQuestion, Topic
+        from worlds.dkc2_trivia.trivia import retrieve_topics
+        from worlds.dkc2_trivia.types import TriviaQuestion, Topic
 
         json_data = json.loads(caller.get_file("data.json").decode("UTF-8"))
         random.seed(json_data["seed"])
-        games_in_session: list = json_data["games_in_session"]
-
-        for idx, game in enumerate(games_in_session):
-            if game in aliases.keys():
-                games_in_session[idx] = aliases[game]
-
-        games_in_session: set = set(games_in_session)
+        games_in_session: set = set(json_data["games_in_session"])
 
         if vars(Utils.persistent_load().get("trivia_settings", {}).get("Donkey Kong Country 2", Namespace())):
             persistent_settings = Utils.persistent_load().get("trivia_settings", {}).get("Donkey Kong Country 2", Namespace())
@@ -289,7 +307,7 @@ class DKC2PatchExtension(APPatchExtension):
 
         # Build database from original question
         start_addr = 0x34C591
-        local_trivia_data: dict[str, Topic] = parse_topics(is_dkc2=True)
+        local_trivia_data: dict[str, Topic] = retrieve_topics(games_in_session, is_dkc2=True)
 
         for idx in range(0, 0x1B0, 8):
             if idx in excluded_questions:
@@ -330,10 +348,9 @@ class DKC2PatchExtension(APPatchExtension):
         }
         
         for game, trivia in local_trivia_data.items():
-            if game in games_in_session:
-                selected_trivia["easy"].extend(trivia.easy_questions)
-                selected_trivia["medium"].extend(trivia.medium_questions)
-                selected_trivia["hard"].extend(trivia.hard_questions)
+            selected_trivia["easy"].extend(trivia.easy_questions)
+            selected_trivia["medium"].extend(trivia.medium_questions)
+            selected_trivia["hard"].extend(trivia.hard_questions)
 
         question_count = min(question_count, 
                              len(selected_trivia["easy"]) // 6, 
@@ -442,8 +459,79 @@ class DKC2PatchExtension(APPatchExtension):
 
     @staticmethod
     def write_settings(caller: APProcedurePatch, rom: bytes) -> bytes:
-        return rom
+        rom = bytearray(rom)
 
+        import random
+
+        reward_addrs: list[int] = [
+            0x3FC49C,
+            0x3FC4A5,
+            0x3FC4AE,
+            0x3FC4C9,
+            0x3FC4D2,
+            0x3FC4DB,
+            0x3FC4ED,
+            0x3FC4FF,
+            0x3FC508,
+            0x3FC511,
+            0x3FC51A,
+            0x3FC523,
+            0x3FC52C,
+            0x3FC53E,
+            0x3FC550,
+            0x3FC559,
+        ]
+
+        special_reward_addrs: dict[int, list[int,int]] = {
+            0x3FC4B7: [0x04, 0x03],  # G letter
+            0x3FC4C0: [0x04, 0x03],  # G letter
+            0x3FC4E4: [0x04, 0x03],  # G letter
+            0x3FC535: [0x04, 0x03],  # G letter
+            0x3FC4F6: [0x11, 0x00],  # DK Coin
+            0x3FC547: [0x11, 0x01],  # DK Coin
+        }
+
+        if vars(Utils.persistent_load().get("global_settings", {}).get("Donkey Kong Country 2", Namespace())):
+            persistent_settings = Utils.persistent_load().get("global_settings", {}).get("Donkey Kong Country 2", Namespace())
+            if hasattr(persistent_settings, "guaranteed_rewards"):
+                guaranteed_rewards = persistent_settings.guaranteed_rewards
+            else:
+                guaranteed_rewards = False
+            if hasattr(persistent_settings, "random_rewards"):
+                random_rewards = persistent_settings.random_rewards
+            else:
+                random_rewards = False
+        else:
+            guaranteed_rewards = False
+            random_rewards = False
+
+        print (guaranteed_rewards, random_rewards)
+
+        if guaranteed_rewards:
+            for addr, value in special_reward_addrs.items():
+                rom[addr+0x00] = 0x40
+                rom[addr+0x01] = value[0x00]
+                rom[addr+0x02] = 0x00
+
+        if random_rewards:
+            for addr in reward_addrs:
+                rewards = random.choices(reward_list, reward_list_weights, k=4)
+                rom[addr+0x01] = rewards[0]
+                rom[addr+0x03] = rewards[1]
+                rom[addr+0x05] = rewards[2]
+                rom[addr+0x07] = rewards[3]
+
+            if not guaranteed_rewards:
+                for addr, value in special_reward_addrs.items():
+                    rewards = random.choices(reward_list, reward_list_weights, k=4)
+                    rom[addr+0x01] = rewards[0]
+                    rom[addr+0x03] = rewards[1]
+                    rom[addr+0x05] = rewards[2]
+                    rom[addr+0x07] = rewards[3]
+                    offset = value[1] * 2
+                    rom[addr+0x01+offset] = value[0]
+
+        return bytes(rom)
 
 
 def write_text_to_rom(rom: bytearray, write_addr: int, input_string: str):
@@ -660,6 +748,8 @@ def compute_cranky_hints(world: "DKC2World", patch: DKC2ProcedurePatch):
     valid_hints: List[CrankyHint] = []
     for location in world.multiworld.get_filled_locations(world.player):
         if location.progress_type is LocationProgressType.EXCLUDED or \
+            location.is_event or \
+            "(Map Event)" in location.name or \
             "Defeated" in location.name or \
             "K. Rool Duel" in location.name or  \
             "Krocodile Kore" in location.name:
