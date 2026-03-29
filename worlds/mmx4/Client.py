@@ -26,10 +26,15 @@ ADDRESS_TANK_FLAGS = 0x0F1774
 ADDRESS_ARMOR_PICKED_UP = 0x0F1790
 ADDRESS_BOSSES_DEFEATED = 0x0F17A0
 ADDRESS_ITEMS_PICKED_UP = 0x0EE558
+# Button Presses
+ADDRESS_SELECT_PRESSED = 0x166C09
+# SELECTED WEAPON
+ADDRESS_WEAPON_SELECTED = 0x14195B
 
 class MMX4Client(BizHawkClient):
     game = "Mega Man X4"
     system = "PSX"
+    weapon = 0
 
     def __init__(self) -> None:
         self.ram = "MainRAM"
@@ -64,6 +69,7 @@ class MMX4Client(BizHawkClient):
             # Calculate our unlocked items
             unlocked_weapons_value = 0
             unlocked_armor_value = 0
+            unlocked_buster_value = 0
             # 0x20 base
             max_health_value = 32
             unlocked_tanks_value = 0
@@ -94,8 +100,10 @@ class MMX4Client(BizHawkClient):
                 if item_id == 14575109:
                     unlocked_armor_value |= 0b10
                 # Arms
-                if item_id == 14575110 or item_id == 14575111:
-                    unlocked_armor_value |= 0b100
+                if item_id == 14575110:
+                    unlocked_buster_value |= 0b10
+                if item_id == 14575111:
+                    unlocked_buster_value |= 0b01
                 # Legs
                 if item_id == 14575112:
                     unlocked_armor_value |= 0b1000
@@ -126,14 +134,32 @@ class MMX4Client(BizHawkClient):
                         "status": ClientStatus.CLIENT_GOAL
                     }])
 
+            override_weapon = False
+            # Detect selected weapon to allow charging any weapon as long as you have either plasma shot or stock charge
+            if (await bizhawk.read(ctx.bizhawk_ctx, [(ADDRESS_WEAPON_SELECTED, 1, self.ram)]))[0][0] > 0 and unlocked_buster_value & 0b11 > 0:
+                override_weapon = True
+
+            # Detect select press to switch between buster types
+            if (await bizhawk.read(ctx.bizhawk_ctx, [(ADDRESS_SELECT_PRESSED, 1, self.ram)]))[0][0] & 1 == 1:
+                self.weapon += 1
+                if self.weapon == 1 and unlocked_buster_value & 0b01 == 0:
+                    self.weapon += 1
+                if self.weapon == 2 and unlocked_buster_value & 0b10 == 0:
+                    self.weapon = 0
+                if self.weapon >= 3:
+                    self.weapon = 0
+
+            if self.weapon > 0 or override_weapon:
+                unlocked_armor_value |= 0b100
+
             # Lock here before we do our edits
             await bizhawk.lock(ctx.bizhawk_ctx)
             # Write Weapons
             await bizhawk.write(ctx.bizhawk_ctx, [(ADDRESS_WEAPONS_FLAGS, [unlocked_weapons_value], self.ram)])
             # Write Armor
             await bizhawk.write(ctx.bizhawk_ctx, [(ADDRESS_ARMOR_FLAGS, [unlocked_armor_value], self.ram)])
-            # Write Buster Type, Gamma forced for now
-            await bizhawk.write(ctx.bizhawk_ctx, [(ADDRESS_ARMS_FLAGS, [0b10], self.ram)])
+            # Write Buster Type
+            await bizhawk.write(ctx.bizhawk_ctx, [(ADDRESS_ARMS_FLAGS, [self.weapon], self.ram)])
             # Write Max Health
             await bizhawk.write(ctx.bizhawk_ctx, [(ADDRESS_MAX_HEALTH, [max_health_value], self.ram)])
             # Write Tanks
