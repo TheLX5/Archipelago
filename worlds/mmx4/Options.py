@@ -253,6 +253,29 @@ class GeneralRequirement(ItemDict, Mapping[str, int]):
     def __len__(self) -> int:
         return self.value.__len__()
 
+class SigmaRequirement(ItemDict, Mapping[str, int]):
+    """
+    A list of items required in logic to beat Sigma
+    Rising Fire is already required by default
+    for example: { Ground Hunter: 1, Soul Body: 1, Lightning Web: 1, Heart Tank: 8 }
+    """
+
+    display_name = "Sigma Requirement"
+    value: Dict[str, int]
+
+    @property
+    def count(self) -> int:
+        return sum(self.values())
+
+    def __getitem__(self, key: str) -> int:
+        return self.value.__getitem__(key)
+
+    def __iter__(self) -> Iterator[str]:
+        return self.value.__iter__()
+
+    def __len__(self) -> int:
+        return self.value.__len__()
+
 # making this mixin so we can keep actual game options separate from AP core options that we want enabled
 # not sure why this isn't a mixin in core atm, anyways
 @dataclass
@@ -276,6 +299,7 @@ class MMX4Options(StartInventoryFromPoolMixin, PerGameCommonOptions):
 
     double_iris_requirement: DoubleIrisRequirement
     general_requirement: GeneralRequirement
+    sigma_requirement: SigmaRequirement
 
 option_groups: Dict[str, List[Any]] = {
     "General Options": [PickupSanity],

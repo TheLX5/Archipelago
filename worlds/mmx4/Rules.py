@@ -34,57 +34,60 @@ def is_zero(world: "MMX4World") -> bool:
 
 def can_beat_web_spider(state: CollectionState, options: MMX4Options, player: int) -> bool:
     if(bool(options.enable_boss_item_requirements)):
-        return state.has("Web Spider Stage Access", player) and state.has_all_counts(options.web_spider_requirement, player);
+        return state.has("Web Spider Stage Access", player) and state.has_all_counts(options.web_spider_requirement, player)
     else:
         return state.has("Web Spider Stage Access", player)
 
 def can_beat_cyber_peacock(state: CollectionState, options: MMX4Options, player: int) -> bool:
     if(bool(options.enable_boss_item_requirements)):
-        return state.has("Cyber Peacock Stage Access", player) and state.has_all_counts(options.cyber_peacock_requirement, player);
+        return state.has("Cyber Peacock Stage Access", player) and state.has_all_counts(options.cyber_peacock_requirement, player)
     else:
         return state.has("Cyber Peacock Stage Access", player)
 
 def can_beat_strom_owl(state: CollectionState, options: MMX4Options, player: int) -> bool:
     if(bool(options.enable_boss_item_requirements)):
-        return state.has("Storm Owl Stage Access", player) and state.has_all_counts(options.storm_owl_requirement, player);
+        return state.has("Storm Owl Stage Access", player) and state.has_all_counts(options.storm_owl_requirement, player)
     else:
         return state.has("Storm Owl Stage Access", player)
 
 def can_beat_magma_dragoon(state: CollectionState, options: MMX4Options, player: int) -> bool:
     if(bool(options.enable_boss_item_requirements)):
-        return state.has("Magma Dragoon Stage Access", player) and state.has_all_counts(options.magma_dragoon_requirement, player);
+        return state.has("Magma Dragoon Stage Access", player) and state.has_all_counts(options.magma_dragoon_requirement, player)
     else:
         return state.has("Magma Dragoon Stage Access", player)
 
 def can_beat_jet_stingray(state: CollectionState, options: MMX4Options, player: int) -> bool:
     if(bool(options.enable_boss_item_requirements)):
-        return state.has("Jet Stingray Stage Access", player) and state.has_all_counts(options.jet_stingray_requirement, player);
+        return state.has("Jet Stingray Stage Access", player) and state.has_all_counts(options.jet_stingray_requirement, player)
     else:
         return state.has("Jet Stingray Stage Access", player)
 
 def can_beat_split_mushroom(state: CollectionState, options: MMX4Options, player: int) -> bool:
     if(bool(options.enable_boss_item_requirements)):
-        return state.has("Split Mushroom Stage Access", player) and state.has_all_counts(options.split_mushroom_requirement, player);
+        return state.has("Split Mushroom Stage Access", player) and state.has_all_counts(options.split_mushroom_requirement, player)
     else:
         return state.has("Split Mushroom Stage Access", player)
 
 def can_beat_slash_beast(state: CollectionState, options: MMX4Options, player: int) -> bool:
     if(bool(options.enable_boss_item_requirements)):
-        return state.has("Slash Beast Stage Access", player) and state.has_all_counts(options.slash_beast_requirement, player);
+        return state.has("Slash Beast Stage Access", player) and state.has_all_counts(options.slash_beast_requirement, player)
     else:
         return state.has("Slash Beast Stage Access", player)
 
 def can_beat_frost_walrus(state: CollectionState, options: MMX4Options, player: int) -> bool:
     if(bool(options.enable_boss_item_requirements)):
-        return state.has("Frost Walrus Stage Access", player) and state.has_all_counts(options.frost_walrus_requirement, player);
+        return state.has("Frost Walrus Stage Access", player) and state.has_all_counts(options.frost_walrus_requirement, player)
     else:
         return state.has("Frost Walrus Stage Access", player)
 
 def can_beat_double_iris(state: CollectionState, options: MMX4Options, player: int) -> bool:
-    return state.has_all_counts(options.double_iris_requirement, player);
+    return state.has_all_counts(options.double_iris_requirement, player)
 
 def can_beat_general(state: CollectionState, options: MMX4Options, player: int) -> bool:
-    return state.has_all_counts(options.general_requirement, player);
+    return state.has_all_counts(options.general_requirement, player)
+
+def can_beat_sigma(state: CollectionState, options: MMX4Options, player: int) -> bool:
+    return state.has_all_counts(options.sigma_requirement, player)
 
 def set_rules(world: "MMX4World"):
     player = world.player
@@ -226,8 +229,12 @@ def set_rules(world: "MMX4World"):
                  lambda state: state.has("Rising Fire", player))
 
     # Beating Sigma also requires Rising Fire. Shouldn't change anything for the actual logic since it's the last check, but is helpful to have for Universal Tracker
-    add_rule(world.multiworld.get_location("Sigma Defeated", player),
-            lambda state: state.has("Rising Fire", player))
+    if(bool(options.enable_boss_item_requirements)):
+        add_rule(world.multiworld.get_location("Sigma Defeated", player),
+                lambda state: state.has("Rising Fire", player) and can_beat_sigma(state, options, player))
+    else:
+        add_rule(world.multiworld.get_location("Sigma Defeated", player),
+                lambda state: state.has("Rising Fire", player))
     
     # Victory condition rule!
     world.multiworld.completion_condition[player] = lambda state: state.has("Victory", player)
