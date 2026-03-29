@@ -10,6 +10,7 @@ class MMX4Item(Item):
 class ItemData(NamedTuple):
     ap_code: Optional[int]
     classification: ItemClassification
+    classification_zero: ItemClassification
     count: Optional[int] = 1
 
 class LocData(NamedTuple):

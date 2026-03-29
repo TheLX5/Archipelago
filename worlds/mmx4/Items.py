@@ -9,6 +9,9 @@ from typing import List, Dict, TYPE_CHECKING
 if TYPE_CHECKING:
     from . import MMX4World
 
+def is_zero(world: "MMX4World") -> bool:
+    return getattr(world.options.character, "value", world.options.character) == 1
+
 def create_itempool(world: "MMX4World") -> List[Item]:
     itempool: List[Item] = []
     
@@ -34,7 +37,7 @@ def create_itempool(world: "MMX4World") -> List[Item]:
 
 def create_item(world: "MMX4World", name: str) -> Item:
     data = item_table[name]
-    return MMX4Item(name, data.classification, data.ap_code, world.player)
+    return MMX4Item(name, data.classification_zero if is_zero(world) else data.classification, data.ap_code, world.player)
 
 def create_multiple_items(world: "MMX4World", name: str, count: int,
                           item_type: ItemClassification = ItemClassification.progression) -> List[Item]:
@@ -52,7 +55,7 @@ def create_junk_items(world: "MMX4World", count: int) -> List[Item]:
     trap_list: Dict[str, int] = {}
 
     for name in item_table.keys():
-        ic = item_table[name].classification
+        ic = item_table[name].classification_zero if is_zero(world) else item_table[name].classification
         if ic == ItemClassification.filler:
             junk_list[name] = 1
 
@@ -64,48 +67,48 @@ def create_junk_items(world: "MMX4World", count: int) -> List[Item]:
 
 mmx4_items = {
     # Maverick Weapons
-    "Lightning Web": ItemData(14575100, ItemClassification.progression),
-    "Aiming Laser": ItemData(14575101, ItemClassification.progression),
-    "Double Cyclone": ItemData(14575102, ItemClassification.progression),
-    "Rising Fire": ItemData(14575103, ItemClassification.progression),
-    "Ground Hunter": ItemData(14575104, ItemClassification.progression),
-    "Soul Body": ItemData(14575105, ItemClassification.progression),
-    "Twin Slasher": ItemData(14575106, ItemClassification.progression),
-    "Frost Tower": ItemData(14575107, ItemClassification.progression),
+    "Lightning Web": ItemData(14575100, ItemClassification.progression, ItemClassification.progression),
+    "Aiming Laser": ItemData(14575101, ItemClassification.progression, ItemClassification.progression),
+    "Double Cyclone": ItemData(14575102, ItemClassification.progression, ItemClassification.progression),
+    "Rising Fire": ItemData(14575103, ItemClassification.progression, ItemClassification.progression),
+    "Ground Hunter": ItemData(14575104, ItemClassification.progression, ItemClassification.progression),
+    "Soul Body": ItemData(14575105, ItemClassification.progression, ItemClassification.progression),
+    "Twin Slasher": ItemData(14575106, ItemClassification.progression, ItemClassification.progression),
+    "Frost Tower": ItemData(14575107, ItemClassification.progression, ItemClassification.progression),
     # Armor Upgrades
-    "Helmet Upgrade": ItemData(14575108, ItemClassification.progression),
-    "Body Upgrade": ItemData(14575109, ItemClassification.progression),
-    "Plasma Shot Upgrade": ItemData(14575110, ItemClassification.progression),
-    "Stock Charge Upgrade": ItemData(14575111, ItemClassification.progression),
-    "Legs Upgrade": ItemData(14575112, ItemClassification.progression),
+    "Helmet Upgrade": ItemData(14575108, ItemClassification.progression, ItemClassification.filler),
+    "Body Upgrade": ItemData(14575109, ItemClassification.progression, ItemClassification.filler),
+    "Plasma Shot Upgrade": ItemData(14575110, ItemClassification.progression, ItemClassification.filler),
+    "Stock Charge Upgrade": ItemData(14575111, ItemClassification.progression, ItemClassification.filler),
+    "Legs Upgrade": ItemData(14575112, ItemClassification.progression, ItemClassification.filler),
     # Tanks
-    "Heart Tank": ItemData(14575113, ItemClassification.progression, 8),
-    "Sub Tank": ItemData(14575114, ItemClassification.progression, 2),
-    "Weapon Energy Tank": ItemData(14575115, ItemClassification.progression, 1),
-    "Extra Lives Tank": ItemData(14575116, ItemClassification.progression, 1),
+    "Heart Tank": ItemData(14575113, ItemClassification.progression, ItemClassification.progression, 8),
+    "Sub Tank": ItemData(14575114, ItemClassification.progression, ItemClassification.progression, 2),
+    "Weapon Energy Tank": ItemData(14575115, ItemClassification.progression, ItemClassification.progression, 1),
+    "Extra Lives Tank": ItemData(14575116, ItemClassification.progression, ItemClassification.progression, 1),
 }
 
 stage_access_items = {
-    "Web Spider Stage Access": ItemData(14575200, ItemClassification.progression | ItemClassification.useful),
-    "Cyber Peacock Stage Access": ItemData(14575201, ItemClassification.progression | ItemClassification.useful),
-    "Storm Owl Stage Access": ItemData(14575202, ItemClassification.progression | ItemClassification.useful),
-    "Magma Dragoon Stage Access": ItemData(14575203, ItemClassification.progression | ItemClassification.useful),
-    "Jet Stingray Stage Access": ItemData(14575204, ItemClassification.progression | ItemClassification.useful),
-    "Split Mushroom Stage Access": ItemData(14575205, ItemClassification.progression | ItemClassification.useful),
-    "Slash Beast Stage Access": ItemData(14575206, ItemClassification.progression | ItemClassification.useful),
-    "Frost Walrus Stage Access": ItemData(14575207, ItemClassification.progression | ItemClassification.useful),
+    "Web Spider Stage Access": ItemData(14575200, ItemClassification.progression | ItemClassification.useful, ItemClassification.progression | ItemClassification.useful),
+    "Cyber Peacock Stage Access": ItemData(14575201, ItemClassification.progression | ItemClassification.useful, ItemClassification.progression | ItemClassification.useful),
+    "Storm Owl Stage Access": ItemData(14575202, ItemClassification.progression | ItemClassification.useful, ItemClassification.progression | ItemClassification.useful),
+    "Magma Dragoon Stage Access": ItemData(14575203, ItemClassification.progression | ItemClassification.useful, ItemClassification.progression | ItemClassification.useful),
+    "Jet Stingray Stage Access": ItemData(14575204, ItemClassification.progression | ItemClassification.useful, ItemClassification.progression | ItemClassification.useful),
+    "Split Mushroom Stage Access": ItemData(14575205, ItemClassification.progression | ItemClassification.useful, ItemClassification.progression | ItemClassification.useful),
+    "Slash Beast Stage Access": ItemData(14575206, ItemClassification.progression | ItemClassification.useful, ItemClassification.progression | ItemClassification.useful),
+    "Frost Walrus Stage Access": ItemData(14575207, ItemClassification.progression | ItemClassification.useful, ItemClassification.progression | ItemClassification.useful),
 }
 
 junk_items = {
-    "Small Energy": ItemData(14575300, ItemClassification.filler),
-    "Large Energy": ItemData(14575301, ItemClassification.filler),
-    "Small Weapon Energy": ItemData(14575302, ItemClassification.filler),
-    "Large Weapon Energy": ItemData(14575303, ItemClassification.filler),
-    "Extra Life": ItemData(14575304, ItemClassification.filler),
+    "Small Energy": ItemData(14575300, ItemClassification.filler, ItemClassification.filler),
+    "Large Energy": ItemData(14575301, ItemClassification.filler, ItemClassification.filler),
+    "Small Weapon Energy": ItemData(14575302, ItemClassification.filler, ItemClassification.filler),
+    "Large Weapon Energy": ItemData(14575303, ItemClassification.filler, ItemClassification.filler),
+    "Extra Life": ItemData(14575304, ItemClassification.filler, ItemClassification.filler),
 }
 
 event_items = {
-    "Victory": ItemData(14575400, ItemClassification.progression),
+    "Victory": ItemData(14575400, ItemClassification.progression, ItemClassification.progression),
 }
 
 item_table = {

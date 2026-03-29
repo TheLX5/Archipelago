@@ -80,6 +80,12 @@ def can_beat_frost_walrus(state: CollectionState, options: MMX4Options, player: 
     else:
         return state.has("Frost Walrus Stage Access", player)
 
+def can_beat_double_iris(state: CollectionState, options: MMX4Options, player: int) -> bool:
+    return state.has_all_counts(options.double_iris_requirement, player);
+
+def can_beat_general(state: CollectionState, options: MMX4Options, player: int) -> bool:
+    return state.has_all_counts(options.general_requirement, player);
+
 def set_rules(world: "MMX4World"):
     player = world.player
     options = world.options
@@ -102,7 +108,7 @@ def set_rules(world: "MMX4World"):
     add_rule(world.multiworld.get_entrance("Stage Select -> Frost Walrus", player),
              lambda state: state.has("Frost Walrus Stage Access", player))
 
-    # Boss Requirements
+    # Maverick Requirements
     if(bool(options.enable_boss_item_requirements)):
         add_rule(world.multiworld.get_location("Web Spider Defeated", player),
                  lambda state: can_beat_web_spider(state, options, player))
@@ -202,6 +208,15 @@ def set_rules(world: "MMX4World"):
 
     add_rule(world.multiworld.get_location("Space Port Colonel Defeated", player), colonel_rule)
 
+    # Double/Iris and General
+    if(bool(options.enable_boss_item_requirements)):
+        add_rule(world.multiworld.get_location("Double / Iris Defeated", player),
+                 lambda state: can_beat_double_iris(state, options, player))
+        add_rule(world.multiworld.get_location("General Defeated", player),
+                 lambda state: can_beat_double_iris(state, options, player) and can_beat_general(state, options, player))
+        add_rule(world.multiworld.get_entrance("Final Weapon 1 -> Final Weapon 2", player),
+                 lambda state: can_beat_double_iris(state, options, player) and can_beat_general(state, options, player))
+
     # Sigma Access
     # Final Weapon Life Energy (3) requires Rising Fire
     add_rule(world.multiworld.get_entrance("Stage Select -> Space Port", player),
@@ -210,6 +225,9 @@ def set_rules(world: "MMX4World"):
         add_rule(world.multiworld.get_location("Final Weapon Life Energy (3)", player),
                  lambda state: state.has("Rising Fire", player))
 
+    # Beating Sigma also requires Rising Fire. Shouldn't change anything for the actual logic since it's the last check, but is helpful to have for Universal Tracker
+    add_rule(world.multiworld.get_location("Sigma Defeated", player),
+            lambda state: state.has("Rising Fire", player))
     
     # Victory condition rule!
     world.multiworld.completion_condition[player] = lambda state: state.has("Victory", player)
