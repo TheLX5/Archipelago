@@ -21,7 +21,7 @@ an experience customized for their taste, and different players in the same mult
 
 Check the releases page for the latest version of the YAML. Alternatively you can generate your own using the Archipelago Launcher.
 
-### Connect to the MultiServer
+## Connect to the MultiServer
 
 1. Install the APWorld
 2. Through the launcher run the Bizhawk Client tool
