@@ -1,26 +1,24 @@
-# This is where your game name would be!
+# Mega Man X4
 
 ## Where is the options page?
 
-Here is where you put the instructions on how to get to the options page. What is currently there should work and direct the player
-your game/player-options which is the normal page for options. Really only change this to spice it up or if something weir is happening
+Nowhere at this time, but if there was one:
 
 The [player options page for this game](../player-options) contains all the options you need to configure and export a
 config file.
 
 ## What does randomization do to this game?
 
-Here you put all the items you are randomizing! You could include future goals or you could only put whats actually possible.
-The world is your oyster.
-And by world I mean these 3 lines of text.
+All Weapons, all Heart Tanks, all Sub Tanks, the EX Tank, the Weapon Tank, all Armor Upgrades and Access Codes to each of the Mavericks' stages are randomized. 
+There are also location checks for each Maverick defeated, including the end-game bosses.
 
 ## Which items can be in another player's world?
 
-This section is useful for if your game has items that will always be local. I can't think of any games as an example but I know they exist
+Everything except Soul Body if you're playing as Zero as of this moment, as having that item will make the intro stage unbeatable.
 
 ## When the player receives an item, what happens?
 
-Here you can tell the player what it will look like when you receive an item in game. This is really nice cause it helps people figure out if
-they actually are receiving items the first time they set up the game. Also nice for explaining that really funny/cool/quirky system you
-put into your game that only a few people will see but youre really proud of.
+Every item is received immediately. Due to the nature of buster upgrades in this game when playing as X, only one of them can be equipped at a time. 
+Assuming you have either the Stock Charge or Plasma Shot Upgrade or both, you can cycle between them and the standard buster by holding down the Select button.
 
+*DO NOT PLAY AS BLACK ZERO*

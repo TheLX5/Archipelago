@@ -1,12 +1,11 @@
-# Your game here!
+# Mega Man X4
 
 ## Required Software
 
-* A legally obtained copy of the game your are randomizing. Include the version if it needs to be specific (IE: NTSC/NA/Steam/Whatever else)
-* Anything else!
-
-  * You can use [this syntax to add hyperlinks to emulators or other web pages](https://www.ikea.com/us/en/p/blahaj-soft-toy-shark-90373590/)
-  * Be specific! Include versions! You'll still get asked why it's broken and it'll be a versioning issue but hey you can try
+* A legally acquired US ROM of Mega Man X4 for the Playstation
+* A legally acquired Playstation BIOS
+* [Bizhawk](https://github.com/TASEmulators/BizHawk/releases)
+* The patch file which can be found on the releases page - "MMX4_Archipelago.xdelta"
 
 * The built-in Archipelago client, which can be installed [here](https://github.com/ArchipelagoMW/Archipelago/releases)
 
@@ -14,21 +13,22 @@
 
 ### What is a YAML file and why do I need one?
 
-You can leave this alone since it will be the same for every game so just delete this! I'm just here for explanations.
-
 Your YAML file contains a set of configuration options which provide the generator with information about how it should
 generate your game. Each player of a multiworld will provide their own YAML file. This setup allows each player to enjoy
 an experience customized for their taste, and different players in the same multiworld can all have different options.
 
 ### Where do I get a YAML file?
 
-You can customize your options by visiting the [Your Game Here Options Page](/games/Your%20Game%20Here/player-options).
-
-Another hyperlink to the options page. The %20 in the link is a space. Make sure it matches the name you put for the your\_game\_here for the en\_your\_game\_here.md doc.
+Check the releases page for the latest version of the YAML. Alternatively you can generate your own using the Archipelago Launcher.
 
 ### Connect to the MultiServer
 
-1. Just describe how to get it connected
-2. Include any optional steps
-
-   * You can use this syntax to add sub steps
+1. Install the APWorld
+2. Through the launcher run the Bizhawk Client tool
+3. Apply the XDelta patch to the ROM
+   * You can use this tool - https://kotcrab.github.io/xdelta-wasm/
+4. Run your Patched ROM in Bizhawk
+5. In Bizhawk open Tools/Lua Console
+6. In the Lua Console open connector_bizhawk_generic.lua which should be in:
+   * (Your Archipelago Installation Folder)/Data/Lua
+7. Connect to your created room through the Bizhawk Client Tool in the Archipelago Launcher
