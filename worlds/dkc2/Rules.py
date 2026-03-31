@@ -997,7 +997,7 @@ class DKC2StrictRules(DKC2Rules):
             LocationName.ghostly_grove_clear:
                 CanClimb,
             LocationName.ghostly_grove_kong:
-                CanClimb & CanTeamAttack & CanCarry,
+                CanClimb & CanCarry,
             LocationName.ghostly_grove_dk_coin:
                 CanClimb & CanUseKannons & (
                     CanCartwheel | CanHover
@@ -1301,18 +1301,18 @@ class DKC2StrictRules(DKC2Rules):
 
             LocationName.chain_link_chamber_clear:
                 CanClimb & CanCling & CanUseKannons & 
-                    CanUseControllableBarrels & CanBeInvincible,
+                    CanUseControllableBarrels,
             LocationName.chain_link_chamber_kong:
                 CanClimb & CanCling & CanUseKannons & 
-                    CanUseControllableBarrels & CanBeInvincible,
+                    CanUseControllableBarrels,
             LocationName.chain_link_chamber_dk_coin:
                 CanClimb & CanCling & CanUseKannons & 
-                    CanUseControllableBarrels & CanBeInvincible,
+                    CanUseControllableBarrels,
             LocationName.chain_link_chamber_bonus_1:
                 CanClimb & CanCling & CanCarry,
             LocationName.chain_link_chamber_bonus_2:
                 CanClimb & CanCling & CanUseKannons & 
-                    CanUseControllableBarrels & CanBeInvincible & CanCartwheel,
+                    CanUseControllableBarrels & CanCartwheel,
             LocationName.chain_link_chamber_banana_coin_1:
                 CanClimb,
             LocationName.chain_link_chamber_banana_bunch_1:
@@ -1323,16 +1323,16 @@ class DKC2StrictRules(DKC2Rules):
                 CanClimb & CanCarry,
             LocationName.chain_link_chamber_banana_coin_2:
                 CanClimb & CanCling & CanUseKannons & 
-                    CanUseControllableBarrels & CanBeInvincible,
+                    CanUseControllableBarrels,
             LocationName.chain_link_chamber_banana_bunch_4:
                 CanClimb & CanCling & CanUseKannons & 
-                    CanUseControllableBarrels & CanBeInvincible,
+                    CanUseControllableBarrels,
             LocationName.chain_link_chamber_banana_coin_3:
                 CanClimb & CanCling & CanUseKannons & 
-                    CanUseControllableBarrels & CanBeInvincible,
+                    CanUseControllableBarrels,
             LocationName.chain_link_chamber_banana_coin_4:
                 CanClimb & CanCling & CanUseKannons & 
-                    CanUseControllableBarrels & CanBeInvincible,
+                    CanUseControllableBarrels,
 
 
             LocationName.toxic_tower_clear:
@@ -1456,25 +1456,25 @@ class DKC2StrictRules(DKC2Rules):
 
 
             LocationName.black_ice_battle_clear:
-                CanCarry,
+                True_(),
             LocationName.black_ice_battle_kong:
                 CanCarry,
             LocationName.black_ice_battle_dk_coin:
-                CanCarry & CanTeamAttack,
+                CanCarry,
             LocationName.black_ice_battle_banana_bunch_1:
-                CanCarry & CanCartwheel,
+                CanHover & CanCartwheel,
             LocationName.black_ice_battle_red_balloon_1:
-                CanCarry,
+                True_(),
             LocationName.black_ice_battle_red_balloon_2:
-                CanCarry,
+                True_(),
             LocationName.black_ice_battle_red_balloon_3:
                 CanCarry,
             LocationName.black_ice_battle_banana_bunch_2:
-                CanCarry,
+                True_(),
             LocationName.black_ice_battle_banana_coin_1:
-                CanCarry,
+                True_(),
             LocationName.black_ice_battle_banana_bunch_3:
-                CanCarry & CanTeamAttack,
+                CanCarry,
 
 
             LocationName.klobber_karnage_clear:
@@ -2403,7 +2403,7 @@ class DKC2LooseRules(DKC2Rules):
             LocationName.ghostly_grove_clear:
                 CanClimb,
             LocationName.ghostly_grove_kong:
-                CanClimb & CanTeamAttack & CanCarry,
+                CanClimb & CanCarry,
             LocationName.ghostly_grove_dk_coin:
                 CanClimb & CanUseKannons & (
                     CanCartwheel | CanHover
@@ -2911,13 +2911,14 @@ class DKC2LooseRules(DKC2Rules):
             LocationName.jungle_jinx_banana_coin_5:
                 CanCartwheel & CanUseKannons,
 
-
+            LocationName.black_ice_battle_clear:
+                True_(),
             LocationName.black_ice_battle_kong:
                 CanCarry,
             LocationName.black_ice_battle_dk_coin:
                 CanCarry,
             LocationName.black_ice_battle_banana_bunch_1:
-                CanCarry & CanCartwheel,
+                CanCartwheel,
             LocationName.black_ice_battle_red_balloon_1:
                 True_(),
             LocationName.black_ice_battle_red_balloon_2:
@@ -2994,16 +2995,13 @@ class DKC2LooseRules(DKC2Rules):
             LocationName.fiery_furnace_banana_bunch_3:
                 CanTeamAttack,
             LocationName.fiery_furnace_banana_bunch_4:
-                CanUseControllableBarrels & CanTeamAttack,
+                CanUseControllableBarrels,
             LocationName.fiery_furnace_banana_coin_1:
-                CanUseControllableBarrels & CanTeamAttack & 
-                    CanCartwheel,
+                CanUseControllableBarrels & CanCartwheel,
             LocationName.fiery_furnace_banana_coin_2:
-                CanUseControllableBarrels & CanTeamAttack & 
-                    CanCartwheel,
+                CanUseControllableBarrels & CanCartwheel,
             LocationName.fiery_furnace_banana_bunch_5:
-                CanUseControllableBarrels & CanTeamAttack & 
-                    CanCartwheel,
+                CanUseControllableBarrels & CanCartwheel,
 
 
             LocationName.animal_antics_clear:
@@ -4565,7 +4563,8 @@ class DKC2ExpertRules(DKC2Rules):
             LocationName.jungle_jinx_banana_coin_5:
                 CanHover | CanUseKannons,
 
-
+            LocationName.black_ice_battle_clear:
+                True_(),
             LocationName.black_ice_battle_kong:
                 CanCarry | HasBothKongs,
             LocationName.black_ice_battle_dk_coin:
