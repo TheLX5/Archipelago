@@ -39,7 +39,7 @@ class Logic(Choice):
     Logic difficulty. May become irrelevant if not a lot of items are added to the item pool.
     - **Strict**: Ensures everything is reachable as the original devs intended. For beginners or people who want to go out of logic with some tricks.
     - **Loose**: Reaching locations may require some level of mastery about the game's mechanics.
-    - **Expert**: Locations expects players to be extremely good at the game with minimal amount of abilities. Hard to go out of logic. (NOT IMPLEMENTED YET)
+    - **Expert**: Locations expects players to be extremely good at the game with minimal amount of abilities. Hard to go out of logic.
     """
     display_name = "Logic Difficulty"
     option_strict = 0
@@ -50,6 +50,7 @@ class Logic(Choice):
 class GlitchedWorldAccess(Toggle):
     """
     Level warping across worlds via glitches will be in logic
+    Players are expected to use Backup DK Barrels
     """
     display_name = "Glitched World Access"
 
@@ -181,7 +182,7 @@ class EnergyLink(Toggle):
     """
     EnergyLink allows players to deposit energy extracted from collected bananas into a shared pool across games in the session.
 
-    You can exchange energy for Instant DK Barrels. Great for players that find the base game hard.
+    You can exchange energy for Backup DK Barrels. Great for players that find the base game hard.
     There's an additional item in the item pool that allows for better energy extraction from bananas.
     """
     display_name = "Energy Link"
