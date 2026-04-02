@@ -792,7 +792,7 @@ def handle_location_item_info(patch: WaffleProcedurePatch, world: "WaffleWorld")
             classification = 2
         elif ItemClassification.useful in location.item.classification:
             classification = 4
-        
+
         level_id = location.address >> 24
         loc_type = (location.address >> 20 & 0x0F)
         level_data = location.address & 0x0F

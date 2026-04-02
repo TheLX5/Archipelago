@@ -9,6 +9,7 @@ from BaseClasses import MultiWorld, Tutorial, ItemClassification, LocationProgre
 from Options import OptionError
 from worlds.LauncherComponents import launch as launch_component, components, Component, Type
 from worlds.AutoWorld import WebWorld, World
+from rule_builder.rules import Rule
 
 from .Client import WaffleSNIClient
 from .Items import WaffleItem, item_table, junk_table, option_name_to_item_unlock
@@ -22,7 +23,7 @@ from .Regions import create_regions, connect_regions, add_location_to_region
 from .Rom import patch_rom, WaffleProcedurePatch, USHASH
 from .Rules import WaffleBasicRules
 from .Teleports import generate_entrance_rando
-from .Tracker import setup_options_from_slot_data, reconnect_found_entrance, disconnect_entrances, tracker_world
+from .Tracker import reconnect_found_entrance, disconnect_entrances, create_glitched_entrances
 
 def launch_manager(*args):
     from .Manager import launch
@@ -72,7 +73,7 @@ class WaffleWeb(WebWorld):
     options_presets = waffle_options_presets
 
 
-class WaffleWorld(World):
+class WaffleWorld(Tracker.UTMxin, World):
     """
     Spicy Mycena Waffles (SMW) is an extension of the original Super Mario World Archipelago implementation
     that features several core changes for better or for worse.
@@ -85,18 +86,13 @@ class WaffleWorld(World):
     options: WaffleOptions
 
     topology_present = False
-    required_client_version = (0, 6, 5)
+    required_client_version = (0, 6, 7)
 
     item_name_to_id = {name: data.code for name, data in item_table.items()}
     location_name_to_id = all_locations
     location_name_groups = location_groups
 
-    using_ut: bool
-    ut_can_gen_without_yaml = True
-    glitches_item_name = ItemName.glitched
-    disconnected_entrances: dict[Entrance, Region]
-    found_entrances_datastorage_key: list[str]
-    tracker_world = tracker_world
+    rule_macros: dict[str, Rule.Resolved]
 
     active_level_dict: typing.Dict[int,int]
     active_location_table: typing.Dict[str,int]
@@ -105,6 +101,7 @@ class WaffleWorld(World):
     
     def __init__(self, multiworld: MultiWorld, player: int):
         self.rom_name_available_event = threading.Event()
+        self.rule_macros = {}
         super().__init__(multiworld, player)
     
     def generate_early(self):
@@ -145,21 +142,13 @@ class WaffleWorld(World):
         }
 
         # Handle UT support
-        setup_options_from_slot_data(self)
+        super().generate_early()
 
-        if not self.using_ut:
+        if not self.is_ut:
             # Bonk non level shuffle users trying to do something weird
             if self.options.starting_location.value != 0 and not self.options.level_shuffle.value:
                 print (f"Enforcing Yoshi's Island as a starting world for \"{self.player_name}\" as they don't have Level Shuffle enabled.")
                 self.options.starting_location.value = 0
-                #raise OptionError(f"{self.player_name} has a very weird combination of settings that are very likely to result in a failed generation.\n"
-                #                f"  Please enable level_shuffle if you desire to change the starting location.")
-            #if self.options.starting_location.value == 0x04 and self.options.map_teleport_shuffle != "on_both_mix":
-            #    raise OptionError(f"{self.player_name} has a very weird combination of settings that are very likely to result in a failed generation.\n"
-            #                    f"  Please enable map_teleport_shuffle with the option 'on_both_mix'.")
-            #if self.options.starting_location.value == 0x02 and self.options.map_teleport_shuffle != "on_both_mix":
-            #    raise OptionError(f"{self.player_name} has a very weird combination of settings that are very likely to result in a failed generation.\n"
-            #                    f"  Please enable map_teleport_shuffle with the option 'on_both_mix'.")
                 
             # Enforce disabling DeathLink for now
             if self.options.death_link:
@@ -229,8 +218,13 @@ class WaffleWorld(World):
 
     # UT Stuff
     def connect_entrances(self):
-        if self.using_ut and self.multiworld.enforce_deferred_connections in ("on", "default"):
-            disconnect_entrances(self)
+        if self.is_ut:
+            self.disconnected_entrances = {}
+            self.found_entrances_datastorage_key = []
+            if self.multiworld.enforce_deferred_connections in ("on", "default"):
+                create_glitched_entrances(self)
+            if self.multiworld.enforce_deferred_connections in ("on"):
+                disconnect_entrances(self)
 
     def reconnect_found_entrances(self, key: str, value: typing.Any) -> None:
         if not value:
@@ -243,11 +237,6 @@ class WaffleWorld(World):
         rules = WaffleBasicRules(self)
         rules.set_smw_rules()
 
-        if self.using_ut:
-            game_difficulty = self.options.game_logic_difficulty.value
-            if game_difficulty != 2:
-                rules.set_glitched_rules()
-
         return     
         # Debug
         from Utils import visualize_regions
@@ -258,9 +247,6 @@ class WaffleWorld(World):
 
     
     def create_items(self):
-        if self.using_ut:
-            return
-        
         itempool: typing.List[WaffleItem] = []
 
         total_required_locations = self.count_locations()
@@ -671,6 +657,7 @@ class WaffleWorld(World):
                 spoiler_handle.write(f"    {original_level.levelName} -> {shuffled_level.levelName}\n")
         
         spoiler_handle.write(f"\nStarting Location: {possible_starting_entrances[self.options.starting_location.value]}\n")
+        spoiler_handle.write(f"\nRequired eggs: {self.required_egg_count} of {self.actual_egg_count}\n")
 
         if self.options.map_teleport_shuffle.value != 0:
             spoiler_handle.write(f"\nMap Teleport Shuffle Results:\n")
@@ -706,6 +693,7 @@ class WaffleWorld(World):
             "yoshi_egg_placement",
             "starting_location",
             "ability_shuffle",
+            "alternate_logic",
         )
         slot_data["active_levels"] = self.active_level_dict
         slot_data["teleport_pairs"] = self.teleport_pairs

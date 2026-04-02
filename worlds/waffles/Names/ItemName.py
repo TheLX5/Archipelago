@@ -68,4 +68,4 @@ trap_repellent          = "Trap Repellent"
 # Other Definitions
 victory   = "The Princess"
 koopaling = "Boss Token"
-glitched = "UT Glitch Item"
+glitched = "Skill"

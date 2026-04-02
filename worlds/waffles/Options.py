@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from Options import Choice, Range, Toggle, DeathLink, DefaultOnToggle, OptionSet, OptionGroup, PerGameCommonOptions, Visibility, StartInventoryPool
 
+from .Tricks import logic_tricks
 
 class Goal(Choice):
     """
@@ -387,6 +388,15 @@ class GameLogicDifficulty(Choice):
     default = 0
 
 
+class AlternateLogic(OptionSet):
+    """
+    Alternate logic for certain locations.
+    """
+    display_name = "Alternate Logic"
+    default = logic_tricks
+    valid_keys = logic_tricks
+
+
 class InventoryYoshiLogic(Toggle):
     """
     Whether being able to use Yoshi inventory items is considered in logic or not for Yoshi related logic
@@ -658,10 +668,11 @@ class TrapLink(Toggle):
 
 class UngoldenEggs(DefaultOnToggle):
     """
-    Does exactly what you're thinking of.
+    Does exactly what you're thinking of. If you're watching this you're very likely a power user lol.
+    (Removes Useful Tag from eggs and nothing else)
     """
     display_name = "No mas huevos dorados"
-    visibility = Visibility.template | Visibility.simple_ui | Visibility.complex_ui
+    visibility = Visibility.none
 
 
 waffle_option_groups = [
@@ -674,6 +685,7 @@ waffle_option_groups = [
     OptionGroup("Logic", [
         AbilityItemShuffle,
         GameLogicDifficulty,
+        AlternateLogic,
         InventoryYoshiLogic,
         DecoupledYoshiCarry,
         DecoupledWallRun,
@@ -742,6 +754,7 @@ class WaffleOptions(PerGameCommonOptions):
     energy_link: EnergyLink
     ability_shuffle: AbilityItemShuffle
     game_logic_difficulty: GameLogicDifficulty
+    alternate_logic: AlternateLogic
     inventory_yoshi_logic: InventoryYoshiLogic
     decoupled_yoshi_carry: DecoupledYoshiCarry
     decoupled_wall_run_anywhere: DecoupledWallRun

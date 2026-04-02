@@ -295,6 +295,9 @@ class WaffleSNIClient(SNIClient):
             await snes_flush_writes(ctx)
 
     async def game_watcher(self, ctx: "SNIContext"):
+        if ctx.server is None:
+            return
+        
         from SNIClient import snes_buffered_write, snes_flush_writes
 
         snes_data = await self.snes_reader.read(ctx)
@@ -461,9 +464,12 @@ class WaffleSNIClient(SNIClient):
         tile_id = 0x100
         if shuffled_level in active_level_data:
             tile_id = active_level_data[shuffled_level]
+        #print (tile_id, game_state == 0x14, tile_id not in self.visited_levels, tile_id in level_info_dict)
+        #print (self.visited_levels)
         if game_state == 0x14 and tile_id not in self.visited_levels and tile_id in level_info_dict:
             self.visited_levels.add(tile_id)
             level_key = level_info_dict[tile_id].levelName
+            #print (f"smw_{ctx.team}_{ctx.slot}_{level_key}")
             await ctx.send_msgs([{
                 "cmd": "Set", 
                 "key": f"smw_{ctx.team}_{ctx.slot}_{level_key}",

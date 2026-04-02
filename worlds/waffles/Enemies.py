@@ -723,6 +723,14 @@ enemy_list_special_cases = {
         0x097: EnemyData(0x097, "Puntin' Chuck", 10, (0,0), ["skip"], ["skip"]),
         0x098: EnemyData(0x098, "Pitchin' Chuck", 10, (0,0), ["skip"], ["skip"]),
         0x099: EnemyData(0x099, "Volcano Lotus", 15, (0,0), ["skip"], ["skip"]),
+        0x03D: EnemyData(0x03D, "Rip Van Fish", 15, (0,0), ["skip"], ["skip"]),
+        0x02E: EnemyData(0x02E, "Spike Top", 20, (0,0), ["skip"], ["skip"]),
+    },
+    0x002: {
+        0x06E: EnemyData(0x06E, "Dino Rhino", 10, (0,0), ["skip"], ["skip"]),
+        0x06F: EnemyData(0x06F, "Dino Torch", 12, (0,0), ["skip"], ["skip"]),
+        0x090: EnemyData(0x090, "Large green gas bubble", 5, (0,3), ["skip"], ["skip"]),
+        0x028: EnemyData(0x028, "Big Boo", 3, (0,3), ["skip"], ["skip"]),
     },
     0x024: {
         0x070: EnemyData(0x070, "Pokey", 15, (0,4), ["skip"], ["skip"]),

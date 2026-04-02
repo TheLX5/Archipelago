@@ -1,259 +1,277 @@
+from functools import cached_property
+from typing import TYPE_CHECKING, Any, ClassVar
+from typing_extensions import override
+
+from BaseClasses import CollectionState, Entrance, Location, Region, CollectionRule
+from rule_builder.rules import Rule
+from NetUtils import JSONMessagePart
+from Utils import get_fuzzy_results, get_intended_text
+from .enums import Items
+from .Options import WaffleOptions
+from .Rules import Macro
+from .Locations import all_locations
+
 from .Constants import *
 from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from . import WaffleWorld
+    from worlds.AutoWorld import World
+else:
+    World = object
 
-def setup_options_from_slot_data(world: "WaffleWorld") -> None:
-    if hasattr(world.multiworld, "generation_is_fake"):
-        if hasattr(world.multiworld, "re_gen_passthrough"):
-            if "SMW: Spicy Mycena Waffles" in world.multiworld.re_gen_passthrough:
-                world.using_ut = True
-                slot_data = world.multiworld.re_gen_passthrough["SMW: Spicy Mycena Waffles"]
-                world.active_level_dict = slot_data["active_levels"]
-                world.teleport_pairs = slot_data["teleport_pairs"]
-                world.transition_pairs = slot_data["transition_pairs"]
-                world.swapped_exits = slot_data["swapped_exits"]
-                world.carryless_exits = slot_data["carryless_exits"]
-                world.options.game_logic_difficulty.value = slot_data["game_logic_difficulty"]
-                world.options.inventory_yoshi_logic.value = slot_data["inventory_yoshi_logic"]
-                world.options.goal.value = slot_data["goal"]
-                world.options.yoshi_egg_count.value = slot_data["yoshi_egg_count"]
-                world.options.dragon_coin_checks.value = slot_data["dragon_coin_checks"]
-                world.options.moon_checks.value = slot_data["moon_checks"]
-                world.options.hidden_1up_checks.value = slot_data["hidden_1up_checks"]
-                world.options.star_block_checks.value = slot_data["star_block_checks"]
-                world.options.midway_point_checks.value = slot_data["midway_point_checks"]
-                world.options.room_checks.value = slot_data["room_checks"]
-                world.options.block_checks.value = slot_data["block_checks"]
-                world.options.swap_level_exits.value = slot_data["swap_level_exits"]
-                #world.options.exclude_special_zone.value = slot_data["exclude_special_zone"]
-                world.options.enemy_shuffle.value = slot_data["enemy_shuffle"]
-                world.options.yoshi_egg_placement.value = slot_data["yoshi_egg_placement"]
-                world.options.starting_location.value = slot_data["starting_location"]
-                world.options.ability_shuffle.value = slot_data["ability_shuffle"]
-                world.required_egg_count = slot_data["required_egg_count"]
-                world.actual_egg_count = slot_data["actual_egg_count"]
-        else:
-            world.using_ut = False
-    else:
-        world.using_ut = False
-
-# Unused stuff for deferred entrances, might come back later
 def disconnect_entrances(world: "WaffleWorld") -> None:
-    world.disconnected_entrances = {}
-    world.found_entrances_datastorage_key = []
     for entrance in world.get_entrances():
         if entrance.name.endswith(" - Tile"):
             world.disconnected_entrances[entrance] = entrance.connected_region
             entrance.connected_region = None
             key = entrance.name.split("-> ")[1].split(" - Tile")[0]
             actual_key = "smw_{team}_{player}_" + key
+            if actual_key not in world.found_entrances_datastorage_key:
+                world.found_entrances_datastorage_key.append(actual_key)
+            
+
+def create_glitched_entrances(world: "WaffleWorld") -> None:
+    for entrance in world.get_entrances():
+        if entrance.name.endswith("(Glitched)"):
+            #print (entrance.name)
+            if "Normal Exit" in entrance.name:
+                idx = 0
+            else:
+                idx = 2
+            try:
+                exit = entrance.parent_region.exits[idx]
+            except IndexError:
+                exit = entrance.parent_region.exits[0]
+            if exit.connected_region is None:
+            #    print (f"      lol {exit} | {entrance.parent_region.exits[2]}")
+                continue
+            try:
+                disconnected_entrance = exit.connected_region.exits[0]
+            except IndexError:
+            #    print (f"      {disconnected_entrance}")
+                continue 
+            if "Transition" in disconnected_entrance.name:
+                disconnected_entrance = disconnected_entrance.connected_region.exits[0].connected_region.exits[0]
+            key = disconnected_entrance.name.split("-> ")[1].split(" - Tile")[0]
+            actual_key = "smw_{team}_{player}_" + key
             world.found_entrances_datastorage_key.append(actual_key)
+            world.disconnected_entrances[entrance] = [entrance.connected_region, disconnected_entrance.connected_region]
+            #print (f"    {entrance.connected_region} | {disconnected_entrance.connected_region} | {actual_key}")
+            entrance.connected_region = None
+            
 
 
 def reconnect_found_entrance(world: "WaffleWorld", key: str) -> None:
     entrance_connected = False
     level_name = key.split("_")[3]
-    for entrance, region in world.disconnected_entrances.items():
+    for entrance, data in world.disconnected_entrances.items():
+        if entrance.name.endswith("(Glitched)"):
+            level_destination = data[1].entrances[0].name.split("-> ")[1].split(" - Tile")[0]
+            if level_destination == level_name:
+                entrance.connect(data[0])
+                entrance_connected = True
+                #print (f"    {entrance} | {entrance.connected_region} | {data[1]}")
         if entrance.name.endswith(" - Tile"):
             level_destination = entrance.name.split("-> ")[1].split(" - Tile")[0]
             if level_destination == level_name:
-                entrance.connect(region)
+                entrance.connect(data)
                 entrance_connected = True
+
     if not entrance_connected:
         raise Exception("Entrance not found in reconnect_found_entrance")
+    
+    
+
 
 map_mapping: dict[int, int] = {
-    0x00: "World Map",
-    0x105: "Yoshi's Island/Yoshi's Island 1/Main room",
-    0x1CB: "Yoshi's Island/Yoshi's Island 1/Dragon coin room",
-    0x106: "Yoshi's Island/Yoshi's Island 2/Main room",
-    0x1CA: "Yoshi's Island/Yoshi's Island 2/Flying block room",
-    0x103: "Yoshi's Island/Yoshi's Island 3/Main room",
-    0x1FD: "Yoshi's Island/Yoshi's Island 3/Lava room",
-    0x102: "Yoshi's Island/Yoshi's Island 4/Main room",
-    0x1BE: "Yoshi's Island/Yoshi's Island 4/Pokey room",
-    0x1FF: "Yoshi's Island/Yoshi's Island 4/Goal room",
-    0x101: "Yoshi's Island/#1 Iggy's Castle/Net room",
-    0x1FC: "Yoshi's Island/#1 Iggy's Castle/Smashers room",
-    0x014: "Yoshi's Island/Yellow Switch Palace/Bonus room",
-    0x0CA: "Yoshi's Island/Yellow Switch Palace/Button room",
-    0x015: "Donut Plains/Donut Plains 1/Main room",
-    0x0E3: "Donut Plains/Donut Plains 1/Flying room",
-    0x0FD: "Donut Plains/Donut Plains 1/Bonus room",
-    0x009: "Donut Plains/Donut Plains 2/Main room",
-    0x0E9: "Donut Plains/Donut Plains 2/Keyhole room",
-    0x0FF: "Donut Plains/Donut Plains 2/Goal room",
-    0x005: "Donut Plains/Donut Plains 3/Main room",
-    0x0F4: "Donut Plains/Donut Plains 3/Bonus room",
-    0x006: "Donut Plains/Donut Plains 4/Main room",
-    0x0C3: "Donut Plains/Donut Plains 4/Pipes room",
-    0x0D2: "Donut Plains/Donut Plains 4/Dragon coin room",
-    0x007: "Donut Plains/#2 Morton's Castle/Stairs room",
-    0x0E8: "Donut Plains/#2 Morton's Castle/Thwomp room",
-    0x0E7: "Donut Plains/#2 Morton's Castle/Moving stones room",
-    0x0E6: "Donut Plains/#2 Morton's Castle/Bonus room",
-    0x004: "Donut Plains/Donut Ghost House/Ghost ceiling room",
-    0x0F9: "Donut Plains/Donut Ghost House/Stairs room #1",
-    0x0DE: "Donut Plains/Donut Ghost House/Stairs room #1",
-    0x0FE: "Donut Plains/Donut Ghost House/Stairs room #2",
-    0x0FA: "Donut Plains/Donut Ghost House/Directional coin room",
-    0x0EB: "Donut Plains/Donut Ghost House/Secret goal room",
-    0x0C4: "Donut Plains/Donut Ghost House/Normal goal room",
-    0x00A: "Donut Plains/Donut Secret 1/Main room",
-    0x0C2: "Donut Plains/Donut Secret 1/P-Balloon room",
-    0x10B: "Donut Plains/Donut Secret 2/Main room",
-    0x1C6: "Donut Plains/Donut Secret 2/P-Balloon room",
-    0x013: "Donut Plains/Donut Secret House/Big boo room",
-    0x0EC: "Donut Plains/Donut Secret House/Big boo room",
-    0x0EE: "Donut Plains/Donut Secret House/Big boo room",
-    0x0ED: "Donut Plains/Donut Secret House/Puzzle room",
-    0x0F2: "Donut Plains/Donut Secret House/Puzzle room",
-    0x0F0: "Donut Plains/Donut Secret House/Goal room",
-    0x0F1: "Donut Plains/Donut Secret House/Directional coin room",
-    0x008: "Donut Plains/Green Switch Palace/Bonus room",
-    0x0C9: "Donut Plains/Green Switch Palace/Button room",
-    0x11A: "Vanilla Dome/Vanilla Dome 1/Main room",
-    0x1EF: "Vanilla Dome/Vanilla Dome 1/Sinking rock room",
-    0x118: "Vanilla Dome/Vanilla Dome 2/Main room",
-    0x1C3: "Vanilla Dome/Vanilla Dome 2/Ice cave room",
-    0x10A: "Vanilla Dome/Vanilla Dome 3/Main room",
-    0x1C2: "Vanilla Dome/Vanilla Dome 3/Ice cave room",
-    0x1F7: "Vanilla Dome/Vanilla Dome 3/Bonus room",
-    0x119: "Vanilla Dome/Vanilla Dome 4/Main room",
-    0x1F5: "Vanilla Dome/Vanilla Dome 4/Lava room",
-    0x11C: "Vanilla Dome/#3 Lemmy's Castle/Main room",
-    0x1F4: "Vanilla Dome/#3 Lemmy's Castle/Midway point room",
-    0x1F3: "Vanilla Dome/#3 Lemmy's Castle/Lava room",
-    0x00B: "Vanilla Dome/Vanilla Fortress/Spikes room",
-    0x0E1: "Vanilla Dome/Vanilla Fortress/Thwomp room",
-    0x0E0: "Vanilla Dome/Vanilla Fortress/Thwomp room",
-    0x107: "Vanilla Dome/Vanilla Ghost House/Main room",
-    0x1FB: "Vanilla Dome/Vanilla Ghost House/Main room",
-    0x1EA: "Vanilla Dome/Vanilla Ghost House/Gas bubbles room",
-    0x1F9: "Vanilla Dome/Vanilla Ghost House/Goal room",
-    0x109: "Vanilla Dome/Vanilla Secret 1/Main room",
-    0x1F0: "Vanilla Dome/Vanilla Secret 1/Secret goal room",
-    0x1F1: "Vanilla Dome/Vanilla Secret 1/Normal goal room",
-    0x001: "Vanilla Dome/Vanilla Secret 2/Main room",
-    0x0D8: "Vanilla Dome/Vanilla Secret 2/Lava room",
-    0x002: "Vanilla Dome/Vanilla Secret 3/Main room",
-    0x0CB: "Vanilla Dome/Vanilla Secret 3/Main room",
-    0x11B: "Vanilla Dome/Red Switch Palace/Bonus room",
-    0x1D8: "Vanilla Dome/Red Switch Palace/Button room",
-    0x00C: "Twin Bridges/Butter Bridge 1/Main room",
-    0x0F3: "Twin Bridges/Butter Bridge 1/Goal room",
-    0x00D: "Twin Bridges/Butter Bridge 2/Main room",
-    0x0DD: "Twin Bridges/Butter Bridge 2/Dragon coin room",
-    0x00F: "Twin Bridges/Cheese Bridge Area/Main room",
-    0x0C8: "Twin Bridges/Cheese Bridge Area/Yoshi wings room",
-    0x0BF: "Twin Bridges/Cheese Bridge Area/Moving platforms room",
-    0x010: "Twin Bridges/Cookie Mountain/Main room",
-    0x0C1: "Twin Bridges/Cookie Mountain/River room",
-    0x00E: "Twin Bridges/#4 Ludwig's Castle/Orange wall room",
-    0x0DC: "Twin Bridges/#4 Ludwig's Castle/Falling ceiling room",
-    0x0DB: "Twin Bridges/#4 Ludwig's Castle/Net room",
-    0x0DA: "Twin Bridges/#4 Ludwig's Castle/Bonus room",
-    0x011: "Twin Bridges/Soda Lake/Main room",
-    0x0C6: "Twin Bridges/Soda Lake/Goal room",
-    0x11E: "Forest of Illusion/Forest of Illusion 1/Main room",
-    0x120: "Forest of Illusion/Forest of Illusion 2/Main room",
-    0x123: "Forest of Illusion/Forest of Illusion 3/Main room",
-    0x1F8: "Forest of Illusion/Forest of Illusion 3/Keyhole room",
-    0x1BC: "Forest of Illusion/Forest of Illusion 3/Bonus room",
-    0x11F: "Forest of Illusion/Forest of Illusion 4/Main room",
-    0x1DF: "Forest of Illusion/Forest of Illusion 4/Keyhole room",
-    0x1C1: "Forest of Illusion/Forest of Illusion 4/Blurp room",
-    0x020: "Forest of Illusion/#5 Roy's Castle/Main room",
-    0x01F: "Forest of Illusion/Forest Fortress/Smashers room",
-    0x0D6: "Forest of Illusion/Forest Fortress/Lava pool room",
-    0x11D: "Forest of Illusion/Forest Ghost House/Main room",
-    0x1E8: "Forest of Illusion/Forest Ghost House/Main room",
-    0x1E9: "Forest of Illusion/Forest Ghost House/Main room",
-    0x1FA: "Forest of Illusion/Forest Ghost House/Ghost ceiling room",
-    0x1E6: "Forest of Illusion/Forest Ghost House/Normal goal room",
-    0x1E7: "Forest of Illusion/Forest Ghost House/Secret goal room",
-    0x122: "Forest of Illusion/Forest Secret Area/Main room",
-    0x121: "Forest of Illusion/Blue Switch Palace/Bonus room",
-    0x1D7: "Forest of Illusion/Blue Switch Palace/Button room",
-    0x022: "Chocolate Island/Chocolate Island 1/Main room",
-    0x0D0: "Chocolate Island/Chocolate Island 1/Main room",
-    0x0F6: "Chocolate Island/Chocolate Island 1/Copy of main room",
-    0x0BE: "Chocolate Island/Chocolate Island 1/Porcupuffer room",
-    0x024: "Chocolate Island/Chocolate Island 2/Main room",
-    0x0CF: "Chocolate Island/Chocolate Island 2/Group A rooms",
-    0x0CE: "Chocolate Island/Chocolate Island 2/Group B rooms",
-    0x0CD: "Chocolate Island/Chocolate Island 2/Group C rooms",
-    0x023: "Chocolate Island/Chocolate Island 3/Main room",
-    0x0D7: "Chocolate Island/Chocolate Island 3/Coin room",
-    0x01D: "Chocolate Island/Chocolate Island 4/Main room",
-    0x0EA: "Chocolate Island/Chocolate Island 4/Vertical bonus room",
-    0x01C: "Chocolate Island/Chocolate Island 5/Main room",
-    0x0C0: "Chocolate Island/Chocolate Island 5/Bubbles room",
-    0x0BD: "Chocolate Island/Chocolate Island 5/Bonus room",
-    0x01A: "Chocolate Island/#6 Wendy's Castle/Spikes room",
-    0x0D4: "Chocolate Island/#6 Wendy's Castle/Hothead room",
-    0x01B: "Chocolate Island/Chocolate Fortress/Wooden spike room",
-    0x0EF: "Chocolate Island/Chocolate Fortress/Thwomp room",
-    0x021: "Chocolate Island/Choco Ghost House/Fishing boo room",
-    0x0FC: "Chocolate Island/Choco Ghost House/Boo stream room",
-    0x0FB: "Chocolate Island/Choco Ghost House/Goal room",
-    0x117: "Chocolate Island/Chocolate Secret/Chuck room",
-    0x1C0: "Chocolate Island/Chocolate Secret/Hammer bro room",
-    0x1ED: "Chocolate Island/Chocolate Secret/Sliding room",
-    0x1EC: "Chocolate Island/Chocolate Secret/Sinking rocks room",
-    0x1EE: "Chocolate Island/Chocolate Secret/Goal room",
-    0x018: "Chocolate Island/Sunken Ghost Ship/Ship entrance",
-    0x0F8: "Chocolate Island/Sunken Ghost Ship/Reappearing ghosts",
-    0x0F7: "Chocolate Island/Sunken Ghost Ship/Falling room",
-    0x116: "Valley of Bowser/Valley of Bowser 1/Main room",
-    0x1E5: "Valley of Bowser/Valley of Bowser 1/Goal room",
-    0x1E4: "Valley of Bowser/Valley of Bowser 1/Bonus room",
-    0x115: "Valley of Bowser/Valley of Bowser 2/Main room",
-    0x1E3: "Valley of Bowser/Valley of Bowser 2/Moving rocks room",
-    0x1E2: "Valley of Bowser/Valley of Bowser 2/Rising rocks room",
-    0x1C8: "Valley of Bowser/Valley of Bowser 2/Yoshi wings room",
-    0x113: "Valley of Bowser/Valley of Bowser 3/Main room",
-    0x1BB: "Valley of Bowser/Valley of Bowser 3/Bonus room",
-    0x10F: "Valley of Bowser/Valley of Bowser 4/Main room",
-    0x1BF: "Valley of Bowser/Valley of Bowser 4/Ice cave room",
-    0x110: "Valley of Bowser/#7 Larry's Castle/Snake block room",
-    0x1FE: "Valley of Bowser/#7 Larry's Castle/Magikoopa room",
-    0x111: "Valley of Bowser/Valley Fortress/Main room",
-    0x114: "Valley of Bowser/Valley Ghost House/Main room",
-    0x1D9: "Valley of Bowser/Valley Ghost House/Main room",
-    0x1DD: "Valley of Bowser/Valley Ghost House/P-Switch room",
-    0x1DB: "Valley of Bowser/Valley Ghost House/Directional coin room",
-    0x1DC: "Valley of Bowser/Valley Ghost House/Directional coin room",
-    0x1DA: "Valley of Bowser/Valley Ghost House/Goal room",
-    0x134: "Star Road/Star Road 1/Main room",
-    0x1D6: "Star Road/Star Road 1/Goal room",
-    0x130: "Star Road/Star Road 2/Main room",
-    0x1D5: "Star Road/Star Road 2/Goal room",
-    0x132: "Star Road/Star Road 3/Main room",
-    0x135: "Star Road/Star Road 4/Main room",
-    0x136: "Star Road/Star Road 5/Main room",
-    0x12A: "Special Zone/Gnarly/Main room",
-    0x1C4: "Special Zone/Gnarly/Goal room",
-    0x1C5: "Special Zone/Gnarly/Goal room",
-    0x12B: "Special Zone/Tubular/Main room",
-    0x12C: "Special Zone/Way Cool/Main room",
-    0x1C9: "Special Zone/Way Cool/Yoshi room",
-    0x12D: "Special Zone/Awesome/Main room",
-    0x128: "Special Zone/Groovy/Main room",
-    0x127: "Special Zone/Mondo/Main room",
-    0x1E0: "Special Zone/Mondo/Slide room",
-    0x1E1: "Special Zone/Mondo/Goal room",
-    0x126: "Special Zone/Outrageous/Main room",
-    0x125: "Special Zone/Funky/Main room",
+    0x000: 00, #"World Map",
+    0x105: 1, #"Yoshi's Island/Yoshi's Island 1/Main room",
+    0x1CB: 2, #"Yoshi's Island/Yoshi's Island 1/Dragon coin room",
+    0x106: 3, #"Yoshi's Island/Yoshi's Island 2/Main room",
+    0x1CA: 4, #"Yoshi's Island/Yoshi's Island 2/Flying block room",
+    0x103: 5, #"Yoshi's Island/Yoshi's Island 3/Main room",
+    0x1FD: 6, #"Yoshi's Island/Yoshi's Island 3/Lava room",
+    0x102: 7, #"Yoshi's Island/Yoshi's Island 4/Main room",
+    0x1BE: 8, #"Yoshi's Island/Yoshi's Island 4/Pokey room",
+    0x1FF: 9, #"Yoshi's Island/Yoshi's Island 4/Goal room",
+    0x101: 10, #"Yoshi's Island/#1 Iggy's Castle/Net room",
+    0x1FC: 11, #"Yoshi's Island/#1 Iggy's Castle/Smashers room",
+    0x014: 12, #"Yoshi's Island/Yellow Switch Palace/Bonus room",
+    0x0CA: 13, #"Yoshi's Island/Yellow Switch Palace/Button room",
+    0x015: 14, #"Donut Plains/Donut Plains 1/Main room",
+    0x0E3: 15, #"Donut Plains/Donut Plains 1/Flying room",
+    0x0FD: 16, #"Donut Plains/Donut Plains 1/Bonus room",
+    0x009: 17, #"Donut Plains/Donut Plains 2/Main room",
+    0x0E9: 18, #"Donut Plains/Donut Plains 2/Keyhole room",
+    0x0FF: 19, #"Donut Plains/Donut Plains 2/Goal room",
+    0x005: 20, #"Donut Plains/Donut Plains 3/Main room",
+    0x0F4: 21, #"Donut Plains/Donut Plains 3/Bonus room",
+    0x006: 22, #"Donut Plains/Donut Plains 4/Main room",
+    0x0C3: 23, #"Donut Plains/Donut Plains 4/Pipes room",
+    0x0D2: 24, #"Donut Plains/Donut Plains 4/Dragon coin room",
+    0x007: 25, #"Donut Plains/#2 Morton's Castle/Stairs room",
+    0x0E8: 26, #"Donut Plains/#2 Morton's Castle/Thwomp room",
+    0x0E7: 27, #"Donut Plains/#2 Morton's Castle/Moving stones room",
+    0x0E6: 28, #"Donut Plains/#2 Morton's Castle/Bonus room",
+    0x004: 29, #"Donut Plains/Donut Ghost House/Ghost ceiling room",
+    0x0F9: 30, #"Donut Plains/Donut Ghost House/Stairs room #1",
+    0x0DE: 30, #"Donut Plains/Donut Ghost House/Stairs room #1",
+    0x0FE: 31, #"Donut Plains/Donut Ghost House/Stairs room #2",
+    0x0FA: 32, #"Donut Plains/Donut Ghost House/Directional coin room",
+    0x0EB: 33, #"Donut Plains/Donut Ghost House/Secret goal room",
+    0x0C4: 34, #"Donut Plains/Donut Ghost House/Normal goal room",
+    0x00A: 35, #"Donut Plains/Donut Secret 1/Main room",
+    0x0C2: 36, #"Donut Plains/Donut Secret 1/P-Balloon room",
+    0x10B: 37, #"Donut Plains/Donut Secret 2/Main room",
+    0x1C6: 38, #"Donut Plains/Donut Secret 2/P-Balloon room",
+    0x013: 39, #"Donut Plains/Donut Secret House/Big boo room",
+    0x0EC: 39, #"Donut Plains/Donut Secret House/Big boo room",
+    0x0EE: 39, #"Donut Plains/Donut Secret House/Big boo room",
+    0x0ED: 40, #"Donut Plains/Donut Secret House/Puzzle room",
+    0x0F2: 40, #"Donut Plains/Donut Secret House/Puzzle room",
+    0x0F0: 41, #"Donut Plains/Donut Secret House/Goal room",
+    0x0F1: 42, #"Donut Plains/Donut Secret House/Directional coin room",
+    0x008: 44, #"Donut Plains/Green Switch Palace/Bonus room",
+    0x0C9: 45, #"Donut Plains/Green Switch Palace/Button room",
+    0x11A: 46, #"Vanilla Dome/Vanilla Dome 1/Main room",
+    0x1EF: 47, #"Vanilla Dome/Vanilla Dome 1/Sinking rock room",
+    0x118: 48, #"Vanilla Dome/Vanilla Dome 2/Main room",
+    0x1C3: 49, #"Vanilla Dome/Vanilla Dome 2/Ice cave room",
+    0x10A: 50, #"Vanilla Dome/Vanilla Dome 3/Main room",
+    0x1C2: 51, #"Vanilla Dome/Vanilla Dome 3/Ice cave room",
+    0x1F7: 52, #"Vanilla Dome/Vanilla Dome 3/Bonus room",
+    0x119: 53, #"Vanilla Dome/Vanilla Dome 4/Main room",
+    0x1F5: 54, #"Vanilla Dome/Vanilla Dome 4/Lava room",
+    0x11C: 55, #"Vanilla Dome/#3 Lemmy's Castle/Main room",
+    0x1F4: 56, #"Vanilla Dome/#3 Lemmy's Castle/Midway point room",
+    0x1F3: 57, #"Vanilla Dome/#3 Lemmy's Castle/Lava room",
+    0x00B: 58, #"Vanilla Dome/Vanilla Fortress/Spikes room",
+    0x0E1: 59, #"Vanilla Dome/Vanilla Fortress/Thwomp room",
+    0x0E0: 59, #"Vanilla Dome/Vanilla Fortress/Thwomp room",
+    0x107: 60, #"Vanilla Dome/Vanilla Ghost House/Main room",
+    0x1FB: 60, #"Vanilla Dome/Vanilla Ghost House/Main room",
+    0x1EA: 61, #"Vanilla Dome/Vanilla Ghost House/Gas bubbles room",
+    0x1F9: 62, #"Vanilla Dome/Vanilla Ghost House/Goal room",
+    0x109: 63, #"Vanilla Dome/Vanilla Secret 1/Main room",
+    0x1F0: 64, #"Vanilla Dome/Vanilla Secret 1/Secret goal room",
+    0x1F1: 65, #"Vanilla Dome/Vanilla Secret 1/Normal goal room",
+    0x001: 66, #"Vanilla Dome/Vanilla Secret 2/Main room",
+    0x0D8: 67, #"Vanilla Dome/Vanilla Secret 2/Lava room",
+    0x002: 68, #"Vanilla Dome/Vanilla Secret 3/Main room",
+    0x0CB: 69, #"Vanilla Dome/Vanilla Secret 3/Main room",
+    0x11B: 70, #"Vanilla Dome/Red Switch Palace/Bonus room",
+    0x1D8: 71, #"Vanilla Dome/Red Switch Palace/Button room",
+    0x00C: 72, #"Twin Bridges/Butter Bridge 1/Main room",
+    0x0F3: 73, #"Twin Bridges/Butter Bridge 1/Goal room",
+    0x00D: 74, #"Twin Bridges/Butter Bridge 2/Main room",
+    0x0DD: 75, #"Twin Bridges/Butter Bridge 2/Dragon coin room",
+    0x00F: 76, #"Twin Bridges/Cheese Bridge Area/Main room",
+    0x0C8: 77, #"Twin Bridges/Cheese Bridge Area/Yoshi wings room",
+    0x0BF: 78, #"Twin Bridges/Cheese Bridge Area/Moving platforms room",
+    0x010: 79, #"Twin Bridges/Cookie Mountain/Main room",
+    0x0C1: 80, #"Twin Bridges/Cookie Mountain/River room",
+    0x00E: 81, #"Twin Bridges/#4 Ludwig's Castle/Orange wall room",
+    0x0DC: 82, #"Twin Bridges/#4 Ludwig's Castle/Falling ceiling room",
+    0x0DB: 83, #"Twin Bridges/#4 Ludwig's Castle/Net room",
+    0x0DA: 84, #"Twin Bridges/#4 Ludwig's Castle/Bonus room",
+    0x011: 85, #"Twin Bridges/Soda Lake/Main room",
+    0x0C6: 86, #"Twin Bridges/Soda Lake/Goal room",
+    0x11E: 87, #"Forest of Illusion/Forest of Illusion 1/Main room",
+    0x120: 88, #"Forest of Illusion/Forest of Illusion 2/Main room",
+    0x123: 89, #"Forest of Illusion/Forest of Illusion 3/Main room",
+    0x1F8: 90, #"Forest of Illusion/Forest of Illusion 3/Keyhole room",
+    0x1BC: 91, #"Forest of Illusion/Forest of Illusion 3/Bonus room",
+    0x11F: 92, #"Forest of Illusion/Forest of Illusion 4/Main room",
+    0x1DF: 93, #"Forest of Illusion/Forest of Illusion 4/Keyhole room",
+    0x1C1: 94, #"Forest of Illusion/Forest of Illusion 4/Blurp room",
+    0x020: 95, #"Forest of Illusion/#5 Roy's Castle/Main room",
+    0x01F: 96, #"Forest of Illusion/Forest Fortress/Smashers room",
+    0x0D6: 97, #"Forest of Illusion/Forest Fortress/Lava pool room",
+    0x11D: 98, #"Forest of Illusion/Forest Ghost House/Main room",
+    0x1E8: 98, #"Forest of Illusion/Forest Ghost House/Main room",
+    0x1E9: 98, #"Forest of Illusion/Forest Ghost House/Main room",
+    0x1FA: 99, #"Forest of Illusion/Forest Ghost House/Ghost ceiling room",
+    0x1E6: 100, #"Forest of Illusion/Forest Ghost House/Normal goal room",
+    0x1E7: 101, #"Forest of Illusion/Forest Ghost House/Secret goal room",
+    0x122: 102, #"Forest of Illusion/Forest Secret Area/Main room",
+    0x121: 103, #"Forest of Illusion/Blue Switch Palace/Bonus room",
+    0x1D7: 104, #"Forest of Illusion/Blue Switch Palace/Button room",
+    0x022: 105, #"Chocolate Island/Chocolate Island 1/Main room",
+    0x0D0: 105, #"Chocolate Island/Chocolate Island 1/Main room",
+    0x0F6: 106, #"Chocolate Island/Chocolate Island 1/Copy of main room",
+    0x0BE: 107, #"Chocolate Island/Chocolate Island 1/Porcupuffer room",
+    0x024: 108, #"Chocolate Island/Chocolate Island 2/Main room",
+    0x0CF: 109, #"Chocolate Island/Chocolate Island 2/Group A rooms",
+    0x0CE: 110, #"Chocolate Island/Chocolate Island 2/Group B rooms",
+    0x0CD: 111, #"Chocolate Island/Chocolate Island 2/Group C rooms",
+    0x023: 112, #"Chocolate Island/Chocolate Island 3/Main room",
+    0x0D7: 113, #"Chocolate Island/Chocolate Island 3/Coin room",
+    0x01D: 114, #"Chocolate Island/Chocolate Island 4/Main room",
+    0x0EA: 115, #"Chocolate Island/Chocolate Island 4/Vertical bonus room",
+    0x01C: 116, #"Chocolate Island/Chocolate Island 5/Main room",
+    0x0C0: 117, #"Chocolate Island/Chocolate Island 5/Bubbles room",
+    0x0BD: 118, #"Chocolate Island/Chocolate Island 5/Bonus room",
+    0x01A: 119, #"Chocolate Island/#6 Wendy's Castle/Spikes room",
+    0x0D4: 120, #"Chocolate Island/#6 Wendy's Castle/Hothead room",
+    0x01B: 121, #"Chocolate Island/Chocolate Fortress/Wooden spike room",
+    0x0EF: 122, #"Chocolate Island/Chocolate Fortress/Thwomp room",
+    0x021: 123, #"Chocolate Island/Choco Ghost House/Fishing boo room",
+    0x0FC: 124, #"Chocolate Island/Choco Ghost House/Boo stream room",
+    0x0FB: 125, #"Chocolate Island/Choco Ghost House/Goal room",
+    0x117: 126, #"Chocolate Island/Chocolate Secret/Chuck room",
+    0x1C0: 127, #"Chocolate Island/Chocolate Secret/Hammer bro room",
+    0x1ED: 128, #"Chocolate Island/Chocolate Secret/Sliding room",
+    0x1EC: 129, #"Chocolate Island/Chocolate Secret/Sinking rocks room",
+    0x1EE: 130, #"Chocolate Island/Chocolate Secret/Goal room",
+    0x018: 131, #"Chocolate Island/Sunken Ghost Ship/Ship entrance",
+    0x0F8: 132, #"Chocolate Island/Sunken Ghost Ship/Reappearing ghosts",
+    0x0F7: 133, #"Chocolate Island/Sunken Ghost Ship/Falling room",
+    0x116: 134, #"Valley of Bowser/Valley of Bowser 1/Main room",
+    0x1E5: 135, #"Valley of Bowser/Valley of Bowser 1/Goal room",
+    0x1E4: 136, #"Valley of Bowser/Valley of Bowser 1/Bonus room",
+    0x115: 137, #"Valley of Bowser/Valley of Bowser 2/Main room",
+    0x1E3: 138, #"Valley of Bowser/Valley of Bowser 2/Moving rocks room",
+    0x1E2: 139, #"Valley of Bowser/Valley of Bowser 2/Rising rocks room",
+    0x1C8: 140, #"Valley of Bowser/Valley of Bowser 2/Yoshi wings room",
+    0x113: 141, #"Valley of Bowser/Valley of Bowser 3/Main room",
+    0x1BB: 142, #"Valley of Bowser/Valley of Bowser 3/Bonus room",
+    0x10F: 143, #"Valley of Bowser/Valley of Bowser 4/Main room",
+    0x1BF: 144, #"Valley of Bowser/Valley of Bowser 4/Ice cave room",
+    0x110: 145, #"Valley of Bowser/#7 Larry's Castle/Snake block room",
+    0x1FE: 146, #"Valley of Bowser/#7 Larry's Castle/Magikoopa room",
+    0x111: 147, #"Valley of Bowser/Valley Fortress/Main room",
+    0x114: 148, #"Valley of Bowser/Valley Ghost House/Main room",
+    0x1D9: 149, #"Valley of Bowser/Valley Ghost House/Main room",
+    0x1DD: 149, #"Valley of Bowser/Valley Ghost House/P-Switch room",
+    0x1DB: 150, #"Valley of Bowser/Valley Ghost House/Directional coin room",
+    0x1DC: 150, #"Valley of Bowser/Valley Ghost House/Directional coin room",
+    0x1DA: 151, #"Valley of Bowser/Valley Ghost House/Goal room",
+    0x134: 152, #"Star Road/Star Road 1/Main room",
+    0x1D6: 153, #"Star Road/Star Road 1/Goal room",
+    0x130: 154, #"Star Road/Star Road 2/Main room",
+    0x1D5: 155, #"Star Road/Star Road 2/Goal room",
+    0x132: 156, #"Star Road/Star Road 3/Main room",
+    0x135: 157, #"Star Road/Star Road 4/Main room",
+    0x136: 158, #"Star Road/Star Road 5/Main room",
+    0x12A: 159, #"Special Zone/Gnarly/Main room",
+    0x1C4: 160, #"Special Zone/Gnarly/Goal room",
+    0x1C5: 160, #"Special Zone/Gnarly/Goal room",
+    0x12B: 161, #"Special Zone/Tubular/Main room",
+    0x12C: 162, #"Special Zone/Way Cool/Main room",
+    0x1C9: 163, #"Special Zone/Way Cool/Yoshi room",
+    0x12D: 165, #"Special Zone/Awesome/Main room",
+    0x128: 166, #"Special Zone/Groovy/Main room",
+    0x127: 167, #"Special Zone/Mondo/Main room",
+    0x1E0: 168, #"Special Zone/Mondo/Slide room",
+    0x1E1: 169, #"Special Zone/Mondo/Goal room",
+    0x126: 170, #"Special Zone/Outrageous/Main room",
+    0x125: 171, #"Special Zone/Funky/Main room",
 }
-
-mapping = {level_id: idx for idx, level_id in enumerate(list(map_mapping.keys()))}
 
 # for UT poptracker integration map tab switching
 def map_page_index(data: Any) -> int:
-    return mapping.get(data, 0)
+    return map_mapping.get(data, 0)
 
 tracker_map_groups = [
     ("World map", "map"),
@@ -4405,12 +4423,311 @@ map_locations = [
     "locations/funky.json",
 ]
 
-tracker_world = {
-    "map_page_maps": ["maps/maps.json"],
-    "map_page_locations": map_locations,
-    "map_page_groups": tracker_map_groups,
-    "map_page_setting_key": r"smw_curlevelid_{team}_{player}",
-    "map_page_index": map_page_index,
-    "external_pack_key": "ut_poptracker_path",
-    "poptracker_name_mapping": poptracker_data,
-}
+
+def rule_to_json(
+    rule: CollectionRule | Rule.Resolved | None,
+    state: CollectionState,
+    indent: str = "",
+) -> list[JSONMessagePart]:
+    messages: list[JSONMessagePart] = []
+    if isinstance(rule, Rule.Resolved) and not rule.always_true:
+        if indent:
+            messages.append({"type": "text", "text": indent})
+        messages.extend(rule.explain_json(state))
+    else:
+        messages.append({"type": "color", "color": "green", "text": f"{indent}True"})
+    return messages
+
+class UTMxin(World):
+    ut_can_gen_without_yaml: ClassVar = True
+    glitches_item_name: str = Items.glitched
+    disconnected_entrances: dict[Entrance, Region]
+    found_entrances_datastorage_key: list[str]
+    tracker_world = {
+        "map_page_maps": ["maps/maps.json"],
+        "map_page_locations": map_locations,
+        "map_page_groups": tracker_map_groups,
+        "map_page_setting_key": r"smw_curlevelid_{team}_{player}",
+        "map_page_index": map_page_index,
+        "external_pack_key": "ut_poptracker_path",
+        "poptracker_name_mapping": poptracker_data,
+    }
+
+    if TYPE_CHECKING:
+        options: WaffleOptions
+
+    @cached_property
+    def is_ut(self) -> bool:
+        return getattr(self.multiworld, "generation_is_fake", False)
+
+    @override
+    def generate_early(self) -> None:
+        re_gen_passthrough = getattr(self.multiworld, "re_gen_passthrough", {})
+        if re_gen_passthrough and self.game in re_gen_passthrough:
+            slot_data: dict[str,Any] = self.multiworld.re_gen_passthrough["SMW: Spicy Mycena Waffles"]
+            self.active_level_dict = slot_data["active_levels"]
+            self.teleport_pairs = slot_data["teleport_pairs"]
+            self.transition_pairs = slot_data["transition_pairs"]
+            self.swapped_exits = slot_data["swapped_exits"]
+            self.carryless_exits = slot_data["carryless_exits"]
+            self.options.alternate_logic.value = slot_data["alternate_logic"]
+            self.options.game_logic_difficulty.value = slot_data["game_logic_difficulty"]
+            self.options.inventory_yoshi_logic.value = slot_data["inventory_yoshi_logic"]
+            self.options.goal.value = slot_data["goal"]
+            self.options.yoshi_egg_count.value = slot_data["yoshi_egg_count"]
+            self.options.dragon_coin_checks.value = slot_data["dragon_coin_checks"]
+            self.options.moon_checks.value = slot_data["moon_checks"]
+            self.options.hidden_1up_checks.value = slot_data["hidden_1up_checks"]
+            self.options.star_block_checks.value = slot_data["star_block_checks"]
+            self.options.midway_point_checks.value = slot_data["midway_point_checks"]
+            self.options.room_checks.value = slot_data["room_checks"]
+            self.options.block_checks.value = slot_data["block_checks"]
+            self.options.swap_level_exits.value = slot_data["swap_level_exits"]
+            #self.options.exclude_special_zone.value = slot_data["exclude_special_zone"]
+            self.options.enemy_shuffle.value = slot_data["enemy_shuffle"]
+            self.options.yoshi_egg_placement.value = slot_data["yoshi_egg_placement"]
+            self.options.starting_location.value = slot_data["starting_location"]
+            self.options.ability_shuffle.value = slot_data["ability_shuffle"]
+            self.required_egg_count = slot_data["required_egg_count"]
+            self.actual_egg_count = slot_data["actual_egg_count"]
+
+
+    def get_logical_path(self, dest_name: str, state: CollectionState, *_: Any, **__: Any) -> list[JSONMessagePart]:
+        # Stolen from DrTChops XD
+        if not dest_name:
+            return [{"type": "text", "text": "Provide a location or region to route to using /get_logical_path [name]"}]
+
+        goal_location: Location | None = None
+        goal_region: Region | None = None
+        region_name = ""
+        location_name, usable, response = get_intended_text(dest_name, [loc.name for loc in self.get_locations()])
+        if usable:
+            try:
+                goal_location = self.get_location(location_name)
+            except KeyError:
+                return [{"type": "text", "text": f"Location {location_name} not found in this multiworld"}]
+            goal_region = goal_location.parent_region
+            if not goal_region:
+                return [{"type": "text", "text": f"Location {location_name} has no parent region"}]
+        else:
+            region_name, usable, _resp = get_intended_text(
+                dest_name,
+                [reg.name for reg in self.get_regions()],
+            )
+            if usable:
+                goal_region = self.get_region(region_name)
+            else:
+                return [{"type": "text", "text": response}]
+
+        glitched_state = state.copy()
+        glitched_state.collect(self.create_item(Items.glitched))
+
+        if goal_location and not goal_location.can_reach(state) and not goal_location.can_reach(glitched_state):
+            return [{"type": "text", "text": f"Location {goal_location.name} cannot be reached"}]
+        if goal_region not in state.path and goal_region not in glitched_state.path and goal_region.name != self.origin_region_name:
+            return [{"type": "text", "text": f"Region {goal_region.name} cannot be reached"}]
+
+        if not goal_location.can_reach(state) and goal_location.can_reach(glitched_state):
+            common_state = glitched_state.copy()
+        else:
+            common_state = state.copy()
+
+        messages: list[JSONMessagePart] = [
+            #{"type": "color", "color": "slateblue", "text": f"Start -> {self.origin_region_name}\n"},
+            #{"type": "color", "color": "green", "text": "    True\n"},
+        ]
+        if goal_region.name != self.origin_region_name:
+            path: list[Entrance] = []
+            name, connection = common_state.path[goal_region]
+            while connection is not None:
+                name, connection = connection
+                if "->" in name:
+                    if name.endswith("- Tile") and not name.endswith("Yoshi's House - Tile"):
+                        continue
+                    if "Transition" in name:
+                        if name.startswith("Transition") and "-> Transition" in name: 
+                            path.append(self.get_entrance(name))
+                    else:
+                        path.append(self.get_entrance(name))
+
+            path.reverse()
+            last = path[-1]
+            for p in path:
+                if "Transition" in p.name or p.name.startswith("Star World -") or "Pipe ->" in p.name:
+                    # Parse teleports and transitions
+                    name = p.name.replace('Transition - ', '')
+                    messages.extend(
+                        [
+                            {"type": "color", "color": "slateblue", "text": name.split("->")[0]},
+                            {"type": "text", "text": "->"},
+                            {"type": "color", "color": "slateblue", "text": name.split("->")[1]},
+                            {"type": "text", "text": "\n"},
+                        ]
+                    )
+                    continue
+                elif p.name.endswith(("Pipe", "- Star World")) or "Star World -" in p.name.split("->")[1]:
+                    # Skip over any intermediate transition/teleport entrance
+                    continue
+                elif "Tile ->" in p.name:
+                    # Write level tile
+                    messages.extend(
+                        [
+                            {"type": "color", "color": "slateblue", "text": f"[{p.name.split(" -> ")[0]}] "},
+                        ]
+                    )
+                    continue
+
+                # Write level name & logic
+                messages.extend(
+                    [
+                        {"type": "text", "text": p.name.split("->")[1], "player": self.player},
+                        {"type": "text", "text": "\n"},
+                        *rule_to_json(p.access_rule, common_state, indent="    "),
+                        {"type": "text", "text": "\n"},
+                    ]
+                )
+                # Remove lone Trues from logic
+                if messages[-1]["text"] == "\n" and messages[-2]["text"] == "    True" and p != last:
+                    messages.pop()
+                    messages.pop()
+
+        if goal_location:
+            if goal_location.name.endswith(("Normal Exit", "Secret Exit")):
+                messages.pop()
+            else:
+                #if messages[-1]["text"] == "\n" and messages[-2]["text"].endswith("True"):
+                #    messages.pop()
+                #    messages.pop()
+                messages.extend(
+                    [
+                        {"type": "text", "text": "-> "},
+                        {
+                            "type": "location_name",
+                            "text": goal_location.name,
+                            "player": self.player,
+                        },
+                        {"type": "text", "text": "\n"},
+                        *rule_to_json(goal_location.access_rule, common_state, indent="    "),
+                    ]
+                )
+
+        return messages
+
+    def explain_rule(self, dest_name: str, state: CollectionState, *_: Any, **__: Any) -> list[JSONMessagePart]:
+        if not dest_name:
+            return [{"type": "text", "text": "Enter a location, region, item, or acronym to get an explanation"}]
+
+        types_to_try = {
+            "macro": self._explain_macro,
+            "location": self._explain_location,
+        }
+        attempts = list(types_to_try.keys())
+        parts = dest_name.split(maxsplit=1)
+        if len(parts) == 2:
+            first_word = parts[0].lower()
+            for label in types_to_try.keys():
+                if first_word == label:
+                    attempts = [label]
+                    break
+
+        result = []
+        usable = False
+        best_guess = []
+        max_confidence = 0
+        confidence = 0
+        for classification in attempts:
+            result, usable, confidence = types_to_try[classification](dest_name, state)
+            if usable:
+                return result
+            if confidence > max_confidence:
+                best_guess = result
+                max_confidence = confidence
+
+        return best_guess
+
+    def _explain_location(self, location_name: str, state: CollectionState) -> tuple[list[JSONMessagePart], bool, int]:
+        all_location_names = set(self.multiworld.regions.location_cache[self.player])
+        guess, usable, response = get_intended_text(location_name, all_location_names)
+        if not usable:
+            picks = get_fuzzy_results(location_name, all_location_names, limit=1)
+            confidence = picks[0][1]
+            return [{"type": "text", "text": response}], False, confidence
+
+        location_name = guess
+        if location_name.endswith(("Normal Exit", "Secret Exit")):
+            location = self.get_location(location_name)
+            # it's actually an entrance lol
+            location = location.parent_region.entrances[0]
+        else:
+            location = self.get_location(location_name)
+        glitched_state = state.copy()
+        glitched_state.collect(self.create_item(Items.glitched))
+
+        if location.can_reach(glitched_state) and not location.can_reach(state):
+            messages: list[JSONMessagePart] = [
+                {"type": "text", "text": "Location: "},
+                {"type": "color", "color": "slateblue" if location.can_reach(glitched_state) else "salmon", "text": location_name},
+                {"type": "text", "text": " (Can be obtained out of logic)"},
+            ]
+            messages.extend(
+                [
+                    {"type": "text", "text": "\nLogic: "},
+                    *rule_to_json(location.access_rule, glitched_state),
+                ]
+            )
+        else:
+            messages: list[JSONMessagePart] = [
+                {"type": "text", "text": "Location: "},
+                {"type": "color", "color": "green" if location.can_reach(state) else "salmon", "text": location_name},
+            ]
+            messages.extend(
+                [
+                    {"type": "text", "text": "\nLogic: "},
+                    *rule_to_json(location.access_rule, state),
+                ]
+            )
+        return messages, True, 100
+
+    def _explain_macro(self, macro_name: str, state: CollectionState) -> tuple[list[JSONMessagePart], bool, int]:
+        all_macro_names = set(self.rule_macros.keys())
+        guess, usable, response = get_intended_text(macro_name, all_macro_names)
+        if not usable:
+            picks = get_fuzzy_results(macro_name, all_macro_names, limit=1)
+            confidence = picks[0][1]
+            return [{"type": "text", "text": response}], False, confidence
+
+        macro_name = guess
+        macro = self.rule_macros[macro_name]
+        assert isinstance(macro, Macro.Resolved)
+        
+        glitched_state = state.copy()
+        glitched_state.collect(self.create_item(Items.glitched))
+
+        if macro(glitched_state) and not macro(state):
+            messages: list[JSONMessagePart] = [
+                {"type": "text", "text": "Macro "},
+                {"type": "color", "color": "slateblue" if macro(glitched_state) else "salmon", "text": macro.name},
+            ]
+            if macro.description:
+                messages.append({"type": "text", "text": f"\n{macro.description}"})
+            messages.extend(
+                [
+                    {"type": "text", "text": "\nLogic: "},
+                    *macro.child.explain_json(glitched_state),
+                ]
+            )
+        else:
+            messages: list[JSONMessagePart] = [
+                {"type": "text", "text": "Macro "},
+                {"type": "color", "color": "green" if macro(state) else "salmon", "text": macro.name},
+            ]
+            if macro.description:
+                messages.append({"type": "text", "text": f"\n{macro.description}"})
+            messages.extend(
+                [
+                    {"type": "text", "text": "\nLogic: "},
+                    *macro.child.explain_json(state),
+                ]
+            )
+
+        return messages, True, 100
