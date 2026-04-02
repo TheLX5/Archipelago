@@ -1547,7 +1547,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.tidal_trouble_coin_1:
                 CanSwim & CanHover,
             Locations.tidal_trouble_coin_2:
-                CanSwim & CanHover,
+                CanSwim,
             Locations.tidal_trouble_balloon_1:
                 CanSwim & CanTeamAttack,
 
