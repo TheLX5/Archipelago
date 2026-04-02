@@ -95,7 +95,7 @@ SMW_GOAL_LEVELS                = [0x28, 0x31, 0x32]
 SMW_INVALID_MARIO_STATES       = [0x05, 0x06, 0x0A, 0x0C, 0x0D]
 SMW_BAD_TEXT_BOX_LEVELS        = [0x00, 0x26, 0x02, 0x4B]
 SMW_BOSS_STATES                = [0x80, 0xC0, 0xC1]
-SMW_UNCOLLECTABLE_LEVELS       = []
+SMW_UNCOLLECTABLE_LEVELS       = [0x14, 0x08, 0x3F, 0x45]
 SMW_UNCOLLECTABLE_DRAGON_COINS = [0x24]
 LEVELS_WITHOUT_CHECKS          = [0x00, 0x03, 0x31, 0x32, 0x28]
 TRAPLESS_LEVELS                = [0x00, 0x03, 0x28]
@@ -653,6 +653,9 @@ class WaffleSNIClient(SNIClient):
             progress_byte = (level_id // 8)
             progress_bit  = 7 - (level_id % 8)
 
+            if level_id in SMW_UNCOLLECTABLE_LEVELS:
+                continue
+            
             # Exits
             if loc_type == 0x00 or loc_type == 0x01:
                 flag = 1 + (loc_type & 0x01)
