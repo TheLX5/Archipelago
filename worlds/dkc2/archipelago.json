@@ -1,6 +1,6 @@
 {
     "game": "Donkey Kong Country 2", 
     "world_version": "3.1.0", 
-    "minimum_ap_version": "0.6.3", 
+    "minimum_ap_version": "0.6.7", 
     "authors": ["lx5"]
 }
