@@ -56,6 +56,7 @@ class Items(StrEnum):
     # Traps
     # Misc
     extractinator = "Banana Extractinator"
+    radar = "Banana Radar"
     # Tracker
     glitched = "Skill"
     

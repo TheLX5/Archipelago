@@ -5,13 +5,13 @@ if TYPE_CHECKING:
 
 from .enums import Items, Locations, Events, Regions
 from .constants import *
-from .options import Goal, RequiredBirds
+from . import options
 
 from BaseClasses import CollectionState, Entrance, Location
 from NetUtils import JSONMessagePart
 from rule_builder.options import OptionFilter
 from rule_builder.rules import Has, HasAny, HasAnyCount, HasAll, Rule, True_, CanReachRegion, CanReachLocation, WrapperRule
-
+from rule_builder.field_resolvers import FromOption, FromWorldAttr
 
 @dataclass()
 class Macro(WrapperRule["DKC3World"], game=GAME_NAME):
@@ -162,28 +162,28 @@ class DKC3Rules:
             f"{Regions.northern_kremisphere_north} -> {Regions.razor_ridge}":
                 Has(Items.razor_ridge),
             f"{Regions.northern_kremisphere_kore} -> {Regions.kaos_kore}":
-                Has(Items.banana_bird, self.world.options.required_birds.value, options=[OptionFilter(RequiredBirds, 0, operator="ne")]) | 
-                Has(Items.kaos_kore, options=[OptionFilter(RequiredBirds, 0)]),
+                Has(Items.banana_bird, count=FromOption(options.RequiredBirds), options=[OptionFilter(options.RequiredBirds, 0, operator="ne")]) | 
+                Has(Items.kaos_kore, options=[OptionFilter(options.RequiredBirds, 0)]),
             f"{Regions.northern_kremisphere_center} -> {Regions.krematoa}":
                 Has(Items.krematoa),
 
             # Boss entrances
             f"{Regions.lake_orangatanga} -> {Regions.belchas_barn_map}":
-                Has(Events.lake_level, self.world.options.required_lake_levels.value),
+                Has(Events.lake_level, count=FromOption(options.RequiredLakeLevels)),
             f"{Regions.kremwood_forest} -> {Regions.arichs_ambush_map}":
-                Has(Events.forest_level, self.world.options.required_forest_levels.value),
+                Has(Events.forest_level, count=FromOption(options.RequiredForestLevels)),
             f"{Regions.cotton_top_cove} -> {Regions.squirt_showdown_map}":
-                Has(Events.cove_level, self.world.options.required_cove_levels.value),
+                Has(Events.cove_level, count=FromOption(options.RequiredCoveLevels)),
             f"{Regions.mekanos} -> {Regions.kaos_karnage_map}":
-                Has(Events.mekanos_level, self.world.options.required_mekanos_levels.value),
+                Has(Events.mekanos_level, count=FromOption(options.RequiredMekanosLevels)),
             f"{Regions.k3} -> {Regions.bleaks_house_map}":
-                Has(Events.k3_level, self.world.options.required_k3_levels.value),
+                Has(Events.k3_level, count=FromOption(options.RequiredK3Levels)),
             f"{Regions.razor_ridge} -> {Regions.barbos_barrier_map}":
-                Has(Events.ridge_level, self.world.options.required_ridge_levels.value),
+                Has(Events.ridge_level, count=FromOption(options.RequiredRidgeLevels)),
             f"{Regions.kaos_kore} -> {Regions.kastle_kaos_map}":
-                Has(Events.kore_level, self.world.options.required_kore_levels.value),
+                Has(Events.kore_level, count=FromOption(options.RequiredKoreLevels)),
             f"{Regions.krematoa} -> {Regions.knautilus_map}":
-                Has(Events.krematoa_level, self.world.options.required_krematoa_levels.value) & CanOpenKnautilus,
+                Has(Events.krematoa_level, count=FromOption(options.RequiredKrematoaLevels)) & CanOpenKnautilus,
 
             # Krematoa special casing
             f"{Regions.krematoa} -> {Regions.stampede_sprint_map}":
@@ -214,7 +214,8 @@ class DKC3Rules:
             Locations.bird_smugglers_cove:
                 True_(),
             Locations.bird_arichs_hoard:
-                CanReachLocation(Locations.riverside_race_clear),
+                True_(),
+                #CanReachLocation(Locations.riverside_race_clear),
             Locations.bird_bounty_bay:
                 True_(),
             #Locations.bird_sky_high_secret:
@@ -255,9 +256,9 @@ class DKC3Rules:
                 self.world.set_rule(self.world.get_location(loc.name), rule)
 
 
-        if self.world.options.goal == Goal.option_kore:
+        if self.world.options.goal == options.Goal.option_kore:
             self.world.set_completion_rule(Has(Events.k_rool_at_kore))
-        elif self.world.options.goal == Goal.option_krematoa:
+        elif self.world.options.goal == options.Goal.option_krematoa:
             self.world.set_completion_rule(Has(Events.k_rool_at_knautilus))
         else:
             self.world.set_completion_rule(HasAll(Events.k_rool_at_kore, Events.k_rool_at_knautilus))

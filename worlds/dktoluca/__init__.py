@@ -177,6 +177,8 @@ class DKC3World(tracker.UTMxin, World):
         if self.options.energy_link:
             itempool += [self.create_item(Items.extractinator) for _ in range(3)]
 
+        itempool += [self.create_item(Items.radar)]
+
         # Add junk items into the pool
         junk_count = self.total_required_locations - len(itempool)
         junk_weights = []

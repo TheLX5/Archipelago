@@ -24,12 +24,12 @@ def rule_to_json(
     indent: str = "",
 ) -> list[JSONMessagePart]:
     messages: list[JSONMessagePart] = []
-    if indent:
-        messages.append({"type": "text", "text": indent})
-    if isinstance(rule, Rule.Resolved):
+    if isinstance(rule, Rule.Resolved) and not rule.always_true:
+        if indent:
+            messages.append({"type": "text", "text": indent})
         messages.extend(rule.explain_json(state))
     else:
-        messages.append({"type": "color", "color": "green", "text": "True"})
+        messages.append({"type": "color", "color": "green", "text": f"{indent}True"})
     return messages
 
 class UTMxin(World):
@@ -119,10 +119,7 @@ class UTMxin(World):
         else:
             common_state = state.copy()
 
-        messages: list[JSONMessagePart] = [
-            {"type": "color", "color": "slateblue", "text": f"Start -> {self.origin_region_name}\n"},
-            {"type": "color", "color": "green", "text": "    True\n"},
-        ]
+        messages: list[JSONMessagePart] = []
         if goal_region.name != self.origin_region_name:
             path: list[Entrance] = []
             name, connection = common_state.path[goal_region]
@@ -132,6 +129,7 @@ class UTMxin(World):
                     path.append(self.get_entrance(name))
 
             path.reverse()
+            last = path[-1]
             for p in path:
                 messages.extend(
                     [
@@ -141,6 +139,10 @@ class UTMxin(World):
                         {"type": "text", "text": "\n"},
                     ]
                 )
+                # Remove lone Trues from logic
+                if messages[-1]["text"] == "\n" and messages[-2]["text"] == "    True":
+                    messages.pop()
+                    messages.pop()
 
         if goal_location:
             messages.extend(

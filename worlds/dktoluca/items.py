@@ -66,6 +66,7 @@ misc_table = {
 
 extra_table = {
     Items.extractinator:         ItemData(COUNT | 0x032, ItemClassification.useful),
+    Items.radar:                 ItemData(FLAG | 0x00F, ItemClassification.useful),
     Items.glitched:              ItemData(None, ItemClassification.progression_skip_balancing),
 }
 
