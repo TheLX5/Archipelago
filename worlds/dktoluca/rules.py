@@ -398,27 +398,27 @@ class DKC3StrictRules(DKC3Rules):
                 True_(),
 
             Locations.murky_mill_clear:
-                HasEllie,
+                True_(),
             Locations.murky_mill_bonus_1:
-                HasEllie,
+                HasEllie | CanCarry,
             Locations.murky_mill_bonus_2:
                 HasEllie & HasBarrelCannon,
             Locations.murky_mill_dk_coin:
-                HasEllie,
+                HasEllie | CanCarry,
             Locations.murky_mill_kong:
-                HasEllie,
+                True_(),
             Locations.murky_mill_bananas_1:
-                HasEllie,
+                True_(),
             Locations.murky_mill_bananas_2:
-                HasEllie,
+                True_(),
             Locations.murky_mill_coin_1:
-                HasEllie,
+                True_(),
             Locations.murky_mill_coin_2:
-                HasEllie,
+                True_(),
             Locations.murky_mill_coin_3:
                 HasEllie,
             Locations.murky_mill_balloon_1:
-                HasEllie,
+                True_(),
                 
             Locations.belchas_barn_clear:
                 HasBothKongs & CanCarry,
@@ -504,7 +504,7 @@ class DKC3StrictRules(DKC3Rules):
             Locations.squeals_on_wheels_bananas_7:
                 CanCarry & CanClimb & HasBarrelCannon,
             Locations.squeals_on_wheels_coin_1:
-                CanCarry & CanClimb & HasBarrelCannon & HasParry,
+                CanCarry & CanClimb & HasBarrelCannon & ( HasParry | CanTeamAttack ),
             Locations.squeals_on_wheels_balloon_1:
                 CanCarry & CanClimb & HasBarrelCannon & HasParry,
 
@@ -1548,7 +1548,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.tidal_trouble_coin_1:
                 CanSwim & CanHover,
             Locations.tidal_trouble_coin_2:
-                CanSwim & CanHover,
+                CanSwim,
             Locations.tidal_trouble_balloon_1:
                 CanSwim & CanTeamAttack,
 
@@ -2862,7 +2862,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.squeals_on_wheels_bananas_7:
                 CanCarry & CanClimb & HasBarrelCannon,
             Locations.squeals_on_wheels_coin_1:
-                CanCarry & CanClimb & HasBarrelCannon,
+                CanCarry & CanClimb & HasBarrelCannon & ( HasParry | CanTeamAttack ),
             Locations.squeals_on_wheels_balloon_1:
                 CanCarry & CanClimb & HasBarrelCannon & HasParry,
 
