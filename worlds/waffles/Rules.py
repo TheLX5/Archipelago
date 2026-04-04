@@ -167,7 +167,7 @@ CanGetYellowYoshi: Macro = Macro(
 
 CanGetBlueYoshi: Macro = Macro(
         CanReachRegion(Regions.star_road_2_region) | (
-            CanGetGreenYoshi | CanGetRedYoshi | CanGetYellowYoshi & (
+            (CanGetGreenYoshi | CanGetRedYoshi | CanGetYellowYoshi) & (
                     CanReachRegion(Regions.cheese_bridge_region) | 
                     CanReachRegion(Regions.special_zone_3_region) | 
                     CanReachRegion(Regions.valley_of_bowser_2_region)
