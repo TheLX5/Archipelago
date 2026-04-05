@@ -2714,7 +2714,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.tidal_trouble_clear:
                 CanSwim,
             Locations.tidal_trouble_bonus_1:
-                HasEnguarde & (CanSwim | CanHover),
+                (CanSwim & (HasBothKongs | (HasEnguarde))) | (CanHover & HasEnguarde),
             Locations.tidal_trouble_bonus_2:
                 CanSwim & ((CanWaterBounce & CanClimb) | CanHover),
             Locations.tidal_trouble_dk_coin:
@@ -2804,7 +2804,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.riverside_race_clear:
                 CanSwim,
             Locations.riverside_race_bonus_1:
-                CanWaterBounce | (CanSwim & HasBothKongs),
+                CanSwim & (CanWaterBounce | HasBothKongs),
             Locations.riverside_race_bonus_2:
                 CanSwim & (HasBarrelInvincible | HasBothKongs),
             Locations.riverside_race_dk_coin:
@@ -3007,7 +3007,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.kreeping_klasps_dk_coin:
                 (CanSwim | CanClimb) & CanCarry,
             Locations.kreeping_klasps_kong:
-                CanClimb,
+                CanClimb | (HasBothKongs & CanTeamAttack),
             Locations.kreeping_klasps_balloon_1:
                 CanTeamAttack | CanSpin,
             Locations.kreeping_klasps_coin_1:
@@ -3036,7 +3036,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.tracker_barrel_trek_coin_2:
                 HasBarrelTracker | CanHover | CanSpin,
             Locations.tracker_barrel_trek_bananas_1:
-                HasBarrelTracker | (HasBothKongs | CanHover),
+                HasBarrelTracker | (HasBarrelCannon & (CanHover | (CanSpin & HasBothKongs))),
             Locations.tracker_barrel_trek_balloon_1:
                 HasBarrelTracker & HasBarrelCannon,
             Locations.tracker_barrel_trek_coin_3:
@@ -3055,7 +3055,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.fish_food_frenzy_kong:
                 CanSwim,
             Locations.fish_food_frenzy_coin_1:
-                CanSwim,
+                True(),
             Locations.fish_food_frenzy_bananas_1:
                 CanSwim,
             Locations.fish_food_frenzy_coin_2:
@@ -3476,11 +3476,11 @@ class DKC3ExpertRules(DKC3Rules):
                 HasEnguarde,
 
             Locations.pot_hole_panic_clear:
-                (HasSquawks | (CanSpin & CanHover)) & CanSwim & ( HasEllie | CanTeamAttack ) & HasBarrelCannon,
+                (HasSquawks | (CanSpin & CanHover)) & CanSwim & (HasEllie | CanTeamAttack | CanSpin) & HasBarrelCannon,
             Locations.pot_hole_panic_bonus_1:
                 (HasSquawks | (CanSpin & CanHover)) & CanSwim & HasEllie,
             Locations.pot_hole_panic_bonus_2:
-               (HasSquawks | (CanSpin & CanHover)) & CanSwim & ( HasEllie | CanTeamAttack ) & HasBarrelCannon & HasSquitter,
+               (HasSquawks | (CanSpin & CanHover)) & CanSwim & (HasEllie | CanTeamAttack | CanSpin) & HasBarrelCannon & HasSquitter,
             Locations.pot_hole_panic_dk_coin:
                 (HasSquawks | (CanSpin & CanHover)) & CanSwim & CanTeamAttack & HasBarrelCannon & CanCarry,
             Locations.pot_hole_panic_kong:
@@ -3512,9 +3512,9 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.pot_hole_panic_coin_4:
                 (HasSquawks | (CanSpin & CanHover)) & CanSwim,
             Locations.pot_hole_panic_bananas_10:
-                (HasSquawks | (CanSpin & CanHover)) & CanSwim & ( HasEllie | CanTeamAttack ) & HasBarrelCannon,
+                (HasSquawks | (CanSpin & CanHover)) & CanSwim & (HasEllie | CanTeamAttack | CanSpin) & HasBarrelCannon,
             Locations.pot_hole_panic_bananas_11:
-                (HasSquawks | (CanSpin & CanHover)) & CanSwim & ( HasEllie | CanTeamAttack ) & HasBarrelCannon & HasSquitter,
+                (HasSquawks | (CanSpin & CanHover)) & CanSwim & (HasEllie | CanTeamAttack | CanSpin) & HasBarrelCannon & HasSquitter,
 
             Locations.ropey_rumpus_clear:
                 CanClimb,
@@ -3755,7 +3755,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.tyrant_twin_tussle_coin_1:
                 CanTeamAttack,
             Locations.tyrant_twin_tussle_balloon_1:
-                CanTeamAttack | HasBothKongs,
+                CanSpin | HasBothKongs,
             Locations.tyrant_twin_tussle_balloon_2:
                 CanTeamAttack,
             Locations.tyrant_twin_tussle_coin_2:
