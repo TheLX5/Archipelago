@@ -2571,7 +2571,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.tyrant_twin_tussle_coin_1:
                 CanTeamAttack,
             Locations.tyrant_twin_tussle_balloon_1:
-                CanTeamAttack,
+                CanTeamAttack | CanSpin,
             Locations.tyrant_twin_tussle_balloon_2:
                 CanTeamAttack,
             Locations.tyrant_twin_tussle_coin_2:
