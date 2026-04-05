@@ -2294,15 +2294,15 @@ class DKC3LooseRules(DKC3Rules):
                 CanSwim & HasEnguarde,
 
             Locations.pot_hole_panic_clear:
-                HasSquawks & CanSwim & ( HasEllie | CanTeamAttack ) & HasBarrelCannon,
+                HasSquawks & CanSwim & ( HasEllie | CanTeamAttack | CanSpin ) & HasBarrelCannon,
             Locations.pot_hole_panic_bonus_1:
                 HasSquawks & CanSwim & HasEllie,
             Locations.pot_hole_panic_bonus_2:
-                HasSquawks & CanSwim & ( HasEllie | CanTeamAttack ) & HasBarrelCannon & HasSquitter,
+                HasSquawks & CanSwim & ( HasEllie | CanTeamAttack | CanSpin ) & HasBarrelCannon & HasSquitter,
             Locations.pot_hole_panic_dk_coin:
                 HasSquawks & CanSwim & CanTeamAttack & HasBarrelCannon & CanCarry,
             Locations.pot_hole_panic_kong:
-                HasSquawks & CanSwim & HasEllie & HasBarrelCannon & ( HasSquitter | CanHover ),
+                HasSquawks & CanSwim & HasEllie & HasBarrelCannon & ( HasSquitter | CanHover | CanSpin ),
             Locations.pot_hole_panic_bananas_1:
                 HasSquawks,
             Locations.pot_hole_panic_bananas_2:
@@ -2330,9 +2330,9 @@ class DKC3LooseRules(DKC3Rules):
             Locations.pot_hole_panic_coin_4:
                 HasSquawks & CanSwim,
             Locations.pot_hole_panic_bananas_10:
-                HasSquawks & CanSwim & ( HasEllie | CanTeamAttack ) & HasBarrelCannon,
+                HasSquawks & CanSwim & ( HasEllie | CanTeamAttack | CanSpin ) & HasBarrelCannon,
             Locations.pot_hole_panic_bananas_11:
-                HasSquawks & CanSwim & ( HasEllie | CanTeamAttack ) & HasBarrelCannon & HasSquitter,
+                HasSquawks & CanSwim & ( HasEllie | CanTeamAttack | CanSpin ) & HasBarrelCannon & HasSquitter,
 
             Locations.ropey_rumpus_clear:
                 CanClimb,
