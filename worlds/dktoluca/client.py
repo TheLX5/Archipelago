@@ -54,6 +54,7 @@ class DKC3Memory(Enum):
     vehicles = Read(WRAM_START + 0x0611, 0x02)
     lives = Read(WRAM_START + 0x05D5, 0x02)
     extractinator_upgrades = Read(DKC3_SRAM + 0x32, 0x02)
+    started_save = Read(WRAM_START + 0x0C2, 2)
 
 countable_items = {
     0x05CD: DKC3Memory.banana_bird_count,
@@ -137,6 +138,12 @@ class DKC3SNIClient(SNIClient):
             self.game_state = False
             self.current_map = 0
             return
+        
+        loaded_save = int.from_bytes(memory_data.get(DKC3Memory.started_save), "little")
+        if loaded_save == 0:
+            self.game_state = False
+            self.current_map = 0
+            return
 
         gameplay_pointer = int.from_bytes(memory_data.get(DKC3Memory.gameplay_pointer), "little")
         if gameplay_pointer == POINTER_MAIN_MAP or gameplay_pointer == POINTER_IN_LEVEL:
@@ -162,7 +169,6 @@ class DKC3SNIClient(SNIClient):
         enabled_coin = setting_data[0x12]
         enabled_birds = setting_data[0x13]
 
-        #print (current_map_level, current_map_level >= 0x1D, current_map_level < 0x4D, current_map_level in sorted_locations_table.keys())
         if current_map_level >= 0x1D and current_map_level < 0x4D and current_map_level in sorted_locations_table.keys():
             for loc_id in sorted_locations_table[current_map_level]:
                 # Early discard already checked locations
@@ -192,7 +198,6 @@ class DKC3SNIClient(SNIClient):
                         new_checks.append(loc_id)
                 elif loc_type == 0x06 and enabled_banana:
                     # Bananas
-                    #print (f"{level_id} | {loc_type:02X} | {loc_data:05X} | {loc_id:08X} | {collectible_data[loc_data + 1]:02X}")
                     if collectible_data[loc_data + 1] & 0x02:
                         new_checks.append(loc_id)
                 elif loc_type == 0x07 and enabled_coin:
@@ -283,7 +288,40 @@ class DKC3SNIClient(SNIClient):
                 
             snes_buffered_write(ctx, DKC3_SRAM + 0x2C, recv_index.to_bytes(2, "little"))
 
-            await snes_flush_writes(ctx)
+        updated_level_flags = False
+        updated_banana_birds = False
+
+        for loc_id in ctx.checked_locations:
+            if loc_id not in ctx.locations_checked:
+                ctx.locations_checked.add(loc_id)
+
+                # Get info from the location ID
+                level_id = loc_id >> 24
+                loc_type = (loc_id >> 20) & 0x0F
+                loc_data = loc_id & 0x000FFFFF
+
+                if loc_type in [0x00, 0x01, 0x02]:
+                    # Clears, Bonuses, DK Coins
+                    level_flags[level_id] |= loc_data
+                    updated_level_flags = True
+                elif loc_type == 0x03 and enabled_dk_coin:
+                    # DK Coins
+                    level_flags[level_id] |= loc_data
+                    updated_level_flags = True
+                elif loc_type == 0x04 and enabled_kong:
+                    # KONG
+                    level_flags[level_id] |= loc_data
+                    updated_level_flags = True
+                elif loc_type == 0x08 and enabled_birds:
+                    banana_bird_flags[loc_data] |= 0x02
+                    updated_banana_birds = True
+        
+        if updated_level_flags:
+            snes_buffered_write(ctx, WRAM_START + 0x632, bytearray(level_flags))
+        if updated_banana_birds:
+            snes_buffered_write(ctx, WRAM_START + 0x642, bytearray(banana_bird_flags))
+
+        await snes_flush_writes(ctx)        
 
 
     async def handle_energy_link(self, ctx: "SNIContext", memory_data: SnesData[DKC3Memory]):

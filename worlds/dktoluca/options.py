@@ -29,9 +29,7 @@ class StartingKong(Choice):
 
 class ShuffleLevels(Toggle):
     """
-    Shuffles levels and bosses around
-
-    NOT SUPPORTED ATM
+    Shuffles levels around. Does nothing to bosses.
     """
     display_name = "Shuffle Levels"
 

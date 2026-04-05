@@ -27,9 +27,23 @@ class DKC3PatchExtension(APPatchExtension):
         unshuffled_rom = bytearray(rom)
         rom = bytearray(rom)
         level_data = base64.b64decode(caller.get_file("levels.bin").decode("UTF-8"))
-        rom_connections = json.loads(level_data)
+        rom_connections: dict[str, list[str, int]] = json.loads(level_data)
 
-        #from .levels import level_rom_data, boss_rom_data
+        from .levels import level_rom_data #, boss_rom_data
+        dkc3_level_rom_data = level_rom_data
+
+        for level, selected_level in rom_connections.items():
+            if level not in dkc3_level_rom_data.keys():
+                continue
+
+            selected_name = selected_level[0]
+            selected_addr = dkc3_level_rom_data[selected_name]
+            selected_name_id = unshuffled_rom[selected_addr]
+            selected_level_id = unshuffled_rom[selected_addr+1]
+
+            dest_addr = dkc3_level_rom_data[level]
+            rom[dest_addr] = selected_name_id
+            rom[dest_addr+1] = selected_level_id
 
         return bytes(rom)
 
@@ -43,6 +57,7 @@ class DKC3ProcedurePatch(APProcedurePatch, APTokenMixin):
     procedure = [
         ("apply_tokens", ["token_patch.bin"]),
         ("apply_bsdiff4", ["dkc3_basepatch.bsdiff4"]),
+        ("shuffle_levels", []),
     ]
 
     @classmethod

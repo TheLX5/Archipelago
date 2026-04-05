@@ -255,8 +255,8 @@ class DKC3World(tracker.UTMxin, World):
 
     def generate_early(self):
         # Skip shuffling levels
-        if self.options.shuffle_levels:
-            self.options.shuffle_levels.value = False
+        #if self.options.shuffle_levels:
+        #    self.options.shuffle_levels.value = False
         # Place cogs anywhere for now
         if self.options.cog_placement:
             self.options.cog_placement.value = 0
@@ -274,6 +274,21 @@ class DKC3World(tracker.UTMxin, World):
 
     def get_filler_item_name(self) -> str:
         return self.random.choice(list(misc_table.keys()))
+    
+
+    def extend_hint_information(self, hint_data: dict[int, dict[int, str]]):
+        er_hint_data = {}
+        for level_spot, map_name in level_map.items():
+            if level_spot not in self.level_connections.keys():
+                continue
+            level_name = self.level_connections[level_spot.value]
+            level_region = self.get_region(level_name)
+            for location in level_region.locations:
+                if location.address is None:
+                    continue
+                er_hint_data[location.address] = map_name.value
+                
+        hint_data[self.player] = er_hint_data
 
 
     def generate_output(self, output_directory: str):
