@@ -485,7 +485,7 @@ class DKC3StrictRules(DKC3Rules):
             Locations.squeals_on_wheels_bonus_2:
                 CanCarry & CanClimb & CanHover & CanTeamAttack,
             Locations.squeals_on_wheels_dk_coin:
-                CanCarry & CanClimb & CanCarry & CanTeamAttack,
+                CanCarry & CanClimb & CanTeamAttack,
             Locations.squeals_on_wheels_kong:
                 CanCarry & CanClimb & HasBarrelCannon & HasParry,
             Locations.squeals_on_wheels_bananas_1:
@@ -1661,7 +1661,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.squeals_on_wheels_bonus_2:
                 CanCarry & CanClimb & CanHover & CanTeamAttack,
             Locations.squeals_on_wheels_dk_coin:
-                CanCarry & CanClimb & CanCarry & CanTeamAttack,
+                CanCarry & CanClimb,
             Locations.squeals_on_wheels_kong:
                 CanCarry & CanClimb & HasBarrelCannon & HasParry,
             Locations.squeals_on_wheels_bananas_1:
