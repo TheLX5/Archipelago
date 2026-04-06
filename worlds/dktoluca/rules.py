@@ -435,7 +435,7 @@ class DKC3StrictRules(DKC3Rules):
             Locations.barrel_shield_bust_up_kong:
                 CanClimb & HasBarrelShield,
             Locations.barrel_shield_bust_up_bananas_1:
-                CanCarry,
+                CanCarry & HasBothKongs,
             Locations.barrel_shield_bust_up_bananas_2:
                 CanClimb & HasBarrelShield,
             Locations.barrel_shield_bust_up_coin_1:
@@ -785,7 +785,7 @@ class DKC3StrictRules(DKC3Rules):
             Locations.ripsaw_rage_kong:
                 True_(),
             Locations.ripsaw_rage_coin_1:
-                CanCarry,
+                CanCarry & HasBothKongs,
             Locations.ripsaw_rage_bananas_1:
                 True_(),
             Locations.ripsaw_rage_coin_2:
@@ -1611,7 +1611,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.barrel_shield_bust_up_kong:
                 CanClimb & HasBarrelShield,
             Locations.barrel_shield_bust_up_bananas_1:
-                CanCarry,
+                CanCarry & HasBothKongs,
             Locations.barrel_shield_bust_up_bananas_2:
                 CanClimb & HasBarrelShield,
             Locations.barrel_shield_bust_up_coin_1:
@@ -1961,7 +1961,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.ripsaw_rage_kong:
                 True_(),
             Locations.ripsaw_rage_coin_1:
-                CanCarry,
+                CanCarry & HasBothKongs,
             Locations.ripsaw_rage_bananas_1:
                 True_(),
             Locations.ripsaw_rage_coin_2:
