@@ -3203,7 +3203,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.low_g_labyrinth_bananas_2:
                 True_(),
             Locations.low_g_labyrinth_coin_2:
-                HasSquawks,
+                HasSquawks | HasBothKongs,
             Locations.low_g_labyrinth_bananas_3:
                 HasSquawks,
             Locations.low_g_labyrinth_balloon_1:
@@ -3484,7 +3484,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.pot_hole_panic_dk_coin:
                 (HasSquawks | (CanSpin & CanHover)) & CanSwim & CanTeamAttack & HasBarrelCannon & CanCarry,
             Locations.pot_hole_panic_kong:
-                (HasSquawks | (CanSpin & CanHover)) & CanSwim & HasEllie & HasBarrelCannon,
+                (HasSquawks | ((CanSpin & CanHover) & CanTeamAttack)) & CanSwim & HasEllie & HasBarrelCannon,
             Locations.pot_hole_panic_bananas_1:
                 (HasSquawks | (CanSpin & CanHover & CanTeamAttack)),
             Locations.pot_hole_panic_bananas_2:
@@ -3719,7 +3719,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.criss_kross_cliffs_dk_coin:
                 HasBarrelSwitch & (HasBarrelCannon | (CanTeamAttack & CanClimb)),
             Locations.criss_kross_cliffs_kong:
-                HasBarrelSwitch & (HasBarrelCannon | (CanTeamAttack & CanClimb)),
+                CanTeamAttack & HasBarrelSwitch & (HasBarrelCannon | CanClimb),
             Locations.criss_kross_cliffs_bananas_1:
                 True_(),
             Locations.criss_kross_cliffs_coin_1:
