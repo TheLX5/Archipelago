@@ -1360,7 +1360,7 @@ class DKC3StrictRules(DKC3Rules):
             Locations.criss_kross_cliffs_dk_coin:
                 HasBarrelSwitch & HasBarrelCannon & CanClimb & CanCarry,
             Locations.criss_kross_cliffs_kong:
-                HasBarrelSwitch & HasBarrelCannon & CanClimb,
+                HasBarrelSwitch & HasBarrelCannon & CanClimb & CanTeamAttack,
             Locations.criss_kross_cliffs_bananas_1:
                 True_(),
             Locations.criss_kross_cliffs_coin_1:
@@ -2536,7 +2536,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.criss_kross_cliffs_dk_coin:
                 HasBarrelSwitch & HasBarrelCannon & CanClimb & CanCarry,
             Locations.criss_kross_cliffs_kong:
-                HasBarrelSwitch & HasBarrelCannon & CanClimb,
+                HasBarrelSwitch & HasBarrelCannon & CanClimb & CanTeamAttack,
             Locations.criss_kross_cliffs_bananas_1:
                 True_(),
             Locations.criss_kross_cliffs_coin_1:
