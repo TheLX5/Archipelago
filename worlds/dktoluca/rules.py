@@ -2567,7 +2567,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.tyrant_twin_tussle_dk_coin:
                 CanTeamAttack & HasSquitter,
             Locations.tyrant_twin_tussle_kong:
-                CanTeamAttack,
+                True_(),
             Locations.tyrant_twin_tussle_coin_1:
                 CanTeamAttack,
             Locations.tyrant_twin_tussle_balloon_1:
