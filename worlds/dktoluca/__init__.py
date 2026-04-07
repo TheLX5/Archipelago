@@ -140,7 +140,7 @@ class DKC3World(tracker.UTMxin, World):
             self.multiworld.push_precollected(self.create_item(Items.kiddy))
 
         self.multiworld.push_precollected(self.create_item(Items.lake_orangatanga))
-        for world_ in item_groups["Worlds"]:
+        for world_ in sorted(item_groups["Worlds"]):
             if world_ in self.multiworld.precollected_items[self.player]:
                 continue
             else:
@@ -150,22 +150,25 @@ class DKC3World(tracker.UTMxin, World):
         if not self.options.required_birds.value:
             itempool.append(self.create_item(Items.kaos_kore))
                 
-        for item in item_groups["Abilities"]:
+        shuffle_abilities = sorted(self.options.shuffle_abilities.value)
+        for item in sorted(item_groups["Abilities"]):
             if item in self.multiworld.precollected_items[self.player]:
                 continue
-            elif item in self.options.shuffle_abilities.value:
+            elif item in shuffle_abilities:
                 itempool += [self.create_item(item)]
             else:
                 self.multiworld.push_precollected(self.create_item(item))
 
-        for item in item_groups["Animals"]:
-            if item in self.options.shuffle_animals.value:
+        shuffle_animals = sorted(self.options.shuffle_animals.value)
+        for item in sorted(item_groups["Animals"]):
+            if item in shuffle_animals:
                 itempool += [self.create_item(item)]
             else:
                 self.multiworld.push_precollected(self.create_item(item))
                 
-        for item in item_groups["Barrels"]:
-            if item in self.options.shuffle_objects.value:
+        shuffle_objects = sorted(self.options.shuffle_objects.value)
+        for item in sorted(item_groups["Barrels"]):
+            if item in shuffle_objects:
                 itempool += [self.create_item(item)]
             else:
                 self.multiworld.push_precollected(self.create_item(item))
