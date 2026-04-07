@@ -187,20 +187,23 @@ class DKC2World(Tracker.UTMxin, World):
         if self.options.energy_link:
             itempool += [self.create_item(ItemName.extractinator) for _ in range(3)]
 
-        for item in item_groups["Abilities"]:
-            if item in self.options.shuffle_abilities.value:
+        shuffle_abilities = sorted(self.options.shuffle_abilities.value)
+        for item in sorted(item_groups["Abilities"]):
+            if item in shuffle_abilities:
                 itempool += [self.create_item(item)]
             else:
                 self.multiworld.push_precollected(self.create_item(item))
 
-        for item in item_groups["Animals"]:
-            if item in self.options.shuffle_animals.value:
+        shuffle_animals = sorted(self.options.shuffle_animals.value)
+        for item in sorted(item_groups["Animals"]):
+            if item in shuffle_animals:
                 itempool += [self.create_item(item)]
             else:
                 self.multiworld.push_precollected(self.create_item(item))
                 
-        for item in item_groups["Barrels"]:
-            if item in self.options.shuffle_barrels.value:
+        shuffle_barrels = sorted(self.options.shuffle_barrels.value)
+        for item in sorted(item_groups["Barrels"]):
+            if item in shuffle_barrels:
                 itempool += [self.create_item(item)]
             else:
                 self.multiworld.push_precollected(self.create_item(item))
