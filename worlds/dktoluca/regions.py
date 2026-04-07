@@ -105,7 +105,6 @@ def create_regions(world: "DKC3World", active_locations):
         add_event_to_region(multiworld, player, level, event_name, event_item)
 
     # Reduce level clears in case a lot of levels are excluded per world
-    print (regional_event_count)
     world.options.required_lake_levels.value = min(world.options.required_lake_levels.value, regional_event_count[Regions.lake_orangatanga])
     world.options.required_forest_levels.value = min(world.options.required_forest_levels.value, regional_event_count[Regions.kremwood_forest])
     world.options.required_cove_levels.value = min(world.options.required_cove_levels.value, regional_event_count[Regions.cotton_top_cove])
