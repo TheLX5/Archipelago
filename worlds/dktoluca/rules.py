@@ -3056,7 +3056,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.fish_food_frenzy_kong:
                 CanSwim,
             Locations.fish_food_frenzy_coin_1:
-                True(),
+                True_(),
             Locations.fish_food_frenzy_bananas_1:
                 CanSwim,
             Locations.fish_food_frenzy_coin_2:
