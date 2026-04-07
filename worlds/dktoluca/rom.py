@@ -191,6 +191,8 @@ def patch_rom(world: "DKC3World", patch: DKC3ProcedurePatch):
 
     # Initialize save name
     save_name = world.options.default_save_name.value[:5].upper()
+    if len(save_name) == 0:
+        save_name = "DIXIE"
     save_name = sanitize_save_name(save_name)
 
     patch.write_byte(letters_addr[0], 0x20)
