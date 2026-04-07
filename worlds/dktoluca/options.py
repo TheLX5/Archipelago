@@ -238,6 +238,7 @@ class BirdChecks(Toggle):
     """
     display_name = "Banana Bird Checks"
 
+
 class EnergyLink(Toggle):
     """
     EnergyLink allows players to deposit energy extracted from collected bananas into a shared pool across games in the session.
@@ -246,6 +247,15 @@ class EnergyLink(Toggle):
     There's an additional item in the item pool that allows for better energy extraction from bananas.
     """
     display_name = "Energy Link"
+
+
+class DefaultSaveFileName(FreeText):
+    """
+    Which name will be given to the save file when pressing start at the name entry menu.
+    Limited to 5 letters.
+    """
+    display_name = "Save File Name"
+    default = "DIXIE"
 
 
 dkc3_option_groups = [
@@ -308,3 +318,4 @@ class DKC3Options(PerGameCommonOptions):
     required_ridge_levels: RequiredRidgeLevels
     required_kore_levels: RequiredKoreLevels
     required_krematoa_levels: RequiredKrematoaLevels
+    default_save_name: DefaultSaveFileName

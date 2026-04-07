@@ -769,6 +769,7 @@ level_region_data: dict[str, dict[str, list[str]]] = {
             Locations.buzzer_barrage_bananas_4,
             Locations.buzzer_barrage_bananas_5,
             Locations.buzzer_barrage_bananas_6,
+            Locations.buzzer_barrage_bananas_7,
         ],
         "Coins":  [
             Locations.buzzer_barrage_coin_1,
@@ -1494,7 +1495,7 @@ def generate_level_list(world: "DKC3World"):
     shuffled_boss_list = boss_list.copy()
     if world.options.shuffle_levels:
         world.random.shuffle(shuffled_level_list)
-        world.random.shuffle(shuffled_boss_list)
+        #world.random.shuffle(shuffled_boss_list)
 
     for map_level, level in level_connections.items():
         selected_level = shuffled_level_list.pop(0)

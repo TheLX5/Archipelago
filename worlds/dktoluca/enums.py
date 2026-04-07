@@ -475,6 +475,7 @@ class Locations(StrEnum):
     buzzer_barrage_bananas_4 = "Buzzer Barrage - Banana Bunch #4 (In a dead end after triple Buzzes)" # 30
     buzzer_barrage_bananas_5 = "Buzzer Barrage - Banana Bunch #5 (In a dead end after circling Buzzes)" # 52
     buzzer_barrage_bananas_6 = "Buzzer Barrage - Banana Bunch #6 (In a dead end after circling Buzzes)" # 51
+    buzzer_barrage_bananas_7 = "Buzzer Barrage - Banana Bunch #7 (Before red buzz trio before G)" # 75
     buzzer_barrage_coin_2 = "Buzzer Barrage - Bear Coin #2 (In a corner near circling Buzzes)" # 53
     buzzer_barrage_coin_3 = "Buzzer Barrage - Bear Coin #3 (Between two Buzzes)" # 92
     buzzer_barrage_coin_4 = "Buzzer Barrage - Bear Coin #4 (Below Kopter)" # 98
@@ -587,17 +588,17 @@ class Locations(StrEnum):
     creepy_caverns_coin_6 = "Creepy Caverns - Bear Coin #6 (Above G)" # 114
     creepy_caverns_balloon_1 = "Creepy Caverns - Balloon #1 (Cache next to Krumples pair)" # 0
 
-    lightning_look_out_clear = "Lightning Look Out - Clear"
-    lightning_look_out_bonus_1 = "Lightning Look Out - Bonus #1"
-    lightning_look_out_bonus_2 = "Lightning Look Out - Bonus #2"
-    lightning_look_out_dk_coin = "Lightning Look Out - DK Coin"
-    lightning_look_out_kong = "Lightning Look Out - KONG"
-    lightning_look_out_balloon_1 = "Lightning Look Out - Balloon #1 (Near start above Buzz trio)" # 3
-    lightning_look_out_coin_1 = "Lightning Look Out - Bear Coin #1 (Cache near trapped Knik-Knaks)" # 0
-    lightning_look_out_coin_2 = "Lightning Look Out - Bear Coin #2 (Above Buzz duo)" # 16
-    lightning_look_out_bananas_1 = "Lightning Look Out - Banana Bunch #1 (Behind Buzz pair)" # 21
-    lightning_look_out_coin_3 = "Lightning Look Out - Bear Coin #3 (Above right buzz next to N)" # 47
-    lightning_look_out_balloon_2 = "Lightning Look Out - Balloon #2 (Cache near end)" # 1
+    lightning_look_out_clear = "Lightning Look-Out - Clear"
+    lightning_look_out_bonus_1 = "Lightning Look-Out - Bonus #1"
+    lightning_look_out_bonus_2 = "Lightning Look-Out - Bonus #2"
+    lightning_look_out_dk_coin = "Lightning Look-Out - DK Coin"
+    lightning_look_out_kong = "Lightning Look-Out - KONG"
+    lightning_look_out_balloon_1 = "Lightning Look-Out - Balloon #1 (Near start above Buzz trio)" # 3
+    lightning_look_out_coin_1 = "Lightning Look-Out - Bear Coin #1 (Cache near trapped Knik-Knaks)" # 0
+    lightning_look_out_coin_2 = "Lightning Look-Out - Bear Coin #2 (Above Buzz duo)" # 16
+    lightning_look_out_bananas_1 = "Lightning Look-Out - Banana Bunch #1 (Behind Buzz pair)" # 21
+    lightning_look_out_coin_3 = "Lightning Look-Out - Bear Coin #3 (Above right buzz next to N)" # 47
+    lightning_look_out_balloon_2 = "Lightning Look-Out - Balloon #2 (Cache near end)" # 1
 
     koindozer_klamber_clear = "Koindozer Klamber - Clear"
     koindozer_klamber_bonus_1 = "Koindozer Klamber - Bonus #1"
@@ -749,7 +750,7 @@ class Regions(StrEnum):
     ropey_rumpus_level = "Ropey Rumpus: Level"
     konveyor_rope_klash_level = "Konveyor Rope Klash: Level"
     creepy_caverns_level = "Creepy Caverns: Level"
-    lightning_look_out_level = "Lightning Look Out: Level"
+    lightning_look_out_level = "Lightning Look-Out: Level"
     koindozer_klamber_level = "Koindozer Klamber: Level"
     poisonous_pipeline_level = "Poisonous Pipeline: Level"
     stampede_sprint_level = "Stampede Sprint: Level"
@@ -798,7 +799,7 @@ class Regions(StrEnum):
     ropey_rumpus_map = "Ropey Rumpus: Map"
     konveyor_rope_klash_map = "Konveyor Rope Klash: Map"
     creepy_caverns_map = "Creepy Caverns: Map"
-    lightning_look_out_map = "Lightning Look Out: Map"
+    lightning_look_out_map = "Lightning Look-Out: Map"
     koindozer_klamber_map = "Koindozer Klamber: Map"
     poisonous_pipeline_map = "Poisonous Pipeline: Map"
     stampede_sprint_map = "Stampede Sprint: Map"

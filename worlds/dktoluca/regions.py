@@ -1,4 +1,4 @@
-from BaseClasses import MultiWorld, Region, ItemClassification
+from BaseClasses import MultiWorld, Region, ItemClassification, LocationProgressType
 from .enums import Locations, Regions, Events
 
 from .levels import boss_connections, level_map, regional_events, level_region_data
@@ -82,13 +82,38 @@ def create_regions(world: "DKC3World", active_locations):
         add_location_to_region(multiworld, player, active_locations, Regions.kaos_kore, Locations.bird_sewer_stockpile)
 
     # Level clears (Events)
+    regional_event_count: dict[str, int] = {
+        Regions.lake_orangatanga: 0,
+        Regions.kremwood_forest: 0,
+        Regions.cotton_top_cove: 0,
+        Regions.mekanos: 0,
+        Regions.k3: 0,
+        Regions.razor_ridge: 0,
+        Regions.kaos_kore: 0,
+        Regions.krematoa: 0,
+    }
     for map_level, level in world.level_connections.items():
         current_world = level_map[map_level]
         if map_level in boss_connections.keys():
             continue
+        level_clear = level_region_data[level]["Clear"][0]
+        if level_clear in world.options.exclude_locations.value:
+            continue
         event_name = level.replace(": Level", " - Clear (Map Event)")
         event_item = regional_events[current_world]
+        regional_event_count[current_world] += 1
         add_event_to_region(multiworld, player, level, event_name, event_item)
+
+    # Reduce level clears in case a lot of levels are excluded per world
+    print (regional_event_count)
+    world.options.required_lake_levels.value = min(world.options.required_lake_levels.value, regional_event_count[Regions.lake_orangatanga])
+    world.options.required_forest_levels.value = min(world.options.required_forest_levels.value, regional_event_count[Regions.kremwood_forest])
+    world.options.required_cove_levels.value = min(world.options.required_cove_levels.value, regional_event_count[Regions.cotton_top_cove])
+    world.options.required_mekanos_levels.value = min(world.options.required_mekanos_levels.value, regional_event_count[Regions.mekanos])
+    world.options.required_k3_levels.value = min(world.options.required_k3_levels.value, regional_event_count[Regions.k3])
+    world.options.required_ridge_levels.value = min(world.options.required_ridge_levels.value, regional_event_count[Regions.razor_ridge])
+    world.options.required_kore_levels.value = min(world.options.required_kore_levels.value, regional_event_count[Regions.kaos_kore])
+    world.options.required_krematoa_levels.value = min(world.options.required_krematoa_levels.value, regional_event_count[Regions.krematoa])
 
     # Goal regions
     # TODO: Banana :b:ird hunt

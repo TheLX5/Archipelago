@@ -10,14 +10,36 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from . import DKC3World
 
-from .enums import Items, Regions
+from .enums import Regions
 from .constants import *
-from .items import item_groups
 
 from worlds.Files import APProcedurePatch, APTokenMixin, APTokenTypes, APPatchExtension
 
 HASH_US = '120abf304f0c40fe059f6a192ed4f947'
 
+valid_letters = [
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 
+    'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 
+    'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', 
+    '4', '5', '6', '7', '8', '9', " "
+]
+
+letters_addr = [
+    0xABAD,
+    0xABAE,
+    0xABB3,
+    0xABB4,
+    0xABB9,
+]
+
+def sanitize_save_name(text: str) -> str:
+    result = ""
+    for letter in text:
+        if letter not in valid_letters:
+            result += " "
+        else:
+            result += letter
+    return result
 
 class DKC3PatchExtension(APPatchExtension):
     game = GAME_NAME
@@ -166,6 +188,21 @@ def patch_rom(world: "DKC3World", patch: DKC3ProcedurePatch):
         else:
             shuffled_level: int = world.rom_connections[map_level][1]
             patch.write_bytes(0x3AFF40+(idx*2), shuffled_level.to_bytes(2, "little"))
+
+    # Initialize save name
+    save_name = world.options.default_save_name.value[:5].upper()
+    save_name = sanitize_save_name(save_name)
+
+    patch.write_byte(letters_addr[0], 0x20)
+    patch.write_byte(letters_addr[1], 0x20)
+    patch.write_byte(letters_addr[2], 0x20)
+    patch.write_byte(letters_addr[3], 0x20)
+    patch.write_byte(letters_addr[4], 0x20)
+
+    for idx, letter in enumerate(save_name):
+        patch.write_byte(letters_addr[idx], ord(letter))
+    else:
+        patch.write_byte(letters_addr[idx], ord(letter) | 0x80)
 
     # Save shuffled levels data
     json_levels = json.dumps(world.rom_connections).encode("UTF-8")
