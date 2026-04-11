@@ -1043,6 +1043,8 @@ class DKC3StrictRules(DKC3Rules):
                 CanTeamAttack & HasSquawks,
             Locations.buzzer_barrage_bananas_6:
                 CanTeamAttack & HasSquawks,
+            Locations.buzzer_barrage_bananas_7:
+                CanTeamAttack & HasSquawks,
             Locations.buzzer_barrage_coin_2:
                 CanTeamAttack & HasSquawks,
             Locations.buzzer_barrage_coin_3:
@@ -2218,6 +2220,8 @@ class DKC3LooseRules(DKC3Rules):
             Locations.buzzer_barrage_bananas_5:
                 CanTeamAttack & HasSquawks,
             Locations.buzzer_barrage_bananas_6:
+                CanTeamAttack & HasSquawks,
+            Locations.buzzer_barrage_bananas_7:
                 CanTeamAttack & HasSquawks,
             Locations.buzzer_barrage_coin_2:
                 CanTeamAttack & HasSquawks,
@@ -3400,6 +3404,8 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.buzzer_barrage_bananas_5:
                 CanTeamAttack & HasSquawks,
             Locations.buzzer_barrage_bananas_6:
+                CanTeamAttack & HasSquawks,
+            Locations.buzzer_barrage_bananas_7:
                 CanTeamAttack & HasSquawks,
             Locations.buzzer_barrage_coin_2:
                 CanTeamAttack & HasSquawks,
