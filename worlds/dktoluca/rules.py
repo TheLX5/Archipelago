@@ -874,7 +874,7 @@ class DKC3StrictRules(DKC3Rules):
             Locations.krevice_kreepers_bonus_1:
                 CanClimb & HasBarrelCannon,
             Locations.krevice_kreepers_bonus_2:
-                CanClimb & CanTeamAttack,
+                CanClimb & CanTeamAttack & HasBarrelCannon,
             Locations.krevice_kreepers_dk_coin:
                 CanClimb & CanCarry,
             Locations.krevice_kreepers_kong:
@@ -2052,7 +2052,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.krevice_kreepers_bonus_1:
                 CanClimb & HasBarrelCannon,
             Locations.krevice_kreepers_bonus_2:
-                CanClimb & CanTeamAttack,
+                CanClimb & CanTeamAttack & HasBarrelCannon,
             Locations.krevice_kreepers_dk_coin:
                 CanClimb & CanCarry,
             Locations.krevice_kreepers_kong:
