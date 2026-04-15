@@ -195,10 +195,8 @@ def connect_regions(world: "DKC3World"):
     connect(world, Regions.krematoa, Regions.rocket_rush_map)
     connect(world, Regions.krematoa, Regions.knautilus_map)
 
-    if world.options.goal != Goal.option_krematoa:
-        connect(world, Regions.kastle_kaos_map, Regions.kastle_kaos_level)
-    if world.options.goal != Goal.option_kore:
-        connect(world, Regions.knautilus_map, Regions.knautilus_level)
+    connect(world, Regions.kastle_kaos_map, Regions.kastle_kaos_level)
+    connect(world, Regions.knautilus_map, Regions.knautilus_level)
     
     for map_level, level in world.level_connections.items():
         connect(world, map_level, level)
