@@ -201,11 +201,11 @@ def connect_regions(world: "DKC3World"):
     for map_level, level in world.level_connections.items():
         connect(world, map_level, level)
 
-def add_location_to_region(multiworld: MultiWorld, player: int, active_locations, region_name: str, location_name: str):
-    region = multiworld.get_region(region_name, player)
-    loc_id = active_locations.get(location_name, 0)
+def add_location_to_region(multiworld: MultiWorld, player: int, active_locations, region_name: Regions, location_name: Locations):
+    region = multiworld.get_region(region_name.value, player)
+    loc_id = active_locations.get(location_name.value, 0)
     if loc_id:
-        location = DKC3Location(player, location_name, loc_id, region)
+        location = DKC3Location(player, location_name.value, loc_id, region)
         region.locations.append(location)
 
 
@@ -219,7 +219,7 @@ def add_event_to_region(multiworld: MultiWorld, player: int, region_name: str, e
     region.locations.append(event)
 
 
-def connect(world: "DKC3World", source: str, target: str):
-    source_region: Region = world.multiworld.get_region(source, world.player)
-    target_region: Region = world.multiworld.get_region(target, world.player)
+def connect(world: "DKC3World", source: Regions, target: Regions):
+    source_region: Region = world.multiworld.get_region(source.value, world.player)
+    target_region: Region = world.multiworld.get_region(target.value, world.player)
     source_region.connect(target_region)

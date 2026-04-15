@@ -65,7 +65,7 @@ class DKC3World(tracker.UTMxin, World):
     
     using_ut: bool
     ut_can_gen_without_yaml = True
-    glitches_item_name = Items.glitched
+    glitches_item_name = Items.glitched.value
 
     item_name_to_id = {name.value: data.code for name, data in item_table.items()}
     location_name_to_id = {name.value: code for name, code in all_locations.items()}
