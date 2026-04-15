@@ -74,12 +74,12 @@ class DKC3World(tracker.UTMxin, World):
     origin_region_name = Regions.northern_kremisphere_south
     rule_macros: dict[str, Rule.Resolved]
     hint_blacklist = {
-        Locations.defeated_belcha,
-        Locations.defeated_arich,
-        Locations.defeated_squirt,
-        Locations.defeated_kaos,
-        Locations.defeated_bleak,
-        Locations.defeated_barbos,
+        Locations.defeated_belcha.value,
+        Locations.defeated_arich.value,
+        Locations.defeated_squirt.value,
+        Locations.defeated_kaos.value,
+        Locations.defeated_bleak.value,
+        Locations.defeated_barbos.value,
     }
 
     def __init__(self, multiworld: MultiWorld, player: int):
