@@ -210,7 +210,7 @@ def add_location_to_region(multiworld: MultiWorld, player: int, active_locations
 
 
 def add_event_to_region(multiworld: MultiWorld, player: int, region_name: Regions, event_name: str, event_item=None):
-    region = multiworld.get_region(region_name.value, player)
+    region = multiworld.get_region(str(region_name), player)
     event = DKC3Location(player, event_name, None, region)
     if event_item:
         event.place_locked_item(DKC3Item(event_item, ItemClassification.progression, None, player))
@@ -220,6 +220,6 @@ def add_event_to_region(multiworld: MultiWorld, player: int, region_name: Region
 
 
 def connect(world: "DKC3World", source: Regions, target: Regions):
-    source_region: Region = world.multiworld.get_region(source.value, world.player)
-    target_region: Region = world.multiworld.get_region(target.value, world.player)
+    source_region: Region = world.multiworld.get_region(str(source), world.player)
+    target_region: Region = world.multiworld.get_region(str(target), world.player)
     source_region.connect(target_region)
