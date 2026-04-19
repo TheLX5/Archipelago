@@ -150,13 +150,8 @@ class WaffleWorld(Tracker.UTMxin, World):
                 print (f"Enforcing Yoshi's Island as a starting world for \"{self.player_name}\" as they don't have Level Shuffle enabled.")
                 self.options.starting_location.value = 0
                 
-            # Enforce disabling DeathLink for now
-            if self.options.death_link:
-                print(f"Enforcing non-DeathLink session for \"{self.player_name}\" (option doesn't work).")
-                self.options.death_link.value = False
-
             # Enforce disabling RingLink for now
-            if self.options.death_link:
+            if self.options.ring_link:
                 print(f"Enforcing non-RingLink session for \"{self.player_name}\" (option requires some design adjustments).")
                 self.options.ring_link.value = False
 
@@ -449,8 +444,9 @@ class WaffleWorld(Tracker.UTMxin, World):
             else:
                 itempool += [self.create_item(ItemName.yoshi_egg) for _ in range(total_egg_count - len(processed_levels))]
 
-        self.actual_egg_count = total_egg_count
-        self.required_egg_count = max(math.floor(total_egg_count * (self.options.percentage_of_yoshi_eggs.value / 100.0)), 0)
+        if not self.is_ut:
+            self.actual_egg_count = total_egg_count
+            self.required_egg_count = max(math.floor(total_egg_count * (self.options.percentage_of_yoshi_eggs.value / 100.0)), 0)
 
         if self.options.goal == Goal.option_yoshi_house:
             self.multiworld.get_location(LocationName.yoshis_house, self.player).place_locked_item(self.create_item(ItemName.victory))

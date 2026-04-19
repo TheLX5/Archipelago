@@ -43,19 +43,19 @@ class LocalYoshiEggPlacement(OptionSet):
     and both of them will not exceed the 255 egg limit.
     """
     display_name = "Local Yoshi Egg Placement"
-    valid_keys = {
+    valid_keys = [
         "Every Level",
         "Castles",
         "Switch Palaces",
         "Ghost Houses",
         "Special Zone",
-    }
-    default = {
+    ]
+    default = [
         "Castles",
         "Switch Palaces",
         "Ghost Houses",
         "Special Zone",
-    }
+    ]
 
 
 class PercentageOfYoshiEggs(Range):
@@ -126,7 +126,7 @@ class BlockChecks(OptionSet):
       * Blocks that are unreachable unless you glitch your way in
     """
     display_name = "Block Checks"
-    default = {
+    default = [
         "Coin Blocks",
         "Item Blocks",
         "Yellow Switch Palace Blocks",
@@ -134,8 +134,8 @@ class BlockChecks(OptionSet):
         "Invisible Blocks",
         "P-Switch Blocks",
         "Flying Blocks",
-    }
-    valid_keys = {
+    ]
+    valid_keys = [
         "Coin Blocks",
         "Item Blocks",
         "Yellow Switch Palace Blocks",
@@ -143,7 +143,7 @@ class BlockChecks(OptionSet):
         "Invisible Blocks",
         "P-Switch Blocks",
         "Flying Blocks",
-    }
+    ]
 
 
 class BowserCastleDoors(Choice):
@@ -331,7 +331,7 @@ class AbilityItemShuffle(OptionSet):
     If an ability is not present in the list they will be treated as unlocked from the start
     """
     display_name = "Ability Shuffle"
-    default = {
+    default = [
         "Run",
         "Carry",
         "Swim",
@@ -349,8 +349,8 @@ class AbilityItemShuffle(OptionSet):
         "Red Switch Palace",
         "Blue Switch Palace",
         "Special World",
-    }
-    valid_keys = {
+    ]
+    valid_keys = [
         "Run",
         "Carry",
         "Swim",
@@ -368,7 +368,7 @@ class AbilityItemShuffle(OptionSet):
         "Red Switch Palace",
         "Blue Switch Palace",
         "Special World",
-    }
+    ]
 
 
 class GameLogicDifficulty(Choice):
@@ -393,7 +393,7 @@ class AlternateLogic(OptionSet):
     Alternate logic for certain locations.
     """
     display_name = "Alternate Logic"
-    default = logic_tricks
+    default = []
     valid_keys = logic_tricks
 
 
@@ -439,6 +439,16 @@ class DisplayReceivedItemPopups(Choice):
     option_progression = 2
     option_progression_minus_yoshi_eggs = 3
     default = 3
+
+
+class LuigiPhysics(Toggle):
+    """
+    Enables SMA2 Luigi physics.
+    WARNING: Logic does not account for those physics and probably never will.
+    If you're watching this you're very likely a power user or your front end is revealing a bit too much info lol.
+    """
+    display_name = "Luigi Physics"
+    visibility = Visibility.none
 
 
 class JunkFillPercentage(Range):
@@ -666,10 +676,18 @@ class TrapLink(Toggle):
     display_name = "Trap Link"
 
 
+class DeathLinkHeart(Toggle):
+    """
+    Whenever DeathLinks are received they will be nullified at the cost of a heart
+    """
+    display_name = "Death Link Heart Cover"
+
+
 class UngoldenEggs(DefaultOnToggle):
     """
-    Does exactly what you're thinking of. If you're watching this you're very likely a power user lol.
+    Does exactly what you're thinking of.
     (Removes Useful Tag from eggs and nothing else)
+    If you're watching this you're very likely a power user or your front end is revealing a bit too much info lol.
     """
     display_name = "No mas huevos dorados"
     visibility = Visibility.none
@@ -690,6 +708,7 @@ waffle_option_groups = [
         DecoupledYoshiCarry,
         DecoupledWallRun,
         DecoupledFastSwim,
+        LuigiPhysics,
     ]),
     OptionGroup("Location Options", [
         DragonCoinChecks,
@@ -749,6 +768,7 @@ waffle_option_groups = [
 class WaffleOptions(PerGameCommonOptions):
     start_inventory_from_pool: StartInventoryPool
     death_link: DeathLink
+    death_link_heart: DeathLinkHeart
     ring_link: RingLink
     trap_link: TrapLink
     energy_link: EnergyLink
@@ -759,6 +779,7 @@ class WaffleOptions(PerGameCommonOptions):
     decoupled_yoshi_carry: DecoupledYoshiCarry
     decoupled_wall_run_anywhere: DecoupledWallRun
     decoupled_fast_swimming: DecoupledFastSwim
+    luigi_physics: LuigiPhysics
     goal: Goal
     yoshi_egg_count: NumberOfYoshiEggs
     percentage_of_yoshi_eggs: PercentageOfYoshiEggs

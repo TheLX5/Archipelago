@@ -29,12 +29,11 @@ def disconnect_entrances(world: "WaffleWorld") -> None:
             actual_key = "smw_{team}_{player}_" + key
             if actual_key not in world.found_entrances_datastorage_key:
                 world.found_entrances_datastorage_key.append(actual_key)
-            
+
 
 def create_glitched_entrances(world: "WaffleWorld") -> None:
     for entrance in world.get_entrances():
         if entrance.name.endswith("(Glitched)"):
-            #print (entrance.name)
             if "Normal Exit" in entrance.name:
                 idx = 0
             else:
@@ -44,14 +43,14 @@ def create_glitched_entrances(world: "WaffleWorld") -> None:
             except IndexError:
                 exit = entrance.parent_region.exits[0]
             if exit.connected_region is None:
-            #    print (f"      lol {exit} | {entrance.parent_region.exits[2]}")
+                #print (f"      lol {exit} | {entrance.parent_region.exits[2]}")
                 continue
             try:
                 disconnected_entrance = exit.connected_region.exits[0]
             except IndexError:
-            #    print (f"      {disconnected_entrance}")
                 continue 
-            if "Transition" in disconnected_entrance.name:
+            #print (f"    {disconnected_entrance}")
+            if "Transition" in disconnected_entrance.name or "Pipe" in disconnected_entrance.name or "Star World -" in disconnected_entrance.name:
                 disconnected_entrance = disconnected_entrance.connected_region.exits[0].connected_region.exits[0]
             key = disconnected_entrance.name.split("-> ")[1].split(" - Tile")[0]
             actual_key = "smw_{team}_{player}_" + key
@@ -4508,6 +4507,8 @@ class UTMxin(World):
                 return [{"type": "text", "text": f"Location {location_name} not found in this multiworld"}]
             goal_region = goal_location.parent_region
             if not goal_region:
+                return [{"type": "text", "text": f"Location {location_name} has no parent region"}]
+            elif "(Glitched)" in goal_region.name:
                 return [{"type": "text", "text": f"Location {location_name} has no parent region"}]
         else:
             region_name, usable, _resp = get_intended_text(

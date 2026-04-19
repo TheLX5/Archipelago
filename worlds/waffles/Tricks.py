@@ -17,7 +17,7 @@ logic_tricks = [
     "Valley of Bowser 4 - Yoshi Climb",
     "Valley Ghost House - True Carryless Secret Exit",
     "Star World 3 - Top area with a Star",
-    "Star World 4 - Carryless Secret Exit with Yoshi sacrifice",
+    "Star World 4 - Carryless exit with wingless Yoshi",
     "Awesome - Itemless",
     "Mondo - Swimless",
     "Outrageous - Wall Run pipe",

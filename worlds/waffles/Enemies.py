@@ -288,6 +288,10 @@ enemy_list_special_cases = {
         0x006: EnemyData(0x006, "Blue Koopa", 10, (0,0), ["ground"], ["ground", "blue koopa"]),
         0x0A1: EnemyData(0x0A1, "Bowser's bowling ball", 20, (0,0), ["blue koopa"], ["skip"]),
     },
+    0x11F: {
+        0x009: EnemyData(0x009, "Green bouncing Koopa (Y&1)", 15, (0,0), ["ground"], ["ground", "kickable", "bounceable", "ambush small", "bouncing koopa", "blue koopa"]),
+        0x0A1: EnemyData(0x0A1, "Bowser's bowling ball", 20, (0,0), ["blue koopa"], ["skip"]),
+    },
     0x103: {
         0x006: EnemyData(0x006, "Blue Koopa", 10, (0,0), ["ground"], ["ground", "blue koopa"]),
         0x0A1: EnemyData(0x0A1, "Bowser's bowling ball", 20, (0,0), ["blue koopa"], ["skip"]),
@@ -494,6 +498,8 @@ enemy_list_special_cases = {
     0x115: {
         0x048: EnemyData(0x048, "Diggin' Chuck's rock", 18, (0,0), ["ground"], ["skip"]),
         0x01B: EnemyData(0x01B, "Bouncing football in place", 15, (0,0), ["ground"], ["skip"]),
+        0x06E: EnemyData(0x06E, "Dino Rhino", 10, (0,0), ["ground"], ["skip"]),
+        0x06F: EnemyData(0x06F, "Dino Torch", 12, (0,0), ["ground"], ["skip"]),
     },
     0x10F: {
         0x00B: EnemyData(0x00B, "Red horizontal flying Koopa", 20, (0,0), ["flying koopa"], ["flying", "floating", "flying koopa"]),
@@ -714,6 +720,7 @@ enemy_list_special_cases = {
         0x09F: EnemyData(0x09F, "Banzai Bill", 10, (0,0), ["skip"], ["skip"]),
         0x090: EnemyData(0x090, "Large green gas bubble", 5, (0,3), ["skip"], ["skip"]),
         0x048: EnemyData(0x048, "Diggin' Chuck's rock", 18, (0,0), ["skip"], ["skip"]),
+        0x01B: EnemyData(0x01B, "Bouncing football in place", 15, (0,0), ["skip"], ["skip"]),
         0x0BC: EnemyData(0x0BC, "Bowser statue, normal/fire/leap (X&3)", 20, (0,0), ["skip"], ["skip"]),
         0x046: EnemyData(0x046, "Diggin' Chuck", 10, (0,0), ["skip"], ["skip"]),
         0x092: EnemyData(0x092, "Splitin' Chuck", 12, (0,0), ["skip"], ["skip"]),
@@ -1070,6 +1077,10 @@ def modify_sprite_data(rom: bytearray, seed: int) -> bytearray:
     # Guarantees enemy that stays on ledges
     rom[0x03C930+2] = 0xC5
     rom[0x03C933+2] = 0xC5
+
+    # FoI4 (11F)
+    # Guarantees bouncing Koopa
+    rom[0x03D5A8+2] = 0xA1
 
     # DP4 (006)
     # Guarantees kickable and bounceable enemies
