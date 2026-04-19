@@ -4573,7 +4573,7 @@ class UTMxin(World):
                     # Write level tile
                     messages.extend(
                         [
-                            {"type": "color", "color": "slateblue", "text": f"[{p.name.split(" -> ")[0]}] "},
+                            {"type": "color", "color": "slateblue", "text": f"[{p.name.split(' -> ')[0]}] "},
                         ]
                     )
                     continue
