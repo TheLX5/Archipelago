@@ -23,7 +23,7 @@ from .Regions import create_regions, connect_regions, add_location_to_region
 from .Rom import patch_rom, WaffleProcedurePatch, USHASH
 from .Rules import WaffleBasicRules
 from .Teleports import generate_entrance_rando
-from .Tracker import reconnect_found_entrance, disconnect_entrances, create_glitched_entrances
+from .Tracker import UTMxin, reconnect_found_entrance, disconnect_entrances, create_glitched_entrances
 
 def launch_manager(*args):
     from .Manager import launch
@@ -73,7 +73,7 @@ class WaffleWeb(WebWorld):
     options_presets = waffle_options_presets
 
 
-class WaffleWorld(Tracker.UTMxin, World):
+class WaffleWorld(UTMxin, World):
     """
     Spicy Mycena Waffles (SMW) is an extension of the original Super Mario World Archipelago implementation
     that features several core changes for better or for worse.
