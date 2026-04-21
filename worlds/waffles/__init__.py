@@ -448,10 +448,10 @@ class WaffleWorld(Tracker.UTMxin, World):
             self.actual_egg_count = total_egg_count
             self.required_egg_count = max(math.floor(total_egg_count * (self.options.percentage_of_yoshi_eggs.value / 100.0)), 0)
 
-        if self.options.goal == Goal.option_yoshi_house:
-            self.multiworld.get_location(LocationName.yoshis_house, self.player).place_locked_item(self.create_item(ItemName.victory))
-        else:
-            self.multiworld.get_location(LocationName.bowser, self.player).place_locked_item(self.create_item(ItemName.victory))
+        #if self.options.goal == Goal.option_yoshi_house:
+        #    self.multiworld.get_location(LocationName.yoshis_house, self.player).place_locked_item(self.create_item(ItemName.victory))
+        #else:
+        #    self.multiworld.get_location(LocationName.bowser, self.player).place_locked_item(self.create_item(ItemName.victory))
 
         junk_count = total_required_locations - len(itempool)
         trap_weights = []
@@ -680,7 +680,6 @@ class WaffleWorld(Tracker.UTMxin, World):
             "room_checks",
             "block_checks",
             "energy_link",
-            "swap_level_exits",
             "game_logic_difficulty",
             "inventory_yoshi_logic",
             "goal",

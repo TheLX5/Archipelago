@@ -299,18 +299,11 @@ class CarrylessExits(Range):
     default = 0
 
 
-class SwapLevelExits(Toggle):
-    """
-    Swaps the destination of level exits in the map
-
-    Star World 5 and Donut Secret House are excluded from this feature
-    """
-    display_name = "Swap Level Exits"
-
-
 class SwapExitCount(Range):
     """
-    How many swapped exits will exist in the game
+    How many levels will have their exits swapped
+
+    Star World 5 and Donut Secret House are excluded from this feature
     """
     display_name = "Swap Exit Count"
     range_start = 0
@@ -343,7 +336,7 @@ class AbilityItemShuffle(OptionSet):
         "Super Star",
         "P-Switch",
         "Item Box",
-        "Midway Points",
+        #"Midway Points",
         "Yellow Switch Palace",
         "Green Switch Palace",
         "Red Switch Palace",
@@ -385,7 +378,7 @@ class GameLogicDifficulty(Choice):
     option_easy = 0
     option_medium = 1
     option_hard = 2
-    default = 0
+    default = 1
 
 
 class AlternateLogic(OptionSet):
@@ -724,7 +717,6 @@ waffle_option_groups = [
         LevelShuffle,
         LevelEffects,
         CarrylessExits,
-        SwapLevelExits,
         SwapExitCount,
         SwapDonutGhostHouseExits,
         MapTeleportShuffle,
@@ -799,7 +791,6 @@ class WaffleOptions(PerGameCommonOptions):
     map_teleport_shuffle: MapTeleportShuffle
     map_transition_shuffle: MapTransitionShuffle
     carryless_exits: CarrylessExits
-    swap_level_exits: SwapLevelExits
     swap_exit_count: SwapExitCount
     swap_donut_gh_exits: SwapDonutGhostHouseExits
     #exclude_special_zone: ExcludeSpecialZone

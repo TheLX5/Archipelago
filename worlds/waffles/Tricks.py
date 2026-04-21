@@ -4,7 +4,6 @@ logic_tricks = [
     "Vanilla Secret 1 - Wall Running",
     "Vanilla Secret 3 - Swimless",
     "Lemmy's Castle - Itemless 1-Up blocks",
-    "Butter Bridge 1 - No Red Switch Palace",
     "Cheese Bridge Area - Secret Exit with Yoshi",
     "Ludwig's Castle - Runless",
     "Ludwig's Castle - Climbless",

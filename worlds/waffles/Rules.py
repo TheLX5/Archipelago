@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from . import WaffleWorld
 
-from .Options import EnemyShuffle, InventoryYoshiLogic, GameLogicDifficulty
+from .Options import EnemyShuffle, InventoryYoshiLogic, GameLogicDifficulty, Goal
 from .Levels import level_info_dict, hard_gameplay_levels, very_hard_gameplay_levels, possible_starting_regions
 from .Tricks import logic_tricks
 
@@ -366,6 +366,10 @@ class WaffleRules:
 
         # Handle goals
         self.world.set_completion_rule(Has(Items.victory))
+        if self.world.options.goal == Goal.option_yoshi_house:
+            self.world.set_rule(self.world.get_location(Locations.yoshis_house), Has(Items.yoshi_egg, count=FromWorldAttr("required_egg_count")))
+        elif self.world.options.goal == Goal.option_bowser:
+            self.world.set_rule(self.world.get_location(Locations.bowser), Has(Items.yoshi_egg, count=FromWorldAttr("required_egg_count")))
 
     
     def alternate_logic(self) -> None:
@@ -548,9 +552,9 @@ class WaffleBasicRules(WaffleRules):
             f"{Regions.valley_castle_region} -> {Locations.valley_castle}": 
                 True_(),
             f"{Locations.front_door} -> {Regions.bowser_region}": 
-                CanCarry & CanClimb & CanRun & CanSwim & Has(Items.yoshi_egg, count=FromWorldAttr("required_egg_count")),
+                CanCarry & CanClimb & CanRun & CanSwim,
             f"{Locations.back_door} -> {Regions.bowser_region}": 
-                CanCarry & Has(Items.yoshi_egg, count=FromWorldAttr("required_egg_count")),
+                CanCarry,
 
             f"{Regions.star_road_1_region} -> {Locations.star_road_1_exit_1}": 
                 CanBreakTurnBlocks,
@@ -655,9 +659,6 @@ class WaffleBasicRules(WaffleRules):
         }
     
         self.location_rules = {
-            Locations.yoshis_house:
-                Has(Items.yoshi_egg, count=FromWorldAttr("required_egg_count")),
-                
             Locations.yoshis_island_1_dragon:
                 CanBreakTurnBlocks,
             Locations.yoshis_island_1_moon:
@@ -2481,7 +2482,7 @@ class WaffleBasicRules(WaffleRules):
                 Locations.vanilla_secret_1_room_2:
                     CanClimb | CanWallRun,
                 Locations.vanilla_secret_1_room_3:
-                    CanClimb | CanWallRun & CanCarry & HasBSP,
+                    (CanClimb | CanWallRun) & CanCarry & HasBSP,
             }
             self.update_rules(is_glitched, connection_rules=connection_rules, location_rules=location_rules)
 
@@ -2521,32 +2522,6 @@ class WaffleBasicRules(WaffleRules):
                     CanCarry | HasFeather | HasYoshi,
             }
             self.update_rules(is_glitched, location_rules=location_rules)
-
-
-        if "Butter Bridge 1 - No Red Switch Palace" in options:
-            connection_rules = {
-                f"{Regions.butter_bridge_1_region} -> {Locations.butter_bridge_1_exit_1}": 
-                    True_(),
-            }
-            location_rules = {
-                Locations.butter_bridge_1_dragon:
-                    True_(),
-                Locations.butter_bridge_1_prize:
-                    True_(),
-                Locations.butter_bridge_1_powerup_block_1:
-                    True_(),
-                Locations.butter_bridge_1_multi_coin_block_1:
-                    True_(),
-                Locations.butter_bridge_1_multi_coin_block_2:
-                    True_(),
-                Locations.butter_bridge_1_multi_coin_block_3:
-                    True_(),
-                Locations.butter_bridge_1_life_block_1:
-                    True_(),
-                Locations.butter_bridge_1_room_2:
-                    True_(),
-            }
-            self.update_rules(is_glitched, connection_rules=connection_rules, location_rules=location_rules)
 
 
         if "Ludwig's Castle - Runless" in options:

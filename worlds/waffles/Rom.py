@@ -817,7 +817,11 @@ def handle_location_item_info(patch: WaffleProcedurePatch, world: "WaffleWorld")
     hidden_1up_info = bytearray([0x00 for _ in range(96)])
     midway_point_info = bytearray([0x00 for _ in range(96)])
     locations = world.multiworld.get_filled_locations(world.player)
+
     for location in locations:
+        if location.address is None:
+            continue
+
         classification = 0
         if ItemClassification.progression in location.item.classification or ItemClassification.trap in location.item.classification:
             classification = 2
@@ -828,7 +832,7 @@ def handle_location_item_info(patch: WaffleProcedurePatch, world: "WaffleWorld")
         loc_type = (location.address >> 20 & 0x0F)
         level_data = location.address & 0x0F
 
-        if level_id in world.swapped_exits:
+        if level_id in world.swapped_exits and loc_type <= 0x01:
             loc_type = loc_type ^ 1
 
         if loc_type == 0x00 and level_data == 0x00:

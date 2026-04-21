@@ -4481,7 +4481,6 @@ class UTMxin(World):
             self.options.midway_point_checks.value = slot_data["midway_point_checks"]
             self.options.room_checks.value = slot_data["room_checks"]
             self.options.block_checks.value = slot_data["block_checks"]
-            self.options.swap_level_exits.value = slot_data["swap_level_exits"]
             #self.options.exclude_special_zone.value = slot_data["exclude_special_zone"]
             self.options.enemy_shuffle.value = slot_data["enemy_shuffle"]
             self.options.yoshi_egg_placement.value = slot_data["yoshi_egg_placement"]

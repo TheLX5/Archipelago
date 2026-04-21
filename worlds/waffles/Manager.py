@@ -77,7 +77,7 @@ def create_file_frame(parent=None, external_vars=None):
             for key, value in vars(var_group).items():
                 setattr(vars_ns, key, value)
 
-    frame = LabelFrame(parent, text="Graphics Pack Options", padx=8, pady=8)
+    frame = LabelFrame(parent, text="Patch File", padx=8, pady=8)
 
     vars_ns.patch_path = StringVar()
     load_frame = Frame(frame)
@@ -285,6 +285,13 @@ def create_linked_frame(parent=None):
     energy_link_label = Label(energy_link_frame, text="Enable Energy Link")
     energy_link_label.pack(side=LEFT, fill=X)
 
+    vars.trap_link = BooleanVar()
+    trap_link_frame = Frame(frame)
+    trap_link_check = Checkbutton(trap_link_frame, variable=vars.trap_link)
+    trap_link_check.pack(side=LEFT, fill=X)
+    trap_link_label = Label(trap_link_frame, text="Enable Trap Link")
+    trap_link_label.pack(side=LEFT, fill=X)
+
     vars.death_link = BooleanVar()
     death_link_frame = Frame(frame)
     death_link_check = Checkbutton(death_link_frame, variable=vars.death_link)
@@ -299,17 +306,10 @@ def create_linked_frame(parent=None):
     death_link_heart_label = Label(death_link_heart_frame, text="Hearts can nullify incoming Death Links")
     death_link_heart_label.pack(side=LEFT, fill=X)
 
-    vars.trap_link = BooleanVar()
-    trap_link_frame = Frame(frame)
-    trap_link_check = Checkbutton(trap_link_frame, variable=vars.trap_link)
-    trap_link_check.pack(side=LEFT, fill=X)
-    trap_link_label = Label(trap_link_frame, text="Enable Trap Link")
-    trap_link_label.pack(side=LEFT, fill=X)
-
     energy_link_frame.pack(side=TOP, fill=X)
+    trap_link_frame.pack(side=TOP, fill=X)
     death_link_frame.pack(side=TOP, fill=X)
     death_link_heart_frame.pack(side=TOP, fill=X)
-    trap_link_frame.pack(side=TOP, fill=X)
 
     return frame, vars
 

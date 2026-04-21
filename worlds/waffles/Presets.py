@@ -92,7 +92,6 @@ dev_choice = {
     "game_logic_difficulty": "medium",
     "level_shuffle": True,
     "level_effects": 30,
-    "swap_level_exits": True,
     "swap_exit_count": 12,
     "map_teleport_shuffle": "on_both_mix",
     "map_transition_shuffle": True,

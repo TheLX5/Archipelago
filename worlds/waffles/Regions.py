@@ -4,7 +4,7 @@ from BaseClasses import Region, ItemClassification
 from .Locations import WaffleLocation
 from .Levels import level_info_dict
 from .Items import WaffleItem
-from .Names import LocationName
+from .Names import LocationName, ItemName
 from .Options import Goal
 from worlds.generic.Rules import add_rule
 
@@ -19,11 +19,7 @@ def create_regions(world: "WaffleWorld", active_locations: typing.Dict[int,int])
 
     yoshis_house_tile = create_region(world, active_locations, LocationName.yoshis_house_tile, None)
 
-    yoshis_house_region_locations = []
-    if world.options.goal == Goal.option_yoshi_house:
-        yoshis_house_region_locations.append(LocationName.yoshis_house)
-    yoshis_house_region = create_region(world, active_locations, LocationName.yoshis_house,
-                                        yoshis_house_region_locations)
+    yoshis_house_region = create_region(world, active_locations, LocationName.yoshis_house, None)
 
     yoshis_island_1_tile = create_region(world, active_locations, LocationName.yoshis_island_1_tile, None)
     yoshis_island_1_region = create_region(world, active_locations, LocationName.yoshis_island_1_region, None)
@@ -367,10 +363,7 @@ def create_regions(world: "WaffleWorld", active_locations: typing.Dict[int,int])
     front_door_region = create_region(world, active_locations, LocationName.front_door, None)
     back_door_tile = create_region(world, active_locations, LocationName.back_door_tile, None)
     back_door_region = create_region(world, active_locations, LocationName.back_door, None)
-    bowser_region_locations = []
-    if world.options.goal == Goal.option_bowser:
-        bowser_region_locations += [LocationName.bowser]
-    bowser_region = create_region(world, active_locations, LocationName.bowser_region, bowser_region_locations)
+    bowser_region = create_region(world, active_locations, LocationName.bowser_region, None)
 
     donut_plains_entrance_pipe = create_region(world, active_locations, LocationName.donut_plains_entrance_pipe, None)
     donut_plains_exit_pipe = create_region(world, active_locations, LocationName.donut_plains_exit_pipe, None)
@@ -771,6 +764,11 @@ def create_regions(world: "WaffleWorld", active_locations: typing.Dict[int,int])
         ci_to_vob,
         vob_from_ci,
     ]
+
+    if world.options.goal == Goal.option_yoshi_house:
+        add_event_to_region(world, LocationName.yoshis_house, LocationName.yoshis_house, ItemName.victory)
+    elif world.options.goal == Goal.option_bowser:
+        add_event_to_region(world, LocationName.bowser_region, LocationName.bowser, ItemName.victory)
 
     add_location_to_region(world, active_locations, LocationName.special_zone_1_exit_1, LocationName.special_zone_1_exit_1)
     add_location_to_region(world, active_locations, LocationName.special_zone_2_exit_1, LocationName.special_zone_2_exit_1)
@@ -2010,4 +2008,4 @@ def connect(world: "WaffleWorld", source: str, target: str) -> None:
     if world.is_ut and " Exit" in target_region.name and world.multiworld.enforce_deferred_connections in ("on", "default"):
         glitched_entrance = source_region.create_exit(f"{source_region.name} -> {target_region.name} (Glitched)")
         glitched_entrance.connect(target_region)
-        print (f"Glitched Entrance: {glitched_entrance.name} ({glitched_entrance.connected_region})")
+        #print (f"Glitched Entrance: {glitched_entrance.name} ({glitched_entrance.connected_region})")
