@@ -248,6 +248,7 @@ tag_list = {
     "force line spin": [],
     "mega mole": [],
     "stay on ledge": [],
+    "force fish": [],
 }
 
 SPRITE_POINTERS_ADDR = 0x2EC00
@@ -804,6 +805,10 @@ enemy_list_special_cases = {
         0x031: EnemyData(0x031, "Bony Beetle", 18, (0,0), ["mode 7"], ["mode 7"]),
         0x01D: EnemyData(0x01D, "Hopping flame", 15, (0,0), ["mode 7"], ["mode 7"]),
         0x0A4: EnemyData(0x0A4, "Floating Spike ball, slow/fast (X&1)", 20, (0,0), ["mode 7"], ["mode 7"]),
+    },
+    0x00A: {
+        0x0A1: EnemyData(0x0A1, "Bowser's bowling ball", 20, (0,0), ["force fish"], ["skip"]),
+        0x016: EnemyData(0x016, "Fish, vertical", 20, (0,0), ["water"], ["water", "force fish"]),
     }
 }
 
@@ -1119,5 +1124,10 @@ def modify_sprite_data(rom: bytearray, seed: int) -> bytearray:
     # Funky (125)
     # Move Whistlin' chuck a bit to the left
     rom[0x03E71F+1] = 0xA9
+
+    # DS1 (00A)
+    # Guarantees fishes after exiting second room
+    rom[0x03C967+2] = 0xA1
+    rom[0x03C96A+2] = 0xA1
 
     return rom
