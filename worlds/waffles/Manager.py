@@ -52,7 +52,7 @@ def manager_gui():
     manager_window = Tk()
     manager_window.minsize(WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT)
     manager_window.resizable(True, False)
-    manager_window.wm_title(f"Spicy Mycena Waffles Adjuster")
+    manager_window.wm_title(f"Spicy Mycena Waffles Manager")
 
     gfx_pack_frame, gfx_pack_vars = create_gfx_pack_frame(manager_window)
     linked_frame, linked_vars = create_linked_frame(manager_window)
