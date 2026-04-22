@@ -2768,9 +2768,7 @@ class WaffleBasicRules(WaffleRules):
                 f"{Regions.star_road_4_region} -> {Locations.star_road_4_exit_2}": 
                     HasYoshi | HasFeather | (HasGSP & HasRSP),
             }
-            self.update_rules(is_glitched, connection_rules=connection_rules, 
-                              carryless_exit_rules=carryless_exit_rules,
-                              location_rules=location_rules)
+            self.update_rules(is_glitched,carryless_exit_rules=carryless_exit_rules)
 
         if "Valley Ghost House - True Carryless Secret Exit" in options:
             carryless_exit_rules = {
