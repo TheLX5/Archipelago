@@ -355,7 +355,6 @@ class WaffleSNIClient(SNIClient):
         flags_data = list(snes_data.get(SMWMemory.flags_data))
         blocksanity_data = list(snes_data.get(SMWMemory.blocksanity_data))
 
-        new_checks = []
         progress_data = list(game_progress[0x02:0x02+0x0F])
         dragon_coins_data = list(game_progress[0x2F:0x2F+0x0C])
         moon_data = list(game_progress[0xEE:0xEE+0x0C])
@@ -398,14 +397,22 @@ class WaffleSNIClient(SNIClient):
                     data = progress_data[event_progress_byte]
                     masked_data = data & (1 << event_progress_bit)
                     if masked_data:
-                        new_checks.append(loc_id)
-                        new_checks.append(loc_id | 0x01)
+                        ctx.locations_checked.add(loc_id)
+                        ctx.locations_checked.add(loc_id | 0x01)
+                        await ctx.send_msgs([{
+                            "cmd": "Set", 
+                            "key": f"smw_{ctx.team}_{ctx.slot}_level_{loc_id:08X}",
+                            "slot": ctx.slot,
+                            "default": 0,
+                            "operations":
+                                [{"operation": "replace", "value": 1}],
+                        }])
                     continue
                 # Item from block
                 elif loc_type == 0x0A and blocksanity_active:
                     block_index = loc_data & 0x0FFFF
                     if blocksanity_data[block_index]:
-                        new_checks.append(loc_id)
+                        ctx.locations_checked.add(loc_id)
                     continue
                 # Room visited
                 elif loc_type == 0x08 and rooms_active:
@@ -413,16 +420,16 @@ class WaffleSNIClient(SNIClient):
                     # Regular rooms
                     if room_type == 0x00:
                         if loc_data == current_sublevel_value:
-                            new_checks.append(loc_id)
+                            ctx.locations_checked.add(loc_id)
                     # Similar rooms
                     elif room_type == 0x01:
                         loc_data &= 0x0FFF
                         if loc_data == current_sublevel_value or loc_data + 0x01 == current_sublevel_value:
-                            new_checks.append(loc_id)
+                            ctx.locations_checked.add(loc_id)
                     # Wing rooms 
                     elif room_type == 0x02:
                         if loc_data & 0x00FF == current_sublevel_value & 0x00FF:
-                            new_checks.append(loc_id)
+                            ctx.locations_checked.add(loc_id)
                     else:
                         continue
                 # Dragon coins
@@ -445,12 +452,10 @@ class WaffleSNIClient(SNIClient):
                 
                 masked_data = data & (1 << progress_bit)
                 if masked_data:
-                    new_checks.append(loc_id)
+                    ctx.locations_checked.add(loc_id)
 
-            for new_check_id in new_checks:
-                ctx.locations_checked.add(new_check_id)
-                await ctx.send_msgs([{"cmd": 'LocationChecks', "locations": [new_check_id]}])
-
+            await ctx.check_locations(ctx.locations_checked)
+            
         # Store visited OW levels for UT
         active_level_data = list(snes_data.get(SMWMemory.active_level_data))
         shuffled_level = state_mirror[0x0A]
@@ -465,12 +470,13 @@ class WaffleSNIClient(SNIClient):
             #print (f"smw_{ctx.team}_{ctx.slot}_{level_key}")
             await ctx.send_msgs([{
                 "cmd": "Set", 
-                "key": f"smw_{ctx.team}_{ctx.slot}_{level_key}",
+                "key": f"smw_{ctx.team}_{ctx.slot}_tile_{level_key}",
                 "slot": ctx.slot,
                 "default": 0,
                 "operations":
                     [{"operation": "replace", "value": 1}],
             }])
+
 
         # Send Current Room for Tracker
         if game_state != 0x14:
@@ -663,6 +669,15 @@ class WaffleSNIClient(SNIClient):
 
                 if masked_data:
                     continue
+                
+                await ctx.send_msgs([{
+                    "cmd": "Set", 
+                    "key": f"smw_{ctx.team}_{ctx.slot}_level_{loc_id:08X}",
+                    "slot": ctx.slot,
+                    "default": 0,
+                    "operations":
+                        [{"operation": "replace", "value": 1}],
+                }])
 
                 new_events += 1
                 new_data = data | (1 << progress_bit)

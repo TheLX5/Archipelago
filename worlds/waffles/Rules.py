@@ -316,7 +316,6 @@ class WaffleRules:
                     self.world.set_rule(entrance, Has(Items.glitched))
 
         # Build entrance rules
-        starting_region = possible_starting_regions[world.options.starting_location.value]
         for entrance_name, rule in self.connection_rules.items():
             entrance: Entrance = self.world.get_entrance(entrance_name)
             if entrance.parent_region.name in hard_gameplay_levels:
@@ -328,19 +327,6 @@ class WaffleRules:
                 location_name = entrance_name.split("-> ")[1]
                 location: Location = self.world.get_location(location_name)
                 self.world.set_rule(location, rule)
-                if self.world.is_ut:
-                    # Apply exit rules to 
-                    if len(entrance.connected_region.exits) != 0:
-                        # Do all of this to fix an issue where rules aren't being applied to an entrance that connects to the origin level
-                        for exit in entrance.connected_region.exits:
-                            if "Transition" in exit.name:
-                                destination = exit.connected_region.exits[0].connected_region.exits[0].connected_region
-                                if destination.name == starting_region:
-                                    break
-                        else:
-                            continue
-                    glitched_entrance = self.world.get_entrance(f"{entrance_name} (Glitched)")
-                    self.world.set_rule(glitched_entrance, rule)
             except KeyError:
                 continue
 
@@ -494,7 +480,7 @@ class WaffleBasicRules(WaffleRules):
             f"{Regions.forest_of_illusion_4_region} -> {Locations.forest_of_illusion_4_exit_1}": 
                 True_(),
             f"{Regions.forest_of_illusion_4_region} -> {Locations.forest_of_illusion_4_exit_2}":
-                True_(),
+                CanCarry,
             f"{Regions.forest_ghost_house_region} -> {Locations.forest_ghost_house_exit_1}": 
                 HasPSwitch,
             f"{Regions.forest_ghost_house_region} -> {Locations.forest_ghost_house_exit_2}": 
