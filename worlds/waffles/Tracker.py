@@ -4468,6 +4468,9 @@ class UTMxin(World):
             self.options.yoshi_egg_placement.value = slot_data["yoshi_egg_placement"]
             self.options.starting_location.value = slot_data["starting_location"]
             self.options.ability_shuffle.value = slot_data["ability_shuffle"]
+            self.options.decoupled_fast_swimming.value = slot_data["decoupled_fast_swimming"]
+            self.options.decoupled_wall_run_anywhere.value = slot_data["decoupled_wall_run_anywhere"]
+            self.options.decoupled_yoshi_carry.value = slot_data["decoupled_yoshi_carry"]
             self.required_egg_count = slot_data["required_egg_count"]
             self.actual_egg_count = slot_data["actual_egg_count"]
 

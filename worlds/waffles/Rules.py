@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from . import WaffleWorld
 
-from .Options import EnemyShuffle, InventoryYoshiLogic, GameLogicDifficulty, Goal
+from .Options import EnemyShuffle, InventoryYoshiLogic, GameLogicDifficulty, Goal, DecoupledFastSwim, DecoupledWallRun, DecoupledYoshiCarry
 from .Levels import level_info_dict, hard_gameplay_levels, very_hard_gameplay_levels, possible_starting_regions
 from .Tricks import logic_tricks
 
@@ -64,17 +64,20 @@ class Macro(WrapperRule["WaffleWorld"], game=GAME_NAME):
         
 CanCarry: Rule = Has(Items.carry)
 CanRun: Macro = Macro(
-    HasAny(Items.run, Items.progressive_run),
+    Has(Items.run, options=[OptionFilter(DecoupledWallRun, 0)]) |
+    Has(Items.progressive_run, 1, options=[OptionFilter(DecoupledWallRun, 1)]),
     "Can run",
     "Can run freely",
 )
 CanWallRun: Macro = Macro(
-    HasAnyCount({Items.run: 1, Items.progressive_run: 2}),
+    Has(Items.run, options=[OptionFilter(DecoupledWallRun, 0)]) |
+    Has(Items.progressive_run, 2, options=[OptionFilter(DecoupledWallRun, 1)]),
     "Can wall run anywhere",
     "Can perform a wall run anywhere",
 )
 CanSwim: Macro = Macro(
-    HasAny(Items.swim, Items.progressive_swim),
+    Has(Items.swim, options=[OptionFilter(DecoupledFastSwim, 0)]) |
+    Has(Items.progressive_swim, 1, options=[OptionFilter(DecoupledFastSwim, 1)]),
     "Can swim",
     "Can swim freely underwater"
 )
@@ -189,7 +192,10 @@ CanGetAnyYoshi: Macro = Macro(
 )
 
 CanYoshiCarry: Macro = Macro(
-    HasAnyCount({Items.yoshi: 1, Items.progressive_yoshi: 2}) & (
+    (
+        Has(Items.yoshi, options=[OptionFilter(DecoupledYoshiCarry, 0)]) |
+        Has(Items.progressive_yoshi, 2, options=[OptionFilter(DecoupledYoshiCarry, 1)])
+    ) & (
         CanGetGreenYoshi | CanGetBlueYoshi | CanGetYellowYoshi
     ),
     "Can carry with Yoshi",
@@ -221,7 +227,10 @@ CanCapeSpinFly: Macro = Macro(
 )
 
 HasYoshi: Macro = Macro(
-    HasAny(Items.yoshi, Items.progressive_yoshi) & CanGetAnyYoshi,
+    (
+        Has(Items.yoshi, options=[OptionFilter(DecoupledYoshiCarry, 0)]) |
+        Has(Items.progressive_yoshi, 1, options=[OptionFilter(DecoupledYoshiCarry, 1)])
+    ) & CanGetAnyYoshi,
     "Has Yoshi",
     "Can get a Yoshi from either a level or the inventory (if that setting is enabled)"
 )
