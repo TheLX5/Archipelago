@@ -5,6 +5,7 @@ import typing
 
 from NetUtils import ClientStatus, color
 from worlds.AutoSNIClient import SNIClient
+from Utils import get_unique_identifier
 
 logger = logging.getLogger("Client")
 snes_logger = logging.getLogger("SNES")
@@ -594,8 +595,9 @@ class MMXSNIClient(SNIClient):
             if "data" not in args:
                 return
 
+            uuid = args["data"]["uuid"]
             source_name = args["data"]["source"]
-            if "SharedDamage" in ctx.tags and "SharedDamage" in args["tags"] and source_name != ctx.player_names[ctx.slot]:
+            if "SharedDamage" in ctx.tags and "SharedDamage" in args["tags"] and (uuid != get_unique_identifier() or source_name != ctx.player_names[ctx.slot]):
                 damage_amount = args["data"]["damage_points"]
                 self.incoming_shared_damage += damage_amount
                 self.shared_damage_message = f"Received {damage_amount} damage points from {source_name}"
@@ -698,6 +700,7 @@ class MMXSNIClient(SNIClient):
                 "cmd": "Bounce", "tags": ["SharedDamage"],
                 "data": {
                     "time": time.time(),
+                    "uuid": get_unique_identifier(),
                     "source": ctx.player_names[ctx.slot],
                     "damage_points": damage_amount
                 }
