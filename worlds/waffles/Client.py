@@ -846,45 +846,50 @@ class WaffleSNIClient(SNIClient):
                 ctx.ui.energy_link_label.text = f"Coins: {int(pool)}"
 
         elif cmd == "Bounced":
-            if self.slot_data is None and "tags" not in args:
-                return 
-            
-            if not hasattr(self, "instance_id"):
-                self.instance_id = time.time()
-
-            if "data" not in args:
-                return
-
-            source_name = args["data"]["source"]
-
-            if "TrapLink" in ctx.tags and "TrapLink" in args["tags"] and source_name != ctx.player_names[ctx.slot]:
-                trap_name: str = args["data"]["trap_name"]
-                if trap_name not in trap_name_to_value:
-                    # We don't know how to handle this trap, ignore it
+            try:
+                if self.slot_data is None and "tags" not in args:
                     return
 
-                trap_id: int = trap_name_to_value[trap_name]
+                if not hasattr(self, "instance_id"):
+                    self.instance_id = time.time()
 
-                if "trap_weights" not in self.slot_data.keys():
+                if "data" not in args:
                     return
 
-                if f"{trap_id}" not in self.slot_data["trap_weights"]:
+                source_name = args["data"].get("source")
+                if source_name is None:
                     return
 
-                if self.slot_data["trap_weights"][f"{trap_id}"] == 0:
-                    # The player disabled this trap type
-                    return
+                if "TrapLink" in ctx.tags and "TrapLink" in args["tags"] and source_name != ctx.player_names[ctx.slot]:
+                    trap_name = args["data"].get("trap_name")
+                    if trap_name is None or trap_name not in trap_name_to_value:
+                        # We don't know how to handle this trap, ignore it
+                        return
 
-                self.priority_trap = NetworkItem(trap_id, 0, 0)
-                self.priority_trap_message = generate_received_trap_link_text(trap_name, source_name)
-                self.priority_trap_message_str = f"Received linked {trap_name} from {source_name}"
+                    trap_id: int = trap_name_to_value[trap_name]
 
-            uuid = args["data"]["uuid"]
-            source_name = args["data"]["source"]
-            if "SharedDamage" in ctx.tags and "SharedDamage" in args["tags"] and (uuid != get_unique_identifier() or source_name != ctx.player_names[ctx.slot]):
-                damage_amount = args["data"]["damage_points"]
-                self.incoming_shared_damage += damage_amount
-                self.shared_damage_message = f"Received {damage_amount} damage points from {source_name}"
+                    if "trap_weights" not in self.slot_data.keys():
+                        return
+
+                    if f"{trap_id}" not in self.slot_data["trap_weights"]:
+                        return
+
+                    if self.slot_data["trap_weights"][f"{trap_id}"] == 0:
+                        # The player disabled this trap type
+                        return
+
+                    self.priority_trap = NetworkItem(trap_id, 0, 0)
+                    self.priority_trap_message = generate_received_trap_link_text(trap_name, source_name)
+                    self.priority_trap_message_str = f"Received linked {trap_name} from {source_name}"
+
+                if "SharedDamage" in ctx.tags and "SharedDamage" in args["tags"]:
+                    uuid = args["data"].get("uuid")
+                    if uuid != get_unique_identifier() or source_name != ctx.player_names[ctx.slot]:
+                        damage_amount = args["data"].get("damage_points", 0)
+                        self.incoming_shared_damage += damage_amount
+                        self.shared_damage_message = f"Received {damage_amount} damage points from {source_name}"
+            except Exception:
+                snes_logger.exception("Error while handling Bounced packet: %r", args)
 
 
     async def send_trap_link(self, ctx: "SNIContext", trap_name: str):
