@@ -2,6 +2,7 @@ import logging
 import time
 import random
 from enum import Enum
+from Utils import get_unique_identifier
 from NetUtils import ClientStatus, NetworkItem, color
 from worlds.AutoSNIClient import SNIClient, SnesReader, SnesData, Read
 from .Names.TextBox import generate_received_text, generate_received_trap_link_text
@@ -878,7 +879,9 @@ class WaffleSNIClient(SNIClient):
                 self.priority_trap_message = generate_received_trap_link_text(trap_name, source_name)
                 self.priority_trap_message_str = f"Received linked {trap_name} from {source_name}"
 
-            elif "SharedDamage" in ctx.tags and "SharedDamage" in args["tags"] and source_name != ctx.player_names[ctx.slot]:
+            uuid = args["data"]["uuid"]
+            source_name = args["data"]["source"]
+            if "SharedDamage" in ctx.tags and "SharedDamage" in args["tags"] and (uuid != get_unique_identifier() or source_name != ctx.player_names[ctx.slot]):
                 damage_amount = args["data"]["damage_points"]
                 self.incoming_shared_damage += damage_amount
                 self.shared_damage_message = f"Received {damage_amount} damage points from {source_name}"
@@ -943,6 +946,7 @@ class WaffleSNIClient(SNIClient):
                 "cmd": "Bounce", "tags": ["SharedDamage"],
                 "data": {
                     "time": time.time(),
+                    "uuid": get_unique_identifier(),
                     "source": ctx.player_names[ctx.slot],
                     "damage_points": damage_amount
                 }
