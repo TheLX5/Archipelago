@@ -1432,7 +1432,7 @@ class UTMxin(World):
 
     def explain_rule(self, dest_name: str, state: CollectionState, *_: Any, **__: Any) -> list[JSONMessagePart]:
         if not dest_name:
-            return [{"type": "text", "text": "Enter a location, region, item, or acronym to get an explanation"}]
+            return [{"type": "text", "text": "Enter a location or region to get an explanation"}]
 
         types_to_try = {
             "location": self._explain_location,
