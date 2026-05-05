@@ -17,6 +17,10 @@ HASH_US = 'a10071fa78554b57538d0b459e00d224'
 HASH_US_REV_1 = 'df1cc0c8c8c4b61e3b834cc03366611c'
 HASH_LEGACY = 'f1dfbbcdc3d8cdeafa4b4b9aa51a56d6'
 
+LC_EXE_HASH = 'f31847891e120d19d74fe2098b273627'
+LC_ROM_OFFSET = 0xD8DF20
+LC_ROM_SIZE = 0x180000
+
 STARTING_ID = 0xBE0800
 
 action_names = ("SHOT", "JUMP", "DASH", "SELECT_L", "SELECT_R", "MENU")
@@ -364,7 +368,7 @@ def patch_rom(world: "MMXWorld", patch: MMXProcedurePatch) -> None:
     patch.write_byte(0x167C28, world.options.energy_link.value)
     patch.write_byte(0x167C29, world.options.death_link.value)
     patch.write_byte(0x167C2A, world.options.jammed_buster.value)
-    patch.write_byte(0x167C2B, world.options.logic_boss_weakness.value)
+    patch.write_byte(0x167C2B, world.options.damage_link.value)
     patch.write_byte(0x167C2C, world.options.boss_weakness_rando.value)
     patch.write_byte(0x167C2D, world.options.starting_hp.value)
     patch.write_byte(0x167C2E, world.options.heart_tank_effectiveness.value)
@@ -391,6 +395,10 @@ def get_base_rom_bytes(file_name: str = "") -> bytes:
 
         basemd5 = hashlib.md5()
         basemd5.update(base_rom_bytes)
+        if basemd5.hexdigest() == LC_EXE_HASH:
+            base_rom_bytes = extract_mmx(base_rom_bytes)
+            basemd5 = hashlib.md5()
+            basemd5.update(base_rom_bytes)
         if basemd5.hexdigest() not in {HASH_US, HASH_LEGACY}:
             raise Exception('Supplied Base Rom does not match known MD5 for US or LC release. '
                             'Get the correct game and version, then dump it')
@@ -405,3 +413,8 @@ def get_base_rom_path(file_name: str = "") -> str:
     if not os.path.exists(file_name):
         file_name = Utils.user_path(file_name)
     return file_name
+
+
+def extract_mmx(exe_file: bytes) -> bytes:
+    mmx = bytearray(exe_file[LC_ROM_OFFSET:LC_ROM_OFFSET + LC_ROM_SIZE])
+    return bytes(mmx)

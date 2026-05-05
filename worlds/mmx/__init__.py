@@ -2,6 +2,7 @@ import os
 import settings
 import threading
 import pkgutil
+import hashlib
 
 from BaseClasses import Item, MultiWorld, Tutorial, ItemClassification
 from worlds.AutoWorld import World, WebWorld
@@ -14,16 +15,42 @@ from .Client import MMXSNIClient
 from .Rules import build_rules
 from .Levels import location_id_to_level_id
 from .Weaknesses import handle_weaknesses, weapon_id
-from .Rom import patch_rom, MMXProcedurePatch, HASH_US, HASH_LEGACY
+from .Rom import patch_rom, MMXProcedurePatch, HASH_US, HASH_LEGACY, LC_EXE_HASH
 
-from typing import Dict, List, Any, ClassVar, TextIO
+from typing import Dict, List, Any, ClassVar, TextIO, Optional, Sequence, Tuple
 
 class MMXSettings(settings.Group):
     class RomFile(settings.SNESRomPath):
         """File name of the Mega Man X US ROM"""
         description = "Mega Man X (USA) ROM File"
         copy_to = "Mega Man X (USA).sfc"
-        md5s = [HASH_US, HASH_LEGACY]
+        md5s = [HASH_US, HASH_LEGACY, LC_EXE_HASH]
+
+        # Borrowed from MM2, let's pray it actually works for X LC
+        def browse(self: settings.T,
+                   filetypes: Optional[Sequence[Tuple[str, Sequence[str]]]] = None,
+                   **kwargs: Any) -> Optional[settings.T]:
+            if not filetypes:
+                file_types = [("SNES", [".sfc"]), ("Program", [".exe"])]  # LC1 is only a windows executable, no linux
+                return super().browse(file_types, **kwargs)
+            else:
+                return super().browse(filetypes, **kwargs)
+
+        @classmethod
+        def validate(cls, path: str) -> None:
+            """Try to open and validate file against hashes"""
+            with open(path, "rb", buffering=0) as f:
+                try:
+                    f.seek(0)
+                    cls._validate_stream_hashes(f)
+                    base_rom_bytes = f.read()
+                    basemd5 = hashlib.md5()
+                    basemd5.update(base_rom_bytes)
+                    if basemd5.hexdigest() == LC_EXE_HASH:
+                        # we need special behavior here
+                        cls.copy_to = None
+                except ValueError:
+                    raise ValueError(f"File hash does not match for {path}")
 
     rom_file: RomFile = RomFile(RomFile.copy_to)
 

@@ -1,6 +1,7 @@
 import logging
 import asyncio
 import time
+import typing
 
 from NetUtils import ClientStatus, color
 from worlds.AutoSNIClient import SNIClient
@@ -82,6 +83,8 @@ MMX_CHECKPOINTS_REACHED    = MMX_RAM + 0x00120
 MMX_REFILL_REQUEST         = MMX_RAM + 0x00110
 MMX_REFILL_TARGET          = MMX_RAM + 0x00111
 MMX_ARSENAL_SYNC           = MMX_RAM + 0x00112
+MMX_DAMAGE_PACKET          = MMX_RAM + 0x00117
+MMX_DAMAGE_TRAP            = MMX_RAM + 0x00118
 
 EXCHANGE_RATE = 500000000
 
@@ -90,11 +93,14 @@ STARTING_ID = 0xBE0800
 MMX_ROMHASH_START = 0x7FC0
 ROMHASH_SIZE = 0x15
 
+VALID_ACTIONS = [0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x10, 0x12, 0x14, 0x20, 0x24, 0x2A, 0x48, 0x4A]
+
 PICKUP_ITEMS = ["1up", "hp refill", "weapon refill"]
 
 class MMXSNIClient(SNIClient):
     game = "Mega Man X"
     patch_suffix = ".apmmx"
+    slot_data: dict[str, typing.Any]
 
     def __init__(self):
         super().__init__()
@@ -103,13 +109,16 @@ class MMXSNIClient(SNIClient):
         self.energy_link_enabled = False
         self.heal_request_command = None
         self.weapon_refill_request_command = None
-        self.using_newer_client = False
         self.energy_link_details = False
         self.trade_request = None
         self.data_storage_enabled = False
         self.save_arsenal = False
         self.resync_request = False
         self.current_level_value = 42
+        self.current_shared_damage = 0
+        self.incoming_shared_damage = 0
+        self.shared_damage_label = None
+        self.shared_damage_message = ""
         self.item_queue = []
 
 
@@ -119,20 +128,23 @@ class MMXSNIClient(SNIClient):
         game_data = await snes_read(ctx, MMX_RAM, 0x0140)
         game_state_data = await snes_read(ctx, MMX_GAME_STATE, 0x3)
         game_progress_data = await snes_read(ctx, MMX_UPGRADE_DATA, 0xF0)
-        if game_data is None or game_state_data is None or game_progress_data is None:
+        player_action = await snes_read(ctx, WRAM_START + 0x0BAA, 0x1)
+        if game_data is None or game_state_data is None or game_progress_data is None or player_action is None:
             return
 
         validation = int.from_bytes(game_data[0x13:0x15], "little")
         if validation != 0xDEAD:
             return
         
-        receiving_item = game_data[0x15]
         menu_state = game_state_data[1]
         gameplay_state = game_state_data[2]
+        if not (menu_state == 0x04 and gameplay_state == 0x04):
+            return
+        
+        receiving_item = game_data[0x15]
         can_move = game_progress_data[3:10]
-        pause_state = game_progress_data[14]
-        if menu_state != 0x04 or \
-            gameplay_state != 0x04 or \
+        pause_state = game_progress_data[0x14]
+        if player_action[0] not in VALID_ACTIONS or \
             pause_state != 0x00 or \
             can_move != b'\x00\x00\x00\x00\x00\x00\x00' or \
             receiving_item != 0x00:
@@ -188,12 +200,25 @@ class MMXSNIClient(SNIClient):
         if death_link:
             await ctx.update_death_link(bool(death_link & 0b1))
 
+        energy_link = game_settings[0x08]
+        if energy_link and "EnergyLink" not in ctx.tags:
+            ctx.tags.add("EnergyLink")
+            await ctx.send_msgs([{"cmd": "ConnectUpdate", "tags": ctx.tags}])
+
+        damage_link = game_settings[0x0B]
+        if damage_link and "SharedDamage" not in ctx.tags:
+            ctx.tags.add("SharedDamage")
+            await ctx.send_msgs([{"cmd": "ConnectUpdate", "tags": ctx.tags}])
+
         ctx.rom = rom_name
 
         return True
      
     
     async def game_watcher(self, ctx):
+        if ctx.server is None:
+            return
+        
         from SNIClient import snes_buffered_write, snes_flush_writes, snes_read
 
         game_data = await snes_read(ctx, MMX_RAM, 0x0140)
@@ -245,6 +270,7 @@ class MMXSNIClient(SNIClient):
             await ctx.handle_deathlink_state(currently_dead)
 
         current_hp = await snes_read(ctx, MMX_CURRENT_HP, 0x1)
+        player_action = await snes_read(ctx, WRAM_START + 0x0BAA, 0x1)
         screen_brightness = await snes_read(ctx, MMX_SCREEN_BRIGHTNESS, 0x1)
 
         if current_hp is not None and screen_brightness is not None:
@@ -254,6 +280,7 @@ class MMXSNIClient(SNIClient):
                 game_progress_data,
                 game_settings,
                 current_hp,
+                player_action,
             ]
 
             keys = {
@@ -269,38 +296,19 @@ class MMXSNIClient(SNIClient):
                all(key in ctx.stored_data.keys() for key in keys):
                 await self.handle_data_storage(ctx, game_ram)
 
-            # Handle DataStorage
-            if not self.using_newer_client:
-                if ctx.server and ctx.server.socket.open and not self.data_storage_enabled and ctx.team is not None:
-                    self.data_storage_enabled = True
-                    ctx.set_notify(f"mmx_global_timer_{ctx.team}_{ctx.slot}")
-                    ctx.set_notify(f"mmx_deaths_{ctx.team}_{ctx.slot}")
-                    ctx.set_notify(f"mmx_damage_taken_{ctx.team}_{ctx.slot}")
-                    ctx.set_notify(f"mmx_damage_dealt_{ctx.team}_{ctx.slot}")
-                    ctx.set_notify(f"mmx_checkpoints_{ctx.team}_{ctx.slot}")
-                    ctx.set_notify(f"mmx_arsenal_{ctx.team}_{ctx.slot}")
-
             if screen_brightness[0] == 0x0F:
                 await self.handle_item_queue(ctx, game_ram)
 
             if self.trade_request is not None:
                 self.handle_hp_trade(ctx, game_ram)
 
-            # This is going to be rewritten whenever SNIClient supports on_package
-            energy_link = game_settings[0x08]
-            if self.using_newer_client:
-                if energy_link != 0:
-                    await self.handle_energy_link(ctx, game_ram)
-            else:
-                if energy_link != 0:
-                    if self.energy_link_enabled and f'EnergyLink{ctx.team}' in ctx.stored_data:
-                        await self.handle_energy_link(ctx, game_ram)
+            if "EnergyLink" in ctx.tags and f"EnergyLink{ctx.team}" in ctx.stored_data:
+                await self.handle_energy_link(ctx, game_ram)
 
-                    if ctx.server and ctx.server.socket.open and not self.energy_link_enabled and ctx.team is not None:
-                        self.energy_link_enabled = True
-                        ctx.set_notify(f"EnergyLink{ctx.team}")
-                        logger.info(f"Initialized EnergyLink{ctx.team}, use /help to get information about the EnergyLink commands.")
-
+            if "SharedDamage" in ctx.tags:
+                await self.handle_incoming_shared_damage(ctx, game_ram)
+                await self.handle_sent_shared_damage(ctx, game_ram)
+                
         await snes_flush_writes(ctx)
 
         from .Rom import weapon_rom_data, upgrades_rom_data, boss_access_rom_data, refill_rom_data, chip_rom_data
@@ -558,9 +566,8 @@ class MMXSNIClient(SNIClient):
             ctx.set_notify(f"mmx_checkpoints_{ctx.team}_{ctx.slot}")
             ctx.set_notify(f"mmx_arsenal_{ctx.team}_{ctx.slot}")
             self.data_storage_enabled = True
-            slot_data = args.get("slot_data", None)
-            self.using_newer_client = True
-            if slot_data["energy_link"]:
+            self.slot_data = args.get("slot_data", None)
+            if self.slot_data["energy_link"]:
                 ctx.set_notify(f"EnergyLink{ctx.team}")
                 if ctx.ui:
                     ctx.ui.enable_energy_link()
@@ -576,6 +583,22 @@ class MMXSNIClient(SNIClient):
             if f"EnergyLink{ctx.team}" in args["keys"] and args["keys"][f"EnergyLink{ctx.team}"] and ctx.ui:
                 pool = (args["keys"][f"EnergyLink{ctx.team}"] or 0) / EXCHANGE_RATE
                 ctx.ui.energy_link_label.text = f"Energy: {pool:.2f}"
+
+        elif cmd == "Bounced":
+            if self.slot_data is None and "tags" not in args:
+                return 
+            
+            if not hasattr(self, "instance_id"):
+                self.instance_id = time.time()
+
+            if "data" not in args:
+                return
+
+            source_name = args["data"]["source"]
+            if "SharedDamage" in ctx.tags and "SharedDamage" in args["tags"] and source_name != ctx.player_names[ctx.slot]:
+                damage_amount = args["data"]["damage_points"]
+                self.incoming_shared_damage += damage_amount
+                self.shared_damage_message = f"Received {damage_amount} damage points from {source_name}"
 
 
     def handle_hp_trade(self, ctx, game_ram):
@@ -610,6 +633,80 @@ class MMXSNIClient(SNIClient):
         else:
             logger.info("Couldn't process trade. HP is too low.")
 
+
+    async def handle_incoming_shared_damage(self, ctx, game_ram):
+        try:
+            from kvui import MDLabel as Label
+        except ImportError:
+            from kvui import Label
+
+        if not self.shared_damage_label:
+            self.shared_damage_label = Label(text=f"", size_hint_x=None, width=120, halign="center")
+            ctx.ui.connect_layout.add_widget(self.shared_damage_label)
+
+        self.shared_damage_label.text = f"DMG: {self.current_shared_damage}"
+
+        # Ignore incoming damage if you can't move, are in pause state, not in the correct mode or not in gameplay state
+        game_data = game_ram[0]
+        game_state_data = game_ram[1]
+        game_progress_data = game_ram[2]
+
+        receiving_item = game_data[0x15]
+        menu_state = game_state_data[1]
+        gameplay_state = game_state_data[2]
+        progress = game_progress_data[0x6B]
+        can_move = game_progress_data[3:10]
+        pause_state = game_progress_data[0x14]
+        hp_refill = game_data[0x0F]
+        weapon_refill = game_data[0x1A]
+        player_action = game_ram[5]
+
+        if menu_state != 0x04 or gameplay_state != 0x04 or player_action[0] not in VALID_ACTIONS:
+            self.incoming_shared_damage = 0
+            return
+        
+        # We cap damage to 120 which is equal to 12 HP, other games could use other values
+        if self.incoming_shared_damage:
+            snes_logger.info(self.shared_damage_message)
+            self.current_shared_damage += min(self.incoming_shared_damage, 120)
+            self.incoming_shared_damage = 0
+        
+        # Delay damage signal in we're paused or something else
+        if can_move != b'\x00\x00\x00\x00\x00\x00\x00' or \
+           progress >= 0x04 or \
+           hp_refill != 0x00 or \
+           pause_state != 0x00 or \
+           weapon_refill != 0x00 or \
+           receiving_item != 0x00:
+            return
+        
+        if self.current_shared_damage >= 10:
+            from SNIClient import snes_buffered_write, snes_flush_writes
+            damage_amount = int(self.current_shared_damage / 10)
+            snes_buffered_write(ctx, MMX_DAMAGE_TRAP, bytearray([damage_amount]))
+            await snes_flush_writes(ctx)
+
+            snes_logger.info(f"Triggered DamageLink for {damage_amount} HP!")
+            self.current_shared_damage = self.current_shared_damage % 10
+
+
+    async def handle_sent_shared_damage(self, ctx, game_ram):
+        game_data = game_ram[0]
+        damage_amount = game_data[0x117]
+        if damage_amount != 0:
+            await ctx.send_msgs([{
+                "cmd": "Bounce", "tags": ["SharedDamage"],
+                "data": {
+                    "time": time.time(),
+                    "source": ctx.player_names[ctx.slot],
+                    "damage_points": damage_amount
+                }
+            }])
+            snes_logger.info(f"Sent {damage_amount} damage points to players")
+
+            from SNIClient import snes_buffered_write, snes_flush_writes
+            snes_buffered_write(ctx, MMX_DAMAGE_PACKET, bytearray([0x00]))
+            await snes_flush_writes(ctx)
 
     async def handle_energy_link(self, ctx, game_ram):
         from SNIClient import snes_buffered_write
@@ -647,7 +744,9 @@ class MMXSNIClient(SNIClient):
         heart_tank = game_data[0x0B]
         hp_refill = game_data[0x0F]
         weapon_refill = game_data[0x1A]
-        if menu_state != 0x04 or \
+        player_action = game_ram[5]
+        
+        if menu_state != 0x04 or player_action[0] not in VALID_ACTIONS or \
            gameplay_state != 0x04 or \
            can_move != b'\x00\x00\x00\x00\x00\x00\x00' or \
            receiving_item != 0x00 or \

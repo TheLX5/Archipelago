@@ -18,6 +18,14 @@ class EnergyLink(DefaultOnToggle):
     """
     display_name = "Energy Link"
 
+
+class DamageLink(Toggle):
+    """
+    Damage is shared across slots
+    """
+    display_name = "Damage Link"
+
+
 class StartingLifeCount(Range):
     """
     How many lives to start the game with. 
@@ -558,6 +566,7 @@ mmx_option_groups = [
 class MMXOptions(PerGameCommonOptions):
     start_inventory_from_pool: StartInventoryPool
     death_link: DeathLink
+    damage_link: DamageLink
     energy_link: EnergyLink
     button_configuration: ButtonConfiguration
     starting_life_count: StartingLifeCount
