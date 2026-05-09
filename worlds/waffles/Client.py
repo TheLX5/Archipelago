@@ -185,10 +185,12 @@ class WaffleSNIClient(SNIClient):
         
         state_mirror = snes_data.get(SMWMemory.state_mirror)
 
-        # If were not in a level
+        # If were not in a level discard any incoming deathlinks
         if state_mirror[0x00] != 0x14:
+            ctx.death_state = DeathState.dead
+            ctx.last_death_link = time.time()
             return
-        # Or Mario isn't in a playable state
+        # Delay deathlinks if Mario isn't in a playable state
         if state_mirror[0x01] != 0x00:
             return
         # Or a Message Box is showing
@@ -879,12 +881,16 @@ class WaffleSNIClient(SNIClient):
                 self.priority_trap_message = generate_received_trap_link_text(trap_name, source_name)
                 self.priority_trap_message_str = f"Received linked {trap_name} from {source_name}"
 
-            uuid = args["data"]["uuid"]
-            source_name = args["data"]["source"]
-            if "SharedDamage" in ctx.tags and "SharedDamage" in args["tags"] and (uuid != get_unique_identifier() or source_name != ctx.player_names[ctx.slot]):
-                damage_amount = args["data"]["damage_points"]
-                self.incoming_shared_damage += damage_amount
-                self.shared_damage_message = f"Received {damage_amount} damage points from {source_name}"
+            if "SharedDamage" in ctx.tags and "SharedDamage" in args["tags"]:
+                if "uuid" in args["data"]:
+                    uuid = args["data"]["uuid"]
+                else:
+                    uuid = "lmao"
+                source_name = args["data"]["source"]
+                if uuid != get_unique_identifier() or source_name != ctx.player_names[ctx.slot]:
+                    damage_amount = args["data"]["damage_points"]
+                    self.incoming_shared_damage += damage_amount
+                    self.shared_damage_message = f"Received {damage_amount} damage points from {source_name}"
 
 
     async def send_trap_link(self, ctx: "SNIContext", trap_name: str):
