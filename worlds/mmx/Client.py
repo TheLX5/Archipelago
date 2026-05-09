@@ -133,15 +133,16 @@ class MMXSNIClient(SNIClient):
         if game_data is None or game_state_data is None or game_progress_data is None or player_action is None:
             return
 
+        # Ignore deathlinks outside gameplay scenarios
         validation = int.from_bytes(game_data[0x13:0x15], "little")
-        if validation != 0xDEAD:
-            return
-        
         menu_state = game_state_data[1]
         gameplay_state = game_state_data[2]
-        if not (menu_state == 0x04 and gameplay_state == 0x04):
+        if not (menu_state == 0x04 and gameplay_state == 0x04) or validation != 0xDEAD:
+            ctx.last_death_link = time.time()
+            ctx.death_state = DeathState.dead
             return
         
+        # Delay deathlink until the player has control
         receiving_item = game_data[0x15]
         can_move = game_progress_data[3:10]
         pause_state = game_progress_data[0x14]
@@ -595,12 +596,16 @@ class MMXSNIClient(SNIClient):
             if "data" not in args:
                 return
 
-            uuid = args["data"]["uuid"]
-            source_name = args["data"]["source"]
-            if "SharedDamage" in ctx.tags and "SharedDamage" in args["tags"] and (uuid != get_unique_identifier() or source_name != ctx.player_names[ctx.slot]):
-                damage_amount = args["data"]["damage_points"]
-                self.incoming_shared_damage += damage_amount
-                self.shared_damage_message = f"Received {damage_amount} damage points from {source_name}"
+            if "SharedDamage" in ctx.tags and "SharedDamage" in args["tags"]:
+                if "uuid" in args["data"]:
+                    uuid = args["data"]["uuid"]
+                else:
+                    uuid = "lmao"
+                source_name = args["data"]["source"]
+                if uuid != get_unique_identifier() or source_name != ctx.player_names[ctx.slot]:
+                    damage_amount = args["data"]["damage_points"]
+                    self.incoming_shared_damage += damage_amount
+                    self.shared_damage_message = f"Received {damage_amount} damage points from {source_name}"
 
 
     def handle_hp_trade(self, ctx, game_ram):
