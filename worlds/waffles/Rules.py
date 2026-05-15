@@ -587,7 +587,7 @@ class WaffleBasicRules(WaffleRules):
             f"{Regions.special_zone_5_region} -> {Locations.special_zone_5_exit_1}": 
                 True_(),
             f"{Regions.special_zone_6_region} -> {Locations.special_zone_6_exit_1}": 
-                True_(),
+                CanSwim,
             f"{Regions.special_zone_7_region} -> {Locations.special_zone_7_exit_1}": 
                 CanCarryOrYoshiTongue,
             f"{Regions.special_zone_8_region} -> {Locations.special_zone_8_exit_1}": 
@@ -1349,6 +1349,8 @@ class WaffleBasicRules(WaffleRules):
                 True_(),
 
             Locations.vanilla_secret_3_dragon:
+                CanSwim,
+            Locations.vanilla_secret_3_midway:
                 CanSwim,
             Locations.vanilla_secret_3_powerup_block_1:
                 CanSwim,
@@ -2486,6 +2488,8 @@ class WaffleBasicRules(WaffleRules):
             }
             location_rules = {
                 Locations.vanilla_secret_3_dragon:
+                    True_(),
+                Locations.vanilla_secret_3_midway:
                     True_(),
                 Locations.vanilla_secret_3_powerup_block_1:
                     True_(),
