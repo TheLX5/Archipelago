@@ -397,9 +397,7 @@ class WaffleBasicRules(WaffleRules):
             f"{Regions.donut_plains_2_region} -> {Locations.donut_plains_2_exit_1}": 
                 True_(),
             f"{Regions.donut_plains_2_region} -> {Locations.donut_plains_2_exit_2}": 
-                CanYoshiCarry | (CanClimb & (
-                    (CanCarry & CanBreakTurnBlocks) | HasYoshi)
-                ),
+                CanYoshiCarry | (CanClimb & CanCarry & (CanBreakTurnBlocks | HasYoshi)),
             f"{Regions.donut_plains_3_region} -> {Locations.donut_plains_3_exit_1}": 
                 True_(),
             f"{Regions.donut_plains_4_region} -> {Locations.donut_plains_4_exit_1}": 
