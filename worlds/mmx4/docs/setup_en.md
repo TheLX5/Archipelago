@@ -24,7 +24,7 @@ Check the releases page for the latest version of the YAML. Alternatively you ca
 ### Connect to the MultiServer
 
 1. Install the APWorld
-2. Through the launcher run the Bizhawk Client tool
+2. Through the launcher run the Mega Man X4 Client
 3. Apply the XDelta patch to the ROM
    * You can use this tool - https://kotcrab.github.io/xdelta-wasm/
 4. Run your Patched ROM in Bizhawk
