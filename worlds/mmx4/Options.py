@@ -1,7 +1,7 @@
 from typing import Mapping, Iterator, List, Dict, Any
 from dataclasses import dataclass
 from worlds.AutoWorld import PerGameCommonOptions
-from Options import Choice, OptionGroup, Toggle, Range, StartInventoryPool, ItemDict
+from Options import Choice, OptionGroup, Toggle, Range, StartInventoryPool, ItemDict, DeathLink, DefaultOnToggle
 
 def create_option_groups() -> List[OptionGroup]:
     option_group_list: List[OptionGroup] = []
@@ -19,6 +19,37 @@ class Character(Choice):
     option_x = 0
     option_zero = 1
     default = 0
+
+
+class EnergyLink(DefaultOnToggle):
+    """
+    Enable EnergyLink support. When enabled, the client can spend EnergyLink to restore current HP.
+    """
+    display_name = "Energy Link"
+
+
+class DamageLink(Toggle):
+    """
+    Share damage with other players through DamageLink.
+    """
+    display_name = "Damage Link"
+
+
+class EnergyLinkAutoHeal(DefaultOnToggle):
+    """
+    Automatically spend EnergyLink to heal missing HP during gameplay.
+    """
+    display_name = "Energy Link Auto Heal"
+
+
+class EnergyLinkCostPerHP(Range):
+    """
+    EnergyLink cost for each HP point restored by auto heal.
+    """
+    display_name = "Energy Link Cost Per HP"
+    range_start = 1
+    range_end = 100
+    default = 5
 
 class PickupSanity(Toggle):
     """
@@ -286,6 +317,11 @@ class StartInventoryFromPoolMixin:
 class MMX4Options(StartInventoryFromPoolMixin, PerGameCommonOptions):
     pickupsanity: PickupSanity
     character: Character
+    death_link: DeathLink
+    damage_link: DamageLink
+    energy_link: EnergyLink
+    energy_link_auto_heal: EnergyLinkAutoHeal
+    energy_link_cost_per_hp: EnergyLinkCostPerHP
 
     enable_boss_item_requirements: EnableBossItemRequirements
     web_spider_requirement: WebSpiderRequirement
@@ -302,6 +338,7 @@ class MMX4Options(StartInventoryFromPoolMixin, PerGameCommonOptions):
     sigma_requirement: SigmaRequirement
 
 option_groups: Dict[str, List[Any]] = {
-    "General Options": [PickupSanity],
+    "General Options": [PickupSanity, Character],
+    "Link Options": [DeathLink, DamageLink, EnergyLink, EnergyLinkAutoHeal, EnergyLinkCostPerHP],
     #"Trap Options": [TrapChance, ForcefemTrapWeight, SpeedChangeTrapWeight]
 }

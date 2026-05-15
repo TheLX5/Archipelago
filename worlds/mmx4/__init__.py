@@ -2,7 +2,8 @@ import logging
 
 from BaseClasses import MultiWorld, Item, Tutorial
 from worlds.AutoWorld import World, CollectionState, WebWorld
-from typing import Dict
+from worlds.LauncherComponents import Component, Type, components, launch
+from typing import Dict, Any
 
 from worlds.mmx4.Rules import set_rules
 
@@ -11,6 +12,23 @@ from .Items import create_item, create_itempool, item_table
 from .Options import MMX4Options
 from .Regions import create_regions
 from .Client import MMX4Client
+
+
+
+def launch_mmx4_client(*args: str) -> None:
+    from .Client import launch_client
+    launch(launch_client, name="MMX4Client", args=args)
+
+
+components.append(Component(
+    "Mega Man X4 Client",
+    func=launch_mmx4_client,
+    component_type=Type.CLIENT,
+    game_name="Mega Man X4",
+    supports_uri=True,
+    description="Connect Mega Man X4 to Archipelago through BizHawk."
+))
+
 
 class MMX4Web(WebWorld):
     theme = "grass"
@@ -37,8 +55,7 @@ class MMX4World(World):
     location_name_to_id = get_location_names()
     options_dataclass = MMX4Options
     options: MMX4Options
-    web = MMX4Web() 
-
+    web = MMX4Web()
     def __init__(self, multiworld: "MultiWorld", player: int):
         super().__init__(multiworld, player)
 
@@ -62,11 +79,17 @@ class MMX4World(World):
         slot_data: Dict[str, object] = {
             "Seed": self.multiworld.seed_name,  # to verify the server's multiworld
             "Slot": self.multiworld.player_name[self.player],  # to connect to server
-            "TotalLocations": get_total_locations(self) # get_total_locations(self) comes from Locations.py
+            "TotalLocations": get_total_locations(self), # get_total_locations(self) comes from Locations.py
+            "death_link": bool(self.options.death_link.value),
+            "damage_link": bool(self.options.damage_link.value),
+            "energy_link": bool(self.options.energy_link.value),
+            "energy_link_auto_heal": bool(self.options.energy_link_auto_heal.value),
+            "energy_link_cost_per_hp": int(self.options.energy_link_cost_per_hp.value),
         }
 
         return slot_data
     
+
     def collect(self, state: "CollectionState", item: "Item") -> bool:
         return super().collect(state, item)
     
