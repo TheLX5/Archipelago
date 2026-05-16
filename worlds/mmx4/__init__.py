@@ -1,4 +1,8 @@
 import logging
+import settings
+import threading
+import base64
+import os
 
 from BaseClasses import MultiWorld, Item, Tutorial
 from worlds.AutoWorld import World, CollectionState, WebWorld
@@ -12,23 +16,16 @@ from .Items import create_item, create_itempool, item_table
 from .Options import MMX4Options
 from .Regions import create_regions
 from .Client import MMX4Client
+from .Rom import HASH_US, MMX4ProcedurePatch, patch_rom
 
+class MMX4Settings(settings.Group):
+    class RomFile(settings.UserFilePath):
+        """File name of the Mega Man X4 US ROM"""
+        description = "Mega Man X4 US ROM File"
+        copy_to = "Mega Man X4 (USA).bin"
+        md5s = [HASH_US]
 
-
-def launch_mmx4_client(*args: str) -> None:
-    from .Client import launch_client
-    launch(launch_client, name="MMX4Client", args=args)
-
-
-components.append(Component(
-    "Mega Man X4 Client",
-    func=launch_mmx4_client,
-    component_type=Type.CLIENT,
-    game_name="Mega Man X4",
-    supports_uri=True,
-    description="Connect Mega Man X4 to Archipelago through BizHawk."
-))
-
+    rom_file: RomFile = RomFile(RomFile.copy_to)
 
 class MMX4Web(WebWorld):
     theme = "grass"
@@ -56,7 +53,10 @@ class MMX4World(World):
     options_dataclass = MMX4Options
     options: MMX4Options
     web = MMX4Web()
+
     def __init__(self, multiworld: "MultiWorld", player: int):
+        self.rom_name = None
+        self.rom_name_available_event = threading.Event()
         super().__init__(multiworld, player)
 
     def generate_early(self):
@@ -95,3 +95,25 @@ class MMX4World(World):
     
     def remove(self, state: "CollectionState", item: "Item") -> bool:
         return super().remove(state, item)
+
+    def generate_output(self, output_directory: str):
+        try:
+            rom_path = os.path.join(output_directory, f"{self.multiworld.get_out_file_name_base(self.player)}"
+                                                        f"{MMX4ProcedurePatch.patch_file_ending}")
+            patch = MMX4ProcedurePatch(player=self.player, player_name=self.multiworld.player_name[self.player])
+            patch_rom(self, patch)
+            self.rom_name = patch.name
+            patch.write(rom_path)
+        except Exception:
+            raise
+        finally:
+            self.rom_name_available_event.set()  # make sure threading continues and errors are collected
+
+    def modify_multidata(self, multidata: dict):
+        # wait for self.rom_name to be available.
+        self.rom_name_available_event.wait()
+        rom_name = getattr(self, "rom_name", None)
+        # we skip in case of error, so that the original error in the output thread is the one that gets raised
+        if rom_name:
+            new_name = base64.b64encode(bytes(self.rom_name)).decode()
+            multidata["connect_names"][new_name] = multidata["connect_names"][self.multiworld.player_name[self.player]]

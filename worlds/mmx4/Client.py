@@ -4,6 +4,7 @@ import os
 import shutil
 import subprocess
 import sys
+import base64
 import time
 import uuid
 from pathlib import Path
@@ -170,6 +171,7 @@ ITEM_ID_TO_NAME = {
 class MMX4Client(BizHawkClient):
     game = "Mega Man X4"
     system = "PSX"
+    patch_suffix = ".apmmx4"
     weapon = 0
 
     def __init__(self) -> None:
@@ -206,17 +208,27 @@ class MMX4Client(BizHawkClient):
             if (await get_memory_size(ctx.bizhawk_ctx, self.ram)) < 0x0F1870:
                 return False
             # Check ROM name/patch version
+            # TODO?: Read an unique string in RAM per generation to inform we're using the rando version
             rom_name = ((await bizhawk.read(ctx.bizhawk_ctx, [(ADDRESS_PATCH_NAME, 0x10, self.ram)]))[0])
-            rom_name = rom_name.decode("ascii")
-            if rom_name != "MMX4_ARCHIPELAGO":
+            if rom_name[:4] != b"MMX4":
                 return False  # Not our patched ROM
         except bizhawk.RequestFailedError:
             return False  # Not able to get a response, say no for now
 
         ctx.game = self.game
         ctx.items_handling = 0b111
-        ctx.want_slot_data = True
+        #ctx.want_slot_data = True
         return True
+
+    async def set_auth(self, ctx: "BizHawkClientContext") -> None:
+        # TODO: This is supposed to output what we wrote to patch.name in Rom.py, it doesn't work.
+        # it keeps the original string (MMX4_ARCHIPELAGO) for some ungodly reason
+        auth_raw = (await bizhawk.read(ctx.bizhawk_ctx, [(ADDRESS_PATCH_NAME, 0x10, self.ram)]))[0]
+        print (auth_raw)
+        #ctx.auth = auth_raw.decode("utf-8")
+
+        # TODO?: Reset client state if trying to connect with a different slot without closing the client window
+        # Sounds like a bad idea to do, but idk
 
     def on_package(self, ctx, cmd: str, args: dict) -> None:
         if cmd == "Connected":
@@ -1062,192 +1074,3 @@ class MMX4Client(BizHawkClient):
 
     async def received_items_check(self, ctx: "BizHawkClientContext") -> None:
         return
-
-
-def _candidate_host_yaml_paths() -> list[Path]:
-    """Return likely Archipelago host.yaml paths.
-
-    The normal installed client runs with Archipelago's folder as cwd, but the
-    launcher/subprocess can vary depending on install method. Check the places
-    that matter before falling back.
-    """
-    paths: list[Path] = []
-
-    env_host = os.environ.get("ARCHIPELAGO_HOST_YAML") or os.environ.get("MMX4_HOST_YAML")
-    if env_host:
-        paths.append(Path(env_host))
-
-    paths.extend([
-        Path.cwd() / "host.yaml",
-        Path(sys.argv[0]).resolve().parent / "host.yaml",
-        Path(__file__).resolve().parents[1] / "host.yaml",
-        Path(__file__).resolve().parents[2] / "host.yaml",
-    ])
-
-    # Keep order, remove duplicates.
-    seen: set[str] = set()
-    unique: list[Path] = []
-    for path in paths:
-        try:
-            key = str(path.resolve())
-        except OSError:
-            key = str(path)
-        if key not in seen:
-            unique.append(path)
-            seen.add(key)
-    return unique
-
-
-def _load_host_yaml() -> dict:
-    # Prefer Archipelago's own option loader. This reads the active host.yaml
-    # from the same place the normal clients use, so the launcher working
-    # directory does not matter.
-    try:
-        from Utils import get_options
-        data = get_options() or {}
-        if isinstance(data, dict):
-            logger.info("Loaded host options through Utils.get_options().")
-            return data
-    except Exception as exc:
-        logger.info(f"Could not load host options through Utils.get_options(): {exc}")
-
-    # Fallback manual search for dev/custom installs.
-    for host_path in _candidate_host_yaml_paths():
-        if not host_path.is_file():
-            continue
-        try:
-            try:
-                import yaml
-                with host_path.open("r", encoding="utf-8") as f:
-                    data = yaml.safe_load(f) or {}
-            except ImportError:
-                logger.info("PyYAML is not available, so host.yaml could not be parsed manually.")
-                data = {}
-            if isinstance(data, dict):
-                logger.info(f"Loaded host.yaml from {host_path}")
-                return data
-        except Exception as exc:
-            logger.info(f"Could not read host.yaml from {host_path}: {exc}")
-
-    logger.info("Could not find host.yaml. Set ARCHIPELAGO_HOST_YAML or MMX4_HOST_YAML if needed.")
-    return {}
-
-
-def _bizhawk_options_from_host() -> dict:
-    host = _load_host_yaml()
-    options = host.get("bizhawkclient_options", {}) if isinstance(host, dict) else {}
-    return options if isinstance(options, dict) else {}
-
-
-def _find_mmx4_rom(args: tuple[str, ...]) -> str | None:
-    # 1) If the launcher passed a ROM path, use it.
-    for arg in args:
-        if isinstance(arg, str) and arg.lower().endswith((".bin", ".cue", ".iso", ".chd")) and Path(arg).is_file():
-            logger.info(f"Using MMX4 ROM from launcher argument: {arg}")
-            return arg
-
-    # 2) Explicit override for testing or custom installs.
-    env_rom = os.environ.get("MMX4_ROM_PATH")
-    if env_rom and Path(env_rom).is_file():
-        logger.info(f"Using MMX4 ROM from MMX4_ROM_PATH: {env_rom}")
-        return env_rom
-
-    names = (
-        "Mega Man X4 (USA)-patched.bin",
-        "Mega Man X4 (USA)-patched.cue",
-        "Mega Man X4 (USA)-patched.iso",
-        "Mega Man X4 (USA)-patched.chd",
-    )
-
-    search_dirs: list[Path] = []
-
-    # Archipelago helper paths are better than guessing cwd.
-    try:
-        from Utils import local_path, user_path, output_path
-        search_dirs.extend([
-            Path(output_path()),
-            Path(user_path()),
-            Path(local_path()),
-            Path(local_path("output")),
-            Path(user_path("output")),
-        ])
-    except Exception:
-        pass
-
-    search_dirs.extend([
-        Path.cwd(),
-        Path(sys.argv[0]).resolve().parent,
-        Path.home() / "Downloads",
-        Path.home() / "Desktop",
-    ])
-
-    seen: set[str] = set()
-    for folder in search_dirs:
-        try:
-            folder = folder.resolve()
-        except OSError:
-            pass
-        key = str(folder)
-        if key in seen or not folder.is_dir():
-            continue
-        seen.add(key)
-        for name in names:
-            path = folder / name
-            if path.is_file():
-                logger.info(f"Using MMX4 ROM found at: {path}")
-                return str(path)
-
-    logger.info("Could not find Mega Man X4 (USA)-patched.bin in AP output/user/local/current/downloads folders.")
-    return None
-
-
-def _connector_script_path() -> str:
-    return str(Path(__file__).with_name("connector_bizhawk_generic.lua"))
-
-
-def _try_launch_bizhawk_with_connector(args: tuple[str, ...]) -> None:
-    bizhawk_options = _bizhawk_options_from_host()
-    rom_start = bizhawk_options.get("rom_start", True)
-
-    if rom_start is False:
-        logger.info("BizHawk auto-start is disabled by host.yaml bizhawkclient_options.rom_start.")
-        return
-
-    connector = _connector_script_path()
-    if not Path(connector).is_file():
-        logger.info("BizHawk connector Lua script was not found inside the APWorld.")
-        return
-
-    rom = _find_mmx4_rom(args)
-    if not rom:
-        logger.info("MMX4 patched ROM was not found. Put 'Mega Man X4 (USA)-patched.bin' beside the client, run from its folder, pass the ROM path to the client, or set MMX4_ROM_PATH.")
-        return
-
-    # host.yaml says rom_start can be true, false, or a program/path. If it is a
-    # string, use that as the launcher command. Otherwise use emuhawk_path.
-    if isinstance(rom_start, str) and rom_start.strip() and rom_start is not True:
-        command = [rom_start]
-    else:
-        emuhawk_path = bizhawk_options.get("emuhawk_path") or os.environ.get("MMX4_BIZHAWK_PATH") or os.environ.get("BIZHAWK_PATH")
-        if not emuhawk_path:
-            logger.info("host.yaml does not define bizhawkclient_options.emuhawk_path, so BizHawk was not auto-started.")
-            return
-        if not Path(str(emuhawk_path)).is_file():
-            logger.info(f"EmuHawk path from host.yaml was not found: {emuhawk_path}")
-            return
-        command = [str(emuhawk_path)]
-
-    command.extend([str(rom), f"--lua={connector}"])
-    logger.info(f"Starting BizHawk command: {command}")
-
-    try:
-        subprocess.Popen(command)
-        logger.info("Started BizHawk with the MMX4 patched ROM and connector script.")
-    except OSError as exc:
-        logger.info(f"Could not start BizHawk automatically: {exc}")
-
-
-def launch_client(*args: str) -> None:
-    _try_launch_bizhawk_with_connector(args)
-    from worlds._bizhawk.context import launch
-    launch(*args)
