@@ -997,11 +997,16 @@ class DKC2SNIClient(SNIClient):
                 self.received_trap_link = NetworkItem(trap_name_to_value[trap_name], None, None)
                 self.message_queue.append([False, "TrapLink", trap_name, 0x04, True])
 
-            uuid = args["data"]["uuid"]
-            if "SharedDamage" in ctx.tags and "SharedDamage" in args["tags"] and (uuid != get_unique_identifier() or source_name != ctx.player_names[ctx.slot]):
-                damage_amount = args["data"]["damage_points"]
-                self.incoming_shared_damage += damage_amount
-                self.shared_damage_message = f"Received {damage_amount} damage points from {source_name}"
+            if "SharedDamage" in ctx.tags and "SharedDamage" in args["tags"]:
+                if "uuid" in args["data"]:
+                    uuid = args["data"]["uuid"]
+                else:
+                    uuid = "lmao"
+                source_name = args["data"]["source"]
+                if uuid != get_unique_identifier() or source_name != ctx.player_names[ctx.slot]:
+                    damage_amount = args["data"]["damage_points"]
+                    self.incoming_shared_damage += damage_amount
+                    self.shared_damage_message = f"Received {damage_amount} damage points from {source_name}"
 
 
         elif cmd == "LocationInfo":
