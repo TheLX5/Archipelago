@@ -946,9 +946,9 @@ class DKC3StrictRules(DKC3Rules):
             Locations.barrel_drop_bounce_clear:
                 HasBarrelWaterfall & HasBarrelCannon & CanHover,
             Locations.barrel_drop_bounce_bonus_1:
-                HasBarrelWaterfall & HasBarrelCannon,
+                HasBarrelWaterfall & HasBarrelCannon & CanHover & CanSpin,
             Locations.barrel_drop_bounce_bonus_2:
-                HasBarrelWaterfall & HasBarrelCannon & CanHover,
+                HasBarrelWaterfall & HasBarrelCannon & CanHover & CanSpin,
             Locations.barrel_drop_bounce_dk_coin:
                 HasBarrelWaterfall & HasBarrelCannon & CanHover & CanCarry,
             Locations.barrel_drop_bounce_kong:
