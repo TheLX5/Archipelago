@@ -2614,16 +2614,15 @@ class DKC2LooseRules(DKC2Rules):
 
 
             LocationName.windy_well_clear:
-                CanUseKannons & CanCling,
+                CanCling,
             LocationName.windy_well_kong:
                 CanUseKannons & CanCling,
             LocationName.windy_well_dk_coin:
-                CanUseKannons & CanCling,
+                CanCling,
             LocationName.windy_well_bonus_1:
                 CanCling,
             LocationName.windy_well_bonus_2:
-                CanUseKannons & CanCling & CanCarry & 
-                    HasSquawks,
+                CanCling & CanCarry & HasSquawks,
             LocationName.windy_well_banana_coin_1:
                 True_(),
             LocationName.windy_well_banana_coin_2:
@@ -2631,18 +2630,17 @@ class DKC2LooseRules(DKC2Rules):
             LocationName.windy_well_banana_coin_3:
                 CanCling,
             LocationName.windy_well_banana_bunch_1:
-                CanUseKannons & CanCling & CanCarry,
+                CanUseKannons & CanCling,
             LocationName.windy_well_banana_bunch_2:
-                CanUseKannons & CanCling & CanCarry,
+                CanUseKannons & CanCling,
             LocationName.windy_well_banana_coin_4:
-                CanCling & CanCarry,
+                CanCling,
             LocationName.windy_well_banana_bunch_3:
-                CanCling & CanCarry,
+                CanCling,
             LocationName.windy_well_red_balloon:
-                CanCling & CanCarry,
+                CanCling,
             LocationName.windy_well_banana_bunch_4:
-                CanCling & CanCarry & 
-                    HasSquawks,
+                CanCling & CanCarry & HasSquawks,
 
 
             LocationName.castle_crush_clear:
