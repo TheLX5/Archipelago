@@ -2883,11 +2883,11 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.springing_spiders_coin_1:
                 True_(),
             Locations.springing_spiders_balloon_1:
-                CanTeamAttack | HasBothKongs,
+                CanTeamAttack | HasBothKongs | HasSquawks,
             Locations.springing_spiders_bananas_1:
                 True_(),
             Locations.springing_spiders_coin_2:
-                CanCarry | HasBothKongs | CanTeamAttack,
+                CanCarry | HasBothKongs | CanTeamAttack | HasSquawks,
             Locations.springing_spiders_coin_3:
                 HasSquawks | CanCarry | HasBothKongs,
             Locations.springing_spiders_coin_4:
@@ -3594,7 +3594,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.konveyor_rope_klash_coin_2:
                 CanClimb | (HasBothKongs & CanHover),
             Locations.konveyor_rope_klash_coin_3:
-                CanClimb | (HasBothKongs & CanHover & CanCarry),
+                (CanClimb | (HasBothKongs & CanHover & CanCarry)) & CanTeamAttack,
             Locations.konveyor_rope_klash_balloon_1:
                 CanClimb,
             Locations.konveyor_rope_klash_balloon_2:
@@ -3635,7 +3635,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.lightning_look_out_bonus_1:
                 CanSwim,
             Locations.lightning_look_out_bonus_2:
-                CanCarry & (CanSwim | HasBothKongs),
+                CanCarry & (CanSpin | CanTeamAttack) & (CanSwim | HasBothKongs),
             Locations.lightning_look_out_dk_coin:
                 CanCarry & (CanSwim | CanHover | CanWaterBounce),
             Locations.lightning_look_out_kong:
@@ -3649,7 +3649,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.lightning_look_out_bananas_1:
                 True_(),
             Locations.lightning_look_out_coin_3:
-                (CanSwim | CanHover | CanWaterBounce) & (CanTeamAttack | HasBothKongs),
+                CanTeamAttack & (CanSwim | CanHover | CanWaterBounce),
             Locations.lightning_look_out_balloon_2:
                 CanSwim | (HasBothKongs & CanCarry) & CanTeamAttack,
 
