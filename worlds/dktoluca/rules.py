@@ -1531,7 +1531,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.doorstop_dash_balloon_3:
                 CanClimb & HasBarrelCannon & CanSpin & CanHover,
             Locations.doorstop_dash_balloon_4:
-                CanClimb & HasBarrelCannon & CanHover,
+                CanClimb & HasBarrelCannon,
 
             Locations.tidal_trouble_clear:
                 CanSwim,
