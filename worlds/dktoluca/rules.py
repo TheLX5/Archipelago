@@ -2122,7 +2122,7 @@ class DKC3LooseRules(DKC3Rules):
                 HasBarrelCannon & CanTeamAttack,
 
             Locations.barrel_drop_bounce_clear:
-                HasBarrelWaterfall & HasBarrelCannon & CanHover,
+                HasBarrelWaterfall & HasBarrelCannon,
             Locations.barrel_drop_bounce_bonus_1:
                 HasBarrelWaterfall & HasBarrelCannon,
             Locations.barrel_drop_bounce_bonus_2:
