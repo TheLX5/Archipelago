@@ -222,15 +222,15 @@ class Locations(StrEnum):
     springing_spiders_coin_2 = "Springin' Spiders - Bear Coin #2 (Behind a green Buzz)" # 77
     springing_spiders_coin_3 = "Springin' Spiders - Bear Coin #3 (In a ledge below a Buzz)" # 76
     springing_spiders_coin_4 = "Springin' Spiders - Bear Coin #4 (In a ledge below a Buzz)" # 120
-    springing_spiders_bananas_2 = "Springin' Spiders - Banana Bunch #1 (Behind Green Buzz before no animal sign)" # 68
+    springing_spiders_bananas_2 = "Springin' Spiders - Banana Bunch #2 (Behind Green Buzz before no animal sign)" # 68
     springing_spiders_coin_5 = "Springin' Spiders - Bear Coin #5 (No animal sign)" # 88
     springing_spiders_coin_6 = "Springin' Spiders - Bear Coin #6 (Above Red Buzz)" # 47
-    springing_spiders_bananas_3 = "Springin' Spiders - Banana Bunch #4 (Above Red Buzz)" # 50
-    springing_spiders_bananas_4 = "Springin' Spiders - Banana Bunch #5 (Below a wooden barrel)" # 101
+    springing_spiders_bananas_3 = "Springin' Spiders - Banana Bunch #3 (Above Red Buzz)" # 50
+    springing_spiders_bananas_4 = "Springin' Spiders - Banana Bunch #4 (Below a wooden barrel)" # 101
     springing_spiders_balloon_2 = "Springin' Spiders - Balloon #2 (In hole between Buzzes)" # 62
     springing_spiders_balloon_3 = "Springin' Spiders - Balloon #3 (Below N)" # 37
-    springing_spiders_bananas_5 = "Springin' Spiders - Banana Bunch #6 (Above a red Buzz)" # 100
-    springing_spiders_bananas_6 = "Springin' Spiders - Banana Bunch #7 (Next to a hole with a single banana below)" # 109
+    springing_spiders_bananas_5 = "Springin' Spiders - Banana Bunch #5 (Above a red Buzz)" # 100
+    springing_spiders_bananas_6 = "Springin' Spiders - Banana Bunch #6 (Next to a hole with a single banana below)" # 109
     springing_spiders_coin_7 = "Springin' Spiders - Bear Coin #7 (Next to Bonus #2)" # 72
 
     bobbing_barrel_brawl_clear = "Bobbing Barrel Brawl - Clear"
