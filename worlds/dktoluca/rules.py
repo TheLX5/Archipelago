@@ -1245,7 +1245,7 @@ class DKC3StrictRules(DKC3Rules):
             Locations.creepy_caverns_bonus_2:
                 HasBarrelGhost & HasBarrelCannon & CanCarry & CanTeamAttack & HasSquitter,
             Locations.creepy_caverns_dk_coin:
-                HasBarrelGhost & HasBarrelCannon & CanCarry,
+                HasBarrelGhost & HasBarrelCannon & CanCarry & CanSpin,
             Locations.creepy_caverns_kong:
                 HasBarrelGhost & HasBarrelCannon,
             Locations.creepy_caverns_bananas_1:
