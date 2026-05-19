@@ -523,7 +523,7 @@ class DKC3StrictRules(DKC3Rules):
             Locations.springing_spiders_balloon_1:
                 CanTeamAttack,
             Locations.springing_spiders_bananas_1:
-                CanTeamAttack,
+                True_(),
             Locations.springing_spiders_coin_2:
                 CanCarry,
             Locations.springing_spiders_coin_3:
@@ -1701,7 +1701,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.springing_spiders_balloon_1:
                 CanTeamAttack,
             Locations.springing_spiders_bananas_1:
-                CanTeamAttack,
+                True_(),
             Locations.springing_spiders_coin_2:
                 CanCarry,
             Locations.springing_spiders_coin_3:
