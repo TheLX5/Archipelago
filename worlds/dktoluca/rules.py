@@ -2568,7 +2568,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.tyrant_twin_tussle_bonus_2:
                 CanTeamAttack & HasBarrelCannon & CanCarry & CanHover,
             Locations.tyrant_twin_tussle_bonus_3:
-                CanHover,
+                True_(),
             Locations.tyrant_twin_tussle_dk_coin:
                 CanTeamAttack & HasSquitter,
             Locations.tyrant_twin_tussle_kong:
