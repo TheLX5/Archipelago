@@ -730,7 +730,7 @@ class DKC3StrictRules(DKC3Rules):
             Locations.fireball_frenzy_bananas_2:
                 CanClimb,
             Locations.fireball_frenzy_coin_4:
-                CanClimb & HasSquitter,
+                CanClimb & HasSquitter & ( CanHover | CanSpin ),
             Locations.fireball_frenzy_coin_5:
                 CanClimb,
             Locations.fireball_frenzy_bananas_3:
@@ -1908,7 +1908,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.fireball_frenzy_bananas_2:
                 CanClimb,
             Locations.fireball_frenzy_coin_4:
-                CanClimb & HasSquitter,
+                CanClimb & HasSquitter & ( CanHover | CanSpin ),
             Locations.fireball_frenzy_coin_5:
                 CanClimb,
             Locations.fireball_frenzy_bananas_3:
