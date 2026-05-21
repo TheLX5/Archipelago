@@ -782,8 +782,10 @@ def generate_swapped_exits(world: "WaffleWorld"):
                 level_weights.append(chance+10)
                 level_list.append(level_id)
 
-    if world.options.swap_donut_gh_exits and 0x04 not in world.swapped_exits:
-        world.swapped_exits.append(0x04)
+    if world.options.swap_donut_gh_exits:
+        dgh_tile_level = next((key for key, value in world.active_level_dict.items() if value == 0x04), None)
+        if dgh_tile_level is not None and dgh_tile_level not in world.swapped_exits:
+            world.swapped_exits.append(dgh_tile_level)
 
 
 def generate_carryless_exits(world: "WaffleWorld"):
