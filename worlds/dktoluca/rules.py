@@ -524,7 +524,7 @@ class DKC3StrictRules(DKC3Rules):
             Locations.springing_spiders_balloon_1:
                 CanTeamAttack,
             Locations.springing_spiders_bananas_1:
-                CanTeamAttack,
+                True_(),
             Locations.springing_spiders_coin_2:
                 CanCarry,
             Locations.springing_spiders_coin_3:
@@ -731,7 +731,7 @@ class DKC3StrictRules(DKC3Rules):
             Locations.fireball_frenzy_bananas_2:
                 CanClimb,
             Locations.fireball_frenzy_coin_4:
-                CanClimb & HasSquitter,
+                CanClimb & HasSquitter & ( CanHover | CanSpin ),
             Locations.fireball_frenzy_coin_5:
                 CanClimb,
             Locations.fireball_frenzy_bananas_3:
@@ -947,9 +947,9 @@ class DKC3StrictRules(DKC3Rules):
             Locations.barrel_drop_bounce_clear:
                 HasBarrelWaterfall & HasBarrelCannon & CanHover,
             Locations.barrel_drop_bounce_bonus_1:
-                HasBarrelWaterfall & HasBarrelCannon,
+                HasBarrelWaterfall & HasBarrelCannon & CanHover & CanSpin,
             Locations.barrel_drop_bounce_bonus_2:
-                HasBarrelWaterfall & HasBarrelCannon & CanHover,
+                HasBarrelWaterfall & HasBarrelCannon & CanHover & CanSpin,
             Locations.barrel_drop_bounce_dk_coin:
                 HasBarrelWaterfall & HasBarrelCannon & CanHover & CanCarry,
             Locations.barrel_drop_bounce_kong:
@@ -1246,7 +1246,7 @@ class DKC3StrictRules(DKC3Rules):
             Locations.creepy_caverns_bonus_2:
                 HasBarrelGhost & HasBarrelCannon & CanCarry & CanTeamAttack & HasSquitter,
             Locations.creepy_caverns_dk_coin:
-                HasBarrelGhost & HasBarrelCannon & CanCarry,
+                HasBarrelGhost & HasBarrelCannon & CanCarry & CanSpin,
             Locations.creepy_caverns_kong:
                 HasBarrelGhost & HasBarrelCannon,
             Locations.creepy_caverns_bananas_1:
@@ -1532,7 +1532,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.doorstop_dash_balloon_3:
                 CanClimb & HasBarrelCannon & CanSpin & CanHover,
             Locations.doorstop_dash_balloon_4:
-                CanClimb & HasBarrelCannon & CanHover,
+                CanClimb & HasBarrelCannon,
 
             Locations.tidal_trouble_clear:
                 CanSwim,
@@ -1702,7 +1702,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.springing_spiders_balloon_1:
                 CanTeamAttack,
             Locations.springing_spiders_bananas_1:
-                CanTeamAttack,
+                True_(),
             Locations.springing_spiders_coin_2:
                 CanCarry,
             Locations.springing_spiders_coin_3:
@@ -1909,7 +1909,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.fireball_frenzy_bananas_2:
                 CanClimb,
             Locations.fireball_frenzy_coin_4:
-                CanClimb & HasSquitter,
+                CanClimb & HasSquitter & ( CanHover | CanSpin ),
             Locations.fireball_frenzy_coin_5:
                 CanClimb,
             Locations.fireball_frenzy_bananas_3:
@@ -2123,7 +2123,7 @@ class DKC3LooseRules(DKC3Rules):
                 HasBarrelCannon & CanTeamAttack,
 
             Locations.barrel_drop_bounce_clear:
-                HasBarrelWaterfall & HasBarrelCannon & CanHover,
+                HasBarrelWaterfall & HasBarrelCannon,
             Locations.barrel_drop_bounce_bonus_1:
                 HasBarrelWaterfall & HasBarrelCannon,
             Locations.barrel_drop_bounce_bonus_2:
@@ -2569,7 +2569,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.tyrant_twin_tussle_bonus_2:
                 CanTeamAttack & HasBarrelCannon & CanCarry & CanHover,
             Locations.tyrant_twin_tussle_bonus_3:
-                CanHover,
+                True_(),
             Locations.tyrant_twin_tussle_dk_coin:
                 CanTeamAttack & HasSquitter,
             Locations.tyrant_twin_tussle_kong:
@@ -2884,11 +2884,11 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.springing_spiders_coin_1:
                 True_(),
             Locations.springing_spiders_balloon_1:
-                CanTeamAttack | HasBothKongs,
+                CanTeamAttack | HasBothKongs | HasSquawks,
             Locations.springing_spiders_bananas_1:
                 True_(),
             Locations.springing_spiders_coin_2:
-                CanCarry | HasBothKongs | CanTeamAttack,
+                CanCarry | HasBothKongs | CanTeamAttack | HasSquawks,
             Locations.springing_spiders_coin_3:
                 HasSquawks | CanCarry | HasBothKongs,
             Locations.springing_spiders_coin_4:
@@ -3595,7 +3595,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.konveyor_rope_klash_coin_2:
                 CanClimb | (HasBothKongs & CanHover),
             Locations.konveyor_rope_klash_coin_3:
-                CanClimb | (HasBothKongs & CanHover & CanCarry),
+                (CanClimb | (HasBothKongs & CanHover & CanCarry)) & CanTeamAttack,
             Locations.konveyor_rope_klash_balloon_1:
                 CanClimb,
             Locations.konveyor_rope_klash_balloon_2:
@@ -3636,7 +3636,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.lightning_look_out_bonus_1:
                 CanSwim,
             Locations.lightning_look_out_bonus_2:
-                CanCarry & (CanSwim | HasBothKongs),
+                CanCarry & (CanSpin | CanTeamAttack) & (CanSwim | HasBothKongs),
             Locations.lightning_look_out_dk_coin:
                 CanCarry & (CanSwim | CanHover | CanWaterBounce),
             Locations.lightning_look_out_kong:
@@ -3650,7 +3650,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.lightning_look_out_bananas_1:
                 True_(),
             Locations.lightning_look_out_coin_3:
-                (CanSwim | CanHover | CanWaterBounce) & (CanTeamAttack | HasBothKongs),
+                CanTeamAttack & (CanSwim | CanHover | CanWaterBounce),
             Locations.lightning_look_out_balloon_2:
                 CanSwim | (HasBothKongs & CanCarry) & CanTeamAttack,
 
