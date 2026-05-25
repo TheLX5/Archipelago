@@ -357,7 +357,7 @@ def generate_entrance_rando(world: "WaffleWorld"):
     processed_exits = []
     used_exits = []
 
-    if world.options.map_teleport_shuffle == "off" or not world.options.map_transition_shuffle:
+    if world.options.map_teleport_shuffle == "off" and not world.options.map_transition_shuffle:
         local_mapping = {**smw_pipe_pairs, **smw_star_pairs, **smw_transition_pairs}
         for entrance, exit in local_mapping.items():
             world.local_mapping[entrance] = exit
@@ -506,8 +506,8 @@ def generate_entrance_rando(world: "WaffleWorld"):
                     if len(possible_exits) == 0:
                         continue
                     selected_exit = world.random.choice(possible_exits)
+                    local_mapping[entrance] = selected_exit
                 used_exits.append(selected_exit)
-                local_mapping[entrance] = selected_exit
                 next_exits.append(selected_exit)
 
             processed_exits.append(exit)
@@ -515,52 +515,30 @@ def generate_entrance_rando(world: "WaffleWorld"):
         # Reachabilty check
         if len(processed_exits) == len(local_region_mapping.keys()):
             remaining_exits = list(local_region_mapping.keys())
-            check_next_exits = [(starting_location, 0)]
-            boss_tokens = 0
+            check_next_exits = [starting_location]
 
             while len(remaining_exits) != 0:
                 cache_exits = remaining_exits.copy()
-                for exit_data in check_next_exits:
-                    exit = exit_data[0]
-                    boss_tokens = exit_data[1]
+                for exit in check_next_exits:
                     if exit not in remaining_exits:
                         continue
                     remaining_exits.remove(exit)
-                    check_next_exits.remove(exit_data)
+                    check_next_exits.remove(exit)
+
                     for entrance in local_region_mapping[exit]:
                         if entrance not in local_mapping.keys():
                             continue
-                        check_next_exits.append((local_mapping[entrance], boss_tokens))
+                        check_next_exits.append(local_mapping[entrance])
                     
                 if len(cache_exits) == len(remaining_exits) and len(cache_exits) != 0:
-                    # EMERGENCY SWAP
-                    # Marks isolated exits as unreachable
-                    processed_exits = [x for x in processed_exits if x not in remaining_exits]
-                    used_exits = [x for x in used_exits if x not in remaining_exits]
-                    emergency_list = [x for x in processed_exits if x not in prefilled_exits.values()]
-                    if len(emergency_list) == 0:
-                        local_mapping = {}
-                        for entrance, exit in prefilled_exits.items():
-                            local_mapping[entrance] = exit
-                        next_exits = [starting_location]
-                        processed_exits = []
-                        used_exits = list(prefilled_exits.values())
-                        break
-
-                    #if world.options.exclude_special_zone:
-                    #    emergency_list.remove(LocationName.special_star_road)
-                    #    emergency_list.remove(LocationName.yoshis_house_tile)
-                    emergency_swap = world.random.choice(emergency_list)
-                    processed_exits.remove(emergency_swap)
-                    if emergency_swap in used_exits:
-                        used_exits.remove(emergency_swap)
-                    for exit, entrances in local_region_mapping.items():
-                        if exit not in processed_exits:
-                            for entrance in entrances:
-                                if entrance not in local_mapping.keys():
-                                    continue
-                                value = local_mapping.pop(entrance)
-                                next_exits.append(value)
+                    # Reroll everything
+                    local_mapping = {}
+                    for entrance, exit in prefilled_exits.items():
+                        local_mapping[entrance] = exit
+                    next_exits = [starting_location]
+                    processed_exits = []
+                    used_exits = list(prefilled_exits.values())
+                    swap_count = 0
                     break
 
     for entrance, exit in local_mapping.items():

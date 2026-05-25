@@ -485,6 +485,10 @@ enemy_list_special_cases = {
         0x028: EnemyData(0x028, "Big Boo", 1, (0,3), ["floating"], ["skip"]),
         0x037: EnemyData(0x037, "Boo", 17, (0,0), ["floating"], ["skip"]),
         0x0B0: EnemyData(0x0B0, "Reflecting stream of Boo Buddies", 15, (0,0), ["flying"], ["skip"]),
+        0x0BF: EnemyData(0x0BF, "Mega Mole", 15, (0,0), ["ground"], ["skip"]),
+        0x06F: EnemyData(0x06F, "Dino Torch", 12, (0,0), ["ground"], ["skip"]),
+        0x070: EnemyData(0x070, "Pokey", 15, (0,4), ["ground"], ["skip"]),
+        0x009: EnemyData(0x009, "Green bouncing Koopa (Y&1)", 15, (0,0), ["ground"], ["skip"]),
     },
     0x1C2: {
         0x00A: EnemyData(0x00A, "Red vertical flying Koopa", 20, (0,0), ["flying koopa"], ["flying", "floating", "flying koopa"]),

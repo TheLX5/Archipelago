@@ -1884,7 +1884,7 @@ def connect_regions(world: "WaffleWorld", level_to_tile_dict):
         # Connect Exit regions to next tile regions
         if current_tile_data.exit1Path:
             next_tile_id = current_tile_data.exit1Path.otherLevelID
-            if current_tile_id in world.swapped_exits:
+            if current_level_id in world.swapped_exits:
                 next_tile_id = current_tile_data.exit2Path.otherLevelID
                 adjust_exit = True
             next_tile_name = level_info_dict[next_tile_id].levelName
@@ -1906,7 +1906,7 @@ def connect_regions(world: "WaffleWorld", level_to_tile_dict):
             
         if current_tile_data.exit2Path:
             next_tile_id = current_tile_data.exit2Path.otherLevelID
-            if current_tile_id in world.swapped_exits:
+            if current_level_id in world.swapped_exits:
                 try:
                     next_tile_id = current_tile_data.exit1Path.otherLevelID
                     adjust_exit = True
@@ -2008,4 +2008,3 @@ def connect(world: "WaffleWorld", source: str, target: str) -> None:
     if world.is_ut and target_region.name.endswith(" Exit") and world.multiworld.enforce_deferred_connections in ("on", "default"):
         glitched_entrance = source_region.create_exit(f"{source_region.name} -> {target_region.name} (Glitched)")
         glitched_entrance.connect(target_region)
-        #print (f"Glitched Entrance: {glitched_entrance.name} ({glitched_entrance.connected_region})")

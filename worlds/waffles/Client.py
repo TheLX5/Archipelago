@@ -158,7 +158,6 @@ class WaffleSNIClient(SNIClient):
     inventory_tag: str
     inventory_refund: int
     inventory_cost: int
-    locations_checked: Set[int]
     visited_levels: Set[int]
 
     def __init__(self):
