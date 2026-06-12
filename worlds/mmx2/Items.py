@@ -29,8 +29,8 @@ access_codes_table = {
     ItemName.stage_crystal_snail:       ItemData(STARTING_ID + 0x07, ItemClassification.progression | ItemClassification.useful),
     ItemName.stage_overdrive_ostrich:   ItemData(STARTING_ID + 0x08, ItemClassification.progression | ItemClassification.useful),
     ItemName.stage_wire_sponge:         ItemData(STARTING_ID + 0x09, ItemClassification.progression | ItemClassification.useful),
-    ItemName.stage_x_hunter:            ItemData(STARTING_ID + 0x0A, ItemClassification.progression | ItemClassification.useful),
-    ItemName.stage_sigma:               ItemData(STARTING_ID + 0x35, ItemClassification.progression | ItemClassification.useful),
+    ItemName.stage_x_hunter:            ItemData(STARTING_ID + 0x0A, ItemClassification.progression_skip_balancing | ItemClassification.useful),
+    ItemName.stage_sigma:               ItemData(STARTING_ID + 0x35, ItemClassification.progression_skip_balancing | ItemClassification.useful),
 }
 
 weapons = {

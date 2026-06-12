@@ -20,6 +20,10 @@ action_buttons = ("Y", "B", "A", "L", "R", "X", "START", "SELECT")
 HASH_US = '67905b989b00046db06df3434ed79f04'
 HASH_LEGACY = 'a8aa24df75686a5bb1a08a27d1876f5f'
 
+LC_EXE_HASH = 'f31847891e120d19d74fe2098b273627'
+LC_ROM_OFFSET = 0x110DF20
+LC_ROM_SIZE = 0x180000
+
 weapon_rom_data = {
     STARTING_ID + 0x000B: [0x1FC1, 0xFF],
     STARTING_ID + 0x000C: [0x1FBD, 0xFF],
@@ -352,6 +356,10 @@ def get_base_rom_bytes(file_name: str = "") -> bytes:
 
         basemd5 = hashlib.md5()
         basemd5.update(base_rom_bytes)
+        if basemd5.hexdigest() == LC_EXE_HASH:
+            base_rom_bytes = extract_mmx2(base_rom_bytes)
+            basemd5 = hashlib.md5()
+            basemd5.update(base_rom_bytes)
         if basemd5.hexdigest() not in {HASH_US, HASH_LEGACY}:
             raise Exception('Supplied Base Rom does not match known MD5 for US or LC release. '
                             'Get the correct game and version, then dump it')
@@ -360,9 +368,14 @@ def get_base_rom_bytes(file_name: str = "") -> bytes:
 
 
 def get_base_rom_path(file_name: str = "") -> str:
-    options = Utils.get_options()
     if not file_name:
-        file_name = options["mmx2_options"]["rom_file"]
+        from settings import get_settings
+        file_name = get_settings()["mmx2_options"]["rom_file"]
     if not os.path.exists(file_name):
         file_name = Utils.user_path(file_name)
     return file_name
+
+
+def extract_mmx2(exe_file: bytes) -> bytes:
+    mmx2 = bytearray(exe_file[LC_ROM_OFFSET:LC_ROM_OFFSET + LC_ROM_SIZE])
+    return bytes(mmx2)
