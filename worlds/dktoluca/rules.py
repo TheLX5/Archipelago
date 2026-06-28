@@ -219,14 +219,42 @@ class DKC3Rules:
                 #CanReachLocation(Locations.riverside_race_clear),
             Locations.bird_bounty_bay:
                 True_(),
-            #Locations.bird_sky_high_secret:
-            #    CanReachRegion(Regions.k3) & CanReachRegion(Regions.cotton_top_cove),
+            Locations.bird_sky_high_secret:
+                Has(Events.item_ball),
             Locations.bird_glacial_grotto:
                 True_(),
-            #Locations.bird_clifftop_cache:
-            #    True_(), # this is an unholy rule i don't want to write yet
+            Locations.bird_clifftop_cache:
+                Has(Events.item_wrench),
             Locations.bird_sewer_stockpile:
                 True_(),
+            Locations.bird_barnacle:
+                Has(Events.item_shell),
+            Locations.bird_bramble:
+                Has(Events.item_flower),
+            Events.bazaar_1:
+                True_(),
+            Events.bazaar_2:    # idk how else to allow the player to farm coins
+                CanReachRegion(Regions.cotton_top_cove) | CanReachRegion(Regions.mekanos),
+            Events.blizzard:
+                True_(),
+            Events.blue:
+                Has(Events.item_present),
+            Events.flower:
+                CanReachLocation(Locations.barbos_barrier_clear), # & CanReachLocation(Locations.bird_barnacle),
+            Events.barter:
+                Has(Events.item_mirror),
+        }
+
+        self.funky_gifts = {
+            Locations.funky_upgrade_1:
+                Has(Items.banana_bird, count=1 , options=[OptionFilter(options.VehicleUnlock, 1)]) | 
+                HasAny(Items.cotton_top_cove, Items.mekanos, options=[OptionFilter(options.VehicleUnlock, 2)]),
+            Locations.funky_upgrade_2:
+                Has(Items.banana_bird, count=2 , options=[OptionFilter(options.VehicleUnlock, 1)]) | 
+                HasAny(Items.k3, Items.razor_ridge, options=[OptionFilter(options.VehicleUnlock, 2)]),
+            Locations.funky_upgrade_3:
+                Has(Items.banana_bird, count=4 , options=[OptionFilter(options.VehicleUnlock, 1)]) | 
+                Has(Items.krematoa, options=[OptionFilter(options.VehicleUnlock, 2)]),
         }
 
     def set_dkc3_rules(self) -> None:
@@ -256,10 +284,14 @@ class DKC3Rules:
                 rule = self.bird_rules[loc.name]
                 self.world.set_rule(self.world.get_location(loc.name), rule)
 
+            if loc.name in self.funky_gifts:
+                rule = self.funky_gifts[loc.name]
+                self.world.set_rule(self.world.get_location(loc.name), rule)
 
-        if self.world.options.goal == options.Goal.option_kore:
+
+        if self.world.options.goal == options.Goal.option_kastle_kaos:
             self.world.set_completion_rule(Has(Events.k_rool_at_kore))
-        elif self.world.options.goal == options.Goal.option_krematoa:
+        elif self.world.options.goal == options.Goal.option_knautilus:
             self.world.set_completion_rule(Has(Events.k_rool_at_knautilus))
         else:
             self.world.set_completion_rule(HasAll(Events.k_rool_at_kore, Events.k_rool_at_knautilus))
@@ -1171,13 +1203,13 @@ class DKC3StrictRules(DKC3Rules):
             Locations.ropey_rumpus_dk_coin:
                 CanClimb & HasBarrelCannon & CanCarry,
             Locations.ropey_rumpus_kong:
-                CanClimb & HasBarrelCannon & ( CanTeamAttack | HasParry ),
+                CanClimb & HasBarrelCannon,
             Locations.ropey_rumpus_coin_1:
                 CanTeamAttack,
             Locations.ropey_rumpus_coin_2:
                 CanTeamAttack,
             Locations.ropey_rumpus_bananas_1:
-                CanClimb & CanCarry,
+                CanClimb & CanCarry & HasBothKongs,
             Locations.ropey_rumpus_coin_3:
                 CanClimb,
             Locations.ropey_rumpus_bananas_2:
@@ -2349,13 +2381,13 @@ class DKC3LooseRules(DKC3Rules):
             Locations.ropey_rumpus_dk_coin:
                 CanClimb & HasBarrelCannon & CanCarry,
             Locations.ropey_rumpus_kong:
-                CanClimb & HasBarrelCannon & ( CanTeamAttack | HasParry ),
+                CanClimb,
             Locations.ropey_rumpus_coin_1:
                 CanTeamAttack,
             Locations.ropey_rumpus_coin_2:
                 CanTeamAttack,
             Locations.ropey_rumpus_bananas_1:
-                CanClimb & CanCarry,
+                CanClimb & CanCarry & HasBothKongs,
             Locations.ropey_rumpus_coin_3:
                 CanClimb,
             Locations.ropey_rumpus_bananas_2:
@@ -2798,7 +2830,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.barrel_shield_bust_up_kong:
                 CanClimb & (HasBarrelShield | CanHover),
             Locations.barrel_shield_bust_up_bananas_1:
-                CanCarry | HasBothKongs,
+                HasBothKongs,
             Locations.barrel_shield_bust_up_bananas_2:
                 CanClimb & (HasBarrelShield | HasDixie),
             Locations.barrel_shield_bust_up_coin_1:
