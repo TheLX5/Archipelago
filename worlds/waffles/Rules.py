@@ -2523,7 +2523,7 @@ class WaffleBasicRules(WaffleRules):
                 Locations.yoshis_island_4_dragon:
                     True_(),
             }
-            self.update_rules(is_glitched, connection_rules=connection_rules, location_rules=location_rules)
+            self.update_rules(is_glitched, location_rules=location_rules)
             
         if "Donut Plains 1 - Yoshi Jump to Key" in options:
             connection_rules = {
