@@ -479,7 +479,7 @@ class WaffleBasicRules(WaffleRules):
                 True_(),
             f"{Regions.forest_of_illusion_1_region} -> {Locations.forest_of_illusion_1_exit_2}": 
                 (CanCarry & HasPBalloon) | 
-                (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)]),
+                (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
             f"{Regions.forest_of_illusion_2_region} -> {Locations.forest_of_illusion_2_exit_1}": 
                 CanSwim & 
                 Has(Items.super_star_active, 3, options=[OptionFilter(EnemyShuffle, 1)], filtered_resolution=True),
@@ -581,7 +581,7 @@ class WaffleBasicRules(WaffleRules):
                     CanCarry & CanClimb & HasPSwitch & 
                     HasYSP & HasGSP & HasRSP & HasBSP
                 ) | (
-                    CanFly & CanCarry
+                    CanCapeFly & CanCarry
                 ),
             f"{Regions.special_zone_1_region} -> {Locations.special_zone_1_exit_1}": 
                 CanClimb & (
@@ -658,7 +658,7 @@ class WaffleBasicRules(WaffleRules):
                     CanClimb & HasPSwitch & 
                     HasYSP & HasGSP & HasRSP & HasBSP
                 ) | (
-                    CanFly & CanCarry
+                    CanCapeFly & CanCarry
                 ),
         }
     
@@ -1822,23 +1822,23 @@ class WaffleBasicRules(WaffleRules):
                 True_(),
 
             Locations.chocolate_island_1_dragon:
-                HasPSwitch | HasYoshi | HasCarry | HasFeather,
+                HasPSwitch | HasYoshi | CanCarry | HasFeather,
             Locations.chocolate_island_1_moon:
                 CanCapeFly | HasYoshi,
             Locations.chocolate_island_1_flying_block_1:
                 True_(),
             Locations.chocolate_island_1_flying_block_2:
-                HasPSwitch | HasYoshi | HasCarry | HasFeather,
+                HasPSwitch | HasYoshi | CanCarry | HasFeather,
             Locations.chocolate_island_1_yoshi_block_1:
-                HasPSwitch | HasYoshi | HasCarry | HasFeather,
+                HasPSwitch | HasYoshi | CanCarry | HasFeather,
             Locations.chocolate_island_1_green_block_1:
-                (HasPSwitch | HasYoshi | HasCarry | HasFeather) & 
+                (HasPSwitch | HasYoshi | CanCarry | HasFeather) & 
                 (HasBSP | HasFeather) & 
                 (HasGSP | HasYSP),
             Locations.chocolate_island_1_life_block_1:
-                HasPSwitch | HasYoshi | HasCarry | HasFeather,
+                HasPSwitch | HasYoshi | CanCarry | HasFeather,
             Locations.chocolate_island_1_room_2:
-                HasPSwitch | HasYoshi | HasCarry | HasFeather,
+                HasPSwitch | HasYoshi | CanCarry | HasFeather,
                 
             Locations.chocolate_island_2_dragon:
                 HasBSP & (
@@ -2101,7 +2101,7 @@ class WaffleBasicRules(WaffleRules):
                 HasPSwitch | CanCapeFly | CanBlueYoshiFly,
             Locations.star_road_5_yellow_block_1:
                 CanBlueYoshiFly | CanCapeFly | (HasPSwitch & (CanClimb | 
-                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)]))),
+                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])))),
             Locations.star_road_5_yellow_block_2:
                 CanBlueYoshiFly | 
                     ((HasPSwitch | CanCapeFly) & CanAnyYoshiFlyRedShell & 
@@ -2172,10 +2172,10 @@ class WaffleBasicRules(WaffleRules):
                     True_(options=[OptionFilter(EnemyShuffle, 0)])),
             Locations.star_road_5_yellow_block_19:
                 CanBlueYoshiFly | CanCapeFly | (HasPSwitch & ((CanClimb & HasFeather) | 
-                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)]))),
+                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])))),
             Locations.star_road_5_yellow_block_20:
                 CanBlueYoshiFly | CanCapeFly | (HasPSwitch & ((CanClimb & HasFeather) | 
-                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)]))),
+                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])))),
             Locations.star_road_5_green_block_1:
                 CanBlueYoshiFly | 
                     ((HasPSwitch | CanCapeFly) & CanAnyYoshiFlyRedShell & 
@@ -2854,19 +2854,19 @@ class WaffleBasicRules(WaffleRules):
             }
             location_rules = {
                 Locations.chocolate_island_1_dragon:
-                    HasPSwitch | HasYoshi | HasCarry | HasMushroom,
+                    HasPSwitch | HasYoshi | CanCarry | HasMushroom,
                 Locations.chocolate_island_1_flying_block_2:
-                    HasPSwitch | HasYoshi | HasCarry | HasMushroom,
+                    HasPSwitch | HasYoshi | CanCarry | HasMushroom,
                 Locations.chocolate_island_1_yoshi_block_1:
-                    HasPSwitch | HasYoshi | HasCarry | HasMushroom,
+                    HasPSwitch | HasYoshi | CanCarry | HasMushroom,
                 Locations.chocolate_island_1_green_block_1:
-                    (HasPSwitch | HasYoshi | HasCarry | HasMushroom) & 
+                    (HasPSwitch | HasYoshi | CanCarry | HasMushroom) & 
                     (HasBSP | HasFeather) & 
                     (HasGSP | HasYSP),
                 Locations.chocolate_island_1_life_block_1:
-                    HasPSwitch | HasYoshi | HasCarry | HasMushroom,
+                    HasPSwitch | HasYoshi | CanCarry | HasMushroom,
                 Locations.chocolate_island_1_room_2:
-                    HasPSwitch | HasYoshi | HasCarry | HasMushroom,
+                    HasPSwitch | HasYoshi | CanCarry | HasMushroom,
                 }
             self.update_rules(is_glitched, connection_rules=connection_rules, location_rules=location_rules)
             
