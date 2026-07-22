@@ -1,25 +1,33 @@
-import dataclasses
 import os
-import typing
 import settings
 import threading
 import pkgutil
 import hashlib
 
-from BaseClasses import Item, MultiWorld, Tutorial, ItemClassification
-from Options import PerGameCommonOptions
-from worlds.AutoWorld import World, WebWorld
-from .Items import MMX2Item, ItemData, item_table, junk_table, item_groups
-from .Locations import MMX2Location, setup_locations, all_locations, location_groups
-from .Regions import create_regions, connect_regions
-from .Names import ItemName, LocationName, EventName
-from .Options import MMX2Options, mmx2_option_groups
-from .Client import MMX2SNIClient
-from .Levels import location_id_to_level_id
-from .Weaknesses import handle_weaknesses, weapon_id
-from .Rom import patch_rom, MMX2ProcedurePatch, HASH_US, HASH_LEGACY, LC_EXE_HASH
+from BaseClasses import MultiWorld, Tutorial, ItemClassification, CollectionState
+from worlds.AutoWorld import World, WebWorld, LogicMixin
+from worlds.LauncherComponents import launch as launch_component, components, Component, Type
+from rule_builder.rules import Rule
 
-from typing import Dict, List, Any, ClassVar, TextIO, Optional, Sequence, Tuple
+from .options import MMX2Options, XHunterBaseOpen, mmx2_option_groups
+from .client import MMX2SNIClient
+from .regions import create_regions, connect_regions
+from .rom import patch_rom, MMX2ProcedurePatch, HASH_US, HASH_LEGACY, LC_EXE_HASH
+from .boss_data import Boss, default_boss_data, shuffle_weaknesses, shuffle_hp
+from .enums import Items, Locations, Regions
+from .items import MMX2Item, all_items, item_groups
+from .locations import all_locations, location_groups, count_locations_active
+from .constants import *
+from . import tracker
+
+from typing import Any, ClassVar, TextIO, Optional, Sequence, Tuple
+
+def launch_manager(*args):
+    from .manager import launch
+    launch_component(launch, "Mega Man X2 Manager")
+
+components.append(Component(display_name="Mega Man X2 Manager", component_type=Type.ADJUSTER, func=launch_manager))
+
 
 class MMX2Settings(settings.Group):
     class RomFile(settings.SNESRomPath):
@@ -68,397 +76,217 @@ class MMX2Web(WebWorld):
         "setup/en",
         ["lx5"]
     )
-    
-    setup_es = Tutorial(
-        "Guía de configuración de Multiworld",
-        "Guía para jugar Mega Man X2 en Archipelago",
-        "Spanish",
-        "setup_es.md",
-        "setup/es",
-        ["lx5"]
-    )
-
-    tutorials = [setup_en, setup_es]
-
-
+    tutorials = [setup_en]
     option_groups = mmx2_option_groups
 
-
-class MMX2World(World):
+class MMX2World(tracker.UTMxin, World):
     """
     Mega Man X2, released in 1994 for the SNES, is the second game in Capcom's "Mega Man X" series. 
     Players control Mega Man X, a Maverick Hunter, as he battles a new group of Mavericks and the X-Hunters, 
     who have taken parts of his ally Zero. The game features classic run-and-gun gameplay with challenging levels, 
     boss battles that grant new weapons, and the use of the Cx4 chip for enhanced graphics.
     """
-    game = "Mega Man X2"
+    game = GAME_NAME
     web = MMX2Web()
 
-    settings: typing.ClassVar[MMX2Settings]
+    settings: ClassVar[MMX2Settings]
     
     options_dataclass = MMX2Options
     options: MMX2Options
 
-    required_client_version = (0, 5, 0)
+    required_client_version = (0, 6, 7)
 
-    item_name_to_id = {name: data.code for name, data in item_table.items()}
+    item_name_to_id = {str(name): data.code for name, data in all_items.items()}
     location_name_to_id = all_locations
-    item_name_groups = item_groups
-    location_name_groups = location_groups
+    #item_name_groups = item_groups
+    #location_name_groups = location_groups
+    origin_region_name = Regions.intro_stage.value
+    rule_macros: dict[str, Rule.Resolved]
+    boss_data: dict[str, Boss] = {}
 
     def __init__(self, multiworld: MultiWorld, player: int):
         self.rom_name_available_event = threading.Event()
+        self.rule_macros = {}
         super().__init__(multiworld, player)
 
     def create_regions(self) -> None:
-        location_table = setup_locations(self)
-        create_regions(self.multiworld, self.player, self, location_table)
-
-        itempool: typing.List[MMX2Item] = []
-        
+        create_regions(self)
         connect_regions(self)
-        
-        total_required_locations = 38
-        if self.options.base_boss_rematch_count.value != 0:
-            total_required_locations += 8
-        if self.options.pickupsanity.value:
-            total_required_locations += 78
 
-        # Setup item pool
+    def create_items(self) -> None:
+        itempool: list[MMX2Item] = []
 
-        # Add levels into the pool
-        start_inventory = self.options.start_inventory.value.copy()
-        stage_list = [
-            ItemName.stage_wheel_gator,
-            ItemName.stage_bubble_crab,
-            ItemName.stage_flame_stag,
-            ItemName.stage_morph_moth,
-            ItemName.stage_magna_centipede,
-            ItemName.stage_crystal_snail,
-            ItemName.stage_overdrive_ostrich,
-            ItemName.stage_wire_sponge,
+        # Set Maverick Medals
+        maverick_location_names =[
+            Locations.wheel_gator_clear,
+            Locations.bubble_crab_clear,
+            Locations.flame_stag_clear,
+            Locations.morph_moth_clear,
+            Locations.magna_centipede_clear,
+            Locations.crystal_snail_clear,
+            Locations.overdrive_ostrich_clear,
+            Locations.wire_sponge_clear
         ]
-        stage_selected = self.random.randint(0, 7)
-        if any(stage in self.options.start_inventory_from_pool for stage in stage_list) or \
-           any(stage in start_inventory for stage in stage_list):
-            total_required_locations += 1
-            for i in range(len(stage_list)):
-                if stage_list[i] not in start_inventory:
-                    itempool += [self.create_item(stage_list[i])]
-        else:
-            for i in range(len(stage_list)):
-                if i == stage_selected:
-                    self.multiworld.get_location(LocationName.intro_stage_clear, self.player).place_locked_item(self.create_item(stage_list[i]))
-                else:
-                    itempool += [self.create_item(stage_list[i])]
+        for location_name in maverick_location_names:
+            self.get_location(location_name.value).place_locked_item(self.create_item(Items.maverick_medal))
 
-        if len(self.options.base_open.value) == 0:
-            itempool += [self.create_item(ItemName.stage_x_hunter)]
+        # Set sigma access item
+        self.get_location(Locations.x_hunter_stage_4_clear.value).place_locked_item(self.create_item(Items.stage_sigma))
 
-        # Add weapons into the pool
-        itempool += [self.create_item(ItemName.spin_wheel)]
-        itempool += [self.create_item(ItemName.bubble_splash)]
-        itempool += [self.create_item(ItemName.speed_burner)]
-        itempool += [self.create_item(ItemName.silk_shot)]
-        itempool += [self.create_item(ItemName.magnet_mine)]
-        itempool += [self.create_item(ItemName.crystal_hunter)]
-        itempool += [self.create_item(ItemName.sonic_slicer)]
-        itempool += [self.create_item(ItemName.strike_chain)]
+        # Set victory item
+        self.get_location(Locations.x_hunter_stage_5_sigma.value).place_locked_item(self.create_item(Items.victory))
 
-        # Add armor upgrades into the pool
-        base_open = self.options.base_open.value
-        if "Armor Upgrades" in base_open and self.options.base_upgrade_count.value > 0:
-            itempool += [self.create_item(ItemName.body)]
-            itempool += [self.create_item(ItemName.helmet)]
-        else:
-            itempool += [self.create_item(ItemName.body, ItemClassification.useful)]
-            itempool += [self.create_item(ItemName.helmet)]
-        itempool += [self.create_item(ItemName.arms)]
-        if self.options.jammed_buster.value:
-            itempool += [self.create_item(ItemName.arms)]
-        itempool += [self.create_item(ItemName.legs)]
+        self.total_required_locations = count_locations_active(self)
 
-        # Add heart tanks into the pool
-        if "Heart Tanks" in base_open and self.options.base_heart_tank_count.value > 0:
-            i = self.options.base_heart_tank_count.value
-            itempool += [self.create_item(ItemName.heart_tank) for _ in range(i)]
-            if i != 8:
-                itempool += [self.create_item(ItemName.heart_tank, ItemClassification.useful) for _ in range(8 - i)]
-        else:
-            itempool += [self.create_item(ItemName.heart_tank, ItemClassification.useful) for _ in range(8)]
+        valid_stages = sorted(item_groups["Access Codes"])
+        valid_stages.remove(Items.stage_x_hunter)
 
-        # Add sub tanks into the pool
-        if "Sub Tanks" in base_open and self.options.base_sub_tank_count.value > 0:
-            i = self.options.base_sub_tank_count.value
-            itempool += [self.create_item(ItemName.sub_tank) for _ in range(i)]
-            if i != 4:
-                itempool += [self.create_item(ItemName.sub_tank, ItemClassification.useful) for _ in range(4 - i)]
-        else:
-            itempool += [self.create_item(ItemName.sub_tank, ItemClassification.useful) for _ in range(4)]
+        self.selected_stage = self.random.choice(valid_stages)
+        precollected_items = [item.name for item in self.multiworld.precollected_items[self.player]]
+        if set(valid_stages).isdisjoint(precollected_items):
+            self.get_location(Locations.intro_stage_clear).place_locked_item(self.create_item(self.selected_stage))
+            valid_stages.remove(self.selected_stage)
+            self.total_required_locations -= 1
+
+        for stage in valid_stages:
+            if stage in precollected_items:
+                continue
+            itempool.append(self.create_item(stage))
+            
+        
+        if self.options.x_hunter_base_open == XHunterBaseOpen.option_item:
+            itempool += [self.create_item(Items.stage_x_hunter)]
+
+        itempool += [self.create_item(Items.spin_wheel)]
+        itempool += [self.create_item(Items.bubble_splash)]
+        itempool += [self.create_item(Items.speed_burner)]
+        itempool += [self.create_item(Items.silk_shot)]
+        itempool += [self.create_item(Items.magnet_mine)]
+        itempool += [self.create_item(Items.crystal_hunter)]
+        itempool += [self.create_item(Items.sonic_slicer)]
+        itempool += [self.create_item(Items.strike_chain)]
+        itempool += [self.create_item(Items.arms)]
+        itempool += [self.create_item(Items.arms)]
+        itempool += [self.create_item(Items.helmet)]
+        itempool += [self.create_item(Items.body)]
+        itempool += [self.create_item(Items.legs)]
+        itempool += [self.create_item(Items.heart_tank) for _ in range(8)]
+        itempool += [self.create_item(Items.sub_tank) for _ in range(4)]
 
         # Add optional upgrades into the pool
         if self.options.shoryuken_in_pool:
-            itempool += [self.create_item(ItemName.shoryuken)]
-        if self.options.quick_charge_in_pool:
-            itempool += [self.create_item(ItemName.chip_quick_charge)]
-        if self.options.speedster_in_pool:
-            itempool += [self.create_item(ItemName.chip_speedster)]
-        if self.options.super_recover_in_pool:
-            itempool += [self.create_item(ItemName.chip_super_recover)]
-
+            itempool += [self.create_item(Items.shoryuken)]
+            
+        if self.options.pickup_locations:
+            for chip_name in self.options.chips.value:
+                itempool.append(self.create_item(chip_name))
+        
         # Setup junk items
-        junk_count = total_required_locations - len(itempool)
+        junk_count = self.total_required_locations - len(itempool)
 
         junk_weights = []
-        junk_weights += ([ItemName.small_hp] * 20)
-        junk_weights += ([ItemName.large_hp] * 35)
-        junk_weights += ([ItemName.life] * 25)
+        junk_weights += ([Items.small_hp] * 40)
+        junk_weights += ([Items.large_hp] * 55)
 
         junk_pool = []
-        for i in range(junk_count):
+        for _ in range(junk_count):
             junk_item = self.random.choice(junk_weights)
             junk_pool.append(self.create_item(junk_item))
 
         itempool += junk_pool
 
-        # Set Maverick Medals
-        maverick_location_names =[
-            LocationName.wheel_gator_clear,
-            LocationName.bubble_crab_clear,
-            LocationName.flame_stag_clear,
-            LocationName.morph_moth_clear,
-            LocationName.magna_centipede_clear,
-            LocationName.crystal_snail_clear,
-            LocationName.overdrive_ostrich_clear,
-            LocationName.wire_sponge_clear
-        ]
-        for location_name in maverick_location_names:
-            self.multiworld.get_location(location_name, self.player).place_locked_item(self.create_item(ItemName.maverick_medal))
-
-        # Set sigma access item
-        self.multiworld.get_location(LocationName.x_hunter_stage_4_clear, self.player).place_locked_item(self.create_item(ItemName.stage_sigma))
-
-        # Set victory item
-        self.multiworld.get_location(LocationName.victory, self.player).place_locked_item(self.create_item(ItemName.victory))
-
         # Finish
         self.multiworld.itempool += itempool
 
-    def create_item(self, name: str, force_classification=False) -> MMX2Item:
-        data = item_table[name]
 
+    def create_item(self, name: Items, force_classification=False) -> MMX2Item:
+        name = str(name)
+        data = all_items[name]
         if force_classification:
             classification = force_classification
         else:
             classification = data.classsification
-        
         created_item = MMX2Item(name, classification, data.code, self.player)
-
         return created_item
 
 
     def set_rules(self):
-        from .Rules import set_rules
-        if hasattr(self.multiworld, "generation_is_fake"):
-            if hasattr(self.multiworld, "re_gen_passthrough"):
-                if "Mega Man X2" in self.multiworld.re_gen_passthrough:
-                    slot_data = self.multiworld.re_gen_passthrough["Mega Man X2"]
-                    self.boss_weaknesses = slot_data["weakness_rules"]
-                    self.boss_weakness_strictness = slot_data["boss_weakness_strictness"]
-                    self.pickupsanity = slot_data["pickupsanity"]
-                    self.jammed_buster = slot_data["jammed_buster"]
-                    self.logic_boss_weakness = slot_data["logic_boss_weakness"]
-                    self.base_open = slot_data["base_open"]
-                    self.base_medal_count = slot_data["base_medal_count"]
-                    self.base_weapon_count = slot_data["base_weapon_count"]
-                    self.base_upgrade_count = slot_data["base_upgrade_count"]
-                    self.base_heart_tank_count = slot_data["base_heart_tank_count"]
-                    self.base_sub_tank_count = slot_data["base_sub_tank_count"]
-                    self.base_all_levels = slot_data["base_all_levels"]
-                    self.base_boss_rematch_count = slot_data["base_boss_rematch_count"]
-                    self.x_hunters_medal_count = slot_data["x_hunters_medal_count"]
-
-        set_rules(self)
+        from .rules import MMX2Rules
+        MMX2Rules(self).set_rules()
 
 
-    def interpret_slot_data(self, slot_data: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any]:
-        local_weaknesses = {boss: entries for boss, entries in slot_data["weakness_rules"].items()}
-            
-        interpreted_slot_data = {
-            "weakness_rules": local_weaknesses,
-            "boss_weakness_strictness": slot_data["boss_weakness_strictness"],
-            "pickupsanity": slot_data["pickupsanity"],
-            "jammed_buster": slot_data["jammed_buster"],
-            "logic_boss_weakness": slot_data["logic_boss_weakness"],
-            "base_open": slot_data["base_open_text"],
-            "base_medal_count": slot_data["base_medal_count"],
-            "base_weapon_count": slot_data["base_weapon_count"],
-            "base_upgrade_count": slot_data["base_upgrade_count"],
-            "base_heart_tank_count": slot_data["base_heart_tank_count"],
-            "base_sub_tank_count": slot_data["base_sub_tank_count"],
-            "base_all_levels": slot_data["base_all_levels"],
-            "base_boss_rematch_count": slot_data["base_boss_rematch_count"],
-            "x_hunters_medal_count": slot_data["x_hunters_medal_count"],
-        }
-
-        return interpreted_slot_data
+    def interpret_slot_data(self, slot_data: dict[str, Any]) -> dict[str, Any]:
+        return slot_data
 
 
-    def fill_slot_data(self):
-        slot_data = {}
-
-        # Write options to slot_data
-        slot_data["boss_weakness_rando"] = self.options.boss_weakness_rando.value
-        slot_data["boss_weakness_strictness"] = self.options.boss_weakness_strictness.value
-        slot_data["pickupsanity"] = self.options.pickupsanity.value
-        slot_data["jammed_buster"] = self.options.jammed_buster.value
-        slot_data["shoryuken_in_pool"] = self.options.shoryuken_in_pool.value
-        slot_data["energy_link"] = self.options.energy_link.value
-        slot_data["logic_boss_weakness"] = self.options.logic_boss_weakness.value
-        
-        value = 0
-        if "Medals" in self.base_open:
-            value |= 0x01
-        if "Weapons" in self.base_open:
-            value |= 0x02
-        if "Armor Upgrades" in self.base_open:
-            value |= 0x04
-        if "Heart Tanks" in self.base_open:
-            value |= 0x08
-        if "Sub Tanks" in self.base_open:
-            value |= 0x10
-        slot_data["base_open"] = value
-        slot_data["base_open_text"] = self.base_open.copy()
-        slot_data["base_medal_count"] = self.options.base_medal_count.value
-        slot_data["base_weapon_count"] = self.options.base_weapon_count.value
-        slot_data["base_upgrade_count"] = self.options.base_upgrade_count.value
-        slot_data["base_heart_tank_count"] = self.options.base_heart_tank_count.value
-        slot_data["base_sub_tank_count"] = self.options.base_sub_tank_count.value
-        slot_data["base_all_levels"] = self.options.base_all_levels.value
-        slot_data["base_boss_rematch_count"] = self.options.base_boss_rematch_count.value
-        slot_data["x_hunters_medal_count"] = self.options.x_hunters_medal_count.value
-        
-        # Write boss weaknesses to slot_data (and for UT)
-        slot_data["boss_weaknesses"] = {}
-        slot_data["weakness_rules"] = {}
-        for boss, entries in self.boss_weaknesses.items():
-            slot_data["weakness_rules"][boss] = entries.copy()
-            slot_data["boss_weaknesses"][boss] = []
-            for entry in entries:
-                slot_data["boss_weaknesses"][boss].append(entry[1])
-                
+    def fill_slot_data(self) -> dict:
+        slot_data = self.options.as_dict(
+            "energy_link",
+            "starting_hp",
+            "heart_tank_effectiveness",
+            "boss_weakness_strictness",
+            "pickup_locations",
+            "jammed_buster",
+            "x_hunter_base_boss_rematch_count",
+            "x_hunter_base_level_unlock",
+            "x_hunter_base_open",
+            "x_hunter_base_medal_count",
+            "x_hunters_arena_medal_count",
+            "chips",
+        )
+        slot_data["boss_data"] = {name: data.dump_slot_data() for name, data in self.boss_data.items()}
         return slot_data
 
 
     def generate_early(self):
-        # Parse logic-relevant settings and save them elsewhere (needed for UT support)
-        self.boss_weakness_strictness = self.options.boss_weakness_strictness.value
-        self.pickupsanity = self.options.pickupsanity.value
-        self.jammed_buster = self.options.jammed_buster.value
-        self.logic_boss_weakness = self.options.logic_boss_weakness.value
-        self.base_open = self.options.base_open.value.copy()
-        self.base_medal_count = self.options.base_medal_count.value
-        self.base_weapon_count = self.options.base_weapon_count.value
-        self.base_upgrade_count = self.options.base_upgrade_count.value
-        self.base_heart_tank_count = self.options.base_heart_tank_count.value
-        self.base_sub_tank_count = self.options.base_sub_tank_count.value
-        self.base_all_levels = self.options.base_all_levels.value
-        self.base_boss_rematch_count = self.options.base_boss_rematch_count.value
-        self.x_hunters_medal_count = self.options.x_hunters_medal_count.value
+        self.hp_per_upgrade = self.options.heart_tank_effectiveness.value
 
-        # Generate weaknesses data
-        self.boss_weakness_data = {}
-        self.boss_weaknesses = {}
-        handle_weaknesses(self)
-
-
-    def write_spoiler(self, spoiler_handle: typing.TextIO) -> None:
-        spoiler_handle.write(f"\nMega Man X2 boss weaknesses for {self.multiworld.player_name[self.player]}:\n")
+        # Fill default boss data
+        self.boss_data = {name: Boss(name=boss.name,
+                                    weakness=boss.weakness,
+                                    sub_weakness=boss.sub_weakness,
+                                    excluded_weaknesses=boss.excluded_weaknesses,
+                                    entrances=boss.entrances,
+                                    locations=boss.locations,
+                                    weakness_addr=boss.weakness_addr,
+                                    hp=boss.hp,
+                                    hp_address=boss.hp_address,
+                                    required_player_hp=boss.required_player_hp)
+                        for name, boss in default_boss_data.items()
+                        }
+        shuffle_weaknesses(self)
+        shuffle_hp(self)
         
-        for boss, data in self.boss_weaknesses.items():
-            weaknesses = ""
-            for i in range(len(data)):
-                weaknesses += f"{weapon_id[data[i][1]]}, "
-            weaknesses = weaknesses[:-2]
-            spoiler_handle.writelines(f"{boss + ':':<30s}{weaknesses}\n")
-
-
-    def extend_hint_information(self, hint_data: typing.Dict[int, typing.Dict[int, str]]):
-        if not self.options.boss_weakness_rando:
-            return
-        
-        boss_to_id = {
-            0x00: "Wheel Gator",
-            0x01: "Bubble Crab",
-            0x02: "Flame Stag",
-            0x03: "Morph Moth",
-            0x04: "Magna Centipede",
-            0x05: "Crystal Snail",
-            0x06: "Overdrive Ostrich",
-            0x07: "Wire Sponge",
-            0x08: "Agile",
-            0x09: "Serges",
-            0x0A: "Violen",
-            0x0B: "Neo Violen",
-            0x0C: "Serges Tank",
-            0x0D: "Agile Flyer",
-            0x0E: "Wheel Gator",
-            0x0F: "Bubble Crab",
-            0x10: "Flame Stag",
-            0x11: "Morph Moth",
-            0x12: "Magna Centipede",
-            0x13: "Crystal Snail",
-            0x14: "Overdrive Ostrich",
-            0x15: "Wire Sponge",
-            0x16: "Zero",
-            0x17: "Sigma",
-            0x19: "Pararoid S-38",
-            0x1D: "Pararoid S-38",
-            0x1A: "Chop Register",
-            0x1B: "Raider Killer",
-            0x1C: "Magna Quartz",
-        }
-        boss_weakness_hint_data = {}
-        for loc_name, level_data in location_id_to_level_id.items():
-            if level_data[1] == 0x000:
-                boss_id = level_data[2]
-                if boss_id not in boss_to_id.keys():
-                    continue
-                boss = boss_to_id[boss_id]
-                data = self.boss_weaknesses[boss]
-                weaknesses = ""
-                for i in range(len(data)):
-                    weaknesses += f"{weapon_id[data[i][1]]}, "
-                weaknesses = weaknesses[:-2]
-                if boss == "Serges Tank":
-                    data = self.boss_weaknesses["Serges"]
-                    weaknesses += ". Serges: "
-                    for i in range(len(data)):
-                        weaknesses += f"{weapon_id[data[i][1]]}, "
-                    weaknesses = weaknesses[:-2]
-                elif boss == "Sigma":
-                    data = self.boss_weaknesses["Sigma Virus"]
-                    weaknesses += ". Sigma Virus: "
-                    for i in range(len(data)):
-                        weaknesses += f"{weapon_id[data[i][1]]}, "
-                    weaknesses = weaknesses[:-2]
-                try:
-                    location = self.multiworld.get_location(loc_name, self.player)
-                except KeyError:
-                    pass
-                boss_weakness_hint_data[location.address] = weaknesses
-
-        hint_data[self.player] = boss_weakness_hint_data
+        super().generate_early()
 
 
     def get_filler_item_name(self) -> str:
-        return self.random.choice(list(junk_table.keys()))
+        return str(Items.large_hp)
+
+
+    def write_spoiler_header(self, spoiler_handle: TextIO) -> None:
+        spoiler_handle.write(f"\nEnemy information:\n")
+        spoiler_handle.write(f"{"-" * 69}\n")
+        spoiler_handle.write(f" {"BOSS NAME":<26s} | HP | {"WEAKNESSES":<32s} |\n")
+        spoiler_handle.write(f"{"-" * 69}\n")
+        for boss_name, boss_data in self.boss_data.items():
+            spoiler_handle.write(f" {boss_name:<26s} | {boss_data.hp:2} |")
+            w = 0
+            for weapon in boss_data.weakness:
+                if w == 0:
+                    spoiler_handle.write(f" {weapon:<32s} |\n")
+                    w += 1
+                else:
+                    spoiler_handle.write(f" {" ":<26s} |    | {weapon:<32s} |\n")
+            else:
+                spoiler_handle.write(f"{"-" * 69}\n")
 
 
     def generate_output(self, output_directory: str):
         try:
             patch = MMX2ProcedurePatch(player=self.player, player_name=self.multiworld.player_name[self.player])
             patch.write_file("mmx2_basepatch.bsdiff4", pkgutil.get_data(__name__, "data/mmx2_basepatch.bsdiff4"))
+            patch.write_file("mmx2_manifest_for_bsnes.xml", pkgutil.get_data(__name__, "data/mmx2_manifest_for_bsnes.xml"))
             patch_rom(self, patch)
 
             self.rom_name = patch.name
@@ -480,3 +308,28 @@ class MMX2World(World):
         if rom_name:
             new_name = base64.b64encode(bytes(self.rom_name)).decode()
             multidata["connect_names"][new_name] = multidata["connect_names"][self.multiworld.player_name[self.player]]
+
+    def collect(self, state: CollectionState, item: MMX2Item) -> bool:
+        change = super().collect(state, item)
+        if change and item.name == Items.heart_tank.value:
+            state.current_hp[self.player] += self.options.heart_tank_effectiveness.value
+        return change
+    
+    def remove(self, state: CollectionState, item: MMX2Item) -> bool: 
+        change = super().remove(state, item)
+        if change and item.name == Items.heart_tank.value:
+            state.current_hp[self.player] -= self.options.heart_tank_effectiveness.value
+        return change
+
+
+class MMXState(LogicMixin):
+    hp: dict[int, int]
+
+    def init_mixin(self, multiworld: MultiWorld) -> None:
+        self.current_hp = {
+            player: multiworld.worlds[player].options.starting_hp.value for player in multiworld.get_game_players(GAME_NAME)
+        }
+
+    def copy_mixin(self, new_state: CollectionState) -> CollectionState:
+        new_state.current_hp = {player: hp for player, hp in self.current_hp.items()}
+        return new_state

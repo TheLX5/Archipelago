@@ -1,113 +1,128 @@
 import typing
 
 from BaseClasses import Item, ItemClassification
-from .Names import ItemName
-
+from .enums import Items
+from .constants import *
 
 class ItemData(typing.NamedTuple):
     code: typing.Optional[int]
     classsification: ItemClassification
     quantity: int = 1
 
-STARTING_ID = 0xBE0C00
-
 class MMX2Item(Item):
-    game = "Mega Man X2"
+    game = GAME_NAME
 
 # Item tables
-event_table = {
-    ItemName.victory:           ItemData(STARTING_ID + 0x00, ItemClassification.progression_skip_balancing | ItemClassification.useful),
-    ItemName.maverick_medal:    ItemData(STARTING_ID + 0x01, ItemClassification.progression_skip_balancing),
-}
+all_items = {
+    Items.victory:                  ItemData(0xFF, ItemClassification.progression_skip_balancing | ItemClassification.useful),
+    Items.maverick_medal:           ItemData(0xFE, ItemClassification.progression_skip_balancing | ItemClassification.useful),
 
-access_codes_table = {
-    ItemName.stage_wheel_gator:         ItemData(STARTING_ID + 0x02, ItemClassification.progression | ItemClassification.useful),
-    ItemName.stage_bubble_crab:         ItemData(STARTING_ID + 0x03, ItemClassification.progression | ItemClassification.useful),
-    ItemName.stage_flame_stag:          ItemData(STARTING_ID + 0x04, ItemClassification.progression | ItemClassification.useful),
-    ItemName.stage_morph_moth:          ItemData(STARTING_ID + 0x05, ItemClassification.progression | ItemClassification.useful),
-    ItemName.stage_magna_centipede:     ItemData(STARTING_ID + 0x06, ItemClassification.progression | ItemClassification.useful),
-    ItemName.stage_crystal_snail:       ItemData(STARTING_ID + 0x07, ItemClassification.progression | ItemClassification.useful),
-    ItemName.stage_overdrive_ostrich:   ItemData(STARTING_ID + 0x08, ItemClassification.progression | ItemClassification.useful),
-    ItemName.stage_wire_sponge:         ItemData(STARTING_ID + 0x09, ItemClassification.progression | ItemClassification.useful),
-    ItemName.stage_x_hunter:            ItemData(STARTING_ID + 0x0A, ItemClassification.progression_skip_balancing | ItemClassification.useful),
-    ItemName.stage_sigma:               ItemData(STARTING_ID + 0x35, ItemClassification.progression_skip_balancing | ItemClassification.useful),
-}
+    Items.stage_wheel_gator:         ItemData(0x18, ItemClassification.progression | ItemClassification.useful),
+    Items.stage_bubble_crab:         ItemData(0x16, ItemClassification.progression | ItemClassification.useful),
+    Items.stage_flame_stag:          ItemData(0x13, ItemClassification.progression | ItemClassification.useful),
+    Items.stage_morph_moth:          ItemData(0x11, ItemClassification.progression | ItemClassification.useful),
+    Items.stage_magna_centipede:     ItemData(0x14, ItemClassification.progression | ItemClassification.useful),
+    Items.stage_crystal_snail:       ItemData(0x19, ItemClassification.progression | ItemClassification.useful),
+    Items.stage_overdrive_ostrich:   ItemData(0x15, ItemClassification.progression | ItemClassification.useful),
+    Items.stage_wire_sponge:         ItemData(0x10, ItemClassification.progression | ItemClassification.useful),
+    Items.stage_x_hunter:            ItemData(0x17, ItemClassification.progression_skip_balancing | ItemClassification.useful),
+    Items.stage_sigma:               ItemData(0x1A, ItemClassification.progression_skip_balancing | ItemClassification.useful),
 
-weapons = {
-    ItemName.spin_wheel:        ItemData(STARTING_ID + 0x0B, ItemClassification.progression),
-    ItemName.bubble_splash:     ItemData(STARTING_ID + 0x0C, ItemClassification.progression),
-    ItemName.speed_burner:      ItemData(STARTING_ID + 0x0D, ItemClassification.progression),
-    ItemName.silk_shot:         ItemData(STARTING_ID + 0x0E, ItemClassification.progression),
-    ItemName.magnet_mine:       ItemData(STARTING_ID + 0x0F, ItemClassification.progression),
-    ItemName.crystal_hunter:    ItemData(STARTING_ID + 0x10, ItemClassification.progression),
-    ItemName.sonic_slicer:      ItemData(STARTING_ID + 0x11, ItemClassification.progression),
-    ItemName.strike_chain:      ItemData(STARTING_ID + 0x12, ItemClassification.progression),
-    ItemName.shoryuken:         ItemData(STARTING_ID + 0x1A, ItemClassification.useful),
-}
+    Items.spin_wheel:               ItemData(0x04, ItemClassification.progression),
+    Items.bubble_splash:            ItemData(0x02, ItemClassification.progression),
+    Items.speed_burner:             ItemData(0x08, ItemClassification.progression),
+    Items.silk_shot:                ItemData(0x03, ItemClassification.progression),
+    Items.magnet_mine:              ItemData(0x07, ItemClassification.progression),
+    Items.crystal_hunter:           ItemData(0x01, ItemClassification.progression),
+    Items.sonic_slicer:             ItemData(0x05, ItemClassification.progression),
+    Items.strike_chain:             ItemData(0x06, ItemClassification.progression),
+    
+    Items.shoryuken:                ItemData(0x09, ItemClassification.useful),
+    
+    Items.heart_tank:               ItemData(0x0E, ItemClassification.progression),
+    Items.sub_tank:                 ItemData(0x0F, ItemClassification.useful),
+    
+    Items.helmet:                   ItemData(0x0A, ItemClassification.progression),
+    Items.body:                     ItemData(0x0B, ItemClassification.progression),
+    Items.arms:                     ItemData(0x0C, ItemClassification.progression),
+    Items.legs:                     ItemData(0x0D, ItemClassification.progression),
 
-tanks_table = {
-    ItemName.heart_tank:        ItemData(STARTING_ID + 0x13, ItemClassification.progression),
-    ItemName.sub_tank:          ItemData(STARTING_ID + 0x14, ItemClassification.progression),
-}
+    Items.small_hp:                 ItemData(0x1C, ItemClassification.filler),
+    Items.large_hp:                 ItemData(0x1D, ItemClassification.filler),
 
-armor_table = {
-    ItemName.helmet:    ItemData(STARTING_ID + 0x1C, ItemClassification.progression),
-    ItemName.body:      ItemData(STARTING_ID + 0x1D, ItemClassification.progression),
-    ItemName.arms:      ItemData(STARTING_ID + 0x1E, ItemClassification.progression),
-    ItemName.legs:      ItemData(STARTING_ID + 0x1F, ItemClassification.progression),
-}
+    Items.chip_quick_charge:        ItemData(0x20, ItemClassification.useful),
+    Items.chip_speedster:           ItemData(0x21, ItemClassification.useful),
+    Items.chip_super_recover:       ItemData(0x22, ItemClassification.useful),
+    Items.chip_rapid_five:          ItemData(0x23, ItemClassification.useful),
+    Items.chip_speed_shot:          ItemData(0x24, ItemClassification.useful),
+    Items.chip_buster_plus:         ItemData(0x25, ItemClassification.useful),
+    Items.chip_weapon_plus:         ItemData(0x26, ItemClassification.useful),
+    Items.chip_d_converter:         ItemData(0x27, ItemClassification.useful),
+    Items.chip_item_plus:           ItemData(0x28, ItemClassification.useful),
+    Items.chip_spike_walker:        ItemData(0x29, ItemClassification.useful),
+    Items.chip_d_barrier:           ItemData(0x2A, ItemClassification.useful),
 
-junk_table = {
-    ItemName.small_hp:      ItemData(STARTING_ID + 0x30, ItemClassification.filler),
-    ItemName.large_hp:      ItemData(STARTING_ID + 0x31, ItemClassification.filler),
-    ItemName.life:          ItemData(STARTING_ID + 0x34, ItemClassification.filler),
-}
-
-enhancements_table = {
-    ItemName.chip_quick_charge:        ItemData(STARTING_ID + 0x40, ItemClassification.useful),
-    ItemName.chip_speedster:           ItemData(STARTING_ID + 0x41, ItemClassification.useful),
-    ItemName.chip_super_recover:       ItemData(STARTING_ID + 0x42, ItemClassification.useful),
+    Items.glitched:                 ItemData(None, ItemClassification.progression_deprioritized_skip_balancing),
 }
 
 item_groups = {
     "Weapons": {
-        ItemName.spin_wheel,
-        ItemName.bubble_splash,
-        ItemName.speed_burner,
-        ItemName.silk_shot,
-        ItemName.magnet_mine,
-        ItemName.crystal_hunter,
-        ItemName.sonic_slicer,
-        ItemName.strike_chain,
+        Items.spin_wheel.value,
+        Items.bubble_splash.value,
+        Items.speed_burner.value,
+        Items.silk_shot.value,
+        Items.magnet_mine.value,
+        Items.crystal_hunter.value,
+        Items.sonic_slicer.value,
+        Items.strike_chain.value,
     },
     "Armor Upgrades": {
-        ItemName.helmet,
-        ItemName.body,
-        ItemName.arms,
-        ItemName.legs,
+        Items.helmet.value,
+        Items.body.value,
+        Items.arms.value,
+        Items.legs.value,
+    },
+    "Chips": {
+        Items.chip_quick_charge.value,
+        Items.chip_speedster.value,
+        Items.chip_super_recover.value,
+        Items.chip_rapid_five.value,
+        Items.chip_speed_shot.value,
+        Items.chip_buster_plus.value,
+        Items.chip_weapon_plus.value,
+        Items.chip_d_converter.value,
+        Items.chip_item_plus.value,
+        Items.chip_spike_walker.value,
+        Items.chip_d_barrier.value,
     },
     "Access Codes": {
-        ItemName.stage_wheel_gator,
-        ItemName.stage_bubble_crab,
-        ItemName.stage_flame_stag,
-        ItemName.stage_morph_moth,
-        ItemName.stage_magna_centipede,
-        ItemName.stage_crystal_snail,
-        ItemName.stage_overdrive_ostrich,
-        ItemName.stage_wire_sponge,
-        ItemName.stage_x_hunter,
+        Items.stage_wheel_gator.value,
+        Items.stage_bubble_crab.value,
+        Items.stage_flame_stag.value,
+        Items.stage_morph_moth.value,
+        Items.stage_magna_centipede.value,
+        Items.stage_crystal_snail.value,
+        Items.stage_overdrive_ostrich.value,
+        Items.stage_wire_sponge.value,
+        #Items.stage_x_hunter_1.value,
+        #Items.stage_x_hunter_2.value,
+        #Items.stage_x_hunter_3.value,
+        #Items.stage_x_hunter_4.value,
+        Items.stage_x_hunter.value,
+    },
+    "Stages": {
+        Items.stage_wheel_gator.value,
+        Items.stage_bubble_crab.value,
+        Items.stage_flame_stag.value,
+        Items.stage_morph_moth.value,
+        Items.stage_magna_centipede.value,
+        Items.stage_crystal_snail.value,
+        Items.stage_overdrive_ostrich.value,
+        Items.stage_wire_sponge.value,
+        #Items.stage_x_hunter_1.value,
+        #Items.stage_x_hunter_2.value,
+        #Items.stage_x_hunter_3.value,
+        #Items.stage_x_hunter_4.value,
+        Items.stage_x_hunter.value,
     }
 }
-
-# Complete item table.
-item_table = {
-    **event_table,
-    **access_codes_table,
-    **weapons,
-    **tanks_table,
-    **armor_table,
-    **enhancements_table,
-    **junk_table,
-}
-
-lookup_id_to_name: typing.Dict[int, str] = {data.code: item_name for item_name, data in item_table.items() if data.code}
