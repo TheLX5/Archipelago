@@ -38,7 +38,7 @@ def patch_rom(world: "RHAWorld", patch: RHAProcedurePatch):
     patch.write_bytes(AUTH_NUMBER_START, patch.name)
     patch.write_byte(SETTING_SUPERBS, world.options.superbs.value)
     patch.write_byte(SETTING_PERFECTS, world.options.perfects.value)
-    patch.write_byte(SETTING_MEDALS, world.options.medals.value)
+    patch.write_byte(SETTING_MEDALS, world.required_medals)
     patch.write_file("token_patch.bin", patch.get_token_binary())
 
     

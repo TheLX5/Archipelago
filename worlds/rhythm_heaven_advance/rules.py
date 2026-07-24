@@ -1,14 +1,13 @@
 from typing import TYPE_CHECKING
 
 from rule_builder.rules import Has, HasAll, Rule, False_, True_, CanReachLocation
-from rule_builder.field_resolvers import FromOption
+from rule_builder.field_resolvers import FromWorldAttr
 
 if TYPE_CHECKING:
     from . import RHAWorld
 
 from .enums import Items, Regions
 from .constants import *
-from .options import Medals
 
 class RHARules:
     world: "RHAWorld"
@@ -19,7 +18,7 @@ class RHARules:
         self.world = world
 
         self.connection_rules = {
-            f"Menu -> Credits": Has(Items.medal, count=FromOption(Medals)),
+            f"Menu -> Credits": Has(Items.medal, count=FromWorldAttr("required_medals")),
                 
             f"Menu -> {Regions.karate_man}": Has(Items.remix_1_column),
             f"Menu -> {Regions.rhythm_tweezers}": Has(Items.remix_1_column),

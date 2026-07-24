@@ -2,22 +2,22 @@ import os
 import settings
 import threading
 import pkgutil
-import hashlib
+import math
 
 from BaseClasses import MultiWorld, Tutorial, ItemClassification, CollectionState
-from worlds.AutoWorld import World, WebWorld, LogicMixin
+from worlds.AutoWorld import World, WebWorld
 from rule_builder.rules import Rule
 
 from .options import RHAOptions
 from .client import RHAClient
 from .regions import create_regions
 from .rom import patch_rom, RHAProcedurePatch, HASH_JP
-from .enums import Items, Locations, Regions
+from .enums import Items
 from .items import RHAItem, all_items, item_groups
 from .locations import all_locations, count_locations_active, location_groups
 from .constants import *
 
-from typing import Any, ClassVar, TextIO, Optional, Sequence, Tuple
+from typing import ClassVar, TextIO
 
 class RHASettings(settings.Group):
     class RomFile(settings.UserFilePath):
@@ -64,6 +64,10 @@ class RHAWorld(World):
     #origin_region_name = Regions.intro_stage.value
     rule_macros: dict[str, Rule.Resolved]
 
+    ut_can_gen_without_yaml: ClassVar = True
+    glitches_item_name: str = Items.glitched
+    is_ut: bool = False
+
     def __init__(self, multiworld: MultiWorld, player: int):
         self.rom_name_available_event = threading.Event()
         self.rule_macros = {}
@@ -89,7 +93,7 @@ class RHAWorld(World):
                 continue
             itempool.append(self.create_item(stage))
 
-        itempool += [self.create_item(Items.medal) for _ in range(50)]
+        itempool += [self.create_item(Items.medal) for _ in range(self.options.medals.value)]
 
         # Setup junk items
         junk_count = self.total_required_locations - len(itempool)
@@ -137,6 +141,7 @@ class RHAWorld(World):
             "perfects",
             "superbs",
         )
+        slot_data["required_medals"] = self.required_medals
         return slot_data
 
 
@@ -144,10 +149,29 @@ class RHAWorld(World):
         patch_version = f"{self.world_version.major:02}{self.world_version.minor:02}{self.world_version.build:02}"
         self.auth =  bytearray(f'RHA-{patch_version}-{self.player}-{self.multiworld.seed:11}\0', 'utf8')[:21]
         self.auth.extend([0] * (21 - len(self.auth)))
+        self.required_medals = max(math.floor(self.options.medals.value * (self.options.medals_required.value / 100.0)), 1)
+
+        re_gen_passthrough = getattr(self.multiworld, "re_gen_passthrough", {})
+        if re_gen_passthrough and self.game in re_gen_passthrough:
+            slot_data = self.multiworld.re_gen_passthrough[GAME_NAME]
+            self.options.perfects.value = slot_data["perfects"]
+            self.options.superbs.value = slot_data["superbs"]
+            self.required_medals = slot_data["required_medals"]
+            self.is_ut = True
+
+
+    @staticmethod
+    def interpret_slot_data(slot_data):
+        return slot_data
 
 
     def get_filler_item_name(self) -> str:
         return str(Items.nothing)
+
+    
+    def write_spoiler_header(self, spoiler_handle: TextIO) -> None:
+        spoiler_handle.write(f"\nRequired Medals: {self.required_medals}")
+
 
 
     def generate_output(self, output_directory: str):
