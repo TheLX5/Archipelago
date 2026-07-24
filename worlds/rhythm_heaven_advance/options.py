@@ -10,7 +10,7 @@ class Medals(Range):
     display_name = "Medals"
     range_start = 1
     range_end = 50
-    default = 1
+    default = 30
 
 class Superbs(DefaultOnToggle):
     """

@@ -96,7 +96,6 @@ class RHAClient(BizHawkClient):
                 ctx.locations_checked.add(loc_id)
 
         await ctx.check_locations(ctx.locations_checked)
-        print(seen_credits)
 
         if not ctx.finished_game and seen_credits == 0xDEAD:
             await ctx.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}])
