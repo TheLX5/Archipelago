@@ -97,7 +97,6 @@ class RHAClient(BizHawkClient):
                 if level_perfects[perfect_id]:
                     ctx.locations_checked.add(loc_id)
 
-        print (ctx.locations_checked)
         await ctx.check_locations(ctx.locations_checked)
 
         if not ctx.finished_game and seen_credits == 0xDEAD:
@@ -142,6 +141,9 @@ class RHAClient(BizHawkClient):
                 loc_type = loc_id & TYPE_MASK
                 stage_id = loc_id & DATA_MASK
 
+                if loc_type == CLEAR and level_states[stage_id] < 4:
+                    level_states[stage_id] = 0x04
+                    new_states = True
                 if loc_type == OK and level_states[stage_id] < 4:
                     level_states[stage_id] = 0x04
                     new_states = True
