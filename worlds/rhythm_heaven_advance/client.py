@@ -11,9 +11,7 @@ if TYPE_CHECKING:
 
 from .constants import *
 from .locations import all_locations
-from .stage_data import remix_groups, level_data
-
-
+from .stage_data import remix_groups, level_data, perfect_data
 
 class RHAClient(BizHawkClient):
     game = GAME_NAME
@@ -55,7 +53,7 @@ class RHAClient(BizHawkClient):
             return
 
         game_data = await bizhawk.read(ctx.bizhawk_ctx, [
-            [LEVEL_STATES, 0x80, "EWRAM"],
+            [LEVEL_STATES, 0x60, "EWRAM"],
             [SETTING_PERFECTS, 0x01, "ROM"],
             [SETTING_SUPERBS, 0x01, "ROM"],
             [SETTING_MEDALS, 0x01, "ROM"],
@@ -63,12 +61,14 @@ class RHAClient(BizHawkClient):
             [MC_MUFFIN_COUNT, 0x02, "EWRAM"],
             [SEEN_CREDITS, 0x02, "EWRAM"],
             [GAME_LOADED, 0x04, "IWRAM"],
+            [LEVEL_PERFECTS, 0x60, "EWRAM"],
         ])
         game_loaded = int.from_bytes(bytearray(game_data[7]), "little")
         if game_loaded != 0x00FF00FE:
             return
         
         level_states = bytearray(game_data[0])
+        level_perfects = bytearray(game_data[8])
         setting_perfects = int.from_bytes(bytearray(game_data[1]), "little")
         setting_superbs = int.from_bytes(bytearray(game_data[2]), "little")
         setting_medals = int.from_bytes(bytearray(game_data[3]), "little")
@@ -92,9 +92,12 @@ class RHAClient(BizHawkClient):
                 ctx.locations_checked.add(loc_id)
             elif loc_type == SUPERB and setting_superbs and level_states[stage_id] >= 5:
                 ctx.locations_checked.add(loc_id)
-            elif loc_type == PERFECT and setting_perfects and level_states[stage_id] >= 6:
-                ctx.locations_checked.add(loc_id)
+            elif loc_type == PERFECT and setting_perfects:
+                perfect_id = perfect_data[stage_id]
+                if level_perfects[perfect_id]:
+                    ctx.locations_checked.add(loc_id)
 
+        print (ctx.locations_checked)
         await ctx.check_locations(ctx.locations_checked)
 
         if not ctx.finished_game and seen_credits == 0xDEAD:
@@ -127,5 +130,26 @@ class RHAClient(BizHawkClient):
             elif item.item < 0x30:
                 # process individual stages
                 pass
+            await bizhawk.write(ctx.bizhawk_ctx, writes)
+
+        else:
+            new_states = False
+            for loc_id in ctx.checked_locations:
+                if loc_id in ctx.locations_checked:
+                    continue
+                ctx.locations_checked.add(loc_id)
+
+                loc_type = loc_id & TYPE_MASK
+                stage_id = loc_id & DATA_MASK
+
+                if loc_type == OK and level_states[stage_id] < 4:
+                    level_states[stage_id] = 0x04
+                    new_states = True
+                elif loc_type == SUPERB and setting_superbs:
+                    level_states[stage_id] = 0x05
+                    new_states = True
+
+            if new_states:
+                writes.append((LEVEL_STATES, level_states, "EWRAM"))
 
             await bizhawk.write(ctx.bizhawk_ctx, writes)

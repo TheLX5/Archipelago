@@ -37,9 +37,9 @@ def create_regions(world: "RHAWorld"):
         region = Region(stage_name, player, multiworld)
         multiworld.regions.append(region)
         menu_region.connect(region)
-        region.locations.append(RHALocation(player, f"{stage_name.value} - Clear", CLEAR | stage_id, region))
-        region.locations.append(RHALocation(player, f"{stage_name.value} - OK", OK | stage_id, region))
+        region.locations.append(RHALocation(player, f"{stage_name.value} - Clear", PAD | CLEAR | stage_id, region))
+        region.locations.append(RHALocation(player, f"{stage_name.value} - OK", PAD | OK | stage_id, region))
         if active_superbs:
-            region.locations.append(RHALocation(player, f"{stage_name.value} - Superb", SUPERB | stage_id, region))
+            region.locations.append(RHALocation(player, f"{stage_name.value} - Superb", PAD | SUPERB | stage_id, region))
         if active_perfects:
-            region.locations.append(RHALocation(player, f"{stage_name.value} - Perfect", PERFECT | stage_id, region))
+            region.locations.append(RHALocation(player, f"{stage_name.value} - Perfect", PAD | PERFECT | stage_id, region))

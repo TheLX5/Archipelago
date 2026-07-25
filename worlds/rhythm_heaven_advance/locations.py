@@ -11,12 +11,12 @@ superb_locations = {}
 perfect_locations = {}
 
 for region_name, level_id in level_data.items():
-    all_locations[f"{region_name.value} - Clear"] = CLEAR | level_id
-    all_locations[f"{region_name.value} - OK"] = OK | level_id
-    all_locations[f"{region_name.value} - Superb"] = SUPERB | level_id
-    superb_locations[f"{region_name.value} - Superb"] = SUPERB | level_id
-    all_locations[f"{region_name.value} - Perfect"] = PERFECT | level_id
-    perfect_locations[f"{region_name.value} - Perfect"] = PERFECT | level_id
+    all_locations[f"{region_name.value} - Clear"] = PAD | CLEAR | level_id
+    all_locations[f"{region_name.value} - OK"] = PAD | OK | level_id
+    all_locations[f"{region_name.value} - Superb"] = PAD | SUPERB | level_id
+    superb_locations[f"{region_name.value} - Superb"] = PAD | SUPERB | level_id
+    all_locations[f"{region_name.value} - Perfect"] = PAD | PERFECT | level_id
+    perfect_locations[f"{region_name.value} - Perfect"] = PAD | PERFECT | level_id
 
 def count_locations_active(world: "RHAWorld"):
     total_count = 0
