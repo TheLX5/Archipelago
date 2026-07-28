@@ -27,8 +27,17 @@ def count_locations_active(world: "RHAWorld"):
             total_count += 1
     return total_count
 
-location_groups = {
+level_groups = {
     region.value: [
         name for name in all_locations.keys() if f"{region.value} -" in name
     ] for region in level_data.keys()
 }
+
+clear_groups = {
+    "Perfect Clears": [name for name in all_locations.keys() if "- Perfect" in name],
+    "Superb Clears": [name for name in all_locations.keys() if "- Superb" in name],
+    "OK Clears": [name for name in all_locations.keys() if "- OK" in name],
+    "Clears": [name for name in all_locations.keys() if "- Clear" in name],
+}
+
+location_groups = level_groups | clear_groups

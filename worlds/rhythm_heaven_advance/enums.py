@@ -5,14 +5,14 @@ class Items(StrEnum):
     medal = "Medal"
     
     # Stages
-    remix_1_column = "Remix 1 Column"
-    remix_2_column = "Remix 2 Column"
-    remix_3_column = "Remix 3 Column"
-    remix_4_column = "Remix 4 Column"
-    remix_5_column = "Remix 5 Column"
-    remix_6_column = "Remix 6 Column"
-    remix_7_column = "Remix 7 Column"
-    remix_8_column = "Remix 8 Column"
+    remix_1_column = "Remix 1 Bundle"
+    remix_2_column = "Remix 2 Bundle"
+    remix_3_column = "Remix 3 Bundle"
+    remix_4_column = "Remix 4 Bundle"
+    remix_5_column = "Remix 5 Bundle"
+    remix_6_column = "Remix 6 Bundle"
+    remix_7_column = "Remix 7 Bundle"
+    remix_8_column = "Remix 8 Bundle"
     
     karate_man_stage = "Karate Man Stage"
     rhythm_tweezers_stage = "Rhythm Tweezers Stage"
@@ -63,7 +63,7 @@ class Items(StrEnum):
     sneaky_spirits_2_stage = "Sneaky Spirits 2 Stage"
     remix_8_stage = "Remix 8 Stage"
 
-    nothing = "Beep"
+    beep = "Beep"
     victory = "Victory!"
 
     glitched = "Skill"

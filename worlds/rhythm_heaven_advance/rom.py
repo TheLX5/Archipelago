@@ -1,8 +1,9 @@
 import Utils
 import hashlib
 import os
+import orjson
 from typing import TYPE_CHECKING, Iterable
-from worlds.Files import APProcedurePatch, APTokenMixin, APTokenTypes
+from worlds.Files import APProcedurePatch, APTokenMixin, APTokenTypes, APPatchExtension
 
 if TYPE_CHECKING:
     from . import RHAWorld
@@ -11,6 +12,30 @@ from .constants import *
 
 HASH_JP = 'f81f60fdb2fd774c72a170a1805db52e'
 
+patches = {
+    0x00: "vanilla",
+    0x01: "sfx",
+    0x02: "plus",
+    0x03: "sfx_plus"
+}
+
+class RHAPatchExtension(APPatchExtension):
+    game = GAME_NAME
+    
+    @staticmethod
+    def apply_selected_patches(caller: APProcedurePatch, rom: bytes):
+        import bsdiff4
+        import pkgutil
+        
+        json_data = orjson.loads(caller.get_file("data.json"))
+        selected_patch = patches[json_data["patches"]]
+        patch_file = pkgutil.get_data(__name__, f"data/rhythmheavenadvance_{selected_patch}.patch")
+        print (f"Using rhythmheavenadvance_{selected_patch}.patch")
+        rom = bsdiff4.patch(rom, patch_file)
+
+        return rom
+        
+
 class RHAProcedurePatch(APProcedurePatch, APTokenMixin):
     hash = [HASH_JP]
     game = GAME_NAME
@@ -18,7 +43,7 @@ class RHAProcedurePatch(APProcedurePatch, APTokenMixin):
     result_file_ending = ".gba"
     name: bytearray
     procedure = [
-        ("apply_bsdiff4", ["rha_basepatch.bsdiff4"]),
+        ("apply_selected_patches", []),
         ("apply_tokens", ["token_patch.bin"]),
     ]
 
@@ -39,7 +64,20 @@ def patch_rom(world: "RHAWorld", patch: RHAProcedurePatch):
     patch.write_byte(SETTING_SUPERBS, world.options.superbs.value)
     patch.write_byte(SETTING_PERFECTS, world.options.perfects.value)
     patch.write_byte(SETTING_MEDALS, world.required_medals)
+    patch.write_byte(SETTING_UNLOCKS, world.options.level_unlock.value)
     patch.write_file("token_patch.bin", patch.get_token_binary())
+
+    patches = 0x00
+    if "SFX" in world.options.patches.value:
+        patches |= 0x01
+    if "Plus" in world.options.patches.value:
+        patches |= 0x02
+
+    # Save random data to an external file
+    data_dict = {
+        "patches": patches,
+    }
+    patch.write_file("data.json", orjson.dumps(data_dict))
 
     
 def get_base_rom_bytes(file_name: str = "") -> bytes:

@@ -110,29 +110,38 @@ class RHAClient(BizHawkClient):
             received_index += 1
             writes.append((RECEIVED_INDEX, received_index.to_bytes(2, "little"), "EWRAM"))
 
-            if item.item == 0xC0:
+            item_name = ctx.item_names.lookup_in_slot(item.item)
+            item_code = item.item & 0xFFF
+
+            if item_code == 0xC0:
                 # give medals and open credits if needed
                 mc_muffins += 1
                 writes.append((MC_MUFFIN_COUNT, mc_muffins.to_bytes(2, "little"), "EWRAM"))
+                writes.append((UPDATE_MEDALS, (0x01).to_bytes(2, "little"), "EWRAM"))
+                await bizhawk.display_message(ctx.bizhawk_ctx, f"Received a {item_name}!")
                 if mc_muffins >= setting_medals:
-                    level_states[53] = 0x03
-                    writes.append((LEVEL_STATES, level_states, "EWRAM"))
-            elif item.item >= 0x100:
+                    writes.append((LEVEL_STATES+53, (0x03).to_bytes(1, "little"), "EWRAM"))
+                    await bizhawk.display_message(ctx.bizhawk_ctx, f"Unlocked Credits Staff Level! (You can now goal the game)")
+
+            elif item_code >= 0x100:
                 # process columns
-                item_name = ctx.item_names.lookup_in_slot(item.item)
                 for level_name in remix_groups[item_name]:
                     level_id = level_data[level_name]
                     if level_states[level_id] <= 0x02:
                         level_states[level_id] = 0x03
-                writes.append((LEVEL_STATES, level_states, "EWRAM"))
+                    writes.append((LEVEL_STATES+level_id, (0x03).to_bytes(1, "little"), "EWRAM"))
+                await bizhawk.display_message(ctx.bizhawk_ctx, f"Unlocked {item_name}!")
 
-            elif item.item < 0x30:
+            elif item_code < 0x30:
                 # process individual stages
-                pass
+                if level_states[item_code] <= 0x02:
+                    level_states[item_code] = 0x03
+                    writes.append((LEVEL_STATES+item_code, (0x03).to_bytes(1, "little"), "EWRAM"))
+                    await bizhawk.display_message(ctx.bizhawk_ctx, f"Unlocked {item_name}!")
+
             await bizhawk.write(ctx.bizhawk_ctx, writes)
 
         else:
-            new_states = False
             for loc_id in ctx.checked_locations:
                 if loc_id in ctx.locations_checked:
                     continue
@@ -143,15 +152,12 @@ class RHAClient(BizHawkClient):
 
                 if loc_type == CLEAR and level_states[stage_id] < 4:
                     level_states[stage_id] = 0x04
-                    new_states = True
+                    writes.append((LEVEL_STATES+stage_id, (0x04).to_bytes(1, "little"), "EWRAM"))
                 if loc_type == OK and level_states[stage_id] < 4:
                     level_states[stage_id] = 0x04
-                    new_states = True
+                    writes.append((LEVEL_STATES+stage_id, (0x04).to_bytes(1, "little"), "EWRAM"))
                 elif loc_type == SUPERB and setting_superbs:
                     level_states[stage_id] = 0x05
-                    new_states = True
-
-            if new_states:
-                writes.append((LEVEL_STATES, level_states, "EWRAM"))
+                    writes.append((LEVEL_STATES+stage_id, (0x05).to_bytes(1, "little"), "EWRAM"))
 
             await bizhawk.write(ctx.bizhawk_ctx, writes)

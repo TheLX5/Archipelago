@@ -4,11 +4,11 @@ import threading
 import pkgutil
 import math
 
-from BaseClasses import MultiWorld, Tutorial, ItemClassification, CollectionState
+from BaseClasses import MultiWorld, Tutorial
 from worlds.AutoWorld import World, WebWorld
 from rule_builder.rules import Rule
 
-from .options import RHAOptions
+from .options import RHAOptions, LevelUnlock
 from .client import RHAClient
 from .regions import create_regions
 from .rom import patch_rom, RHAProcedurePatch, HASH_JP
@@ -16,6 +16,7 @@ from .enums import Items
 from .items import RHAItem, all_items, item_groups
 from .locations import all_locations, count_locations_active, location_groups
 from .constants import *
+from .stage_data import level_data
 
 from typing import ClassVar, TextIO
 
@@ -41,7 +42,6 @@ class RHAWeb(WebWorld):
         ["lx5"]
     )
     tutorials = [setup_en]
-    #option_groups = rha_option_groups
 
 class RHAWorld(World):
     """
@@ -82,13 +82,19 @@ class RHAWorld(World):
         self.total_required_locations = count_locations_active(self)
 
         # Submit stage bundles to item pool
-        stage_bundles = sorted(item_groups["Stage Bundle"])
-        self.selected_stage = self.random.choice(stage_bundles)
+        if self.options.level_unlock == LevelUnlock.option_bundles:
+            all_stages = sorted(item_groups["Stage Bundle"])
+        else:
+            all_stages = sorted(item_groups["Stages"])
+
+        self.selected_stage = self.random.choice(all_stages)
         precollected_items = [item.name for item in self.multiworld.precollected_items[self.player]]
-        if set(stage_bundles).isdisjoint(precollected_items):
+        if set(all_stages).isdisjoint(precollected_items):
             self.push_precollected(self.create_item(self.selected_stage))
-            stage_bundles.remove(self.selected_stage)
-        for stage in stage_bundles:
+            all_stages.remove(self.selected_stage)
+        else:
+            self.selected_stage = "None"
+        for stage in all_stages:
             if stage in precollected_items:
                 continue
             itempool.append(self.create_item(stage))
@@ -99,7 +105,7 @@ class RHAWorld(World):
         junk_count = self.total_required_locations - len(itempool)
 
         junk_weights = []
-        junk_weights += ([Items.nothing] * 2)
+        junk_weights += ([Items.beep] * 2)
 
         junk_pool = []
         for _ in range(junk_count):
@@ -126,14 +132,6 @@ class RHAWorld(World):
     def set_rules(self):
         from .rules import RHARules
         RHARules(self).set_rules()
-
-        # Debug
-        return
-        from Utils import visualize_regions
-        state = CollectionState(self.multiworld, allow_partial_entrances=True)
-        state.update_reachable_regions(self.player)
-        visualize_regions(self.get_region("Menu"), "my_world.puml", show_entrance_names=True,
-                        regions_to_highlight=state.reachable_regions[self.player])
 
 
     def fill_slot_data(self) -> dict:
@@ -166,7 +164,7 @@ class RHAWorld(World):
 
 
     def get_filler_item_name(self) -> str:
-        return str(Items.nothing)
+        return str(Items.beep)
 
     
     def write_spoiler_header(self, spoiler_handle: TextIO) -> None:
@@ -177,7 +175,6 @@ class RHAWorld(World):
     def generate_output(self, output_directory: str):
         try:
             patch = RHAProcedurePatch(player=self.player, player_name=self.multiworld.player_name[self.player])
-            patch.write_file("rha_basepatch.bsdiff4", pkgutil.get_data(__name__, "data/rha_basepatch.bsdiff4"))
             patch_rom(self, patch)
 
             self.rom_name = patch.name
