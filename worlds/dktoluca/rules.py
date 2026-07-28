@@ -714,7 +714,7 @@ class DKC3StrictRules(DKC3Rules):
             Locations.tracker_barrel_trek_bananas_1:
                 HasBarrelTracker,
             Locations.tracker_barrel_trek_balloon_1:
-                HasBarrelTracker & HasBarrelCannon,
+                HasBarrelTracker & HasBarrelCannon & HasDixie,
             Locations.tracker_barrel_trek_coin_3:
                 HasBarrelTracker & HasBarrelCannon,
             Locations.tracker_barrel_trek_coin_4:
