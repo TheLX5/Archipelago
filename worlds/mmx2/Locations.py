@@ -50,6 +50,7 @@ location_groups = {
         Locations.x_hunter_stage_2_boss.value,
         Locations.x_hunter_stage_3_boss.value,
         Locations.x_hunter_stage_5_zero.value,
+        Locations.x_hunter_stage_5_sigma.value,
     },
     "Heart Tanks": {location for location in all_locations.keys() if "- Heart Tank" in location},
     "Sub Tanks": {location for location in all_locations.keys() if "- Sub Tank" in location},

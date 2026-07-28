@@ -39,7 +39,7 @@ all_items = {
     
     Items.shoryuken:                ItemData(0x09, ItemClassification.useful),
     
-    Items.heart_tank:               ItemData(0x0E, ItemClassification.progression),
+    Items.heart_tank:               ItemData(0x0E, ItemClassification.progression_deprioritized),
     Items.sub_tank:                 ItemData(0x0F, ItemClassification.useful),
     
     Items.helmet:                   ItemData(0x0A, ItemClassification.progression),

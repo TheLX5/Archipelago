@@ -166,7 +166,6 @@ class MMX2SNIClient(SNIClient):
         ctx.rom = rom_name
 
         return True
-    #Crystal Snail - HP Pickup 2 (After X-Hunter room)
 
     def on_package(self, ctx, cmd: str, args: dict):
         super().on_package(ctx, cmd, args)
@@ -251,7 +250,7 @@ class MMX2SNIClient(SNIClient):
         if self.trade_request is not None:
             await self.handle_hp_trade(ctx, snes_data)
 
-        if "EnergyLink" in ctx.tags:
+        if "EnergyLink" in ctx.tags and f"EnergyLink{ctx.team}" in ctx.stored_data:
             await self.handle_energy_link(ctx, snes_data)
 
         if "SharedDamage" in ctx.tags:
@@ -525,6 +524,7 @@ class MMX2SNIClient(SNIClient):
                 snes_buffered_write(ctx, MMX2_ENERGY_LINK_COUNT, bytearray([total_energy & 0xFF, (total_energy >> 8) & 0xFF]))
             else:
                 snes_buffered_write(ctx, MMX2_ENERGY_LINK_COUNT, bytearray([0x0F, 0x27]))
+            await snes_flush_writes(ctx)
 
         receiving_item = int.from_bytes(snes_data.get(MMX2Memory.receiving_item), "little")
         menu_state = ram_mirror[0x01]
@@ -707,7 +707,6 @@ class MMX2SNIClient(SNIClient):
            receiving_item != 0x00 or \
            pause_state != 0x00 or \
            any(can_move):
-            print ()
             return
         
         snes_buffered_write(ctx, MMX2_SRAM + 0x0162, bytearray([0x01]))

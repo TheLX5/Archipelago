@@ -14,14 +14,22 @@ from .base_rules import (LEMON,
                          SHORYUKEN, 
                          GIGA_CRUSH, 
                          BUBBLE_SPLASH, 
-                         SILK_SHOT, 
+                         SILK_SHOT_ROCKS,  
+                         SILK_SHOT_BLACK,  
+                         SILK_SHOT_JUNK,  
+                         SILK_SHOT_LEAVES,  
+                         SILK_SHOT_CRYSTAL,
                          SPIN_WHEEL, 
                          SONIC_SLICER,
                          STRIKE_CHAIN, 
                          MAGNET_MINE, 
                          SPEED_BURNER,
                          CHARGED_BUBBLE_SPLASH, 
-                         CHARGED_SILK_SHOT, 
+                         CHARGED_SILK_SHOT_ROCKS, 
+                         CHARGED_SILK_SHOT_BLACK, 
+                         CHARGED_SILK_SHOT_JUNK, 
+                         CHARGED_SILK_SHOT_LEAVES, 
+                         CHARGED_SILK_SHOT_CRYSTAL, 
                          CHARGED_SPIN_WHEEL, 
                          CHARGED_SONIC_SLICER,
                          CHARGED_STRIKE_CHAIN, 
@@ -46,6 +54,7 @@ class Boss():
     weakness: list[str]
     sub_weakness: list[str]
     excluded_weaknesses: list[str]
+    weakness_data: list[int]
     entrances: list[str]
     locations: list[str]
     weakness_addr: int
@@ -57,6 +66,7 @@ class Boss():
                  name: str, 
                  weakness: list[str], 
                  sub_weakness: list[str],
+                 weakness_data: list[int],
                  excluded_weaknesses: list[str],
                  entrances: list[str],
                  locations: list[str],
@@ -67,6 +77,7 @@ class Boss():
         self.name = name
         self.weakness = weakness.copy()
         self.sub_weakness = sub_weakness.copy()
+        self.weakness_data = weakness_data.copy()
         self.excluded_weaknesses = excluded_weaknesses.copy()
         self.entrances = entrances.copy()
         self.locations = locations.copy()
@@ -88,10 +99,11 @@ class Boss():
     def dump_slot_data(self):
         data = {}
         data["weakness"] = self.weakness
+        data["weakness_by_id"] = [weapons[weapon_name].id for weapon_name in self.weakness]
         data["sub_weakness"] = self.sub_weakness
+        data["sub_weakness_by_id"] = [weapons[weapon_name].id for weapon_name in self.sub_weakness]
         data["hp"] = self.hp
         return data
-
 
 weapons = {
     "Lemon": Weapon(0x00, "Lemon", 0x02, LEMON),
@@ -112,18 +124,18 @@ weapons = {
     "Magnet Mine": Weapon(0x0D, "Magnet Mine", 0x03, MAGNET_MINE),
     "Charged Magnet Mine": Weapon(0x16, "Charged Magnet Mine", 0x05, CHARGED_MAGNET_MINE),
     "Speed Burner": Weapon(0x0E, "Speed Burner", 0x03, SPEED_BURNER),
-    "Speed Burner (Underwater)": Weapon(0x23, "Speed Burner (Underwater)", 0x03, CHARGED_SILK_SHOT),
+    "Speed Burner (Underwater)": Weapon(0x23, "Speed Burner (Underwater)", 0x03, SPEED_BURNER),
     "Charged Speed Burner": Weapon(0x17, "Charged Speed Burner", 0x03, CHARGED_SPEED_BURNER),
-    "Silk Shot (Rocks)": Weapon(0x09, "Silk Shot (Rocks)", 0x03, SILK_SHOT),
-    "Silk Shot (Black Rock)": Weapon(0x18, "Silk Shot (Black Rock)", 0x05, SILK_SHOT),
-    "Silk Shot (Junk)": Weapon(0x1B, "Silk Shot (Junk)", 0x03, SILK_SHOT),
-    "Silk Shot (Leaves)": Weapon(0x1C, "Silk Shot (Leaves)", 0x03, SILK_SHOT),
-    "Silk Shot (Crystals)": Weapon(0x1E, "Silk Shot (Crystals)", 0x03, SILK_SHOT),
-    "Charged Silk Shot (Rocks)": Weapon(0x12, "Charged Silk Shot (Rocks)", 0x05, CHARGED_SILK_SHOT),
-    "Charged Silk Shot (Black Rock)": Weapon(0x1F, "Charged Silk Shot (Black Rock)", 0x05, CHARGED_SILK_SHOT),
-    "Charged Silk Shot (Junk)": Weapon(0x20, "Charged Silk Shot (Junk)", 0x05, CHARGED_SILK_SHOT),
-    "Charged Silk Shot (Leaves)": Weapon(0x21, "Charged Silk Shot (Leaves)", 0x05, CHARGED_SILK_SHOT),
-    "Charged Silk Shot (Crystals)": Weapon(0x22, "Charged Silk Shot (Crystals)", 0x05, CHARGED_SILK_SHOT),
+    "Silk Shot (Rocks)": Weapon(0x09, "Silk Shot (Rocks)", 0x03, SILK_SHOT_ROCKS),
+    "Silk Shot (Black Rock)": Weapon(0x18, "Silk Shot (Black Rock)", 0x05, SILK_SHOT_BLACK),
+    "Silk Shot (Junk)": Weapon(0x1B, "Silk Shot (Junk)", 0x03, SILK_SHOT_JUNK),
+    "Silk Shot (Leaves)": Weapon(0x1C, "Silk Shot (Leaves)", 0x03, SILK_SHOT_LEAVES),
+    "Silk Shot (Crystals)": Weapon(0x1E, "Silk Shot (Crystals)", 0x03, SILK_SHOT_CRYSTAL),
+    "Charged Silk Shot (Rocks)": Weapon(0x12, "Charged Silk Shot (Rocks)", 0x05, CHARGED_SILK_SHOT_ROCKS),
+    "Charged Silk Shot (Black Rock)": Weapon(0x1F, "Charged Silk Shot (Black Rock)", 0x05, CHARGED_SILK_SHOT_BLACK),
+    "Charged Silk Shot (Junk)": Weapon(0x20, "Charged Silk Shot (Junk)", 0x05, CHARGED_SILK_SHOT_JUNK),
+    "Charged Silk Shot (Leaves)": Weapon(0x21, "Charged Silk Shot (Leaves)", 0x05, CHARGED_SILK_SHOT_LEAVES),
+    "Charged Silk Shot (Crystals)": Weapon(0x22, "Charged Silk Shot (Crystals)", 0x05, CHARGED_SILK_SHOT_CRYSTAL),
 }
 
 weapon_groups = {
@@ -186,6 +198,13 @@ default_boss_data = {
         name="Wheel Gator",
         weakness=["Strike Chain", "Charged Strike Chain"],
         sub_weakness=["Bubble Splash"],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         excluded_weaknesses=[],
         weakness_addr=0x37643,
         hp=32,
@@ -197,6 +216,13 @@ default_boss_data = {
         name="Bubble Crab",
         weakness=["Spin Wheel", "Charged Spin Wheel"],
         sub_weakness=[],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         excluded_weaknesses=["Speed Burner", "Charged Speed Burner"],
         weakness_addr=0x3753A,
         hp=32,
@@ -208,6 +234,13 @@ default_boss_data = {
         name="Flame Stag",
         weakness=["Bubble Splash", "Charged Bubble Splash"],
         sub_weakness=["Sonic Slicer", "Charged Sonic Slicer", "Silk Shot (Leaves)", "Charged Silk Shot (Leaves)"],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         excluded_weaknesses=[],
         weakness_addr=0x3761D,
         hp=32,
@@ -218,6 +251,13 @@ default_boss_data = {
     "Morph Moth": Boss(
         name="Morph Moth",
         weakness=["Speed Burner", "Charged Speed Burner"],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         sub_weakness=["Charged Magnet Mine"],
         excluded_weaknesses=[],
         weakness_addr=0x376DB,
@@ -230,6 +270,13 @@ default_boss_data = {
         name="Magna Centipede",
         weakness=["Silk Shot (Junk)", "Charged Silk Shot (Junk)"],
         sub_weakness=["Strike Chain", "Charged Strike Chain"],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         excluded_weaknesses=[],
         weakness_addr=0x374EE,
         hp=32,
@@ -241,6 +288,13 @@ default_boss_data = {
         name="Crystal Snail",
         weakness=["Magnet Mine", "Charged Magnet Mine"],
         sub_weakness=["Charged Spin Wheel", "Charged Silk Shot (Rocks)"],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         excluded_weaknesses=[],
         weakness_addr=0x37514,
         hp=32,
@@ -252,6 +306,13 @@ default_boss_data = {
         name="Overdrive Ostrich",
         weakness=["Lemon", "Dash Lemon", "Level 1 Charge Shot", "Level 2 Charge Shot", "Level 3 Charge Shot"],
         sub_weakness=["Silk Shot (Rocks)", "Charged Silk Shot (Rocks)", "Silk Shot (Junk)", "Charged Silk Shot (Junk)"],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         excluded_weaknesses=[],
         weakness_addr=0x375F7,
         hp=32,
@@ -263,6 +324,13 @@ default_boss_data = {
         name="Wire Sponge",
         weakness=["Sonic Slicer", "Charged Sonic Slicer"],
         sub_weakness=["Speed Burner", "Charged Magnet Mine"],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         excluded_weaknesses=[],
         weakness_addr=0x37560,
         hp=32,
@@ -274,6 +342,13 @@ default_boss_data = {
         name="Magna Quartz",
         weakness=["Spin Wheel", "Charged Spin Wheel"],
         sub_weakness=[],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         excluded_weaknesses=[],
         weakness_addr=0x37DF8,
         hp=32,
@@ -285,6 +360,13 @@ default_boss_data = {
         name="Chop Register",
         weakness=["Silk Shot (Junk)", "Charged Silk Shot (Junk)"],
         sub_weakness=["Strike Chain", "Charged Strike Chain"],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         excluded_weaknesses=[],
         weakness_addr=0x37E20,
         hp=32,
@@ -296,6 +378,13 @@ default_boss_data = {
         name="Raider Killer",
         weakness=["Speed Burner", "Charged Speed Burner"],
         sub_weakness=["Charged Magnet Mine"],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         excluded_weaknesses=[],
         weakness_addr=0x37E48,
         hp=32,
@@ -307,6 +396,13 @@ default_boss_data = {
         name="Pararoid S-38",
         weakness=["Sonic Slicer", "Charged Bubble Splash", "Speed Burner"],
         sub_weakness=["Bubble Splash", "Charged Spin Wheel"],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         excluded_weaknesses=[],
         weakness_addr=0x37E70,
         hp=32,
@@ -318,6 +414,13 @@ default_boss_data = {
     "Gigantic Mechaniloid CF-0": Boss(
         name="Gigantic Mechaniloid CF-0",
         weakness=["Lemon", "Dash Lemon"],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         sub_weakness=[],
         excluded_weaknesses=[],
         weakness_addr=0x0,
@@ -330,6 +433,13 @@ default_boss_data = {
         name="Agile",
         weakness=["Magnet Mine", "Charged Magnet Mine"],
         sub_weakness=["Charged Spin Wheel", "Charged Silk Shot (Rocks)"],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         excluded_weaknesses=[],
         weakness_addr=0x37D80,
         hp=32,
@@ -341,18 +451,32 @@ default_boss_data = {
         name="Serges",
         weakness=["Sonic Slicer", "Charged Sonic Slicer"],
         sub_weakness=["Speed Burner", "Charged Magnet Mine"],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         excluded_weaknesses=["Silk Shot (Leaves)", "Charged Silk Shot (Leaves)",
                              "Charged Speed Burner", "Charged Bubble Splash"],
         weakness_addr=0x37DA8,
         hp=32,
         hp_address=0x0,
         entrances=[f"{Regions.x_hunter_stage_2_start} -> {Regions.x_hunter_stage_2_boss}"],
-        locations=[Locations.serges_defeated, Events.x_hunter_stage_2_clear],
+        locations=[Locations.serges_defeated, Locations.x_hunter_stage_2_boss, Events.x_hunter_stage_2_clear],
     ),
     "Violen": Boss(
         name="Violen",
         weakness=["Bubble Splash", "Charged Bubble Splash"],
         sub_weakness=["Sonic Slicer", "Charged Sonic Slicer", "Silk Shot (Leaves)", "Charged Silk Shot (Leaves)"],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         excluded_weaknesses=[],
         weakness_addr=0x37DD0,
         hp=32,
@@ -364,39 +488,67 @@ default_boss_data = {
         name="Serges Tank",
         weakness=["Silk Shot (Junk)", "Charged Silk Shot (Junk)", "Giga Crush"],
         sub_weakness=["Strike Chain", "Charged Bubble Splash", "Charged Magnet Mine"],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         excluded_weaknesses=["Charged Speed Burner"],
         weakness_addr=0x377BF,
         hp=32,
         hp_address=0x14D4F,
         entrances=[f"{Regions.x_hunter_stage_2_start} -> {Regions.x_hunter_stage_2_boss}"],
-        locations=[Events.x_hunter_stage_2_clear],
+        locations=[Locations.x_hunter_stage_2_boss, Events.x_hunter_stage_2_clear],
     ),
     "Agile Flyer": Boss(
         name="Agile Flyer",
         weakness=["Magnet Mine", "Charged Magnet Mine"],
         sub_weakness=[],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         excluded_weaknesses=[],
         weakness_addr=0x377E5,
         hp=32,
         hp_address=0xAF148,
         entrances=[f"{Regions.x_hunter_stage_3_start} -> {Regions.x_hunter_stage_3_boss}"],
-        locations=[Events.x_hunter_stage_3_clear],
+        locations=[Locations.x_hunter_stage_3_boss, Events.x_hunter_stage_3_clear],
     ),
     "Neo Violen": Boss(
         name="Neo Violen",
         weakness=["Bubble Splash", "Charged Bubble Splash"],
         sub_weakness=["Sonic Slicer", "Charged Sonic Slicer", "Silk Shot (Leaves)", "Charged Silk Shot (Leaves)"],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         excluded_weaknesses=[],
         weakness_addr=0x3780B,
         hp=32,
         hp_address=0x0,
         entrances=[f"{Regions.x_hunter_stage_1_start} -> {Regions.x_hunter_stage_1_boss}"],
-        locations=[Events.x_hunter_stage_1_clear],
+        locations=[Locations.x_hunter_stage_1_boss, Events.x_hunter_stage_1_clear],
     ),
     "Zero": Boss(
         name="Zero",
         weakness=["Speed Burner", "Charged Speed Burner"],
         sub_weakness=[],
+        weakness_data=[
+            0x01, 0x01, 0x01, 0x02, 0x10, 0x02, 0x02, 0x80,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03,
+            0x80, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
         excluded_weaknesses=[],
         weakness_addr=0x3774D,
         hp=32,
@@ -407,7 +559,14 @@ default_boss_data = {
     "Neo Sigma": Boss(
         name="Neo Sigma",
         weakness=["Sonic Slicer", "Charged Sonic Slicer"],
-        sub_weakness=[],
+        sub_weakness=["Level 2 Charge Shot", "Level 3 Charge Shot"],
+        weakness_data=[
+            0x80, 0x80, 0x80, 0x01, 0x10, 0x80, 0x80, 0x80,
+            0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x01,
+            0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+            0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+            0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+        ],
         excluded_weaknesses=[],
         weakness_addr=0x37773,
         hp=32,
@@ -418,7 +577,14 @@ default_boss_data = {
     "Sigma Virus": Boss(
         name="Sigma Virus",
         weakness=["Strike Chain"],
-        sub_weakness=["Charged Strike Chain"],
+        sub_weakness=["Charged Strike Chain", "Level 3 Charge Shot"],
+        weakness_data=[
+            0x80, 0x80, 0x80, 0x01, 0x08, 0x80, 0x80, 0x80,
+            0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x01,
+            0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+            0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+            0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+        ],
         excluded_weaknesses=[],
         weakness_addr=0x37799,
         hp=32,
@@ -507,6 +673,8 @@ def shuffle_weaknesses(world: "MMX2World"):
 
                 world.boss_data[boss_name].weakness.extend(new_weakness_data)
 
+
+def apply_strictness(world: "MMX2World"):
     # Apply plando weaknesses, they disregard everything else rolled before
     if len(world.options.boss_weakness_plando.value.keys()) != 0:
         for boss_name, plando_weaknesses in world.options.boss_weakness_plando.value.items():
@@ -525,10 +693,15 @@ def shuffle_weaknesses(world: "MMX2World"):
         for boss_name in world.boss_data.keys():
             world.boss_data[boss_name].weakness.extend(["Level 3 Charge Shot"])
 
+    # Removes duplicates
+    for boss_name in world.boss_data.keys():
+        world.boss_data[boss_name].weakness = list(dict.fromkeys(world.boss_data[boss_name].weakness))
+
     #for boss_name, boss_data in world.boss_data.items():
     #    print (boss_name)
     #    for weapon in boss_data.weakness:
     #        print (f"    - {weapon}")
+
 
 def shuffle_hp(world: "MMX2World"):
     if world.options.boss_randomize_hp == BossRandomizedHP.option_off:

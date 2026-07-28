@@ -9,11 +9,11 @@ from worlds.AutoWorld import World, WebWorld, LogicMixin
 from worlds.LauncherComponents import launch as launch_component, components, Component, Type
 from rule_builder.rules import Rule
 
-from .options import MMX2Options, XHunterBaseOpen, mmx2_option_groups
+from .options import MMX2Options, XHunterBaseOpen, mmx2_option_groups, BossWeaknessStrictness
 from .client import MMX2SNIClient
 from .regions import create_regions, connect_regions
 from .rom import patch_rom, MMX2ProcedurePatch, HASH_US, HASH_LEGACY, LC_EXE_HASH
-from .boss_data import Boss, default_boss_data, shuffle_weaknesses, shuffle_hp
+from .boss_data import Boss, default_boss_data, shuffle_weaknesses, apply_strictness, shuffle_hp
 from .enums import Items, Locations, Regions
 from .items import MMX2Item, all_items, item_groups
 from .locations import all_locations, location_groups, count_locations_active
@@ -98,8 +98,8 @@ class MMX2World(tracker.UTMxin, World):
 
     item_name_to_id = {str(name): data.code for name, data in all_items.items()}
     location_name_to_id = all_locations
-    #item_name_groups = item_groups
-    #location_name_groups = location_groups
+    item_name_groups = item_groups
+    location_name_groups = location_groups
     origin_region_name = Regions.intro_stage.value
     rule_macros: dict[str, Rule.Resolved]
     boss_data: dict[str, Boss] = {}
@@ -245,6 +245,7 @@ class MMX2World(tracker.UTMxin, World):
         self.boss_data = {name: Boss(name=boss.name,
                                     weakness=boss.weakness,
                                     sub_weakness=boss.sub_weakness,
+                                    weakness_data=boss.weakness_data,
                                     excluded_weaknesses=boss.excluded_weaknesses,
                                     entrances=boss.entrances,
                                     locations=boss.locations,
@@ -255,6 +256,7 @@ class MMX2World(tracker.UTMxin, World):
                         for name, boss in default_boss_data.items()
                         }
         shuffle_weaknesses(self)
+        apply_strictness(self)
         shuffle_hp(self)
         
         super().generate_early()
@@ -280,6 +282,37 @@ class MMX2World(tracker.UTMxin, World):
                     spoiler_handle.write(f" {" ":<26s} |    | {weapon:<32s} |\n")
             else:
                 spoiler_handle.write(f"{"-" * 69}\n")
+
+
+    def extend_hint_information(self, hint_data: dict[int, dict[int, str]]):
+        any_buster = ["Lemon", "Dash Lemon", "Level 1 Charge Shot", "Level 2 Charge Shot", "Level 3 Charge Shot"]
+        strictness = self.options.boss_weakness_strictness
+        boss_hint_data: dict[int, str] = {}
+        boss_names: dict[int,str] = {}
+        boss_hint_text: dict[int,str] = {}
+        for boss_name, boss_data in self.boss_data.items():
+            hint_text = f""
+            weaknesses = boss_data.weakness.copy()
+            if strictness == BossWeaknessStrictness.option_weakness_and_buster:
+                weaknesses = [weapon for weapon in weaknesses if weapon not in any_buster]
+                weaknesses.append("Any buster shot")
+            for weapon in weaknesses:
+                hint_text += f"{weapon}, "
+            hint_text = hint_text[:-2]
+            for location_name in boss_data.locations:
+                location = self.get_location(location_name)
+                if location.is_event:
+                    continue
+                if location.address not in boss_hint_data.keys():
+                    boss_hint_data[location.address] = f"{hint_text}"
+                else:
+                    previous_boss_name = boss_names[location.address] 
+                    previous_boss_hint = boss_hint_text[location.address]
+                    boss_hint_data[location.address] = f"{previous_boss_name}: {previous_boss_hint} | {boss_name}: {hint_text}"
+                boss_names[location.address] = boss_name
+                boss_hint_text[location.address] = hint_text
+
+        hint_data[self.player] = boss_hint_data
 
 
     def generate_output(self, output_directory: str):

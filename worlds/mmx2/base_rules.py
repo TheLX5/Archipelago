@@ -141,10 +141,30 @@ SPEED_BURNER = Macro(
     "Speed Burner",
     "Can deal damage with Speed Burner"
 )
-SILK_SHOT = Macro(
+SILK_SHOT_ROCKS = Macro(
     Has(Items.silk_shot),
-    "Silk Shot",
-    "Can deal damage with Silk Shot"
+    "Silk Shot (Rocks)",
+    "Can deal damage with Silk Shot's Rocks (shot type 1)"
+)
+SILK_SHOT_BLACK = Macro(
+    Has(Items.silk_shot),
+    "Silk Shot (Black Rocks)",
+    "Can deal damage with Silk Shot's Black Rocks (shot type 2)"
+)
+SILK_SHOT_JUNK = Macro(
+    Has(Items.silk_shot),
+    "Silk Shot (Junk)",
+    "Can deal damage with Silk Shot's Junk (shot type 3)"
+)
+SILK_SHOT_LEAVES = Macro(
+    Has(Items.silk_shot),
+    "Silk Shot (Leaves)",
+    "Can deal damage with Silk Shot's Leaves (shot type 4)"
+)
+SILK_SHOT_CRYSTAL = Macro(
+    Has(Items.silk_shot),
+    "Silk Shot (Crystal)",
+    "Can deal damage with Silk Shot's Crystal (shot type 5)"
 )
 MAGNET_MINE = Macro(
     Has(Items.magnet_mine),
@@ -177,10 +197,30 @@ CHARGED_SPEED_BURNER = Macro(
     "Charged Speed Burner",
     "Can deal damage with Speed Burner"
 )
-CHARGED_SILK_SHOT = Macro(
-    CAN_CHARGE & SILK_SHOT,
-    "Charged Silk Shot",
-    "Can deal damage with Silk Shot"
+CHARGED_SILK_SHOT_ROCKS = Macro(
+    CAN_CHARGE & SILK_SHOT_ROCKS,
+    "Charged Silk Shot (Rocks)",
+    "Can deal damage with Silk Shot's Rocks (shot type 1)"
+)
+CHARGED_SILK_SHOT_BLACK = Macro(
+    CAN_CHARGE & SILK_SHOT_BLACK,
+    "Charged Silk Shot (Black Rocks)",
+    "Can deal damage with Silk Shot's Black Rocks (shot type 2)"
+)
+CHARGED_SILK_SHOT_JUNK = Macro(
+    CAN_CHARGE & SILK_SHOT_JUNK,
+    "Charged Silk Shot (Junk)",
+    "Can deal damage with Silk Shot's Junk (shot type 3)"
+)
+CHARGED_SILK_SHOT_LEAVES = Macro(
+    CAN_CHARGE & SILK_SHOT_LEAVES,
+    "Charged Silk Shot (Leaves)",
+    "Can deal damage with Silk Shot's Leaves (shot type 4)"
+)
+CHARGED_SILK_SHOT_CRYSTAL = Macro(
+    CAN_CHARGE & SILK_SHOT_CRYSTAL,
+    "Charged Silk Shot (Crystal)",
+    "Can deal damage with Silk Shot's Crystals (shot type 5)"
 )
 CHARGED_MAGNET_MINE = Macro(
     CAN_CHARGE & MAGNET_MINE,

@@ -22,7 +22,7 @@ LC_ROM_SIZE = 0x180000
 
 ROM_SETTINGS = 0x17FFE0
 
-class MMX3PatchExtension(APPatchExtension):
+class MMX2PatchExtension(APPatchExtension):
     game = GAME_NAME
     
     @staticmethod
@@ -53,7 +53,7 @@ class MMX3PatchExtension(APPatchExtension):
 
     @staticmethod
     def handle_enemy_weaknesses(caller: APProcedurePatch, rom: bytes):
-        from .boss_data import weapons
+        from .boss_data import weapons, default_boss_data
 
         rom = bytearray(rom)
 
@@ -61,6 +61,8 @@ class MMX3PatchExtension(APPatchExtension):
         strictness = rom[ROM_SETTINGS+0x10]
 
         weakness_offset = 0x140000
+        #print (f"#####################################################################################")
+        #print (f"Strictness: {strictness}")
 
         for enemy_name, enemy_data in rolled_enemy_data.items():
             weakness_data = [0xFF for _ in range(16)]
@@ -74,7 +76,7 @@ class MMX3PatchExtension(APPatchExtension):
             offset: int = enemy_data["weakness_addr"]
 
             if strictness == 0x00:
-                damage_table_data = rom[offset:offset+0x26]
+                damage_table_data = default_boss_data[enemy_name].weakness_data.copy()
             else:
                 damage_table_data = [
                     0x80, 0x80, 0x80, 0x80, 0x01, 0x80, 0x80, 0x80,
@@ -89,21 +91,26 @@ class MMX3PatchExtension(APPatchExtension):
             multiplier = 1
             if enemy_name == "Serges Tank":
                 multiplier = 2
+
+            #print (f"####################################")
+            #print (f"{enemy_name} | {multiplier}")
             
             for weapon_name in enemy_data["weakness"]:
+                #print ("   ", weapon_name)
                 weapon = weapons[weapon_name]
                 damage_table_data[weapon.id] = int(weapon.damage * multiplier) if weapon.damage < 0x80 else weapon.damage
                 weakness_data[weakness_data_idx] = weapon.id
                 weakness_data_idx += 1
 
             # Save damage data, add some potential secondary tables for some bosses
-            rom[offset:offset+0x26] = damage_table_data
+            rom[offset:offset+0x26] = bytearray(damage_table_data)
             if enemy_name == "Wheel Gator":
                 offset = 0x37669
-                rom[offset:offset+0x26] = damage_table_data
+                rom[offset:offset+0x26] = bytearray(damage_table_data)
+
+            #print (damage_table_data)
 
             # Write weaknesses to a ROM table that's copied to RAM on boot
-            print (f"{weakness_offset:06X} {len(weakness_data)} {weakness_data}")
             rom[weakness_offset:weakness_offset+16] = bytearray(weakness_data)
             weakness_offset += 16
 
