@@ -1771,7 +1771,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.bobbing_barrel_brawl_dk_coin:
                 HasBarrelCannon & HasEllie,
             Locations.bobbing_barrel_brawl_kong:
-                HasBarrelCannon & HasEllie & CanTeamAttack,
+                HasBarrelCannon & HasEllie & ( CanTeamAttack | ( CanCarry | HasBothKongs ) ),
             Locations.bobbing_barrel_brawl_balloon_1:
                 HasBarrelCannon & HasEllie,
             Locations.bobbing_barrel_brawl_coin_1:
