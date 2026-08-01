@@ -714,7 +714,7 @@ class DKC3StrictRules(DKC3Rules):
             Locations.tracker_barrel_trek_bananas_1:
                 HasBarrelTracker,
             Locations.tracker_barrel_trek_balloon_1:
-                HasBarrelTracker & HasBarrelCannon,
+                HasBarrelTracker & HasBarrelCannon & HasDixie,
             Locations.tracker_barrel_trek_coin_3:
                 HasBarrelTracker & HasBarrelCannon,
             Locations.tracker_barrel_trek_coin_4:
@@ -1771,7 +1771,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.bobbing_barrel_brawl_dk_coin:
                 HasBarrelCannon & HasEllie,
             Locations.bobbing_barrel_brawl_kong:
-                HasBarrelCannon & HasEllie & CanTeamAttack,
+                HasBarrelCannon & HasEllie & ( CanTeamAttack | ( CanCarry | HasBothKongs ) ),
             Locations.bobbing_barrel_brawl_balloon_1:
                 HasBarrelCannon & HasEllie,
             Locations.bobbing_barrel_brawl_coin_1:
@@ -3666,7 +3666,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.lightning_look_out_clear:
                 CanSwim | (HasBothKongs & CanCarry),
             Locations.lightning_look_out_bonus_1:
-                CanSwim,
+                CanSwim | (CanHover & CanTeamAttack),
             Locations.lightning_look_out_bonus_2:
                 CanCarry & (CanSpin | CanTeamAttack) & (CanSwim | HasBothKongs),
             Locations.lightning_look_out_dk_coin:
@@ -3684,7 +3684,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.lightning_look_out_coin_3:
                 CanTeamAttack & (CanSwim | CanHover | CanWaterBounce),
             Locations.lightning_look_out_balloon_2:
-                CanSwim | (HasBothKongs & CanCarry) & CanTeamAttack,
+                CanTeamAttack & (CanSwim | CanCarry | CanHover),
 
             Locations.koindozer_klamber_clear:
                 CanClimb | CanHover | CanSpin,
