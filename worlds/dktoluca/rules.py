@@ -3666,7 +3666,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.lightning_look_out_clear:
                 CanSwim | (HasBothKongs & CanCarry),
             Locations.lightning_look_out_bonus_1:
-                CanSwim | (CanHover & CanTeamAttack),
+                CanSwim | CanTeamAttack,
             Locations.lightning_look_out_bonus_2:
                 CanCarry & (CanSpin | CanTeamAttack) & (CanSwim | HasBothKongs),
             Locations.lightning_look_out_dk_coin:
