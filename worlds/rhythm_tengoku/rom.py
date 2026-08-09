@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 from .constants import *
 
 HASH_JP = 'f81f60fdb2fd774c72a170a1805db52e'
+HASH_JP_REV_A = '5b2d4704ce570d89ae956025bd1036db'
 
 class TengokuPatchExtension(APPatchExtension):
     game = GAME_NAME
@@ -19,7 +20,12 @@ class TengokuPatchExtension(APPatchExtension):
         import bsdiff4
         import pkgutil
         
-        patch_file = pkgutil.get_data(__name__, f"data/rhythmtengoku.bsdiff4")
+        basemd5 = hashlib.md5()
+        basemd5.update(rom)
+        if basemd5.hexdigest() == HASH_JP:
+            patch_file = pkgutil.get_data(__name__, f"data/rhythmtengoku.bsdiff4")
+        else:
+            patch_file = pkgutil.get_data(__name__, f"data/rhythmtengoku_rev1.bsdiff4")
         rom = bsdiff4.patch(rom, patch_file)
 
         return rom
@@ -65,7 +71,7 @@ def get_base_rom_bytes(file_name: str = "") -> bytes:
 
         basemd5 = hashlib.md5()
         basemd5.update(base_rom_bytes)
-        if basemd5.hexdigest() not in [HASH_JP]:
+        if basemd5.hexdigest() not in [HASH_JP, HASH_JP_REV_A]:
             raise Exception("Supplied Base ROM does not match known MD5s for Rhythm Tengoku (JP)."
                             "Get the correct game and version, then dump it.")
         setattr(get_base_rom_bytes, "base_rom_bytes", base_rom_bytes)

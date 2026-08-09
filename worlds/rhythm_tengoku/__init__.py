@@ -11,7 +11,7 @@ from rule_builder.rules import Rule
 from .options import TengokuOptions, LevelUnlock
 from .client import TengokuClient
 from .regions import create_regions
-from .rom import patch_rom, TengokuProcedurePatch, HASH_JP
+from .rom import patch_rom, TengokuProcedurePatch, HASH_JP, HASH_JP_REV_A
 from .enums import Items
 from .items import TengokuItem, all_items, item_groups
 from .locations import all_locations, count_locations_active, location_groups
@@ -25,7 +25,7 @@ class TengokuSettings(settings.Group):
         """File name of the Rhythm Tengoku JP rom"""
         copy_to = "Rhythm Tengoku (Japan).gba"
         description = "Rhythm Tengoku (Japan) ROM File"
-        md5s = [HASH_JP]
+        md5s = [HASH_JP, HASH_JP_REV_A]
 
     rom_file: RomFile = RomFile(RomFile.copy_to)
 
@@ -35,7 +35,7 @@ class TengokuWeb(WebWorld):
 
     setup_en = Tutorial(
         "Multiworld Setup Guide",
-        "A guide to playing Mega Man X2 with Archipelago",
+        "A guide to playing Rhythm Tengoku with Archipelago",
         "English",
         "setup_en.md",
         "setup/en",
