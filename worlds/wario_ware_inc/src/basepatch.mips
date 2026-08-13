@@ -1,0 +1,46 @@
+.gba
+
+.open "WarioWare, Inc. - Mega Microgame$! (USA).gba", "wario.gba", 0x08000000
+
+; Disables unlocking microgames
+.org 0x080090DC
+.thumb
+    nop
+
+; Disables unlocking stages
+.org 0x08000674
+.thumb
+    bx lr
+
+; Disables unlocking special stages
+.org 0x080163b8
+.thumb
+    mov r0, #0
+    bx lr
+
+; Sets to 0 all high scores
+.org 0x08000528
+    add sp, #0x04
+    pop {r4, r5}
+    pop {r0}
+    bx r0
+
+; Allow accessing microgames even if the stage is not unlocked
+.org 0x08012fe8
+    b 0x08012ff0
+.org 0x080135ec
+    b 0x080135f4
+.org 0x08012d10
+    b 0x08012d18
+.org 0x08013536
+    nop 
+
+; Disables unlocking the first stage
+;.org 0x08000524
+;.thumb 
+;    mov r0, #0
+;    strb r0, [r4]
+
+
+.close
+
