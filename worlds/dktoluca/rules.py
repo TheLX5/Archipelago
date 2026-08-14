@@ -2481,7 +2481,7 @@ class DKC3LooseRules(DKC3Rules):
             Locations.lightning_look_out_clear:
                 CanCarry & CanSwim,
             Locations.lightning_look_out_bonus_1:
-                CanCarry & CanSwim,
+                CanCarry & ( CanSwim | CanHover ),
             Locations.lightning_look_out_bonus_2:
                 CanCarry & CanSwim & CanTeamAttack,
             Locations.lightning_look_out_dk_coin:
@@ -3666,7 +3666,7 @@ class DKC3ExpertRules(DKC3Rules):
             Locations.lightning_look_out_clear:
                 CanSwim | (HasBothKongs & CanCarry),
             Locations.lightning_look_out_bonus_1:
-                CanSwim | CanTeamAttack,
+                CanSwim | CanHover,
             Locations.lightning_look_out_bonus_2:
                 CanCarry & (CanSpin | CanTeamAttack) & (CanSwim | HasBothKongs),
             Locations.lightning_look_out_dk_coin:
