@@ -269,6 +269,8 @@ enemy_list_special_cases = {
         0x008: EnemyData(0x008, "Green Koopa, flying left", 20, (0,0), ["flying"], ["floating", "flying", "flying koopa"]),
         0x00A: EnemyData(0x00A, "Red vertical flying Koopa", 20, (0,0), ["flying"], ["flying", "floating", "flying koopa"]),
         0x00B: EnemyData(0x00B, "Red horizontal flying Koopa", 20, (0,0), ["flying"], ["flying", "floating", "flying koopa"]),
+        0x005: EnemyData(0x005, "Red Koopa", 20, (0,0), ["ground"], ["ground", "bounceable", "upsidedown pipe", "stay on ledge"]),
+        0x006: EnemyData(0x006, "Blue Koopa", 10, (0,0), ["ground"], ["ground", "bounceable", "upsidedown pipe", "stay on ledge"]),
     },
     0x134: {
         0x008: EnemyData(0x008, "Green Koopa, flying left", 20, (0,0), ["flying"], ["floating", "flying", "flying koopa"]),
