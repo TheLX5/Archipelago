@@ -62,7 +62,10 @@ class MMX2Rules:
             f"{Regions.x_hunter_stage} -> {Regions.x_hunter_stage_5}":
                 HasAll(Events.x_hunter_stage_1_clear, Events.x_hunter_stage_2_clear,
                         Events.x_hunter_stage_3_clear, Events.x_hunter_stage_4_clear),
-    
+
+            f"{Regions.x_hunter_stage_4} -> {Regions.x_hunter_stage_4_lobby}":
+                HasAll(Events.x_hunter_stage_1_clear, Events.x_hunter_stage_2_clear,
+                        Events.x_hunter_stage_3_clear),
             f"{Regions.x_hunter_stage_4_lobby} -> {Regions.x_hunter_stage_4_voice}":
                 Has(Events.boss_rematch_clear, count=FromOption(XHunterBaseBossRematchCount)),
 
