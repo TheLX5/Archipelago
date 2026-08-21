@@ -767,8 +767,13 @@ def generate_swapped_exits(world: "WaffleWorld"):
             level_list = easy_double_levels + hard_double_levels
         else:
             level_list = world.ordered_double_exits.copy()
-        level_list.remove(0x5A)
-        level_list.remove(0x13)
+        # Remove whatever landed in SW5
+        sw5_tile_level = next((key for key, value in world.active_level_dict.items() if value == 0x5A), None)
+        level_list.remove(sw5_tile_level)
+        # Remove DSH, causes issues
+        if 0x13 in level_list:
+            level_list.remove(0x13)
+
         level_list.reverse()
         level_weights = [100-((x+1)*15) if 100-((x+1)*15) >= 45 else 45 for x in range(len(level_list))]
         remaining = world.options.swap_exit_count.value
