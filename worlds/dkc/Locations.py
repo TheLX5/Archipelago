@@ -472,9 +472,6 @@ location_groups = {
         LocationName.necky_revenge_clear,
         LocationName.defeated_necky_2,
     },
-    "7-B Gang-Plank Galleon": {
-        LocationName.k_rool_clear,
-    },
 }
 
 def setup_locations(world: "DKCWorld"):
