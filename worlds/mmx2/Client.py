@@ -235,6 +235,10 @@ class MMX2SNIClient(SNIClient):
         game_state = ram_mirror[0x00]
         menu_state = ram_mirror[0x01]
         gameplay_state = ram_mirror[0x02]
+        current_level = ram_mirror[0x05]
+
+        if game_state == 0x00 or (game_state == 0x02 and menu_state != 0x04):
+            current_level = -1
 
         if game_state == 0:
             self.game_state = False
@@ -245,6 +249,10 @@ class MMX2SNIClient(SNIClient):
             self.game_state = True
         
         if not self.game_state:
+            return
+
+        # Don't process anything if the game isn't on a level or map
+        if game_state != 0x02:
             return
 
         if self.trade_request is not None:
@@ -285,10 +293,12 @@ class MMX2SNIClient(SNIClient):
 
             if loc_type == CLEAR:
                 if stage == INTRO and game_state == 0x02 and menu_state == 0x00 and gameplay_state == 0x01:
+                    print (f"LOL | {loc_id:08X} | {data} | {cleared_levels}")
                     ctx.locations_checked.add(loc_id)
                 elif stage == BASE4 and collected_sigma_access:
                         ctx.locations_checked.add(loc_id)
                 elif cleared_levels[data]:
+                    print (f"{loc_id:08X} | {data} | {cleared_levels}")
                     ctx.locations_checked.add(loc_id)
             elif loc_type == ENEMY:
                 if defeated_bosses[data]:
@@ -315,11 +325,6 @@ class MMX2SNIClient(SNIClient):
             ctx.finished_game = True
    
         # Send Current Room for Tracker
-        current_level = ram_mirror[0x05]
-
-        if game_state == 0x00 or (game_state == 0x02 and menu_state != 0x04):
-            current_level = -1
-
         if self.current_level_value != (current_level + 1):
             self.current_level_value = current_level + 1
 
@@ -379,6 +384,8 @@ class MMX2SNIClient(SNIClient):
             if loc_type == CLEAR:
                 if stage == BASE4:
                     snes_buffered_write(ctx, MMX2_SRAM + 0x046, bytearray([collected_sigma_access]))
+                elif stage == INTRO:
+                    continue
                 else:
                     cleared_levels[data] = 0xFF
                     new_cleared_level = True
