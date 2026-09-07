@@ -18,6 +18,10 @@ class RHAClient(BizHawkClient):
     system = "GBA"
     patch_suffix = ".aprhythmadvance"
 
+    def __init__(self):
+        super().__init__()
+        self.medal_label = None
+
     async def validate_rom(self, ctx: "BizHawkClientContext") -> bool:
         from CommonClient import logger
 
@@ -76,6 +80,8 @@ class RHAClient(BizHawkClient):
         mc_muffins = int.from_bytes(bytearray(game_data[5]), "little")
         seen_credits = int.from_bytes(bytearray(game_data[6]), "little")
 
+        self.handle_medal_label(ctx, mc_muffins, setting_medals)
+
         for _, loc_id in all_locations.items():
             if loc_id in ctx.locations_checked:
                 continue
@@ -132,7 +138,7 @@ class RHAClient(BizHawkClient):
                     writes.append((LEVEL_STATES+level_id, (0x03).to_bytes(1, "little"), "EWRAM"))
                 await bizhawk.display_message(ctx.bizhawk_ctx, f"Unlocked {item_name}!")
 
-            elif item_code < 0x30:
+            elif item_code <= 0x30:
                 # process individual stages
                 if level_states[item_code] <= 0x02:
                     level_states[item_code] = 0x03
@@ -161,3 +167,16 @@ class RHAClient(BizHawkClient):
                     writes.append((LEVEL_STATES+stage_id, (0x05).to_bytes(1, "little"), "EWRAM"))
 
             await bizhawk.write(ctx.bizhawk_ctx, writes)
+
+
+    def handle_medal_label(self, ctx: "BizHawkClientContext", medal_count, medal_max) -> None:
+        try:
+            from kvui import MDLabel as Label
+        except ImportError:
+            from kvui import Label
+
+        if not self.medal_label:
+            self.medal_label = Label(text=f"", size_hint_x=None, width=120, halign="center")
+            ctx.ui.connect_layout.add_widget(self.medal_label)
+
+        self.medal_label.text = f"Medals: {medal_count}/{medal_max}"
