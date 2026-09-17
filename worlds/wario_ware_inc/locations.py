@@ -1,5 +1,5 @@
 from .constants import *
-from .enums import Locations, Regions
+from .enums import Locations, Regions, Items
 from .stage_data import microgame_data, game_data, game_scores, score_only_games, game_groups
 
 from typing import TYPE_CHECKING
@@ -30,7 +30,33 @@ def count_locations_active(world: "WarioWareWorld"):
 flower_groups = {
     "Flowers": [
         name for name in all_locations.keys() if f" - Flower" in name
-    ]
+    ],
 }
 
-location_groups = flower_groups
+location_groups = {
+    "Introduction": [name for name in all_locations.keys() if "Introduction -" in name],
+    "Jimmy": [name for name in all_locations.keys() if "Jimmy -" in name],
+    "Dribble": [name for name in all_locations.keys() if "Dribble -" in name],
+    "Mona": [name for name in all_locations.keys() if "Mona -" in name],
+    "9-Volt": [name for name in all_locations.keys() if "9-Volt -" in name],
+    "9 Volt": [name for name in all_locations.keys() if "9-Volt -" in name],
+    "Remix 1": [name for name in all_locations.keys() if "Remix 1 -" in name],
+    "Orbulon": [name for name in all_locations.keys() if "Orbulon -" in name],
+    "Dr. Crygor": [name for name in all_locations.keys() if "Dr. Crygor -" in name],
+    "Crygor": [name for name in all_locations.keys() if "Dr. Crygor -" in name],
+    "Kat": [name for name in all_locations.keys() if "Kat -" in name],
+    "Remix 2": [name for name in all_locations.keys() if "Remix 2 -" in name],
+    "Wario": [name for name in all_locations.keys() if "Wario -" in name],
+    "Flowers": [name for name in all_locations.keys() if f" - Flower" in name],
+    "Introduction Microgames": [name for name in game_groups[Items.introduction_bundle]],
+    "Jimmy Microgames": [name for name in game_groups[Items.jimmy_bundle]],
+    "Dribble Microgames": [name for name in game_groups[Items.dribble_bundle]],
+    "Mona Microgames": [name for name in game_groups[Items.mona_bundle]],
+    "9-Volt Microgames": [name for name in game_groups[Items.nine_volt_bundle]],
+    "9 Volt Microgames": [name for name in game_groups[Items.nine_volt_bundle]],
+    "Orbulon Microgames": [name for name in game_groups[Items.orbulon_bundle]],
+    "Dr. Crygor Microgames": [name for name in game_groups[Items.crygor_bundle]],
+    "Crygor Microgames": [name for name in game_groups[Items.crygor_bundle]],
+    "Kat Microgames": [name for name in game_groups[Items.kat_bundle]],
+    "Wario Microgames": [name for name in game_groups[Items.wario_bundle]],
+}

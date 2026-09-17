@@ -117,10 +117,6 @@ class WarioWareClient(BizHawkClient):
 
         writes: list[tuple[int, Sequence[int], str]] = []
 
-        # Always write 0xFF to the skip game flags
-        writes.append((0x0400, (0xFF).to_bytes(1, "little"), "EWRAM"))
-        writes.append((0x0401, (0xFF).to_bytes(1, "little"), "EWRAM"))
-
         if received_index < len(ctx.items_received):
             item = ctx.items_received[received_index]
             received_index += 1

@@ -2,11 +2,13 @@ import Utils
 import hashlib
 import os
 from typing import TYPE_CHECKING, Iterable
+from BaseClasses import Location, ItemClassification
 from worlds.Files import APProcedurePatch, APTokenMixin, APTokenTypes, APPatchExtension
 
 if TYPE_CHECKING:
     from . import WarioWareWorld
 
+from .items import item_groups
 from .constants import *
 
 HASH_US = 'a2d26dc774cec9a0b47388a5dd727b03'
@@ -59,8 +61,67 @@ def patch_rom(world: "WarioWareWorld", patch: WarioWareProcedurePatch):
     microgames_list = world.microgames.copy()
     microgames_list.extend([0xFF] * (0x100 - len(microgames_list)))
     patch.write_bytes(MICROGAMES_LIST, bytearray(microgames_list))
+
+    write_location_data(world, patch)
     
     patch.write_file("token_patch.bin", patch.get_token_binary())
+
+classification_text = {
+    ItemClassification.progression | ItemClassification.useful:
+        "☀LOCATION⛉",
+    ItemClassification.progression:
+        "⛊LOCATION⛉",
+}
+
+def write_location_data(world: "WarioWareWorld", patch: WarioWareProcedurePatch):
+    from .stage_data import microgame_data, microgame_flower_data
+    from .text_dict import supported_characters
+
+    filled_locations = world.multiworld.get_filled_locations(world.player)
+    location_data_by_name = {location.name: location for location in filled_locations}
+    for microgame_name in microgame_data.keys():
+        if f"{microgame_name} - Clear" not in location_data_by_name.keys():
+            continue
+
+        item_name, classification, player_name = get_location_info(world, location_data_by_name[f"{microgame_name} - Clear"])
+    
+        clear_text = "Clear — "
+        if classification in classification_text:
+            clear_text += f"{classification_text[classification].replace("LOCATION", item_name)} "
+        else:
+            clear_text += f"{item_name} "
+        clear_text += f"(⛊{player_name}⛉)"
+
+        flower_text = ""
+        if world.options.microgame_flowers:
+            flower_text = f"Flower: ⛊{microgame_flower_data[microgame_name]}⛉ Pts. — "
+            item_name, classification, player_name = get_location_info(world, location_data_by_name[f"{microgame_name} - Flower"])
+            if classification in classification_text:
+                flower_text += f"{classification_text[classification].replace("LOCATION", item_name)} "
+            else:
+                flower_text += f"{item_name} "
+            flower_text += f"(⛊{player_name}⛉) ★"
+
+        hint_text = f"【{microgame_name}】 {flower_text} {clear_text}©©©©©©©©"
+
+        microgame_id = microgame_data[microgame_name]
+        current_offset = NEW_MICROGAME_LOCATION + (microgame_id << 9)
+        patch.write_bytes(MICROGAME_PTRS + (microgame_id * 4), (current_offset | 0x08000000).to_bytes(4, "little"))
+        for character in hint_text: 
+            if character not in supported_characters:
+                character = "★"
+            data = supported_characters[character]
+            for current_byte in data:
+                patch.write_byte(current_offset, current_byte)
+                current_offset += 1
+
+
+def get_location_info(world: "WarioWareWorld", location: Location):
+    return (
+        location.item.name[:32],
+        location.item.classification & (ItemClassification.progression | ItemClassification.useful),
+        world.multiworld.get_player_name(location.item.player)[:16]
+    )
 
     
 def get_base_rom_bytes(file_name: str = "") -> bytes:

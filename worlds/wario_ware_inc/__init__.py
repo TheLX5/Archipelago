@@ -7,6 +7,7 @@ import math
 from BaseClasses import MultiWorld, Tutorial
 from worlds.AutoWorld import World, WebWorld
 from rule_builder.rules import Rule
+from Options import OptionError
 
 from .options import WarioWareOptions, MicrogameUnlock
 from .client import WarioWareClient
@@ -45,7 +46,7 @@ class WarioWareWeb(WebWorld):
 
 class WarioWareWorld(World):
     """
-    beat.
+    wa.
     """
     game = GAME_NAME
     web = WarioWareWeb()
@@ -77,18 +78,37 @@ class WarioWareWorld(World):
         create_regions(self)
 
     def create_items(self) -> None:
-        # Push item creation right after creating regions, the create_items method runs too late
         itempool: list[WarioWareItem] = []
 
         total_required_locations = count_locations_active(self)
 
         # Submit stages to item pool
-        stages = sorted(list(game_items.keys()))
-        stages.remove(Items.introduction.value)
-        self.push_precollected(self.create_item(Items.introduction.value))
-        for stage in stages:
-            if stage in self.included_games:
-                itempool.append(self.create_item(stage))
+        if self.is_ut:
+            stages = sorted(list(game_items.keys()))
+            for stage in stages:
+                if stage in self.included_games:
+                    itempool.append(self.create_item(stage))
+
+        elif len(self.included_games) != 0:
+            stages = sorted(list(game_items.keys()))
+
+            if len(self.options.starting_stage.value) != 0:
+                possible_starting_stages = list(set(self.included_games) & set(self.options.starting_stage.value))
+                starting_stage = self.random.choice(possible_starting_stages)
+                stages.remove(starting_stage)
+                self.push_precollected(self.create_item(starting_stage))
+
+            for stage in stages:
+                if stage in self.included_games:
+                    itempool.append(self.create_item(stage))
+
+        # Force initial microgames
+        if not self.is_ut:
+            starting_microgames_ids = self.random.choices(self.microgames, k=self.options.starting_microgames)
+            for microgame in sorted(item_groups["Microgames"]):
+                microgame_id = microgame_data[microgame.replace(" Microgame", "")]
+                if microgame_id in starting_microgames_ids:
+                    self.push_precollected(self.create_item(microgame))
 
         # Submit microgames to item pool
         if self.options.microgame_unlock == MicrogameUnlock.option_bundles:
@@ -173,13 +193,21 @@ class WarioWareWorld(World):
             self.is_ut = True
 
         if not self.is_ut:
+            if self.options.microgame_unlock == MicrogameUnlock.option_individual:
+                if not(len(self.options.included_stages.value) != 0 or self.options.microgame_flowers):
+                    raise OptionError(f"{self.player_name} requires including at least one stage or activate Flower locations in order to play with the Individual Microgame Unlock option.")
+
             # Select microgames
             game_groups_copy = {k.value: v.copy() for k,v in game_groups.items()}
             self.microgames = []
             total_count = self.options.microgame_count.value
+            if total_count > 213 - len(self.options.excluded_microgames.value):
+                raise OptionError(f"{self.player_name} has way too many excluded microgames, please adjust your YAML by lowering the amount of excluded microgames or lowering the amount of playable microgames.")
+            
             count_per_group = total_count // len(game_groups_copy.keys())
             leftovers = total_count % len(game_groups_copy.keys())
             for group_name, microgame_list in game_groups_copy.items():
+                microgame_list = [microgame for microgame in  microgame_list if microgame not in self.options.excluded_microgames.value]
                 self.random.shuffle(microgame_list)
                 for x in range(count_per_group):
                     if len(microgame_list) != 0:
@@ -192,6 +220,7 @@ class WarioWareWorld(World):
             # Fill microgame leftovers
             while leftovers != 0:
                 for group_name, microgame_list in game_groups_copy.items():
+                    microgame_list = [microgame for microgame in  microgame_list if microgame not in self.options.excluded_microgames.value]
                     if leftovers == 0:
                         break
                     if len(microgame_list) != 0:
@@ -200,10 +229,12 @@ class WarioWareWorld(World):
                         self.microgames.append(microgame_id)
                         leftovers -= 1
 
-            self.included_games = [
-                Items.introduction.value,
-            ]
+            self.included_games = []
             self.included_games.extend(self.options.included_stages.value)
+
+            if len(self.options.starting_stage.value):
+                self.options.starting_stage.value = self.included_games.copy()
+            self.options.starting_stage.value = list(set(self.included_games) & set(self.options.starting_stage.value))
 
 
     @staticmethod
@@ -217,7 +248,6 @@ class WarioWareWorld(World):
     
     def write_spoiler_header(self, spoiler_handle: TextIO) -> None:
         spoiler_handle.write(f"\nRequired Flowers: {self.required_flowers}")
-
 
 
     def generate_output(self, output_directory: str):

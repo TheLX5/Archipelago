@@ -3,13 +3,15 @@ from dataclasses import dataclass
 from Options import Choice, Range, Toggle, PerGameCommonOptions, StartInventoryPool, OptionSet
 
 from .enums import Items
+from .stage_data import microgame_data, game_data
 
 class IncludedStages(OptionSet):
     """
     Which stages will be added in the location pool.
-    Introduction stage is unlocked by default and can't be toggled off.
+    Can be left empty.
 
     Valid stages:
+        - "Introduction"
         - "Jimmy"
         - "Dribble"
         - "Mona"
@@ -24,64 +26,64 @@ class IncludedStages(OptionSet):
         - "Thrilling"
         - "Hard"
         - "Total Boss"
-        - "Sheriff"
+        - "Sheriff Stage"
         - "Dr. Wario"
         - "Fly Swatter"
         - "Pyoro"
         - "Pyoro 2"
         - "Jump Forever"
-        - "Paper Plane"
+        - "Paper Plane Stage"
         - "Skating Board"
     """
     display_name = "Included Stages"
-    valid_keys = [
-        Items.jimmy.value,
-        Items.dribble.value,
-        Items.mona.value,
-        Items.nine_volt.value,
-        Items.remix_1.value,
-        Items.orbulon.value,
-        Items.crygor.value,
-        Items.kat.value,
-        Items.remix_2.value,
-        Items.wario.value,
-        Items.easy.value,
-        Items.thrilling.value,
-        Items.hard.value,
-        Items.total_boss.value,
-        Items.sheriff_stage.value,
-        Items.dr_wario.value,
-        Items.fly_swatter.value,
-        Items.pyoro.value,
-        Items.pyoro_2.value,
-        Items.jump_forever.value,
-        Items.paper_plane_stage.value,
-        Items.skating_board.value,
-    ]
-    default = [
-        Items.jimmy.value,
-        Items.dribble.value,
-        Items.mona.value,
-        Items.nine_volt.value,
-        Items.remix_1.value,
-        Items.orbulon.value,
-        Items.crygor.value,
-        Items.kat.value,
-        Items.remix_2.value,
-        Items.wario.value,
-        Items.easy.value,
-        Items.thrilling.value,
-        Items.hard.value,
-        Items.total_boss.value,
-        Items.sheriff_stage.value,
-        Items.dr_wario.value,
-        Items.fly_swatter.value,
-        Items.pyoro.value,
-        Items.pyoro_2.value,
-        Items.jump_forever.value,
-        Items.paper_plane_stage.value,
-        Items.skating_board.value,
-    ]
+    valid_keys = [game.value for game in game_data.keys()]
+    default = [game.value for game in game_data.keys()]
+
+
+class StartingStage(OptionSet):
+    """
+    Which of the following stages will be chosen as a potential initial stage.
+    The stage has to be in the pool in order to be chosen.
+    Can be left empty.
+
+    Valid stages:
+        - "Introduction"
+        - "Jimmy"
+        - "Dribble"
+        - "Mona"
+        - "9-Volt"
+        - "Remix 1"
+        - "Orbulon"
+        - "Dr. Crygor"
+        - "Kat"
+        - "Remix 2"
+        - "Wario"
+        - "Easy"
+        - "Thrilling"
+        - "Hard"
+        - "Total Boss"
+        - "Sheriff Stage"
+        - "Dr. Wario"
+        - "Fly Swatter"
+        - "Pyoro"
+        - "Pyoro 2"
+        - "Jump Forever"
+        - "Paper Plane Stage"
+        - "Skating Board"
+    """
+    display_name = "Included Stages"
+    valid_keys = [game.value for game in game_data.keys()]
+    default = [game.value for game in game_data.keys()]
+
+
+class StartingMicrogames(Range):
+    """
+    How many individual microgames will be unlocked by default at the start.
+    """
+    display_name = "Microgame Count"
+    range_start = 4
+    range_end = 18
+    default = 4
 
 
 class MicrogameUnlock(Choice):
@@ -100,13 +102,21 @@ class MicrogameCount(Range):
     """
     How many microgames will be considered locations. Selected at random.
     Unselected microgames will not be unlocked.
-    At least 4 microgames will be forced per group and the selection will remain relatively equal across groups.
+    At least 2 microgames will be forced per stage and the selection will remain relatively equal across stages.
     """
     display_name = "Microgame Count"
     range_start = 18
     range_end = 213
     default = 36
 
+
+class ExcludedMicrogames(OptionSet):
+    """
+    Which microgames will not be considered in the random selection of microgames for the current session.
+    """
+    display_name = "Excluded Microgames"
+    default = []
+    valid_keys = [microgame.value for microgame in microgame_data.keys()]
 
 class Flowers(Range):
     """
@@ -146,13 +156,18 @@ class StageHiScores(Toggle):
     display_name = "Stage Hi-Scores"
 
 
+
+
 @dataclass
 class WarioWareOptions(PerGameCommonOptions):
     start_inventory_from_pool: StartInventoryPool
     included_stages: IncludedStages
+    starting_stage: StartingStage
     microgame_unlock: MicrogameUnlock
     flowers: Flowers
     flowers_required: FlowersRequired
+    starting_microgames: StartingMicrogames
+    excluded_microgames: ExcludedMicrogames
     microgame_flowers: MicrogameFlowers
     microgame_count: MicrogameCount
     stage_hi_scores: StageHiScores
