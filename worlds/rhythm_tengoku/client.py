@@ -127,6 +127,7 @@ class TengokuClient(BizHawkClient):
                 await bizhawk.display_message(ctx.bizhawk_ctx, f"Received a {item_name}!")
                 if mc_muffins >= setting_medals:
                     writes.append((LEVEL_STATES+53, (0x03).to_bytes(1, "little"), "EWRAM"))
+                    writes.append((UPDATE_LEVELS, (0x01).to_bytes(2, "little"), "EWRAM"))
                     await bizhawk.display_message(ctx.bizhawk_ctx, f"Unlocked Credits Staff Level! (You can now goal the game)")
 
             elif item_code >= 0x100:
@@ -136,6 +137,7 @@ class TengokuClient(BizHawkClient):
                     if level_states[level_id] <= 0x02:
                         level_states[level_id] = 0x03
                     writes.append((LEVEL_STATES+level_id, (0x03).to_bytes(1, "little"), "EWRAM"))
+                writes.append((UPDATE_LEVELS, (0x01).to_bytes(2, "little"), "EWRAM"))
                 await bizhawk.display_message(ctx.bizhawk_ctx, f"Unlocked {item_name}!")
 
             elif item_code <= 0x30:
@@ -143,6 +145,7 @@ class TengokuClient(BizHawkClient):
                 if level_states[item_code] <= 0x02:
                     level_states[item_code] = 0x03
                     writes.append((LEVEL_STATES+item_code, (0x03).to_bytes(1, "little"), "EWRAM"))
+                    writes.append((UPDATE_LEVELS, (0x01).to_bytes(2, "little"), "EWRAM"))
                     await bizhawk.display_message(ctx.bizhawk_ctx, f"Unlocked {item_name}!")
 
             await bizhawk.write(ctx.bizhawk_ctx, writes)
@@ -159,12 +162,15 @@ class TengokuClient(BizHawkClient):
                 if loc_type == CLEAR and level_states[stage_id] < 4:
                     level_states[stage_id] = 0x04
                     writes.append((LEVEL_STATES+stage_id, (0x04).to_bytes(1, "little"), "EWRAM"))
+                    writes.append((UPDATE_LEVELS, (0x01).to_bytes(2, "little"), "EWRAM"))
                 if loc_type == OK and level_states[stage_id] < 4:
                     level_states[stage_id] = 0x04
                     writes.append((LEVEL_STATES+stage_id, (0x04).to_bytes(1, "little"), "EWRAM"))
+                    writes.append((UPDATE_LEVELS, (0x01).to_bytes(2, "little"), "EWRAM"))
                 elif loc_type == SUPERB and setting_superbs:
                     level_states[stage_id] = 0x05
                     writes.append((LEVEL_STATES+stage_id, (0x05).to_bytes(1, "little"), "EWRAM"))
+                    writes.append((UPDATE_LEVELS, (0x01).to_bytes(2, "little"), "EWRAM"))
 
             await bizhawk.write(ctx.bizhawk_ctx, writes)
 
