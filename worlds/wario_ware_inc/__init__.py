@@ -93,7 +93,7 @@ class WarioWareWorld(World):
             stages = sorted(list(game_items.keys()))
 
             if len(self.options.starting_stage.value) != 0:
-                possible_starting_stages = list(set(self.included_games) & set(self.options.starting_stage.value))
+                possible_starting_stages = sorted(list(set(self.included_games) & set(self.options.starting_stage.value)))
                 starting_stage = self.random.choice(possible_starting_stages)
                 stages.remove(starting_stage)
                 self.push_precollected(self.create_item(starting_stage))
