@@ -1,0 +1,65 @@
+.gba
+
+.open "WarioWare - Twisted! (USA).gba", "wario_twisted_tilt.gba", 0x08000000
+
+
+; Disables unlocking games
+.org 0x0800086C
+.thumb
+    bx lr
+.org 0x0801824E
+.thumb
+    nop
+.org 0x08018314
+.thumb
+    b 0x08018320
+.org 0x080184B2
+.thumb
+    ; premature return, skips setting default high scores
+    mov r0, #0
+    pop {r4}
+    pop {r1}
+    bx r1
+.org 0x08000754
+.thumb
+    ; disables unlocking wario's stage
+    nop
+
+.org 0x08016078
+.thumb
+    ; allows seeing tower games every time
+    nop
+
+; Disables unlocking microgames
+.org 0x0800094E
+.thumb
+    mov r0, #0
+    bx lr
+.org 0x080008D6
+.thumb
+    mov r0, #0
+    bx lr
+
+; Automagically unlock things in Spindex
+.org 0x08016998
+.thumb
+    nop 
+;    b 0x0801699C
+
+; Allow accessing every submenu in Spindex
+.org 0x08016BFC
+.thumb
+    nop 
+;    b 0x0801699C
+
+; Unlocks everything but places crowns
+;.org 0x080169D2
+;.thumb
+;    nop
+
+;.org 0x080169FC
+;.thumb
+;    nop
+
+.close
+
