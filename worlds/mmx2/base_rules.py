@@ -76,7 +76,7 @@ class HasHP(Rule["MMX2World"], game=GAME_NAME):
 
         @override
         def item_dependencies(self) -> dict[str, set[int]]:
-            return {Items.heart_tank.value(): {id(self)}}
+            return {Items.heart_tank.value: {id(self)}}
 
         @override
         def explain_json(self, state: CollectionState | None = None) -> list[JSONMessagePart]:

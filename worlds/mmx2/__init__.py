@@ -153,10 +153,10 @@ class MMX2World(tracker.UTMxin, World):
                 continue
             itempool.append(self.create_item(stage))
             
-        
         if self.options.x_hunter_base_open == XHunterBaseOpen.option_item:
             itempool += [self.create_item(Items.stage_x_hunter)]
 
+        # upload base arsenal to the pool
         itempool += [self.create_item(Items.spin_wheel)]
         itempool += [self.create_item(Items.bubble_splash)]
         itempool += [self.create_item(Items.speed_burner)]
@@ -166,12 +166,15 @@ class MMX2World(tracker.UTMxin, World):
         itempool += [self.create_item(Items.sonic_slicer)]
         itempool += [self.create_item(Items.strike_chain)]
         itempool += [self.create_item(Items.arms)]
-        itempool += [self.create_item(Items.arms)]
         itempool += [self.create_item(Items.helmet)]
         itempool += [self.create_item(Items.body)]
         itempool += [self.create_item(Items.legs)]
         itempool += [self.create_item(Items.heart_tank) for _ in range(8)]
         itempool += [self.create_item(Items.sub_tank) for _ in range(4)]
+
+        # Add additional arms upgrade if buster is jammed
+        if self.options.jammed_buster.value:
+            itempool += [self.create_item(Items.arms)]
 
         # Add optional upgrades into the pool
         if self.options.shoryuken_in_pool:

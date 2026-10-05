@@ -73,7 +73,7 @@ class Boss():
                  weakness_addr: int,
                  hp: int, 
                  hp_address: int,
-                 required_player_hp: dict[str, int] = {"No Logic": 1}):
+                 required_player_hp: dict[str, int] = {"Xtreme": 1}):
         self.name = name
         self.weakness = weakness.copy()
         self.sub_weakness = sub_weakness.copy()
@@ -103,6 +103,7 @@ class Boss():
         data["sub_weakness"] = self.sub_weakness
         data["sub_weakness_by_id"] = [weapons[weapon_name].id for weapon_name in self.sub_weakness]
         data["hp"] = self.hp
+        data["required_player_hp"] = self.required_player_hp.copy()
         return data
 
 weapons = {
@@ -247,6 +248,12 @@ default_boss_data = {
         hp_address=0x24056,
         entrances=[f"{Regions.flame_stag_gas} -> {Regions.flame_stag_boss}"],
         locations=[Locations.flame_stag_boss, Locations.x_hunter_stage_4_flame_stag, Events.flame_stag_rematch],
+        required_player_hp={
+            "Xtreme": 0,
+            "Hard": 8,
+            "Normal": 16,
+            "Easy": 20,
+        }
     ),
     "Morph Moth": Boss(
         name="Morph Moth",

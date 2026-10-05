@@ -51,6 +51,7 @@ MMX2_GLOBAL_DMG_DEALT       = MMX2_SRAM + 0x0002B
 MMX2_GLOBAL_DMG_TAKEN       = MMX2_SRAM + 0x0002D
 MMX2_REFILL_REQUEST         = MMX2_SRAM + 0x0002F
 MMX2_REFILL_TARGET          = MMX2_SRAM + 0x00030
+MMX2_REFILL_TIMER           = MMX2_SRAM + 0x00048
 
 MMX2_SFX_FLAG   = MMX2_SRAM + 0x00003
 MMX2_SFX_NUMBER = MMX2_SRAM + 0x00004
@@ -293,12 +294,10 @@ class MMX2SNIClient(SNIClient):
 
             if loc_type == CLEAR:
                 if stage == INTRO and game_state == 0x02 and menu_state == 0x00 and gameplay_state == 0x01:
-                    print (f"LOL | {loc_id:08X} | {data} | {cleared_levels}")
                     ctx.locations_checked.add(loc_id)
                 elif stage == BASE4 and collected_sigma_access:
                         ctx.locations_checked.add(loc_id)
                 elif cleared_levels[data]:
-                    print (f"{loc_id:08X} | {data} | {cleared_levels}")
                     ctx.locations_checked.add(loc_id)
             elif loc_type == ENEMY:
                 if defeated_bosses[data]:
@@ -531,7 +530,6 @@ class MMX2SNIClient(SNIClient):
                 snes_buffered_write(ctx, MMX2_ENERGY_LINK_COUNT, bytearray([total_energy & 0xFF, (total_energy >> 8) & 0xFF]))
             else:
                 snes_buffered_write(ctx, MMX2_ENERGY_LINK_COUNT, bytearray([0x0F, 0x27]))
-            await snes_flush_writes(ctx)
 
         receiving_item = int.from_bytes(snes_data.get(MMX2Memory.receiving_item), "little")
         menu_state = ram_mirror[0x01]
@@ -563,6 +561,9 @@ class MMX2SNIClient(SNIClient):
                     if self.weapon_refill_request_command is None:
                         self.weapon_refill_request_command = request
                 snes_buffered_write(ctx, MMX2_REFILL_REQUEST, bytearray([0x00]))
+                snes_buffered_write(ctx, MMX2_REFILL_TIMER, bytearray([0x00]))
+                
+        await snes_flush_writes(ctx)
 
         if not skip_hp:
             # Handle heal requests
@@ -607,8 +608,6 @@ class MMX2SNIClient(SNIClient):
                 pool = (pool / EXCHANGE_RATE) - heal_needed
                 logger.info(f"Refilled current weapon by {heal_needed}. Energy available: {pool:.2f}")
                 self.weapon_refill_request_command = None
-
-        await snes_flush_writes(ctx)
 
 
     async def handle_incoming_shared_damage(self, ctx, snes_data: SnesData[MMX2Memory]):
