@@ -1,6 +1,6 @@
 from .constants import *
 from .enums import Items
-from .stage_data import microgame_data, game_data, game_scores, game_groups, score_only_games
+from .stage_data import microgame_data, game_data, game_scores, game_groups, score_only_games, microgame_crown_data
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -74,4 +74,4 @@ for group_name, microgames in game_groups.items():
         clear_id = all_locations[f"{microgame_name} - Clear"]
         crown_id = all_locations[f"{microgame_name} - Crown"]
         ut_location_id_to_alias[clear_id] = current_group
-        ut_location_id_to_alias[crown_id] = current_group
+        ut_location_id_to_alias[crown_id] = f"{current_group}, {microgame_crown_data[microgame_name]} Points"

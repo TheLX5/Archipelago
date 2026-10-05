@@ -259,6 +259,22 @@ class WarioTwistedWorld(World):
         spoiler_handle.write(f"\nRequired Crowns: {self.required_crowns}")
 
 
+    def extend_hint_information(self, hint_data: dict[int, dict[int, str]]):
+        microgame_hint_data: dict[int, str] = {}
+
+        for location in self.get_locations():
+            if location.is_event:
+                continue
+            loc_type = location.address & TYPE_MASK
+            microgame_id = location.address & DATA_MASK
+            if loc_type not in [MICROGAME, CROWN] or microgame_id not in self.microgames:
+                continue
+            hint_text = ut_location_id_to_alias[location.address]
+            microgame_hint_data[location.address] = hint_text.split(",")[0]
+
+        hint_data[self.player] = microgame_hint_data
+
+
     def generate_output(self, output_directory: str):
         try:
             patch = WarioTwistedProcedurePatch(player=self.player, player_name=self.multiworld.player_name[self.player])
