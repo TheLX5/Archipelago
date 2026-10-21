@@ -748,14 +748,13 @@ class DKC2StrictRules(DKC2Rules):
 
 
             LocationName.krockhead_klamber_clear:
-                CanClimb & CanUseKannons & CanCarry,
+                CanClimb & CanUseKannons,
             LocationName.krockhead_klamber_kong:
-                CanClimb & CanUseKannons & CanCarry,
+                CanClimb & CanUseKannons,
             LocationName.krockhead_klamber_dk_coin:
                 CanTeamAttack & CanCarry & CanCartwheel,
             LocationName.krockhead_klamber_bonus_1:
-                CanClimb & CanTeamAttack & CanUseKannons & 
-                    HasSquitter,
+                CanClimb & CanTeamAttack & CanUseKannons & HasSquitter,
             LocationName.krockhead_klamber_red_balloon_1:
                 CanTeamAttack & CanCarry,
             LocationName.krockhead_klamber_banana_coin_1:
@@ -763,8 +762,7 @@ class DKC2StrictRules(DKC2Rules):
             LocationName.krockhead_klamber_banana_coin_2:
                 CanClimb,
             LocationName.krockhead_klamber_red_balloon_2:
-                CanClimb & CanTeamAttack & CanUseKannons & 
-                    HasSquitter,
+                CanClimb & CanTeamAttack & CanUseKannons & HasSquitter,
             LocationName.krockhead_klamber_banana_coin_3:
                 CanClimb & CanUseKannons,
 
