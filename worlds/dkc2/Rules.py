@@ -998,35 +998,27 @@ class DKC2StrictRules(DKC2Rules):
 
 
             LocationName.mudhole_marsh_clear:
-                CanClimb & CanCling & CanBeInvincible,
+                CanClimb & CanCling,
             LocationName.mudhole_marsh_kong:
-                CanClimb & CanCling & CanBeInvincible & 
-                    CanCarry & CanTeamAttack,
+                CanClimb & CanCling & CanCarry & CanTeamAttack,
             LocationName.mudhole_marsh_dk_coin:
-                CanClimb & CanCling & CanBeInvincible & 
-                    CanHover,
+                CanClimb & CanCling & CanHover,
             LocationName.mudhole_marsh_bonus_1:
-                CanCling & CanBeInvincible & 
-                    CanCarry & CanTeamAttack,
+                CanCling & CanCarry & CanTeamAttack,
             LocationName.mudhole_marsh_bonus_2:
-                CanClimb & CanCling & CanBeInvincible & 
-                    CanCarry,
+                CanClimb & CanCling & CanCarry,
             LocationName.mudhole_marsh_banana_coin_1:
                 True_(),
             LocationName.mudhole_marsh_banana_bunch_1:
                 CanCling & CanCarry,
             LocationName.mudhole_marsh_banana_coin_2:
-                CanCling & CanCarry & CanTeamAttack & 
-                    CanBeInvincible,
+                CanCling & CanCarry,
             LocationName.mudhole_marsh_banana_coin_3:
-                CanCling & CanCarry & CanTeamAttack & 
-                    CanBeInvincible & CanClimb,
+                CanCling & CanTeamAttack & CanClimb,
             LocationName.mudhole_marsh_banana_coin_4:
-                CanCling & CanCarry & CanTeamAttack & 
-                    CanBeInvincible & CanClimb & CanCartwheel,
+                CanCling & CanClimb & CanCartwheel,
             LocationName.mudhole_marsh_banana_coin_5:
-                CanCling & CanCarry & CanTeamAttack & 
-                    CanBeInvincible & CanClimb,
+                CanCling & CanTeamAttack & CanClimb,
 
 
             LocationName.rambi_rumble_clear:
@@ -2406,13 +2398,11 @@ class DKC2LooseRules(DKC2Rules):
             LocationName.mudhole_marsh_clear:
                 CanClimb & CanCling,
             LocationName.mudhole_marsh_kong:
-                CanClimb & CanCling & CanCarry & 
-                    CanTeamAttack,
+                CanClimb & CanCling & CanCarry & CanTeamAttack,
             LocationName.mudhole_marsh_dk_coin:
                 CanClimb & CanCling & CanHover,
             LocationName.mudhole_marsh_bonus_1:
-                CanCling & CanCarry & 
-                    CanTeamAttack,
+                CanCling & CanCarry & CanTeamAttack,
             LocationName.mudhole_marsh_bonus_2:
                 CanClimb & CanCling & CanCarry,
             LocationName.mudhole_marsh_banana_coin_1:
@@ -2420,17 +2410,13 @@ class DKC2LooseRules(DKC2Rules):
             LocationName.mudhole_marsh_banana_bunch_1:
                 CanCling & CanCarry,
             LocationName.mudhole_marsh_banana_coin_2:
-                CanCling & CanCarry & CanTeamAttack & 
-                    CanBeInvincible,
+                CanCling & CanCarry,
             LocationName.mudhole_marsh_banana_coin_3:
-                CanCling & CanCarry & CanTeamAttack & 
-                    CanClimb,
+                CanCling & CanTeamAttack & CanClimb,
             LocationName.mudhole_marsh_banana_coin_4:
-                CanCling & CanCarry & CanTeamAttack & 
-                    CanClimb & CanCartwheel,
+                CanCling & CanClimb & CanCartwheel,
             LocationName.mudhole_marsh_banana_coin_5:
-                CanCling & CanCarry & CanTeamAttack & 
-                    CanClimb,
+                CanCling & CanTeamAttack & CanClimb,
 
 
             LocationName.rambi_rumble_clear:
