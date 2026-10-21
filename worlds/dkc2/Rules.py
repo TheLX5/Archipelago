@@ -858,9 +858,9 @@ class DKC2StrictRules(DKC2Rules):
 
 
             LocationName.kudgels_kontest_clear:
-                CanCarry & CanCartwheel & CanHover & HasDiddy,
+                CanCarry & CanHover & HasDiddy,
             LocationName.kudgel_defeated:
-                CanCarry & CanCartwheel & CanHover & HasDiddy,
+                CanCarry & CanHover & HasDiddy,
 
 
             LocationName.hornet_hole_clear:
