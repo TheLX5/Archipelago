@@ -796,38 +796,29 @@ class DKC2StrictRules(DKC2Rules):
 
 
             LocationName.slime_climb_clear:
-                CanClimb & CanSwim & CanCarry & 
-                    CanUseKannons & CanHover,
+                CanClimb & CanSwim & CanUseKannons & CanHover,
             LocationName.slime_climb_kong:
-                CanClimb & CanSwim & CanCarry & 
-                    CanCartwheel & CanHover,
+                CanClimb & CanSwim & CanCartwheel & CanHover,
             LocationName.slime_climb_dk_coin:
-                CanClimb & CanSwim & CanCarry & 
-                    CanTeamAttack & CanBeInvincible & CanHover,
+                CanClimb & CanSwim & CanTeamAttack & CanBeInvincible & CanHover,
             LocationName.slime_climb_bonus_1:
-                CanClimb & CanSwim & CanCarry & 
-                    CanBeInvincible & CanCling & CanCartwheel & CanHover,
+                CanClimb & CanSwim & CanBeInvincible & CanCling & CanCartwheel & CanHover,
             LocationName.slime_climb_bonus_2:
                 CanClimb & CanSwim & CanCarry & CanHover,
             LocationName.slime_climb_banana_coin_1:
                 CanCartwheel,
             LocationName.slime_climb_banana_coin_2:
-                CanClimb & CanCarry & CanSwim & 
-                    CanCartwheel,
+                CanClimb & CanSwim & CanCartwheel,
             LocationName.slime_climb_banana_bunch_1:
-                CanClimb & CanCarry & CanSwim & 
-                    CanCartwheel,
+                CanClimb & CanSwim & CanCartwheel,
             LocationName.slime_climb_banana_bunch_2:
-                CanClimb & CanCarry & CanSwim,
+                CanClimb & CanSwim,
             LocationName.slime_climb_banana_coin_3:
-                CanClimb & CanCarry & CanSwim & 
-                    CanCartwheel,
+                CanClimb & CanSwim & CanCartwheel,
             LocationName.slime_climb_banana_bunch_3:
-                CanClimb & CanCarry & CanSwim & 
-                    CanCartwheel & CanHover,
+                CanClimb & CanCarry & CanSwim & CanCartwheel & CanHover,
             LocationName.slime_climb_banana_bunch_4:
-                CanClimb & CanCarry & CanSwim & 
-                    CanCartwheel & CanHover,
+                CanClimb & CanCarry & CanSwim & CanCartwheel & CanHover,
 
 
             LocationName.bramble_blast_clear:
