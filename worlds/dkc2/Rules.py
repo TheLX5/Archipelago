@@ -574,15 +574,15 @@ class DKC2StrictRules(DKC2Rules):
 
 
             LocationName.red_hot_ride_clear:
-                CanCarry & HasRambi,
+                True_(),
             LocationName.red_hot_ride_kong:
-                CanCarry & HasRambi,
+                CanCarry,
             LocationName.red_hot_ride_dk_coin:
-                CanCarry & HasRambi & CanTeamAttack,
+                CanCarry & CanTeamAttack,
             LocationName.red_hot_ride_bonus_1:
-                CanCarry & HasRambi,
+                (CanCarry | CanTeamAttack) & HasRambi,
             LocationName.red_hot_ride_bonus_2:
-                CanCarry & HasRambi,
+                True_(),
             LocationName.red_hot_ride_banana_bunch_1:
                 True_(),
             LocationName.red_hot_ride_banana_coin_1:
@@ -590,19 +590,19 @@ class DKC2StrictRules(DKC2Rules):
             LocationName.red_hot_ride_banana_coin_2:
                 CanTeamAttack,
             LocationName.red_hot_ride_banana_bunch_2:
-                CanCarry,
+                True_(),
             LocationName.red_hot_ride_banana_coin_3:
-                CanCarry & HasRambi,
+                CanCarry | (CanTeamAttack & HasRambi),
             LocationName.red_hot_ride_banana_bunch_3:
                 (CanCarry | CanTeamAttack) & HasRambi,
             LocationName.red_hot_ride_banana_coin_4:
                 (CanCarry | CanTeamAttack) & HasRambi,
             LocationName.red_hot_ride_banana_coin_5:
-                CanCarry & HasRambi,
+                (CanCarry | CanTeamAttack) & HasRambi,
             LocationName.red_hot_ride_banana_coin_6:
-                CanCarry & HasRambi,
+                CanCarry,
             LocationName.red_hot_ride_banana_bunch_4:
-                CanCarry & HasRambi,
+                True_(),
 
 
             LocationName.squawks_shaft_clear:
@@ -1979,7 +1979,7 @@ class DKC2LooseRules(DKC2Rules):
             LocationName.red_hot_ride_banana_coin_2:
                 True_(),
             LocationName.red_hot_ride_banana_bunch_2:
-                CanCarry,
+                True_(),
             LocationName.red_hot_ride_banana_coin_3:
                 CanCarry | HasRambi,
             LocationName.red_hot_ride_banana_bunch_3:
