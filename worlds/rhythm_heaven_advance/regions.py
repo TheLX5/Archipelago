@@ -2,7 +2,7 @@ from BaseClasses import MultiWorld, Region, ItemClassification, LocationProgress
 
 from .enums import Items
 from .constants import *
-from .stage_data import level_data
+from .stage_data import level_data, level_data_tempo_up
 from .items import RHAItem
 
 from typing import TYPE_CHECKING
@@ -43,3 +43,17 @@ def create_regions(world: "RHAWorld"):
             region.locations.append(RHALocation(player, f"{stage_name.value} - Superb", PAD | SUPERB | stage_id, region))
         if active_perfects:
             region.locations.append(RHALocation(player, f"{stage_name.value} - Perfect", PAD | PERFECT | stage_id, region))
+
+    # Create regions and locations for extra games
+    if world.options.tempo_up:
+        for stage_name, stage_id in level_data_tempo_up.items():
+            region = Region(stage_name, player, multiworld)
+            multiworld.regions.append(region)
+            menu_region.connect(region)
+            region.locations.append(RHALocation(player, f"{stage_name.value} - Clear", PAD | TEMPOUP | CLEAR | stage_id, region))
+            region.locations.append(RHALocation(player, f"{stage_name.value} - OK", PAD | TEMPOUP | OK | stage_id, region))
+            if active_superbs:
+                region.locations.append(RHALocation(player, f"{stage_name.value} - Superb", PAD | TEMPOUP | SUPERB | stage_id, region))
+            if active_perfects:
+                region.locations.append(RHALocation(player, f"{stage_name.value} - Perfect", PAD | TEMPOUP | PERFECT | stage_id, region))
+

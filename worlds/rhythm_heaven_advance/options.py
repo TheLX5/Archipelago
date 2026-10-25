@@ -1,23 +1,6 @@
 from dataclasses import dataclass
 
-from Options import Choice, Range, Toggle, DefaultOnToggle, OptionSet, PerGameCommonOptions, StartInventoryPool
-
-class Patches(OptionSet):
-    """
-    Which sets of patches you'd like to see applied:
-    * Plus: Adds a lot of changes to "modernize" the game
-    * SFX: Enables english localization to various audio files in the game
-    """
-    display_name = "Patches"
-    valid_keys = [
-        "Plus",
-        "SFX",
-    ]
-    default = [
-        "Plus",
-        "SFX",
-    ]
-
+from Options import Choice, Range, Toggle, DefaultOnToggle, Visibility, PerGameCommonOptions, StartInventoryPool
 
 class LevelUnlock(Choice):
     """
@@ -67,12 +50,52 @@ class Perfects(Toggle):
     display_name = "Perfects"
 
 
+class TempoUp(Toggle):
+    """
+    Enables Tempo Up! songs from the arcade version of Tengoku.
+    """
+    display_name = "Tempo Up Songs"
+    visibility = Visibility.spoiler
+
+
+class PatchPlus(DefaultOnToggle):
+    """
+    Enables several quality of life changes.
+
+    List of Quality of Life changes: https://thelx5.github.io/rha/index.html#versions-plus
+    """
+    display_name = "PLUS Patch"
+
+
+class DefaultVoices(Choice):
+    """
+    Which language will be used for voice clips. Can be toggled in-game.
+    """
+    display_name = "Voice Language"
+    option_japanese = 0x00
+    option_english = 0x01
+    default = option_english
+
+
+class DefaultMusic(Choice):
+    """
+    Which language will be used for songs with lyrics. Can be toggled in-game.
+    """
+    display_name = "Music Language"
+    option_japanese = 0x00
+    option_english = 0x02
+    default = option_english
+
+
 @dataclass
 class RHAOptions(PerGameCommonOptions):
     start_inventory_from_pool: StartInventoryPool
-    patches: Patches
     level_unlock: LevelUnlock
     medals: Medals
     medals_required: MedalsRequired
     superbs: Superbs
     perfects: Perfects
+    tempo_up: TempoUp
+    patch_plus: PatchPlus
+    default_voices: DefaultVoices
+    default_music: DefaultMusic

@@ -16,7 +16,7 @@ from .enums import Items
 from .items import RHAItem, all_items, item_groups
 from .locations import all_locations, count_locations_active, location_groups
 from .constants import *
-from .stage_data import level_data
+from .stage_data import level_data, level_data_tempo_up
 
 from typing import ClassVar, TextIO
 
@@ -84,8 +84,13 @@ class RHAWorld(World):
         # Submit stage bundles to item pool
         if self.options.level_unlock == LevelUnlock.option_bundles:
             all_stages = sorted(item_groups["Stage Bundle"])
+            if self.options.tempo_up:
+                all_stages.append(Items.tempo_up_column.value)
         else:
             all_stages = sorted(item_groups["Stages"])
+            if self.options.tempo_up:
+                tempo_up_stages = {f"{stage_name} Stage" for stage_name in list(level_data_tempo_up.keys())}
+                all_stages |= tempo_up_stages
 
         self.selected_stage = self.random.choice(all_stages)
         precollected_items = [item.name for item in self.multiworld.precollected_items[self.player]]
@@ -138,6 +143,7 @@ class RHAWorld(World):
         slot_data = self.options.as_dict(
             "perfects",
             "superbs",
+            "tempo_up",
         )
         slot_data["required_medals"] = self.required_medals
         return slot_data
@@ -154,6 +160,7 @@ class RHAWorld(World):
             slot_data = self.multiworld.re_gen_passthrough[GAME_NAME]
             self.options.perfects.value = slot_data["perfects"]
             self.options.superbs.value = slot_data["superbs"]
+            self.options.tempo_up.value = slot_data["tempo_up"]
             self.required_medals = slot_data["required_medals"]
             self.is_ut = True
 

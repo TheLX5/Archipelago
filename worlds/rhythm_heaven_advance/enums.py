@@ -13,6 +13,7 @@ class Items(StrEnum):
     remix_6_column = "Remix 6 Bundle"
     remix_7_column = "Remix 7 Bundle"
     remix_8_column = "Remix 8 Bundle"
+    tempo_up_column = "Tempo Up Bundle"
     
     karate_man_stage = "Karate Man Stage"
     rhythm_tweezers_stage = "Rhythm Tweezers Stage"
@@ -62,6 +63,13 @@ class Items(StrEnum):
     spaceball_2_stage = "Spaceball 2 Stage"
     sneaky_spirits_2_stage = "Sneaky Spirits 2 Stage"
     remix_8_stage = "Remix 8 Stage"
+
+    karate_man_tempo_up_stage = "Karate Man Tempo Up! Stage"
+    rhythm_tweezers_tempo_up_stage = "Rhythm Tweezers Tempo Up! Stage"
+    marching_orders_tempo_up_stage = "Marching Orders Tempo Up! Stage"
+    spaceball_tempo_up_stage = "Spaceball Tempo Up! Stage"
+    the_clappy_trio_tempo_up_stage = "The Clappy Trio Tempo Up! Stage"
+    remix_1_tempo_up_stage = "Remix 1 Tempo Up! Stage"
 
     beep = "Beep"
     victory = "Victory!"
@@ -127,6 +135,13 @@ class Regions(StrEnum):
     spaceball_2 = "Spaceball 2"
     sneaky_spirits_2 = "Sneaky Spirits 2"
     remix_8 = "Remix 8"
+
+    karate_man_tempo_up = "Karate Man Tempo Up!"
+    rhythm_tweezers_tempo_up = "Rhythm Tweezers Tempo Up!"
+    marching_orders_tempo_up = "Marching Orders Tempo Up!"
+    spaceball_tempo_up = "Spaceball Tempo Up!"
+    the_clappy_trio_tempo_up = "The Clappy Trio Tempo Up!"
+    remix_1_tempo_up = "Remix 1 Tempo Up!"
 
     def __str__(self) -> str:
         return str(self.value)

@@ -14,9 +14,13 @@ HASH_JP = 'f81f60fdb2fd774c72a170a1805db52e'
 
 patches = {
     0x00: "vanilla",
-    0x01: "sfx",
+    0x01: "tempoup",
     0x02: "plus",
-    0x03: "sfx_plus"
+    0x03: "tempoup_plus",
+    0x04: "rumble",
+    0x05: "tempoup_rumble",
+    0x06: "plus_rumble",
+    0x07: "tempoup_plus_rumble",
 }
 
 class RHAPatchExtension(APPatchExtension):
@@ -28,12 +32,28 @@ class RHAPatchExtension(APPatchExtension):
         import pkgutil
         
         json_data = orjson.loads(caller.get_file("data.json"))
-        selected_patch = patches[json_data["patches"]]
+
+        setting_byte = 0x00
+        patch_file = 0x00
+        if json_data["tempo_up"]:
+            patch_file |= 0x01
+        if json_data["plus"]:
+            patch_file |= 0x02
+        if json_data["rumble"]:
+            patch_file |= 0x04
+            setting_byte |= 0x04
+        selected_patch = patches[patch_file]
         patch_file = pkgutil.get_data(__name__, f"data/rhythmheavenadvance_{selected_patch}.patch")
         print (f"Using rhythmheavenadvance_{selected_patch}.patch")
         rom = bsdiff4.patch(rom, patch_file)
 
-        return rom
+        setting_byte |= json_data["voices"]
+        setting_byte |= json_data["music"]
+
+        rom = bytearray(rom)
+        rom[SETTING_GLOBAL] = setting_byte
+
+        return bytes(rom)
         
 
 class RHAProcedurePatch(APProcedurePatch, APTokenMixin):
@@ -67,15 +87,12 @@ def patch_rom(world: "RHAWorld", patch: RHAProcedurePatch):
     patch.write_byte(SETTING_UNLOCKS, world.options.level_unlock.value)
     patch.write_file("token_patch.bin", patch.get_token_binary())
 
-    patches = 0x00
-    if "SFX" in world.options.patches.value:
-        patches |= 0x01
-    if "Plus" in world.options.patches.value:
-        patches |= 0x02
-
-    # Save random data to an external file
     data_dict = {
-        "patches": patches,
+        "tempo_up": world.options.tempo_up.value,
+        "plus": world.options.patch_plus.value,
+        "rumble": 0x04,
+        "voices": world.options.default_voices.value,
+        "music": world.options.default_music.value,
     }
     patch.write_file("data.json", orjson.dumps(data_dict))
 

@@ -1,6 +1,6 @@
 from .constants import *
 from .enums import Locations, Regions
-from .stage_data import level_data
+from .stage_data import level_data, level_data_tempo_up
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -18,6 +18,16 @@ for region_name, level_id in level_data.items():
     all_locations[f"{region_name.value} - Perfect"] = PAD | PERFECT | level_id
     perfect_locations[f"{region_name.value} - Perfect"] = PAD | PERFECT | level_id
 
+
+for region_name, level_id in level_data_tempo_up.items():
+    all_locations[f"{region_name.value} - Clear"] = PAD | TEMPOUP | CLEAR | level_id
+    all_locations[f"{region_name.value} - OK"] = PAD | TEMPOUP | OK | level_id
+    all_locations[f"{region_name.value} - Superb"] = PAD | TEMPOUP | SUPERB | level_id
+    superb_locations[f"{region_name.value} - Superb"] = PAD | TEMPOUP | SUPERB | level_id
+    all_locations[f"{region_name.value} - Perfect"] = PAD | TEMPOUP | PERFECT | level_id
+    perfect_locations[f"{region_name.value} - Perfect"] = PAD | TEMPOUP | PERFECT | level_id
+
+
 def count_locations_active(world: "RHAWorld"):
     total_count = 0
     for loc in world.get_locations():
@@ -33,6 +43,12 @@ level_groups = {
     ] for region in level_data.keys()
 }
 
+level_groups_tempo_up = {
+    region.value: [
+        name for name in all_locations.keys() if f"{region.value} -" in name
+    ] for region in level_data_tempo_up.keys()
+}
+
 clear_groups = {
     "Perfect Clears": [name for name in all_locations.keys() if "- Perfect" in name],
     "Superb Clears": [name for name in all_locations.keys() if "- Superb" in name],
@@ -40,4 +56,4 @@ clear_groups = {
     "Clears": [name for name in all_locations.keys() if "- Clear" in name],
 }
 
-location_groups = level_groups | clear_groups
+location_groups = level_groups | level_groups_tempo_up | clear_groups

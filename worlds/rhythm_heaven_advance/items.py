@@ -25,6 +25,7 @@ all_items = {
     Items.remix_6_column:           ItemData(PAD | 0x105, ItemClassification.progression | ItemClassification.useful),
     Items.remix_7_column:           ItemData(PAD | 0x106, ItemClassification.progression | ItemClassification.useful),
     Items.remix_8_column:           ItemData(PAD | 0x107, ItemClassification.progression | ItemClassification.useful),
+    Items.tempo_up_column:          ItemData(PAD | TEMPOUP | 0x108, ItemClassification.progression | ItemClassification.useful),
 
     Items.karate_man_stage:         ItemData(PAD | 0x00, ItemClassification.progression_deprioritized),
     Items.karate_man_2_stage:       ItemData(PAD | 0x01, ItemClassification.progression_deprioritized),
@@ -74,6 +75,13 @@ all_items = {
     Items.remix_6_stage:            ItemData(PAD | 0x2E, ItemClassification.progression_deprioritized),
     Items.remix_7_stage:            ItemData(PAD | 0x2F, ItemClassification.progression_deprioritized),
     Items.remix_8_stage:            ItemData(PAD | 0x30, ItemClassification.progression_deprioritized),
+
+    Items.karate_man_tempo_up_stage:        ItemData(PAD | TEMPOUP | 0x00, ItemClassification.progression_deprioritized),
+    Items.rhythm_tweezers_tempo_up_stage:   ItemData(PAD | TEMPOUP | 0x01, ItemClassification.progression_deprioritized),
+    Items.marching_orders_tempo_up_stage:   ItemData(PAD | TEMPOUP | 0x02, ItemClassification.progression_deprioritized),
+    Items.spaceball_tempo_up_stage:         ItemData(PAD | TEMPOUP | 0x03, ItemClassification.progression_deprioritized),
+    Items.the_clappy_trio_tempo_up_stage:   ItemData(PAD | TEMPOUP | 0x04, ItemClassification.progression_deprioritized),
+    Items.remix_1_tempo_up_stage:           ItemData(PAD | TEMPOUP | 0x05, ItemClassification.progression_deprioritized),
 
     Items.beep:                     ItemData(PAD | 0x80, ItemClassification.filler),
 

@@ -1,7 +1,6 @@
 from .constants import *
 from .enums import Locations, Regions, Items
 
-
 level_data = {
     Regions.karate_man: 0x00,
     Regions.karate_man_2: 0x01,
@@ -53,6 +52,15 @@ level_data = {
     Regions.remix_8: 0x30,
 }
 
+level_data_tempo_up = {
+    Regions.karate_man_tempo_up: 0x00,
+    Regions.rhythm_tweezers_tempo_up: 0x01,
+    Regions.marching_orders_tempo_up: 0x02,
+    Regions.spaceball_tempo_up: 0x03,
+    Regions.the_clappy_trio_tempo_up: 0x04,
+    Regions.remix_1_tempo_up: 0x05,
+}
+
 perfect_data = {
     0x00: 0x28,  # Karate Man
     0x01: 0x2E,  # Karate Man 2
@@ -102,6 +110,15 @@ perfect_data = {
     0x2E: 0x05,  # Remix 6
     0x2F: 0x06,  # Remix 7
     0x30: 0x07,  # Remix 8
+}
+
+perfect_data_tempo_up = {
+    0x00: 0x00,  # Karate Man
+    0x01: 0x01,  # Rhythm Tweezers
+    0x02: 0x02,  # Marching Orders
+    0x03: 0x03,  # Spaceball
+    0x04: 0x04,  # The Clappy Trio
+    0x05: 0x05,  # Remix 1
 }
 
 remix_groups = {
@@ -168,5 +185,13 @@ remix_groups = {
         Regions.spaceball_2.value,
         Regions.sneaky_spirits_2.value,
         Regions.remix_8.value,
+    ],
+    Items.tempo_up_column: [
+        Regions.karate_man_tempo_up.value,
+        Regions.rhythm_tweezers_tempo_up.value,
+        Regions.marching_orders_tempo_up.value,
+        Regions.spaceball_tempo_up.value,
+        Regions.the_clappy_trio_tempo_up.value,
+        Regions.remix_1_tempo_up.value,
     ],
 }

@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 from .constants import *
 from .locations import all_locations
-from .stage_data import remix_groups, level_data, perfect_data
+from .stage_data import remix_groups, level_data, level_data_tempo_up, perfect_data, perfect_data_tempo_up
 
 class RHAClient(BizHawkClient):
     game = GAME_NAME
@@ -66,6 +66,9 @@ class RHAClient(BizHawkClient):
             [SEEN_CREDITS, 0x02, "EWRAM"],
             [GAME_LOADED, 0x04, "IWRAM"],
             [LEVEL_PERFECTS, 0x60, "EWRAM"],
+            [BEEP_COUNT, 0x02, "EWRAM"],
+            [LEVEL_EXTRA_STATES, 0x06*2, "EWRAM"],      # Tempo Up!
+            [LEVEL_EXTRA_PERFECTS, 0x06*2, "EWRAM"],      # Tempo Up!
         ])
         game_loaded = int.from_bytes(bytearray(game_data[7]), "little")
         if game_loaded != 0x00FF00FE:
@@ -79,6 +82,9 @@ class RHAClient(BizHawkClient):
         received_index = int.from_bytes(bytearray(game_data[4]), "little")
         mc_muffins = int.from_bytes(bytearray(game_data[5]), "little")
         seen_credits = int.from_bytes(bytearray(game_data[6]), "little")
+        beeps = int.from_bytes(bytearray(game_data[9]), "little")
+        level_extra_states = bytearray(game_data[10])
+        level_extra_perfects = bytearray(game_data[11])
 
         self.handle_medal_label(ctx, mc_muffins, setting_medals)
 
@@ -88,20 +94,39 @@ class RHAClient(BizHawkClient):
 
             loc_type = loc_id & TYPE_MASK
             stage_id = loc_id & DATA_MASK
+            loc_extra = loc_id & EXTRA_MASK
 
-            if level_states[stage_id] <= 0x03:
-                continue
+            if loc_extra != TEMPOUP:
+                if level_states[stage_id] <= 0x03:
+                    continue
 
-            if loc_type == CLEAR and level_states[stage_id] >= 4:
-                ctx.locations_checked.add(loc_id)
-            elif loc_type == OK and level_states[stage_id] >= 4:
-                ctx.locations_checked.add(loc_id)
-            elif loc_type == SUPERB and setting_superbs and level_states[stage_id] >= 5:
-                ctx.locations_checked.add(loc_id)
-            elif loc_type == PERFECT and setting_perfects:
-                perfect_id = perfect_data[stage_id]
-                if level_perfects[perfect_id]:
+                if loc_type == CLEAR and level_states[stage_id] >= 4:
                     ctx.locations_checked.add(loc_id)
+                elif loc_type == OK and level_states[stage_id] >= 4:
+                    ctx.locations_checked.add(loc_id)
+                elif loc_type == SUPERB and setting_superbs and level_states[stage_id] >= 5:
+                    ctx.locations_checked.add(loc_id)
+                elif loc_type == PERFECT and setting_perfects:
+                    perfect_id = perfect_data[stage_id]
+                    if level_perfects[perfect_id]:
+                        ctx.locations_checked.add(loc_id)
+            else:
+                # Handle Tempo Up!
+                stage_id = stage_id * 2
+
+                if level_extra_states[stage_id] <= 0x03:
+                    continue
+
+                if loc_type == CLEAR and level_extra_states[stage_id] >= 4:
+                    ctx.locations_checked.add(loc_id)
+                elif loc_type == OK and level_extra_states[stage_id] >= 4:
+                    ctx.locations_checked.add(loc_id)
+                elif loc_type == SUPERB and setting_superbs and level_extra_states[stage_id] >= 5:
+                    ctx.locations_checked.add(loc_id)
+                elif loc_type == PERFECT and setting_perfects:
+                    perfect_id = perfect_data_tempo_up[stage_id]
+                    if level_extra_perfects[perfect_id]:
+                        ctx.locations_checked.add(loc_id)
 
         await ctx.check_locations(ctx.locations_checked)
 
@@ -118,6 +143,7 @@ class RHAClient(BizHawkClient):
 
             item_name = ctx.item_names.lookup_in_slot(item.item)
             item_code = item.item & 0xFFF
+            item_type = item.item & 0xF000
 
             if item_code == 0xC0:
                 # give medals and open credits if needed
@@ -130,23 +156,50 @@ class RHAClient(BizHawkClient):
                     writes.append((UPDATE_LEVELS, (0x01).to_bytes(2, "little"), "EWRAM"))
                     await bizhawk.display_message(ctx.bizhawk_ctx, f"Unlocked Credits Staff Level! (You can now goal the game)")
 
-            elif item_code >= 0x100:
-                # process columns
-                for level_name in remix_groups[item_name]:
-                    level_id = level_data[level_name]
-                    if level_states[level_id] <= 0x02:
-                        level_states[level_id] = 0x03
-                    writes.append((LEVEL_STATES+level_id, (0x03).to_bytes(1, "little"), "EWRAM"))
-                writes.append((UPDATE_LEVELS, (0x01).to_bytes(2, "little"), "EWRAM"))
-                await bizhawk.display_message(ctx.bizhawk_ctx, f"Unlocked {item_name}!")
+            elif item_code == 0x80:
+                beeps += 1
+                writes.append((BEEP_COUNT, beeps.to_bytes(2, "little"), "EWRAM"))
+                writes.append((UPDATE_FLOW, (0x01).to_bytes(2, "little"), "EWRAM"))
+                await bizhawk.display_message(ctx.bizhawk_ctx, f"Beep!")
 
-            elif item_code <= 0x30:
-                # process individual stages
-                if level_states[item_code] <= 0x02:
-                    level_states[item_code] = 0x03
-                    writes.append((LEVEL_STATES+item_code, (0x03).to_bytes(1, "little"), "EWRAM"))
+            if item_type == NORMAL:
+                if item_code >= 0x100:
+                    # process columns
+                    for level_name in remix_groups[item_name]:
+                        level_id = level_data[level_name]
+                        if level_states[level_id] <= 0x02:
+                            level_states[level_id] = 0x03
+                        writes.append((LEVEL_STATES+level_id, (0x03).to_bytes(1, "little"), "EWRAM"))
                     writes.append((UPDATE_LEVELS, (0x01).to_bytes(2, "little"), "EWRAM"))
                     await bizhawk.display_message(ctx.bizhawk_ctx, f"Unlocked {item_name}!")
+
+                elif item_code <= 0x30:
+                    # process individual stages
+                    if level_states[item_code] <= 0x02:
+                        level_states[item_code] = 0x03
+                        writes.append((LEVEL_STATES+item_code, (0x03).to_bytes(1, "little"), "EWRAM"))
+                        writes.append((UPDATE_LEVELS, (0x01).to_bytes(2, "little"), "EWRAM"))
+                        await bizhawk.display_message(ctx.bizhawk_ctx, f"Unlocked {item_name}!")
+                        
+            elif item_type == TEMPOUP:
+                if item_code >= 0x100:
+                    # process columns
+                    for level_name in remix_groups[item_name]:
+                        level_id = level_data_tempo_up[level_name] * 0x02
+                        if level_extra_states[level_id] <= 0x02:
+                            level_extra_states[level_id] = 0x03
+                        writes.append((LEVEL_EXTRA_STATES+level_id, (0x03).to_bytes(1, "little"), "EWRAM"))
+                    writes.append((UPDATE_LEVELS, (0x01).to_bytes(2, "little"), "EWRAM"))
+                    await bizhawk.display_message(ctx.bizhawk_ctx, f"Unlocked {item_name}!")
+
+                elif item_code <= 0xFF:
+                    # process individual stages
+                    item_code *= 0x02
+                    if level_extra_states[item_code] <= 0x02:
+                        level_extra_states[item_code] = 0x03
+                        writes.append((LEVEL_EXTRA_STATES+item_code, (0x03).to_bytes(1, "little"), "EWRAM"))
+                        writes.append((UPDATE_LEVELS, (0x01).to_bytes(2, "little"), "EWRAM"))
+                        await bizhawk.display_message(ctx.bizhawk_ctx, f"Unlocked {item_name}!")
 
             await bizhawk.write(ctx.bizhawk_ctx, writes)
 

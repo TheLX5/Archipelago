@@ -75,6 +75,13 @@ class RHARules:
             f"Menu -> {Regions.spaceball_2}": HasAny(Items.remix_8_column, Items.spaceball_2_stage),
             f"Menu -> {Regions.sneaky_spirits_2}": HasAny(Items.remix_8_column, Items.sneaky_spirits_2_stage),
             f"Menu -> {Regions.remix_8}": HasAny(Items.remix_8_column, Items.remix_8_stage),
+                
+            f"Menu -> {Regions.karate_man_tempo_up}": HasAny(Items.tempo_up_column, Items.karate_man_tempo_up_stage),
+            f"Menu -> {Regions.rhythm_tweezers_tempo_up}": HasAny(Items.tempo_up_column, Items.rhythm_tweezers_tempo_up_stage),
+            f"Menu -> {Regions.marching_orders_tempo_up}": HasAny(Items.tempo_up_column, Items.marching_orders_tempo_up_stage),
+            f"Menu -> {Regions.spaceball_tempo_up}": HasAny(Items.tempo_up_column, Items.spaceball_tempo_up_stage),
+            f"Menu -> {Regions.the_clappy_trio_tempo_up}": HasAny(Items.tempo_up_column, Items.the_clappy_trio_tempo_up_stage),
+            f"Menu -> {Regions.remix_1_tempo_up}": HasAny(Items.tempo_up_column, Items.remix_1_tempo_up_stage),
         }
 
     def set_rules(self) -> None:
