@@ -402,7 +402,7 @@ class WaffleBasicRules(WaffleRules):
             f"{Regions.donut_plains_2_region} -> {Locations.donut_plains_2_exit_1}": 
                 True_(),
             f"{Regions.donut_plains_2_region} -> {Locations.donut_plains_2_exit_2}": 
-                CanAnyYoshiFlyBlueShell | (CanCarry & (HasYoshi | (CanClimb & CanBreakTurnBlocks))),
+                CanAnyYoshiFlyBlueShell | (CanCarry & (HasYoshi | (CanClimb & CanBreakTurnBlocks) | CanCapeSpinFly)),
             f"{Regions.donut_plains_3_region} -> {Locations.donut_plains_3_exit_1}": 
                 True_(),
             f"{Regions.donut_plains_4_region} -> {Locations.donut_plains_4_exit_1}": 
@@ -429,8 +429,7 @@ class WaffleBasicRules(WaffleRules):
             f"{Regions.vanilla_dome_1_region} -> {Locations.vanilla_dome_1_exit_1}": 
                 CanRun & (HasSuperStar | HasMushroom),
             f"{Regions.vanilla_dome_1_region} -> {Locations.vanilla_dome_1_exit_2}": 
-                CanClimb & CanCarry & (HasYoshi | HasRSP) | 
-                (CanAnyYoshiFlyBlueShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                CanClimb & CanCarry & (HasYoshi | HasRSP) | CanAnyYoshiFlyBlueShell,
             f"{Regions.vanilla_dome_2_region} -> {Locations.vanilla_dome_2_exit_1}": 
                 CanSwim & (
                     CanClimb | HasYoshi
@@ -444,10 +443,10 @@ class WaffleBasicRules(WaffleRules):
             f"{Regions.vanilla_dome_4_region} -> {Locations.vanilla_dome_4_exit_1}": 
                 True_(),
             f"{Regions.vanilla_secret_1_region} -> {Locations.vanilla_secret_1_exit_1}": 
-                CanClimb | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                CanClimb | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             f"{Regions.vanilla_secret_1_region} -> {Locations.vanilla_secret_1_exit_2}": 
                 (CanClimb & CanCarry & HasBSP) | 
-                (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             f"{Regions.vanilla_secret_2_region} -> {Locations.vanilla_secret_2_exit_1}": 
                 True_(),
             f"{Regions.vanilla_secret_3_region} -> {Locations.vanilla_secret_3_exit_1}": 
@@ -479,7 +478,7 @@ class WaffleBasicRules(WaffleRules):
                 True_(),
             f"{Regions.forest_of_illusion_1_region} -> {Locations.forest_of_illusion_1_exit_2}": 
                 (CanCarry & HasPBalloon) | 
-                (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             f"{Regions.forest_of_illusion_2_region} -> {Locations.forest_of_illusion_2_exit_1}": 
                 CanSwim & 
                 Has(Items.super_star_active, 3, options=[OptionFilter(EnemyShuffle, 1)], filtered_resolution=True),
@@ -609,13 +608,12 @@ class WaffleBasicRules(WaffleRules):
                 HasGSP | CanCapeFly | CanBlueYoshiFly | 
                 (CanAnyYoshiFlyBlueShell & True_(options=[OptionFilter(EnemyShuffle, 1)])),
             f"{Regions.donut_plains_2_region} -> {Locations.donut_plains_2_exit_2}": 
-                HasYoshi | (CanClimb & CanCarry & CanBreakTurnBlocks),
+                HasYoshi | (CanClimb & CanCarry & CanBreakTurnBlocks) | CanCapeSpinFly,
             f"{Regions.donut_secret_1_region} -> {Locations.donut_secret_1_exit_2}": 
                 CanSwim,
 
             f"{Regions.vanilla_dome_1_region} -> {Locations.vanilla_dome_1_exit_2}": 
-                (CanClimb & (HasYoshi | HasRSP)) | 
-                (CanAnyYoshiFlyBlueShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                (CanClimb & (HasYoshi | HasRSP)) | CanAnyYoshiFlyBlueShell,
             f"{Regions.vanilla_dome_2_region} -> {Locations.vanilla_dome_2_exit_2}": 
                 CanSwim & CanCarry & HasPSwitch & (
                     CanClimb | HasYoshi
@@ -666,7 +664,7 @@ class WaffleBasicRules(WaffleRules):
             Locations.yoshis_island_1_dragon:
                 CanBreakTurnBlocks,
             Locations.yoshis_island_1_moon:
-                CanCapeFly | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                CanCapeFly | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             Locations.yoshis_island_1_midway:
                 True_(),
             Locations.yoshis_island_1_flying_block_1:
@@ -979,7 +977,7 @@ class WaffleBasicRules(WaffleRules):
                 (CanAnyYoshiFlyBlueShell & True_(options=[OptionFilter(EnemyShuffle, 1)])),
 
             Locations.yoshis_island_4_dragon:
-                HasYoshi | CanSwim | HasPSwitch,
+                HasYoshi | CanSwim | HasPSwitch | HasFeather,
             Locations.yoshis_island_4_hidden_1up:
                 HasYoshi | CanCapeFly,
             Locations.yoshis_island_4_yellow_block_1:
@@ -1087,7 +1085,7 @@ class WaffleBasicRules(WaffleRules):
             Locations.donut_plains_2_yellow_block_2:
                 True_(),
             Locations.donut_plains_2_vine_block_1:
-                (CanBreakTurnBlocks & CanCarry) | HasYoshi,
+                (CanBreakTurnBlocks & CanCarry) | HasYoshi | CanCapeFly,
 
             Locations.donut_plains_3_dragon:
                 ((CanBreakTurnBlocks | HasFeather) & CanClimb) | HasYoshi |
@@ -1111,9 +1109,9 @@ class WaffleBasicRules(WaffleRules):
             Locations.donut_plains_4_dragon:
                 True_(),
             Locations.donut_plains_4_moon:
-                CanCapeFly | (CanAnyYoshiFlyBlueShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                CanCapeFly | (CanAnyYoshiFlyBlueShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             Locations.donut_plains_4_hidden_1up:
-                CanCapeFly | (CanAnyYoshiFlyBlueShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                CanCapeFly | (CanAnyYoshiFlyBlueShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             Locations.donut_plains_4_midway:
                 True_(),
             Locations.donut_plains_4_coin_block_1:
@@ -1381,11 +1379,11 @@ class WaffleBasicRules(WaffleRules):
             Locations.vanilla_dome_4_coin_block_7:
                 True_(),
             Locations.vanilla_dome_4_coin_block_8:
-                CanCarry | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                CanCarry | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
 
             Locations.vanilla_secret_1_dragon:
                 (CanClimb & CanCarry) | 
-                (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             Locations.vanilla_secret_1_coin_block_1:
                 True_(),
             Locations.vanilla_secret_1_powerup_block_1:
@@ -1395,18 +1393,18 @@ class WaffleBasicRules(WaffleRules):
             Locations.vanilla_secret_1_vine_block_1:
                 True_(),
             Locations.vanilla_secret_1_vine_block_2:
-                CanClimb | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                CanClimb | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             Locations.vanilla_secret_1_coin_block_2:
-                CanClimb | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                CanClimb | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             Locations.vanilla_secret_1_coin_block_3:
-                CanClimb | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                CanClimb | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             Locations.vanilla_secret_1_powerup_block_2:
-                CanClimb | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                CanClimb | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             Locations.vanilla_secret_1_room_2:
-                CanClimb | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                CanClimb | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             Locations.vanilla_secret_1_room_3:
                 (CanClimb & CanCarry & HasBSP) | 
-                (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
 
             Locations.vanilla_secret_2_dragon:
                 CanCapeFly | HasYoshi,
@@ -1516,14 +1514,14 @@ class WaffleBasicRules(WaffleRules):
                 Has(Items.red_switch_palace, options=[OptionFilter(EnemyShuffle, 1)]),
 
             Locations.butter_bridge_2_dragon:
-                CanCapeFly | (CanAnyYoshiFlyBlueShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                CanCapeFly | (CanAnyYoshiFlyBlueShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             Locations.butter_bridge_2_powerup_block_1:
                 CanCarry | HasYoshi | CanCapeFly,
             Locations.butter_bridge_2_green_block_1:
                 True_(),
             Locations.butter_bridge_2_yoshi_block_1:
                 CanCarry | HasFeather | 
-                (CanAnyYoshiFlyBlueShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                (CanAnyYoshiFlyBlueShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
 
             Locations.cheese_bridge_dragon:
                 CanClimb | HasYoshi,
@@ -1566,11 +1564,11 @@ class WaffleBasicRules(WaffleRules):
                 True_(),
             Locations.cookie_mountain_life_block_1:
                 CanClimb | CanCapeFly | 
-                (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             Locations.cookie_mountain_vine_block_1:
                 True_(),
             Locations.cookie_mountain_yoshi_block_1:
-                HasRSP | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                HasRSP | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             Locations.cookie_mountain_coin_block_10:
                 True_(),
             Locations.cookie_mountain_coin_block_11:
@@ -1635,7 +1633,7 @@ class WaffleBasicRules(WaffleRules):
             Locations.forest_of_illusion_1_powerup_block_2:
                 True_(),
             Locations.forest_of_illusion_1_key_block_1:
-                HasPBalloon | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                HasPBalloon | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             Locations.forest_of_illusion_1_life_block_1:
                 True_(),
 
@@ -1841,10 +1839,9 @@ class WaffleBasicRules(WaffleRules):
                 HasPSwitch | HasYoshi | CanCarry | HasFeather,
                 
             Locations.chocolate_island_2_dragon:
-                HasBSP & (
-                    HasPSwitch | HasGSP | HasYoshi | (
-                        HasYSP & HasRSP
-                    )),
+                HasPSwitch | CanCapeFly |
+                (HasBSP & (HasYoshi | HasFeather | HasGSP | (HasRSP & HasYSP))) |
+                (HasRSP & (HasYoshi | HasFeather | HasGSP | HasYSP)),
             Locations.chocolate_island_2_hidden_1up:
                 True_(),
             Locations.chocolate_island_2_multi_coin_block_1:
@@ -2346,8 +2343,7 @@ class WaffleBasicRules(WaffleRules):
             Locations.special_zone_4_dragon:
                 (CanCarry | HasPSwitch) & HasSuperStar,
             Locations.special_zone_4_star_block_1:
-                CanCarry | HasPSwitch | CanBlueYoshiFly | 
-                (CanAnyYoshiFlyBlueShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                CanCarry | HasPSwitch | HasYoshi,
 
             Locations.special_zone_5_dragon:
                 True_(),
@@ -2596,28 +2592,28 @@ class WaffleBasicRules(WaffleRules):
         if "Vanilla Secret 1 - Wall Running" in options:
             connection_rules = {
                 f"{Regions.vanilla_secret_1_region} -> {Locations.vanilla_secret_1_exit_1}": 
-                    CanClimb | CanWallRun | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                    CanClimb | CanWallRun | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
                 f"{Regions.vanilla_secret_1_region} -> {Locations.vanilla_secret_1_exit_2}": 
                     ((CanClimb | CanWallRun) & CanCarry & HasBSP) | 
-                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             }
             location_rules = {
                 Locations.vanilla_secret_1_dragon:
                     ((CanClimb | CanWallRun) & CanCarry) | 
-                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
                 Locations.vanilla_secret_1_vine_block_2:
-                    CanClimb | CanWallRun | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                    CanClimb | CanWallRun | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
                 Locations.vanilla_secret_1_coin_block_2:
-                    CanClimb | CanWallRun | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                    CanClimb | CanWallRun | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
                 Locations.vanilla_secret_1_coin_block_3:
-                    CanClimb | CanWallRun | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                    CanClimb | CanWallRun | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
                 Locations.vanilla_secret_1_powerup_block_2:
-                    CanClimb | CanWallRun | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                    CanClimb | CanWallRun | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
                 Locations.vanilla_secret_1_room_2:
-                    CanClimb | CanWallRun | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                    CanClimb | CanWallRun | (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
                 Locations.vanilla_secret_1_room_3:
                     ((CanClimb | CanWallRun) & CanCarry) | 
-                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             }
             self.update_rules(is_glitched, connection_rules=connection_rules, location_rules=location_rules)
 
@@ -2688,7 +2684,7 @@ class WaffleBasicRules(WaffleRules):
             connection_rules = {
                 f"{Regions.forest_of_illusion_1_region} -> {Locations.forest_of_illusion_1_exit_2}": 
                     (CanCarry & (HasYoshi | HasPBalloon)) | 
-                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             }
             carryless_exit_rules = {
                 f"{Regions.forest_of_illusion_1_region} -> {Locations.forest_of_illusion_1_exit_2}": 
@@ -2706,17 +2702,17 @@ class WaffleBasicRules(WaffleRules):
             connection_rules = {
                 f"{Regions.forest_of_illusion_1_region} -> {Locations.forest_of_illusion_1_exit_2}": 
                     (CanCarry & (HasPBalloon | CanCapeFly)) | 
-                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             }
             carryless_exit_rules = {
                 f"{Regions.forest_of_illusion_1_region} -> {Locations.forest_of_illusion_1_exit_2}": 
                     HasPBalloon | CanCapeFly | 
-                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             }
             location_rules = {
                 Locations.forest_of_illusion_1_key_block_1:
                     HasPBalloon | CanCapeFly | 
-                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             }
             self.update_rules(is_glitched, connection_rules=connection_rules, 
                               carryless_exit_rules=carryless_exit_rules,
@@ -2726,7 +2722,7 @@ class WaffleBasicRules(WaffleRules):
             connection_rules = {
                 f"{Regions.forest_of_illusion_1_region} -> {Locations.forest_of_illusion_1_exit_2}": 
                     (CanCarry & (HasYoshi | HasPBalloon | CanCapeFly)) | 
-                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])),
+                    (CanAnyYoshiFlyRedShell & True_(options=[OptionFilter(EnemyShuffle, 0)])) | CanBlueYoshiFly,
             }
             carryless_exit_rules = {
                 f"{Regions.forest_of_illusion_1_region} -> {Locations.forest_of_illusion_1_exit_2}": 
