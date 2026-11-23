@@ -8,7 +8,10 @@ from worlds.Files import APProcedurePatch, APTokenMixin, APTokenTypes, APPatchEx
 if TYPE_CHECKING:
     from . import WarioTwistedWorld
 
+from .stage_data import microgame_data, microgame_text_data, microgame_crown_data, game_text_data
+from .text_dict import supported_characters
 from .items import item_groups
+from .locations import location_groups
 from .constants import *
 
 HASH_US = '89579f4dfe1ed24a7cd16a6a61a72a17'
@@ -54,6 +57,22 @@ class WarioTwistedProcedurePatch(APProcedurePatch, APTokenMixin):
     def write_bytes(self, offset: int, value: Iterable[int]):
         self.write_token(APTokenTypes.WRITE, offset, bytes(value))
 
+    def write_text(self, original_text_ptr: int, text: str):
+        text = text[:0xF0]
+        text += "⛉©©©©©©©©"
+        if not hasattr(self, "idx"):
+            self.idx = 0x00
+        new_text_location = RANDOM_TEXT_LOCATION + (0x100*self.idx)
+        self.idx += 1
+        self.write_bytes(original_text_ptr, (new_text_location | 0x08000000).to_bytes(4, "little"))
+        for character in text:
+            if character not in supported_characters:
+                character = "★"
+            data = supported_characters[character]
+            for current_byte in data:
+                self.write_byte(new_text_location, current_byte)
+                new_text_location += 1
+
 
 def patch_rom(world: "WarioTwistedWorld", patch: WarioTwistedProcedurePatch):
     patch.name = world.auth
@@ -81,48 +100,59 @@ classification_text = {
         "⛊LOCATION⛉",
 }
 
-def write_location_data(world: "WarioTwistedWorld", patch: WarioTwistedProcedurePatch):
-    from .stage_data import microgame_data, microgame_text_data, microgame_crown_data
-    from .text_dict import supported_characters
+def get_location_text(text: str, item_name: str, player_name: str, classification: ItemClassification):
+    if classification in classification_text:
+        text += f"{classification_text[classification].replace("LOCATION", item_name)} "
+    else:
+        text += f"{item_name} "
+    text += f"(⛊{player_name}⛉)"
+    return text
 
+def write_location_data(world: "WarioTwistedWorld", patch: WarioTwistedProcedurePatch):
     filled_locations = world.multiworld.get_filled_locations(world.player)
     location_data_by_name = {location.name: location for location in filled_locations}
+    
+    # Write microgame text
     for microgame_name in microgame_data.keys():
         if f"{microgame_name} - Clear" not in location_data_by_name.keys():
             continue
 
         item_name, classification, player_name = get_location_info(world, location_data_by_name[f"{microgame_name} - Clear"])
-    
-        clear_text = "Clear — "
-        if classification in classification_text:
-            clear_text += f"{classification_text[classification].replace("LOCATION", item_name)} "
-        else:
-            clear_text += f"{item_name} "
-        clear_text += f"(⛊{player_name}⛉)"
 
+        clear_text = get_location_text("Clear — ", item_name, player_name, classification)
         crown_text = ""
         if world.options.microgame_crowns:
-            crown_text = f"Crown: ⛊{microgame_crown_data[microgame_name]}⛉ Pts. — "
-            item_name, classification, player_name = get_location_info(world, location_data_by_name[f"{microgame_name} - Crown"])
-            if classification in classification_text:
-                crown_text += f"{classification_text[classification].replace("LOCATION", item_name)} "
-            else:
-                crown_text += f"{item_name} "
-            crown_text += f"(⛊{player_name}⛉) ★"
+            crown_text = get_location_text(f"Crown: ⛊{microgame_crown_data[microgame_name]}⛉ Pts. — ", item_name, player_name, classification)
+            crown_text += " ★"
 
-        hint_text = f"【{microgame_name}】 {crown_text} {clear_text}©©©©©©©©"
+        hint_text = f"【{microgame_name}】 {crown_text} {clear_text}"
 
         microgame_id = microgame_text_data[microgame_name]
-        current_offset = NEW_MICROGAME_LOCATION + (microgame_id << 8)
-        #print (f"{microgame_id:04X} | {microgame_id * 6:06X} | {MICROGAME_PTRS + (microgame_id * 4 * 6):06X} | {current_offset:06X} | {microgame_name}")
-        patch.write_bytes(MICROGAME_PTRS + (microgame_id * 4 * 6), (current_offset | 0x08000000).to_bytes(4, "little"))
-        for character in hint_text: 
-            if character not in supported_characters:
-                character = "★"
-            data = supported_characters[character]
-            for current_byte in data:
-                patch.write_byte(current_offset, current_byte)
-                current_offset += 1
+        patch.write_text(MICROGAME_PTRS + (microgame_id * 4 * 6), hint_text)
+
+    # Write game text
+    for game_group in game_text_data:
+        points_text = ""
+        for location_name in location_groups[game_group]:
+            if location_name not in location_data_by_name.keys():
+                continue
+            item_name, classification, player_name = get_location_info(world, location_data_by_name[location_name])
+
+            if "- Clear" in location_name:
+                clear_text = get_location_text("Clear — ", item_name, player_name, classification)
+            else:
+                points = location_name.split(" - ")[1].split(" Points")[0]
+                current_points_text = get_location_text(f"{points} Pts. — ", item_name, player_name, classification)
+                points_text += f"★ {current_points_text} " 
+
+        final_text = f"⛊Rewards:⛉ {clear_text} {points_text}"
+        patch.write_text(game_text_data[game_group], final_text)
+
+    # Write misc text
+    version = world.world_version.as_simple_string()
+    patch.write_text(0x093E07C, f"Welcome to the ⛊WarioWare: Twisted! Archipelago v{version}⛉. Your goal is to collect ☀{world.required_crowns} Crowns⛉ — Once that's achieved, head to the credits sequence in Souvenirs and watch them.")
+    patch.write_text(0x093774C, f"Archipelago implementation of ⛊WarioWare: Twisted! v{version}⛉ made by ☀lx5⛉. Go play my other implementations ;)")
+
 
 def get_location_info(world: "WarioTwistedWorld", location: Location):
     return (

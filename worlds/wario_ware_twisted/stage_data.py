@@ -747,6 +747,23 @@ game_groups = {
     ],
 }
 
+game_text_data = {
+    Regions.wario: 0x0093E094,
+    Regions.mona: 0x0093E0C4,
+    Regions.jimmy: 0x0093E0AC,
+    Regions.kat_ana: 0x0093E0DC,
+    Regions.dribble: 0x0093E0F4,
+    Regions.crygor: 0x0093E124,
+    Regions.orbulon: 0x0093E13C,
+    Regions.nine_volt: 0x0093E10C,
+    Regions.wario_man: 0x0093E154,
+    Regions.jimmy_folks: 0x0093E184,
+    Regions.wariowatch: 0x0093E16C,
+    Regions.wariowatch_2: 0x0093E1E4,
+    Regions.skyscraper: 0x0093E19C,
+    Regions.tower: 0x0093E1CC,
+    Regions.mansion: 0x0093E1B4,
+}
 
 microgame_text_data = {
     Regions.tiptoe_titan: 0x03A,

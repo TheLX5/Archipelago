@@ -52,14 +52,53 @@
     nop 
 ;    b 0x0801699C
 
-; Unlocks everything but places crowns
-;.org 0x080169D2
-;.thumb
-;    nop
 
-;.org 0x080169FC
-;.thumb
-;    nop
+; Auto skip cutscenes
+.org 0x0800A58E
+.thumb
+    ldr r0, =skip_cutscenes+1
+    mov lr, pc
+    bx r0
+
+.pool
+
+    
+.org 0x08ECE000
+.thumb
+    skip_cutscenes:
+        ldr r1, =0x03003B34
+        ldrb r1, [r1, #0x00]    ; not a cutscene
+        cmp r1, #0x17
+        beq ending_cutscene
+        cmp r1, #0x01
+        beq intro_cutscene
+    return_no_skip:
+        ldr r1, =0x0800A612+1
+        bx r1
+
+    intro_cutscene:
+    ending_cutscene:
+        ldr r0, =0x0813EE28     ; pointer to credits?
+        ldr r1, =0x03003B30     ; compare it with the loaded pointer
+        ldr r1, [r1, #0x00]
+        cmp r1, r0
+        bne return_skip
+
+    credits:
+        ldr r0, =0x03003B10
+        ldrb r0, [r0, #0x06]
+        lsr r0, r0, #0x07
+        cmp r0, #0x07
+        beq return_no_skip
+    return_check_buttons:
+        ldr r1, =0x0800A598+1
+        bx r1
+
+    return_skip:
+        ldr r1, =0x0800A5A4+1
+        bx r1
+
+.pool
 
 .close
 

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from . import WarioTwistedWorld
 
-all_locations = {}
+all_locations: dict[str, int] = {}
 
 for region_name, stage_id in game_data.items():
     if region_name not in score_only_games:
@@ -33,24 +33,24 @@ crown_groups = {
     ],
 }
 
-location_groups = {
-    "Wario": [name for name in all_locations.keys() if "Wario -" in name],
-    "Mona": [name for name in all_locations.keys() if "Mona -" in name],
-    "Jimmy": [name for name in all_locations.keys() if "Jimmy -" in name],
-    "Kat & Ana": [name for name in all_locations.keys() if "Kat & Ana -" in name],
-    "Dribble & Spitz": [name for name in all_locations.keys() if "Dribble & Spitz -" in name],
-    "Dribble": [name for name in all_locations.keys() if "Dribble & Spitz -" in name],
-    "Dr. Crygor": [name for name in all_locations.keys() if "Dr. Crygor" in name],
-    "Orbulon": [name for name in all_locations.keys() if "Orbulon -" in name],
-    "9-Volt": [name for name in all_locations.keys() if "9-Volt -" in name],
-    "Wario-Man": [name for name in all_locations.keys() if "Wario-Man -" in name],
-    "Jimmy's Folks": [name for name in all_locations.keys() if "Jimmy's Folks -" in name],
-    "Jimmy Folks": [name for name in all_locations.keys() if "Jimmy's Folks -" in name],
-    "WarioWatch": [name for name in all_locations.keys() if "WarioWatch -" in name],
-    "WarioWatch 2": [name for name in all_locations.keys() if "WarioWatch 2 -" in name],
-    "Skyscraper": [name for name in all_locations.keys() if "Skyscraper -" in name],
-    "Tower": [name for name in all_locations.keys() if "Tower -" in name],
-    "Mansion": [name for name in all_locations.keys() if "Mansion -" in name],
+location_groups: dict[list[str]] = {
+    "Wario": [name for name in all_locations.keys() if name.startswith("Wario -")],
+    "Mona": [name for name in all_locations.keys() if name.startswith("Mona -")],
+    "Jimmy": [name for name in all_locations.keys() if name.startswith("Jimmy -")],
+    "Kat & Ana": [name for name in all_locations.keys() if name.startswith("Kat & Ana -")],
+    "Dribble & Spitz": [name for name in all_locations.keys() if name.startswith("Dribble & Spitz -")],
+    "Dribble": [name for name in all_locations.keys() if name.startswith("Dribble & Spitz -")],
+    "Dr. Crygor": [name for name in all_locations.keys() if name.startswith("Dr. Crygor")],
+    "Orbulon": [name for name in all_locations.keys() if name.startswith("Orbulon -")],
+    "9-Volt": [name for name in all_locations.keys() if name.startswith("9-Volt -")],
+    "Wario-Man": [name for name in all_locations.keys() if name.startswith("Wario-Man -")],
+    "Jimmy's Folks": [name for name in all_locations.keys() if name.startswith("Jimmy's Folks -")],
+    "Jimmy Folks": [name for name in all_locations.keys() if name.startswith("Jimmy's Folks -")],
+    "WarioWatch": [name for name in all_locations.keys() if name.startswith("WarioWatch -")],
+    "WarioWatch 2": [name for name in all_locations.keys() if name.startswith("WarioWatch 2 -")],
+    "Skyscraper": [name for name in all_locations.keys() if name.startswith("Skyscraper -")],
+    "Tower": [name for name in all_locations.keys() if name.startswith("Tower -")],
+    "Mansion": [name for name in all_locations.keys() if name.startswith("Mansion -")],
     "Crowns": [name for name in all_locations.keys() if f" - Crown" in name],
     "Mona Microgames": [entry for name in game_groups[Items.mona_bundle] for entry in [f"{name} - Clear", f"{name} - Crown"]],
     "Jimmy Microgames": [entry for name in game_groups[Items.jimmy_bundle] for entry in [f"{name} - Clear", f"{name} - Crown"]],
