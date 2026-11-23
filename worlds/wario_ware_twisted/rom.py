@@ -17,6 +17,11 @@ from .constants import *
 HASH_US = '89579f4dfe1ed24a7cd16a6a61a72a17'
 HASH_US_TILT = 'e2dbd6a74162fae64f9835762242ca1c'
 
+
+def align(num: int):
+    return ((num + 15) // 16) * 16
+
+
 class WarioTwistedPatchExtension(APPatchExtension):
     game = GAME_NAME
     
@@ -58,20 +63,18 @@ class WarioTwistedProcedurePatch(APProcedurePatch, APTokenMixin):
         self.write_token(APTokenTypes.WRITE, offset, bytes(value))
 
     def write_text(self, original_text_ptr: int, text: str):
-        text = text[:0xF0]
         text += "⛉©©©©©©©©"
-        if not hasattr(self, "idx"):
-            self.idx = 0x00
-        new_text_location = RANDOM_TEXT_LOCATION + (0x100*self.idx)
-        self.idx += 1
-        self.write_bytes(original_text_ptr, (new_text_location | 0x08000000).to_bytes(4, "little"))
+        if not hasattr(self, "text_location"):
+            self.text_location = RANDOM_TEXT_LOCATION
+        self.write_bytes(original_text_ptr, (self.text_location | 0x08000000).to_bytes(4, "little"))
         for character in text:
             if character not in supported_characters:
                 character = "★"
             data = supported_characters[character]
             for current_byte in data:
-                self.write_byte(new_text_location, current_byte)
-                new_text_location += 1
+                self.write_byte(self.text_location, current_byte)
+                self.text_location += 1
+        self.text_location = align(self.text_location)
 
 
 def patch_rom(world: "WarioTwistedWorld", patch: WarioTwistedProcedurePatch):
@@ -133,6 +136,7 @@ def write_location_data(world: "WarioTwistedWorld", patch: WarioTwistedProcedure
     # Write game text
     for game_group in game_text_data:
         points_text = ""
+        clear_text = ""
         for location_name in location_groups[game_group]:
             if location_name not in location_data_by_name.keys():
                 continue
